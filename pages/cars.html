@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <title>سيارات للبيع والإيجار | سوق</title>
+  <meta name="description" content="تصفح آلاف السيارات للبيع والإيجار - جديدة ومستعملة بأفضل الأسعار">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/pages.css">
+</head>
+<body>
+
+  <!-- ===================== الهيدر ===================== -->
+  <header class="header">
+    <div class="container header-inner">
+      <a href="../index.html" class="logo">
+        <span class="logo-icon"><i data-lucide="home"></i></span>
+        <span class="logo-text">سوق</span>
+      </a>
+
+      <nav class="nav">
+        <a href="../index.html">الرئيسية</a>
+        <a href="properties.html">عقارات</a>
+        <a href="cars.html" class="active">سيارات</a>
+        <a href="about.html">من نحن</a>
+        <a href="contact.html">اتصل بنا</a>
+      </nav>
+
+      <div class="header-actions">
+        <button class="btn-icon" title="البحث">
+          <i data-lucide="search"></i>
+        </button>
+        <a href="login.html" class="btn btn-outline">دخول</a>
+        <a href="add-listing.html" class="btn btn-primary">
+          <i data-lucide="plus"></i>
+          <span>أضف إعلان</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================== رأس الصفحة ===================== -->
+  <div class="container">
+    <nav class="breadcrumb">
+      <a href="../index.html">
+        <i data-lucide="home"></i>
+        الرئيسية
+      </a>
+      <i data-lucide="chevron-left"></i>
+      <span class="current">سيارات</span>
+    </nav>
+
+    <div class="page-header">
+      <h1 class="page-title">السيارات المتاحة</h1>
+      <p class="page-subtitle">اكتشف آلاف السيارات الجديدة والمستعملة للبيع والإيجار</p>
+    </div>
+  </div>
+
+  <!-- ===================== المحتوى ===================== -->
+  <div class="container">
+    <div class="page-layout">
+
+      <!-- ===== Sidebar الفلاتر ===== -->
+      <aside class="filters-sidebar" id="filtersSidebar">
+        <div class="filters-header">
+          <h3>
+            <i data-lucide="sliders-horizontal"></i>
+            الفلاتر
+          </h3>
+          <button class="filters-clear" id="clearFilters">مسح الكل</button>
+        </div>
+
+        <!-- الغرض -->
+        <div class="filter-group">
+          <h4><i data-lucide="tag"></i> الغرض</h4>
+          <div class="filter-options">
+            <label class="filter-option">
+              <input type="radio" name="purpose" value="" checked>
+              <span>الكل</span>
+            </label>
+            <label class="filter-option">
+              <input type="radio" name="purpose" value="sale">
+              <span>للبيع</span>
+            </label>
+            <label class="filter-option">
+              <input type="radio" name="purpose" value="rent">
+              <span>للإيجار</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- الماركة -->
+        <div class="filter-group">
+          <h4><i data-lucide="award"></i> الماركة</h4>
+          <div class="filter-options">
+            <label class="filter-option">
+              <input type="checkbox" name="brand" value="toyota">
+              <span>تويوتا</span>
+            </label>
+            <label class="filter-option">
+              <input type="checkbox" name="brand" value="hyundai">
+              <span>هيونداي</span>
+            </label>
+            <label class="filter-option">
+              <input type="checkbox" name="brand" value="kia">
+              <span>كيا</span>
+            </label>
+            <label class="filter-option">
+              <input type="checkbox" name="brand" value="mercedes">
+              <span>مرسيدس</span>
+            </label>
+            <label class="filter-option">
+              <input type="checkbox" name="brand" value="bmw">
+              <span>BMW</span>
+            </label>
+            <label class="filter-option">
+              <input type="checkbox" name="brand" value="nissan">
+              <span>نيسان</span>
+            </label>
+            <label class="filter-option">
+              <input type="checkbox" name="brand" value="honda">
+              <span>هوندا</span>
+            </label>
+            <label class="filter-option">
+              <input type="checkbox" name="brand" value="chevrolet">
+              <span>شيفروليه</span>
+            </label>
+            <label class="filter-option">
+              <input type="checkbox" name="brand" value="ford">
+              <span>فورد</span>
+            </label>
+            <label class="filter-option">
+              <input type="checkbox" name="brand" value="other">
+              <span>أخرى</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- المحافظة -->
+        <div class="filter-group">
+          <h4><i data-lucide="map-pin"></i> المحافظة</h4>
+          <select class="filter-select" id="filterCity">
+            <option value="">كل المحافظات</option>
+            <option value="damascus">دمشق</option>
+            <option value="rif-dimashq">ريف دمشق</option>
+            <option value="aleppo">حلب</option>
+            <option value="homs">حمص</option>
+            <option value="hama">حماة</option>
+            <option value="latakia">اللاذقية</option>
+            <option value="tartus">طرطوس</option>
+            <option value="daraa">درعا</option>
+            <option value="sweida">السويداء</option>
+            <option value="quneitra">القنيطرة</option>
+            <option value="deir-ezzor">دير الزور</option>
+            <option value="raqqa">الرقة</option>
+            <option value="hasakah">الحسكة</option>
+            <option value="idlib">إدلب</option>
+          </select>
+        </div>
+
+        <!-- السعر -->
+        <div class="filter-group">
+          <h4><i data-lucide="dollar-sign"></i> السعر (USD)</h4>
+          <div class="filter-range">
+            <input type="number" id="priceMin" placeholder="من">
+            <input type="number" id="priceMax" placeholder="إلى">
+          </div>
+        </div>
+
+        <!-- سنة الصنع -->
+        <div class="filter-group">
+          <h4><i data-lucide="calendar"></i> سنة الصنع</h4>
+          <div class="filter-range">
+            <input type="number" id="yearMin" placeholder="من (مثال: 2015)">
+            <input type="number" id="yearMax" placeholder="إلى (مثال: 2024)">
+          </div>
+        </div>
+
+        <!-- الحالة -->
+        <div class="filter-group">
+          <h4><i data-lucide="sparkles"></i> الحالة</h4>
+          <div class="filter-options">
+            <label class="filter-option">
+              <input type="radio" name="condition" value="" checked>
+              <span>الكل</span>
+            </label>
+            <label class="filter-option">
+              <input type="radio" name="condition" value="new">
+              <span>جديد</span>
+            </label>
+            <label class="filter-option">
+              <input type="radio" name="condition" value="used">
+              <span>مستعمل</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- ناقل الحركة -->
+        <div class="filter-group">
+          <h4><i data-lucide="settings-2"></i> ناقل الحركة</h4>
+          <div class="filter-options">
+            <label class="filter-option">
+              <input type="radio" name="transmission" value="" checked>
+              <span>الكل</span>
+            </label>
+            <label class="filter-option">
+              <input type="radio" name="transmission" value="automatic">
+              <span>أوتوماتيك</span>
+            </label>
+            <label class="filter-option">
+              <input type="radio" name="transmission" value="manual">
+              <span>عادي</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- الوقود -->
+        <div class="filter-group">
+          <h4><i data-lucide="fuel"></i> الوقود</h4>
+          <div class="filter-options">
+            <label class="filter-option">
+              <input type="checkbox" name="fuel" value="petrol">
+              <span>بنزين</span>
+            </label>
+            <label class="filter-option">
+              <input type="checkbox" name="fuel" value="diesel">
+              <span>ديزل</span>
+            </label>
+            <label class="filter-option">
+              <input type="checkbox" name="fuel" value="electric">
+              <span>كهرباء</span>
+            </label>
+            <label class="filter-option">
+              <input type="checkbox" name="fuel" value="hybrid">
+              <span>هايبرد</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- الكيلومترات -->
+        <div class="filter-group">
+          <h4><i data-lucide="gauge"></i> الكيلومترات (كم)</h4>
+          <div class="filter-range">
+            <input type="number" id="kmMax" placeholder="أقصى حد">
+          </div>
+        </div>
+
+        <button class="btn-apply-filters" id="applyFilters">
+          تطبيق الفلاتر
+        </button>
+      </aside>
+
+      <!-- Overlay للجوال -->
+      <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+      <!-- ===== المحتوى الرئيسي ===== -->
+      <main class="results-main">
+
+        <!-- Toolbar -->
+        <div class="results-toolbar">
+          <p class="results-count">
+            <strong id="resultsCount">0</strong> سيارة متاحة
+          </p>
+
+          <div class="toolbar-actions">
+            <button class="filter-toggle-btn" id="filterToggle">
+              <i data-lucide="sliders-horizontal"></i>
+              الفلاتر
+            </button>
+
+            <select class="sort-select" id="sortSelect">
+              <option value="newest">الأحدث</option>
+              <option value="price-asc">الأرخص أولاً</option>
+              <option value="price-desc">الأغلى أولاً</option>
+              <option value="year-desc">الأحدث سنة</option>
+            </select>
+
+            <div class="view-toggle">
+              <button class="view-btn active" data-view="grid" title="شبكة">
+                <i data-lucide="grid-3x3"></i>
+              </button>
+              <button class="view-btn" data-view="list" title="قائمة">
+                <i data-lucide="list"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- شبكة السيارات -->
+        <div class="properties-grid" id="carsGrid">
+          <!-- رح يتم التحميل عبر JS -->
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" id="pagination"></div>
+
+      </main>
+
+    </div>
+  </div>
+
+  <!-- ===================== الفوتر ===================== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <a href="../index.html" class="logo">
+            <span class="logo-icon"><i data-lucide="home"></i></span>
+            <span class="logo-text">سوق</span>
+          </a>
+          <p class="footer-desc">
+            منصة عربية متكاملة لبيع وشراء وإيجار العقارات والسيارات.
+          </p>
+        </div>
+        <div class="footer-col">
+          <h4>روابط سريعة</h4>
+          <a href="properties.html">عقارات</a>
+          <a href="cars.html">سيارات</a>
+          <a href="about.html">من نحن</a>
+          <a href="contact.html">اتصل بنا</a>
+        </div>
+        <div class="footer-col">
+          <h4>الحساب</h4>
+          <a href="login.html">تسجيل الدخول</a>
+          <a href="register.html">إنشاء حساب</a>
+          <a href="add-listing.html">أضف إعلان</a>
+          <a href="favorites.html">المفضلة</a>
+        </div>
+        <div class="footer-col">
+          <h4>تواصل معنا</h4>
+          <a href="https://wa.me/963930932794" target="_blank">
+            <i data-lucide="phone"></i>
+            +963 930 932 794
+          </a>
+          <a href="mailto:info@souq.com">
+            <i data-lucide="mail"></i>
+            info@souq.com
+          </a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 سوق. جميع الحقوق محفوظة.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===================== Bottom Navigation ===================== -->
+  <nav class="bottom-nav">
+    <a href="../index.html" class="bottom-nav-item">
+      <i data-lucide="home"></i>
+      <span>الرئيسية</span>
+    </a>
+    <a href="search.html" class="bottom-nav-item">
+      <i data-lucide="search"></i>
+      <span>البحث</span>
+    </a>
+    <a href="add-listing.html" class="bottom-nav-item add-btn">
+      <div class="add-icon"><i data-lucide="plus"></i></div>
+      <span>أضف</span>
+    </a>
+    <a href="favorites.html" class="bottom-nav-item">
+      <i data-lucide="heart"></i>
+      <span>المفضلة</span>
+    </a>
+    <a href="account.html" class="bottom-nav-item">
+      <i data-lucide="user"></i>
+      <span>حسابي</span>
+    </a>
+  </nav>
+
+  <script src="../js/main.js"></script>
+  <script src="../js/cars.js"></script>
+  <script src="../js/auth-guard.js"></script>
+</body>
+</html>

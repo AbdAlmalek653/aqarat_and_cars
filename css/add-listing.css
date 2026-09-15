@@ -1,0 +1,414 @@
+/* ==========================================
+   صفحة إضافة إعلان
+   ========================================== */
+.al-page { padding: 30px 0 80px; }
+
+.al-header { text-align: center; margin-bottom: 40px; }
+.al-header h1 { font-size: clamp(24px, 4vw, 32px); font-weight: 800; margin-bottom: 10px; }
+.al-header p { color: var(--text-secondary); font-size: 15px; }
+
+.al-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  max-width: 900px;
+  margin: 0 auto;
+  box-shadow: var(--shadow);
+}
+
+.al-type-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 32px; }
+
+.al-type-tab {
+  display: flex; align-items: center; gap: 14px; padding: 20px;
+  background: var(--bg-secondary); border: 2px solid var(--border);
+  border-radius: var(--radius); cursor: pointer; transition: var(--transition); text-align: right;
+}
+.al-type-tab:hover { border-color: var(--primary); background: var(--bg-hover); }
+.al-type-tab.active { border-color: var(--primary); background: var(--primary-soft); }
+
+.al-type-tab .tab-icon {
+  width: 52px; height: 52px; background: var(--bg-card);
+  border-radius: var(--radius); display: flex; align-items: center;
+  justify-content: center; color: var(--primary); flex-shrink: 0; transition: var(--transition);
+}
+.al-type-tab.active .tab-icon { background: var(--primary); color: white; }
+.al-type-tab .tab-icon svg { width: 26px; height: 26px; }
+.al-type-tab .tab-text h3 { font-size: 16px; font-weight: 700; margin-bottom: 4px; color: var(--text-primary); }
+.al-type-tab .tab-text p { font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; }
+
+.al-section { margin-bottom: 30px; padding-bottom: 30px; border-bottom: 1px solid var(--border); }
+.al-section:last-of-type { border-bottom: none; padding-bottom: 0; }
+
+.al-section-title {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 16px; font-weight: 700; margin-bottom: 20px; color: var(--text-primary);
+}
+.al-section-title svg { width: 20px; height: 20px; color: var(--primary); }
+
+.al-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+.al-grid-3 { grid-template-columns: repeat(3, 1fr); }
+
+.al-field { display: flex; flex-direction: column; gap: 8px; }
+.al-field.full { grid-column: 1 / -1; }
+.al-field label { font-size: 13.5px; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 6px; }
+.al-field label .required { color: var(--danger); }
+
+.al-field input,
+.al-field select,
+.al-field textarea {
+  width: 100%; padding: 12px 14px; background: var(--bg-secondary);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  font-size: 14px; font-family: inherit; color: var(--text-primary);
+  outline: none; transition: var(--transition);
+}
+.al-field input:focus,
+.al-field select:focus,
+.al-field textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
+.al-field input.error,
+.al-field select.error,
+.al-field textarea.error { border-color: var(--danger); }
+.al-field textarea { resize: vertical; min-height: 120px; line-height: 1.7; }
+.al-field .hint { font-size: 12px; color: var(--text-muted); }
+.al-field .error-msg { font-size: 12.5px; color: #FCA5A5; display: none; }
+.al-field .error-msg.show { display: block; }
+
+.al-field input[type="number"]::-webkit-outer-spin-button,
+.al-field input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.al-field input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+
+.al-price-group { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; }
+
+.al-upload {
+  border: 2px dashed var(--border); border-radius: var(--radius);
+  padding: 40px 20px; text-align: center; cursor: pointer;
+  transition: var(--transition); background: var(--bg-secondary);
+}
+.al-upload:hover, .al-upload.dragover { border-color: var(--primary); background: var(--primary-soft); }
+.al-upload svg { width: 48px; height: 48px; color: var(--text-muted); margin-bottom: 14px; }
+.al-upload h4 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+.al-upload p { font-size: 13px; color: var(--text-secondary); }
+.al-upload input { display: none; }
+
+.al-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; margin-top: 18px; }
+.al-preview-item { position: relative; aspect-ratio: 1; border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border); background: var(--bg-secondary); }
+.al-preview-item img { width: 100%; height: 100%; object-fit: cover; }
+.al-preview-item .remove {
+  position: absolute; top: 6px; left: 6px; width: 26px; height: 26px;
+  background: rgba(239, 68, 68, 0.9); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: white; cursor: pointer; transition: var(--transition);
+}
+.al-preview-item .remove:hover { transform: scale(1.1); }
+.al-preview-item .remove svg { width: 14px; height: 14px; }
+
+.al-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 30px; padding-top: 24px; border-top: 1px solid var(--border); }
+.al-actions .btn { min-width: 140px; padding: 13px 24px; justify-content: center; }
+.al-actions .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
+
+.al-alert {
+  display: flex; align-items: flex-start; gap: 10px; padding: 14px 16px;
+  border-radius: var(--radius); margin-bottom: 20px; font-size: 13.5px;
+  line-height: 1.6; animation: slideDown 0.3s ease;
+}
+.al-alert svg { width: 18px; height: 18px; flex-shrink: 0; margin-top: 2px; }
+.al-alert.error { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #FCA5A5; }
+.al-alert.success { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: #6EE7B7; }
+
+@keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+.al-success { text-align: center; padding: 60px 20px; }
+.al-success-icon {
+  width: 90px; height: 90px; background: rgba(16, 185, 129, 0.15);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 24px; animation: pulse 2s infinite;
+}
+.al-success-icon svg { width: 44px; height: 44px; color: var(--success); }
+@keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+.al-success h2 { font-size: 26px; font-weight: 800; margin-bottom: 12px; }
+.al-success p { color: var(--text-secondary); font-size: 15px; margin-bottom: 28px; line-height: 1.8; }
+.al-success-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+.spin { animation: spin 1s linear infinite; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* ==========================================
+   الجوال
+   ========================================== */
+@media (max-width: 768px) {
+  .al-page { padding: 16px 0 60px; }
+  .al-card { padding: 20px 16px; border-radius: var(--radius); }
+  .al-type-tabs { grid-template-columns: 1fr; gap: 10px; margin-bottom: 24px; }
+  .al-type-tab { padding: 14px; }
+  .al-type-tab .tab-icon { width: 44px; height: 44px; }
+  .al-type-tab .tab-icon svg { width: 22px; height: 22px; }
+  .al-type-tab .tab-text h3 { font-size: 14.5px; }
+  .al-type-tab .tab-text p { font-size: 12px; }
+  .al-section { margin-bottom: 24px; padding-bottom: 24px; }
+  .al-section-title { font-size: 15px; margin-bottom: 16px; }
+  .al-grid, .al-grid-3 { grid-template-columns: 1fr; gap: 14px; }
+  .al-price-group { grid-template-columns: 1fr; }
+  .al-upload { padding: 30px 16px; }
+  .al-upload svg { width: 40px; height: 40px; }
+  .al-upload h4 { font-size: 14px; }
+  .al-preview { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 8px; }
+  .al-actions { flex-direction: column-reverse; }
+  .al-actions .btn { width: 100%; min-width: 0; }
+  .al-success { padding: 40px 16px; }
+  .al-success-icon { width: 72px; height: 72px; }
+  .al-success-icon svg { width: 36px; height: 36px; }
+  .al-success h2 { font-size: 22px; }
+  .al-success-actions { flex-direction: column; }
+  .al-success-actions .btn { width: 100%; }
+}
+/* ==========================================
+   مؤشر الخطوات
+   ========================================== */
+.al-steps-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin: 30px auto 40px;
+  max-width: 600px;
+}
+
+.al-step-dot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+}
+
+.al-step-num {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-muted);
+  transition: var(--transition);
+}
+
+.al-step-dot.active .al-step-num {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+  box-shadow: 0 0 0 4px var(--primary-soft);
+}
+
+.al-step-dot.done .al-step-num {
+  background: var(--success);
+  border-color: var(--success);
+  color: white;
+}
+
+.al-step-label {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+.al-step-dot.active .al-step-label { color: var(--primary); }
+.al-step-dot.done .al-step-label { color: var(--success); }
+
+.al-step-line {
+  flex: 1;
+  height: 2px;
+  background: var(--border);
+  margin: 0 8px;
+  margin-bottom: 22px;
+  min-width: 30px;
+}
+
+/* ==========================================
+   بطاقات الاختيار
+   ========================================== */
+.type-choice-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.type-choice-card {
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 40px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: inherit;
+  color: inherit;
+  position: relative;
+}
+
+.type-choice-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-6px);
+  box-shadow: 0 12px 30px rgba(59, 130, 246, 0.25);
+}
+
+.type-choice-icon {
+  width: 80px;
+  height: 80px;
+  background: var(--primary-soft);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  margin: 0 auto 20px;
+  transition: var(--transition);
+}
+
+.type-choice-card:hover .type-choice-icon {
+  background: var(--primary);
+  color: white;
+  transform: scale(1.1);
+}
+
+.type-choice-icon svg { width: 40px; height: 40px; }
+
+.type-choice-card h3 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+.type-choice-card p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+
+/* ==========================================
+   النوع الفرعي
+   ========================================== */
+.subtype-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.subtype-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 10px;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: inherit;
+  color: var(--text-secondary);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.subtype-card:hover {
+  border-color: var(--primary);
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.subtype-card.active {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.subtype-card svg {
+  width: 24px;
+  height: 24px;
+  color: var(--primary);
+}
+
+/* ==========================================
+   صف الـ checkbox
+   ========================================== */
+.checkbox-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.checkbox-row .filter-option {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+/* ==========================================
+   شريط علوي
+   ========================================== */
+.al-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.al-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: var(--transition);
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.al-back-btn:hover { border-color: var(--primary); color: var(--primary); }
+.al-back-btn svg { width: 16px; height: 16px; }
+
+.al-current-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--primary-soft);
+  border-radius: var(--radius-full);
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.al-current-type svg { width: 18px; height: 18px; }
+
+.al-step { animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.spin { animation: spin 1s linear infinite; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* ==========================================
+   الجوال
+   ========================================== */
+@media (max-width: 768px) {
+  .type-choice-grid { grid-template-columns: 1fr; gap: 14px; }
+  .type-choice-card { padding: 30px 20px; }
+  .type-choice-icon { width: 66px; height: 66px; }
+  .type-choice-icon svg { width: 32px; height: 32px; }
+  .type-choice-card h3 { font-size: 19px; }
+  .al-top-bar { flex-direction: column-reverse; align-items: stretch; }
+  .al-back-btn { justify-content: center; }
+  .subtype-grid { grid-template-columns: repeat(2, 1fr); }
+  .al-steps-indicator { padding: 0 12px; }
+  .al-step-label { font-size: 10px; }
+  .al-step-num { width: 34px; height: 34px; font-size: 13px; }
+}

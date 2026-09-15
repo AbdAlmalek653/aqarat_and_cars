@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <title>سوق | عقارات وسيارات</title>
+  <meta name="description" content="منصة عربية متكاملة لبيع وشراء وإيجار العقارات والسيارات">
+
+  <!-- خط Cairo -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ===================== الهيدر ===================== -->
+  <header class="header">
+    <div class="container header-inner">
+
+      <!-- الشعار -->
+      <a href="index.html" class="logo">
+        <span class="logo-icon">
+          <i data-lucide="home"></i>
+        </span>
+        <span class="logo-text">سوق</span>
+      </a>
+
+      <!-- التنقل (سطح المكتب) -->
+      <nav class="nav">
+        <a href="index.html" class="active">الرئيسية</a>
+        <a href="pages/properties.html">عقارات</a>
+        <a href="pages/cars.html">سيارات</a>
+        <a href="pages/about.html">من نحن</a>
+        <a href="pages/contact.html">اتصل بنا</a>
+      </nav>
+
+      <!-- الأزرار -->
+      <div class="header-actions">
+        <button class="btn-icon" title="البحث">
+          <i data-lucide="search"></i>
+        </button>
+<a href="pages/login.html" class="btn-login">
+  <i data-lucide="log-in"></i>
+  <span>تسجيل الدخول</span>
+</a>        <a href="pages/add-listing.html" class="btn btn-primary">
+          <i data-lucide="plus"></i>
+          <span>أضف إعلان</span>
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ===================== Hero ===================== -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <span class="hero-badge">
+  <i data-lucide="sparkles"></i>
+  منصة العقارات &amp; السيارات للوساطة الإلكترونية
+</span>
+        <h1 class="hero-title">
+          ابحث عن <span class="gradient-text">عقارك</span> أو <span class="gradient-text">سيارتك</span> المثالية
+        </h1>
+        <p class="hero-subtitle">
+          منصة عربية موثوقة لبيع وشراء وإيجار العقارات والسيارات بأسعار تنافسية
+        </p>
+      </div>
+
+      <!-- صندوق البحث -->
+      <div class="search-box">
+        <div class="search-tabs">
+          <button class="tab active" data-type="property">
+            <i data-lucide="building-2"></i>
+            عقارات
+          </button>
+          <button class="tab" data-type="car">
+            <i data-lucide="car"></i>
+            سيارات
+          </button>
+        </div>
+
+        <form class="search-form" id="searchForm">
+          <div class="form-group">
+            <i data-lucide="map-pin"></i>
+            <input type="text" placeholder="المدينة أو المنطقة..." id="searchLocation">
+          </div>
+
+          <div class="form-group">
+            <i data-lucide="tag"></i>
+            <select id="searchPurpose">
+              <option value="">الغرض</option>
+              <option value="sale">بيع</option>
+              <option value="rent">إيجار</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-lg">
+            <i data-lucide="search"></i>
+            <span>ابحث الآن</span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ===================== إحصائيات ===================== -->
+   
+  <section class="stats-section">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-icon"><i data-lucide="home"></i></div>
+          <div>
+            <h3 class="stat-number" id="statProperties">0</h3>
+            <p class="stat-label">عقار متاح</p>
+          </div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon"><i data-lucide="car"></i></div>
+          <div>
+            <h3 class="stat-number" id="statCars">0</h3>
+            <p class="stat-label">سيارة معروضة</p>
+          </div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon"><i data-lucide="users"></i></div>
+          <div>
+            <h3 class="stat-number" id="statUsers">0</h3>
+            <p class="stat-label">مستخدم نشط</p>
+          </div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon"><i data-lucide="map-pinned"></i></div>
+          <div>
+            <h3 class="stat-number" id="statCities">14</h3>
+            <p class="stat-label">محافظة</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== عقارات مميزة ===================== -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">
+            <i data-lucide="building-2"></i>
+            عقارات مميزة
+          </h2>
+          <p class="section-subtitle">أحدث العقارات المعروضة للبيع والإيجار</p>
+        </div>
+        <a href="pages/properties.html" class="link-more">
+          عرض الكل
+          <i data-lucide="arrow-left"></i>
+        </a>
+      </div>
+
+      <div class="grid grid-4" id="featuredProperties">
+        <!-- رح يتم التحميل عبر JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== سيارات مميزة ===================== -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">
+            <i data-lucide="car"></i>
+            سيارات مميزة
+          </h2>
+          <p class="section-subtitle">أحدث السيارات المعروضة للبيع والإيجار</p>
+        </div>
+        <a href="pages/cars.html" class="link-more">
+          عرض الكل
+          <i data-lucide="arrow-left"></i>
+        </a>
+      </div>
+
+      <div class="grid grid-4" id="featuredCars">
+        <!-- رح يتم التحميل عبر JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== الفوتر ===================== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+
+        <div class="footer-col">
+          <a href="index.html" class="logo">
+            <span class="logo-icon"><i data-lucide="home"></i></span>
+            <span class="logo-text">سوق</span>
+          </a>
+          <p class="footer-desc">
+            منصة عربية متكاملة لبيع وشراء وإيجار العقارات والسيارات بكل سهولة وموثوقية.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h4>روابط سريعة</h4>
+          <a href="pages/properties.html">عقارات</a>
+          <a href="pages/cars.html">سيارات</a>
+          <a href="pages/about.html">من نحن</a>
+          <a href="pages/contact.html">اتصل بنا</a>
+        </div>
+
+        <div class="footer-col">
+          <h4>الحساب</h4>
+          <a href="pages/login.html">تسجيل الدخول</a>
+          <a href="pages/register.html">إنشاء حساب</a>
+          <a href="pages/add-listing.html">أضف إعلان</a>
+          <a href="pages/favorites.html">المفضلة</a>
+        </div>
+
+        <div class="footer-col">
+          <h4>تواصل معنا</h4>
+          <a href="https://wa.me/963930932794" target="_blank">
+            <i data-lucide="phone"></i>
+            +963 930 932 794
+          </a>
+          <a href="mailto:mnstaqarat@gmail.com">
+            <i data-lucide="mail"></i>
+            mnstaqarat@gmail.com"
+          </a>
+          <div class="social">
+            <a href="#" class="social-icon"><i data-lucide="facebook"></i></a>
+            <a href="#" class="social-icon"><i data-lucide="instagram"></i></a>
+            <a href="#" class="social-icon"><i data-lucide="twitter"></i></a>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2026 سوق. جميع الحقوق محفوظة.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===================== Bottom Navigation (جوال) ===================== -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="bottom-nav-item active">
+      <i data-lucide="home"></i>
+      <span>الرئيسية</span>
+    </a>
+    <a href="pages/search.html" class="bottom-nav-item">
+      <i data-lucide="search"></i>
+      <span>البحث</span>
+    </a>
+    <a href="pages/add-listing.html" class="bottom-nav-item add-btn">
+      <div class="add-icon"><i data-lucide="plus"></i></div>
+      <span>أضف</span>
+    </a>
+    <a href="pages/favorites.html" class="bottom-nav-item">
+      <i data-lucide="heart"></i>
+      <span>المفضلة</span>
+    </a>
+    <a href="pages/account.html" class="bottom-nav-item">
+      <i data-lucide="user"></i>
+      <span>حسابي</span>
+    </a>
+  </nav>
+    <!-- ===================== نافذة الترحيب ===================== -->
+  <div class="welcome-modal" id="welcomeModal">
+    <div class="welcome-modal-overlay" onclick="closeWelcome()"></div>
+    <div class="welcome-modal-content">
+      <button class="welcome-close" onclick="closeWelcome()">
+        <i data-lucide="x"></i>
+      </button>
+
+      <div class="welcome-modal-icon">
+        <i data-lucide="sparkles"></i>
+      </div>
+
+      <h2 class="welcome-modal-title">
+        أهلاً وسهلاً بك في <span class="gradient-text">سوق</span>
+      </h2>
+
+      <p class="welcome-modal-text">
+        أهلا بكم في منصة العقارات &amp; السيارات للوساطة الإلكترونية، نقدم لكم تجربة مثالية لبيع وشراء أي عقار أو سيارة إلكترونياً
+      </p>
+
+      <div class="welcome-modal-features">
+        <div class="welcome-feature">
+          <i data-lucide="building-2"></i>
+          <span>عقارات للبيع والإيجار</span>
+        </div>
+        <div class="welcome-feature">
+          <i data-lucide="car"></i>
+          <span>سيارات بأسعار تنافسية</span>
+        </div>
+        <div class="welcome-feature">
+          <i data-lucide="shield-check"></i>
+          <span>وساطة إلكترونية آمنة</span>
+        </div>
+      </div>
+
+      <button class="btn btn-primary btn-block-full" onclick="closeWelcome()">
+        <i data-lucide="arrow-left"></i>
+        <span>ابدأ التصفح الآن</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- JS -->
+  <script src="js/api.js"></script>
+  <script src="js/main.js"></script>
+  <script src="../js/auth-guard.js"></script>
+</body>
+</html>

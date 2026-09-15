@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,viewport-fit=cover">
+<title>تفاصيل الإعلان | سوق</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/pages.css">
+</head>
+<body>
+<header class="header">
+<div class="container header-inner">
+<a href="../index.html" class="logo"><span class="logo-icon"><i data-lucide="home"></i></span><span class="logo-text">سوق</span></a>
+<nav class="nav">
+<a href="../index.html">الرئيسية</a>
+<a href="properties.html">عقارات</a>
+<a href="cars.html">سيارات</a>
+<a href="about.html">من نحن</a>
+<a href="contact.html">اتصل بنا</a>
+</nav>
+<div class="header-actions">
+<button class="btn-icon" title="البحث"><i data-lucide="search"></i></button>
+<a href="login.html" class="btn btn-outline">دخول</a>
+<a href="add-listing.html" class="btn btn-primary"><i data-lucide="plus"></i><span>أضف إعلان</span></a>
+</div>
+</div>
+</header>
+
+<div class="container">
+<nav class="breadcrumb">
+<a href="../index.html"><i data-lucide="home"></i> الرئيسية</a>
+<i data-lucide="chevron-left"></i>
+<a href="#" id="breadcrumbParent">العقارات</a>
+<i data-lucide="chevron-left"></i>
+<span class="current" id="breadcrumbTitle">تفاصيل الإعلان</span>
+</nav>
+
+<div id="loadingState" style="text-align:center;padding:80px 20px;">
+<i data-lucide="loader-2" class="spin" style="width:48px;height:48px;color:var(--primary);"></i>
+<p style="margin-top:16px;color:var(--text-secondary);">جاري تحميل الإعلان...</p>
+</div>
+
+<div id="notFoundState" style="display:none;text-align:center;padding:80px 20px;">
+<i data-lucide="search-x" style="width:80px;height:80px;color:var(--text-muted);opacity:.4;margin-bottom:20px;"></i>
+<h2 style="font-size:22px;margin-bottom:10px;">الإعلان غير موجود</h2>
+<p style="color:var(--text-secondary);margin-bottom:24px;">ربما تم حذفه أو انتهت صلاحيته</p>
+<a href="../index.html" class="btn btn-primary"><i data-lucide="home"></i><span>العودة للرئيسية</span></a>
+</div>
+
+<div class="details-layout" id="detailsContent" style="display:none;">
+<div>
+<div class="details-gallery">
+<div class="gallery-main" id="galleryMain">
+<i data-lucide="image"></i>
+<div class="gallery-nav prev" onclick="prevImage()"><i data-lucide="chevron-right"></i></div>
+<div class="gallery-nav next" onclick="nextImage()"><i data-lucide="chevron-left"></i></div>
+<div class="gallery-counter" id="galleryCounter">0 / 0</div>
+</div>
+<div class="gallery-thumbs" id="galleryThumbs"></div>
+</div>
+
+<div class="info-card">
+<div class="info-badges" id="infoBadges"></div>
+<h1 class="info-title" id="adTitle">—</h1>
+<div class="info-price" id="adPrice">—</div>
+<div class="info-location"><i data-lucide="map-pin"></i><span id="adLocation">—</span></div>
+<h2 class="section-heading"><i data-lucide="list-checks"></i> المواصفات</h2>
+<div class="specs-grid" id="adSpecs"></div>
+</div>
+
+<div class="info-card">
+<h2 class="section-heading"><i data-lucide="file-text"></i> الوصف</h2>
+<p class="description-text" id="adDescription">—</p>
+</div>
+</div>
+
+<aside class="details-sidebar">
+<div class="ad-id"><i data-lucide="hash"></i><span>رقم الإعلان: <strong id="adId">—</strong></span></div>
+<div class="seller-card">
+<div class="seller-info">
+<div class="seller-avatar" id="sellerAvatar">و</div>
+<div class="seller-details">
+<div class="seller-name" id="sellerName">الوسيط المعتمد</div>
+<div class="seller-role">وسيط معتمد</div>
+</div>
+</div>
+<div class="seller-actions">
+<a href="#" class="btn btn-whatsapp btn-block-full" id="whatsappBtn" target="_blank">
+<i data-lucide="message-circle"></i><span>للتواصل مع الوسيط</span>
+</a>
+<div class="action-row">
+<button class="btn-icon-text" id="favBtn"><i data-lucide="heart"></i><span>مفضلة</span></button>
+<button class="btn-icon-text" id="shareBtn"><i data-lucide="share-2"></i><span>مشاركة</span></button>
+</div>
+</div>
+<div class="safety-note" style="margin-top:16px;">
+<i data-lucide="shield-check"></i>
+<span>ننصح بمعاينة الإعلان قبل الدفع، ولا ترسل أي مبالغ مسبقاً.</span>
+</div>
+</div>
+</aside>
+</div>
+</div>
+
+<footer class="footer">
+<div class="container">
+<div class="footer-grid">
+<div class="footer-col">
+<a href="../index.html" class="logo"><span class="logo-icon"><i data-lucide="home"></i></span><span class="logo-text">سوق</span></a>
+<p class="footer-desc">منصة عربية متكاملة لبيع وشراء وإيجار العقارات والسيارات.</p>
+</div>
+<div class="footer-col"><h4>روابط سريعة</h4>
+<a href="properties.html">عقارات</a><a href="cars.html">سيارات</a>
+<a href="about.html">من نحن</a><a href="contact.html">اتصل بنا</a></div>
+<div class="footer-col"><h4>الحساب</h4>
+<a href="login.html">تسجيل الدخول</a><a href="register.html">إنشاء حساب</a>
+<a href="add-listing.html">أضف إعلان</a><a href="favorites.html">المفضلة</a></div>
+<div class="footer-col"><h4>تواصل معنا</h4>
+<a href="https://wa.me/963930932794" target="_blank"><i data-lucide="phone"></i> +963 930 932 794</a>
+<a href="mailto:info@souq.com"><i data-lucide="mail"></i> info@souq.com</a></div>
+</div>
+<div class="footer-bottom"><p>© 2026 سوق. جميع الحقوق محفوظة.</p></div>
+</div>
+</footer>
+
+<nav class="bottom-nav">
+<a href="../index.html" class="bottom-nav-item"><i data-lucide="home"></i><span>الرئيسية</span></a>
+<a href="search.html" class="bottom-nav-item"><i data-lucide="search"></i><span>البحث</span></a>
+<a href="add-listing.html" class="bottom-nav-item add-btn"><div class="add-icon"><i data-lucide="plus"></i></div><span>أضف</span></a>
+<a href="favorites.html" class="bottom-nav-item"><i data-lucide="heart"></i><span>المفضلة</span></a>
+<a href="account.html" class="bottom-nav-item"><i data-lucide="user"></i><span>حسابي</span></a>
+</nav>
+
+<script src="../js/api.js"></script>
+<script src="../js/details.js"></script>
+<script src="../js/auth-guard.js"></script>
+</body>
+</html>

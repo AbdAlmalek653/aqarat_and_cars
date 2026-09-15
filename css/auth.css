@@ -1,0 +1,546 @@
+/* ==========================================
+   صفحات المصادقة (Login / Register)
+   ========================================== */
+
+.auth-page {
+  padding-bottom: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ===== زر العودة ===== */
+.auth-back {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  color: var(--text-secondary);
+  z-index: 100;
+  transition: var(--transition);
+}
+
+.auth-back:hover {
+  background: var(--bg-hover);
+  color: var(--primary);
+  border-color: var(--primary);
+  transform: translateX(4px);
+}
+
+.auth-back svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* ===== التخطيط الرئيسي ===== */
+.auth-wrap {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 100vh;
+}
+
+/* ===== الجانب المرئي (Brand) ===== */
+.auth-brand {
+  position: relative;
+  padding: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: linear-gradient(135deg, #0B1120 0%, #1A2438 100%);
+}
+
+.auth-brand::before {
+  content: '';
+  position: absolute;
+  top: -200px;
+  right: -100px;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.25) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.auth-brand::after {
+  content: '';
+  position: absolute;
+  bottom: -200px;
+  left: -100px;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.auth-brand-content {
+  position: relative;
+  z-index: 1;
+  max-width: 460px;
+  color: var(--text-primary);
+}
+
+.auth-logo {
+  margin-bottom: 40px;
+  font-size: 24px;
+}
+
+.auth-logo .logo-icon {
+  width: 46px;
+  height: 46px;
+}
+
+.auth-logo .logo-icon svg {
+  width: 26px;
+  height: 26px;
+}
+
+.auth-brand-title {
+  font-size: clamp(28px, 3vw, 40px);
+  font-weight: 800;
+  line-height: 1.3;
+  margin-bottom: 20px;
+}
+
+.auth-brand-subtitle {
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.9;
+  margin-bottom: 36px;
+}
+
+.auth-features {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.auth-features li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14.5px;
+  color: var(--text-secondary);
+}
+
+.auth-features li svg {
+  width: 20px;
+  height: 20px;
+  color: var(--success);
+  flex-shrink: 0;
+}
+
+/* ===== جانب النموذج ===== */
+.auth-form-side {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 40px;
+  background: var(--bg-primary);
+  overflow-y: auto;
+}
+
+.auth-form-wrap {
+  width: 100%;
+  max-width: 440px;
+  padding: 20px 0;
+}
+
+.auth-form-header {
+  margin-bottom: 30px;
+  text-align: right;
+}
+
+.auth-form-title {
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.auth-form-subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.auth-form-subtitle a {
+  color: var(--primary);
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+.auth-form-subtitle a:hover {
+  color: var(--primary-hover);
+  text-decoration: underline;
+}
+
+/* ===== تنبيه ===== */
+.auth-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  margin-bottom: 20px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.auth-alert svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.auth-alert.error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #FCA5A5;
+}
+
+.auth-alert.success {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #6EE7B7;
+}
+
+/* ===== النموذج ===== */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-field label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.field-input {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0 16px;
+  transition: var(--transition);
+}
+
+.field-input:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px var(--primary-soft);
+}
+
+.field-input.error {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15);
+}
+
+.field-input > svg {
+  width: 18px;
+  height: 18px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.field-input input {
+  flex: 1;
+  padding: 15px 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  font-family: inherit;
+  color: var(--text-primary);
+  min-width: 0;
+}
+
+.field-input input::placeholder {
+  color: var(--text-muted);
+}
+
+/* زر إظهار/إخفاء كلمة المرور */
+.toggle-password {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+
+.toggle-password:hover {
+  color: var(--primary);
+  background: var(--bg-hover);
+}
+
+.toggle-password svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* رسالة خطأ الحقل */
+.field-error {
+  font-size: 12.5px;
+  color: #FCA5A5;
+  min-height: 0;
+  display: none;
+}
+
+.field-error.show {
+  display: block;
+  animation: slideDown 0.2s ease;
+}
+
+/* ===== تذكرني + نسيت ===== */
+.form-extras {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  user-select: none;
+}
+
+.remember-me input {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border-light);
+  border-radius: 5px;
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+  background: transparent;
+  flex-shrink: 0;
+}
+
+.remember-me input:checked {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.remember-me input:checked::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 5px;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.forgot-link {
+  font-size: 13.5px;
+  color: var(--primary);
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+.forgot-link:hover {
+  color: var(--primary-hover);
+  text-decoration: underline;
+}
+
+/* ===== زر ممتد بعرض كامل ===== */
+.btn-block {
+  width: 100%;
+  justify-content: center;
+  padding: 15px 24px;
+  font-size: 15px;
+  margin-top: 4px;
+}
+
+.btn-block:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* ===== فاصل ===== */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 26px 0;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ===== أزرار التواصل الاجتماعي ===== */
+.auth-social {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 13px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  transition: var(--transition);
+  font-family: inherit;
+}
+
+.social-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.social-btn svg {
+  flex-shrink: 0;
+}
+
+/* ===== ملاحظة ===== */
+.auth-note {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: 26px;
+  line-height: 1.8;
+}
+
+.auth-note a {
+  color: var(--primary);
+  transition: var(--transition);
+}
+
+.auth-note a:hover {
+  text-decoration: underline;
+}
+
+/* ==========================================
+   الجوال
+   ========================================== */
+@media (max-width: 968px) {
+  .auth-wrap {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-brand {
+    padding: 60px 24px 40px;
+    min-height: auto;
+  }
+
+  .auth-features {
+    display: none;
+  }
+
+  .auth-brand-title {
+    font-size: 26px;
+    margin-bottom: 12px;
+  }
+
+  .auth-brand-subtitle {
+    font-size: 14px;
+    margin-bottom: 0;
+  }
+
+  .auth-logo {
+    margin-bottom: 24px;
+  }
+
+  .auth-form-side {
+    padding: 40px 20px 60px;
+  }
+
+  .auth-back {
+    top: 14px;
+    right: 14px;
+    width: 40px;
+    height: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-brand {
+    padding: 50px 20px 30px;
+  }
+
+  .auth-form-side {
+    padding: 30px 16px 50px;
+  }
+
+  .auth-form-title {
+    font-size: 24px;
+  }
+
+  .auth-form-wrap {
+    max-width: 100%;
+  }
+
+  .field-input {
+    padding: 0 14px;
+  }
+
+  .field-input input {
+    padding: 14px 0;
+    font-size: 14px;
+  }
+
+  .auth-social {
+    grid-template-columns: 1fr;
+  }
+}/* ===== دوران أيقونة التحميل ===== */
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

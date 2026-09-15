@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,viewport-fit=cover">
+<title>أضف إعلان | سوق</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/pages.css">
+<link rel="stylesheet" href="../css/add-listing.css">
+</head>
+<body>
+
+<header class="header">
+<div class="container header-inner">
+<a href="../index.html" class="logo"><span class="logo-icon"><i data-lucide="home"></i></span><span class="logo-text">سوق</span></a>
+<nav class="nav">
+<a href="../index.html">الرئيسية</a><a href="properties.html">عقارات</a><a href="cars.html">سيارات</a>
+<a href="about.html">من نحن</a><a href="contact.html">اتصل بنا</a></nav>
+<div class="header-actions">
+<a href="login.html" class="btn btn-outline">دخول</a>
+<a href="add-listing.html" class="btn btn-primary active"><i data-lucide="plus"></i><span>أضف إعلان</span></a>
+</div>
+</div></header>
+
+<div class="container al-page">
+
+<nav class="breadcrumb">
+<a href="../index.html"><i data-lucide="home"></i> الرئيسية</a>
+<i data-lucide="chevron-left"></i>
+<span class="current">أضف إعلان</span>
+</nav>
+
+<!-- ============ مؤشر الخطوات ============ -->
+<div class="al-steps-indicator" id="stepsIndicator">
+  <div class="al-step-dot active" data-step="1">
+    <span class="al-step-num">1</span>
+    <span class="al-step-label">النوع</span>
+  </div>
+  <div class="al-step-line"></div>
+  <div class="al-step-dot" data-step="2">
+    <span class="al-step-num">2</span>
+    <span class="al-step-label">الغرض</span>
+  </div>
+  <div class="al-step-line"></div>
+  <div class="al-step-dot" data-step="3">
+    <span class="al-step-num">3</span>
+    <span class="al-step-label">التفاصيل</span>
+  </div>
+</div>
+
+<!-- ============ الخطوة 1: النوع ============ -->
+<div id="step1" class="al-step">
+  <div class="al-header">
+    <h1>ما نوع إعلانك؟</h1>
+    <p>اختر النوع للبدء</p>
+  </div>
+
+  <div class="type-choice-grid">
+    <button type="button" class="type-choice-card" data-value="property">
+      <div class="type-choice-icon"><i data-lucide="building-2"></i></div>
+      <h3>عقار</h3>
+      <p>شقة، فيلا، أرض، مكتب، محل، شاليه</p>
+    </button>
+    <button type="button" class="type-choice-card" data-value="car">
+      <div class="type-choice-icon"><i data-lucide="car"></i></div>
+      <h3>سيارة</h3>
+      <p>سيارة للبيع أو للإيجار</p>
+    </button>
+  </div>
+</div>
+
+<!-- ============ الخطوة 2: الغرض ============ -->
+<div id="step2" class="al-step" style="display:none;">
+  <div class="al-header">
+    <h1>ما هو الغرض؟</h1>
+    <p>هل تريد <strong id="purposeTypeName">العقار</strong> للبيع أم للإيجار؟</p>
+  </div>
+
+  <div class="type-choice-grid">
+    <button type="button" class="type-choice-card" data-value="sale">
+      <div class="type-choice-icon"><i data-lucide="tag"></i></div>
+      <h3>للبيع</h3>
+      <p>بيع نهائي بسعر محدد</p>
+    </button>
+    <button type="button" class="type-choice-card" data-value="rent">
+      <div class="type-choice-icon"><i data-lucide="key-round"></i></div>
+      <h3>للإيجار</h3>
+      <p>إيجار يومي، شهري، أو سنوي</p>
+    </button>
+  </div>
+
+  <div style="text-align:center;margin-top:24px;">
+    <button type="button" class="al-back-btn" id="backToStep1">
+      <i data-lucide="arrow-right"></i><span>رجوع</span>
+    </button>
+  </div>
+</div>
+
+<!-- ============ الخطوة 3: النموذج ============ -->
+<div id="step3" class="al-step" style="display:none;">
+  <div class="al-header">
+    <h1 id="formTitle">أضف إعلانك</h1>
+    <p id="formSubtitle">املأ البيانات لنشر إعلانك</p>
+  </div>
+
+  <div class="al-card">
+    <div class="al-top-bar">
+      <button type="button" class="al-back-btn" id="backToStep2">
+        <i data-lucide="arrow-right"></i><span>رجوع</span>
+      </button>
+      <div class="al-current-type">
+        <i data-lucide="building-2" id="currentTypeIcon"></i>
+        <span id="currentTypeText">—</span>
+      </div>
+    </div>
+
+    <div class="al-alert error" id="alAlert" style="display:none;">
+      <i data-lucide="alert-circle"></i>
+      <span id="alAlertText"></span>
+    </div>
+
+    <form id="addListingForm" novalidate>
+
+      <!-- ===== اختيار النوع الفرعي (للعقار) ===== -->
+      <div class="al-section" id="subTypeSection" style="display:none;">
+        <h3 class="al-section-title"><i data-lucide="layers"></i> نوع العقار</h3>
+        <div class="subtype-grid" id="subTypeGrid">
+          <button type="button" class="subtype-card" data-subtype="apartment">
+            <i data-lucide="building-2"></i><span>شقة</span>
+          </button>
+          <button type="button" class="subtype-card" data-subtype="villa">
+            <i data-lucide="home"></i><span>فيلا</span>
+          </button>
+          <button type="button" class="subtype-card" data-subtype="arabic-house">
+            <i data-lucide="landmark"></i><span>بيت عربي</span>
+          </button>
+          <button type="button" class="subtype-card" data-subtype="land">
+            <i data-lucide="trees"></i><span>أرض</span>
+          </button>
+          <button type="button" class="subtype-card" data-subtype="office">
+            <i data-lucide="briefcase"></i><span>مكتب</span>
+          </button>
+          <button type="button" class="subtype-card" data-subtype="shop">
+            <i data-lucide="store"></i><span>محل تجاري</span>
+          </button>
+          <button type="button" class="subtype-card" data-subtype="chalet">
+            <i data-lucide="tent"></i><span>شاليه</span>
+          </button>
+          <button type="button" class="subtype-card" data-subtype="building">
+            <i data-lucide="building"></i><span>بناء كامل</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ===== المعلومات الأساسية ===== -->
+      <div class="al-section" id="basicSection">
+        <h3 class="al-section-title"><i data-lucide="info"></i> المعلومات الأساسية</h3>
+        <div class="al-grid">
+
+          <div class="al-field full">
+            <label for="title">عنوان الإعلان <span class="required">*</span></label>
+            <input type="text" id="title" placeholder="اكتب عنواناً واضحاً" required>
+            <span class="error-msg" id="titleError"></span>
+          </div>
+
+          <div class="al-field">
+            <label for="city">المحافظة <span class="required">*</span></label>
+            <select id="city" required>
+              <option value="">اختر المحافظة</option>
+              <option value="damascus">دمشق</option>
+              <option value="rif-dimashq">ريف دمشق</option>
+              <option value="aleppo">حلب</option>
+              <option value="homs">حمص</option>
+              <option value="hama">حماة</option>
+              <option value="latakia">اللاذقية</option>
+              <option value="tartus">طرطوس</option>
+              <option value="daraa">درعا</option>
+              <option value="sweida">السويداء</option>
+              <option value="quneitra">القنيطرة</option>
+              <option value="deir-ezzor">دير الزور</option>
+              <option value="raqqa">الرقة</option>
+              <option value="hasakah">الحسكة</option>
+              <option value="idlib">إدلب</option>
+            </select>
+            <span class="error-msg" id="cityError"></span>
+          </div>
+
+          <div class="al-field">
+            <label for="area">المنطقة / الحي</label>
+            <input type="text" id="area" placeholder="مثال: المزة، أبو رمانة...">
+          </div>
+
+          <div class="al-field full">
+            <label for="address">العنوان التفصيلي</label>
+            <input type="text" id="address" placeholder="الشارع، رقم البناء...">
+          </div>
+
+          <!-- حقل الواتساب -->
+          <div class="al-field full">
+            <label for="whatsapp">رقم الواتساب <span class="required">*</span></label>
+            <input type="tel" id="whatsapp" placeholder="مثال: 0930123456" required>
+            <span class="hint">🔒 لن يظهر رقمك للعامة — يُستخدم فقط من قبل الإدارة للتواصل معك.</span>
+            <span class="error-msg" id="whatsappError"></span>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ===== الماركة (للسيارة) ===== -->
+      <div class="al-section" id="brandSection" style="display:none;">
+        <h3 class="al-section-title"><i data-lucide="award"></i> ماركة السيارة</h3>
+        <div class="subtype-grid" id="brandGrid">
+          <button type="button" class="subtype-card" data-brand="toyota"><span>تويوتا</span></button>
+          <button type="button" class="subtype-card" data-brand="hyundai"><span>هيونداي</span></button>
+          <button type="button" class="subtype-card" data-brand="kia"><span>كيا</span></button>
+          <button type="button" class="subtype-card" data-brand="mercedes"><span>مرسيدس</span></button>
+          <button type="button" class="subtype-card" data-brand="bmw"><span>BMW</span></button>
+          <button type="button" class="subtype-card" data-brand="nissan"><span>نيسان</span></button>
+          <button type="button" class="subtype-card" data-brand="honda"><span>هوندا</span></button>
+          <button type="button" class="subtype-card" data-brand="chevrolet"><span>شيفروليه</span></button>
+          <button type="button" class="subtype-card" data-brand="ford"><span>فورد</span></button>
+          <button type="button" class="subtype-card" data-brand="other"><span>أخرى</span></button>
+        </div>
+
+        <div class="al-field full" id="otherBrandField" style="display:none;margin-top:20px;">
+          <label for="otherBrand">اكتب اسم الماركة <span class="required">*</span></label>
+          <input type="text" id="otherBrand" placeholder="مثال: بيجو، رينو، سيات، جيلي...">
+          <span class="hint">اكتب اسم الماركة والطراز كامل، مثلاً: بيجو 301</span>
+          <span class="error-msg" id="otherBrandError"></span>
+        </div>
+      </div>
+
+      <!-- ===== السعر ===== -->
+      <div class="al-section" id="priceSection">
+        <h3 class="al-section-title"><i data-lucide="dollar-sign"></i> <span id="priceSectionTitle">السعر</span></h3>
+        <div class="al-grid">
+          <div class="al-field full">
+            <label for="price"><span id="priceLabel">السعر</span> <span class="required">*</span></label>
+            <div class="al-price-group">
+              <input type="number" id="price" placeholder="مثال: 150000" required>
+              <select id="currency">
+                <option value="USD">دولار أمريكي</option>
+                <option value="SYP">ليرة سورية</option>
+              </select>
+            </div>
+            <span class="error-msg" id="priceError"></span>
+          </div>
+
+          <div class="al-field" id="rentPeriodField" style="display:none;">
+            <label for="rentPeriod">مدة الإيجار <span class="required">*</span></label>
+            <select id="rentPeriod">
+              <option value="">اختر المدة</option>
+              <option value="daily">يومي</option>
+              <option value="monthly">شهري</option>
+              <option value="yearly">سنوي</option>
+            </select>
+            <span class="error-msg" id="rentPeriodError"></span>
+          </div>
+
+          <div class="al-field" id="depositField" style="display:none;">
+            <label for="deposit">مبلغ التأمين (اختياري)</label>
+            <input type="number" id="deposit" placeholder="مثال: 500">
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== تفاصيل العقار السكني ===== -->
+      <div class="al-section" id="residentialSection" style="display:none;">
+        <h3 class="al-section-title"><i data-lucide="home"></i> تفاصيل العقار السكني</h3>
+        <div class="al-grid al-grid-3">
+
+          <div class="al-field">
+            <label for="propertyArea">المساحة (م²)</label>
+            <input type="number" id="propertyArea" placeholder="مثال: 150">
+          </div>
+
+          <div class="al-field">
+            <label for="rooms">عدد الغرف</label>
+            <input type="number" id="rooms" placeholder="مثال: 3">
+          </div>
+
+          <div class="al-field">
+            <label for="bathrooms">عدد الحمامات</label>
+            <input type="number" id="bathrooms" placeholder="مثال: 2">
+          </div>
+
+          <div class="al-field">
+            <label for="floor">الطابق</label>
+            <input type="number" id="floor" placeholder="مثال: 3">
+          </div>
+
+          <div class="al-field">
+            <label for="totalFloors">إجمالي الطوابق</label>
+            <input type="number" id="totalFloors" placeholder="مثال: 5">
+          </div>
+
+          <div class="al-field">
+            <label for="age">عمر البناء (سنة)</label>
+            <input type="number" id="age" placeholder="مثال: 5">
+          </div>
+
+          <div class="al-field">
+            <label for="heating">نظام التدفئة</label>
+            <select id="heating">
+              <option value="">اختر</option>
+              <option value="central">مركزي</option>
+              <option value="split">مكيفات</option>
+              <option value="kerosene">كاز</option>
+              <option value="electric">كهرباء</option>
+              <option value="none">بدون</option>
+            </select>
+          </div>
+
+          <div class="al-field" id="furnishedField" style="display:none;">
+            <label for="furnished">الفرش</label>
+            <select id="furnished">
+              <option value="">اختر</option>
+              <option value="furnished">مفروش</option>
+              <option value="semi-furnished">نصف مفروش</option>
+              <option value="unfurnished">غير مفروش</option>
+            </select>
+          </div>
+
+          <div class="al-field" id="gardenField" style="display:none;">
+            <label for="garden">حديقة</label>
+            <select id="garden">
+              <option value="">اختر</option>
+              <option value="yes">نعم</option>
+              <option value="no">لا</option>
+            </select>
+          </div>
+
+          <div class="al-field" id="poolField" style="display:none;">
+            <label for="pool">مسبح</label>
+            <select id="pool">
+              <option value="">اختر</option>
+              <option value="yes">نعم</option>
+              <option value="no">لا</option>
+            </select>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ===== تفاصيل الأرض ===== -->
+      <div class="al-section" id="landSection" style="display:none;">
+        <h3 class="al-section-title"><i data-lucide="trees"></i> تفاصيل الأرض</h3>
+        <div class="al-grid al-grid-3">
+
+          <div class="al-field">
+            <label for="landArea">المساحة الكلية (م²) <span class="required">*</span></label>
+            <input type="number" id="landArea" placeholder="مثال: 500">
+            <span class="error-msg" id="landAreaError"></span>
+          </div>
+
+          <div class="al-field">
+            <label for="landFrontage">عرض الواجهة (م)</label>
+            <input type="number" id="landFrontage" placeholder="مثال: 20">
+          </div>
+
+          <div class="al-field">
+            <label for="landDepth">العمق (م)</label>
+            <input type="number" id="landDepth" placeholder="مثال: 25">
+          </div>
+
+          <div class="al-field">
+            <label for="landZoning">التنظيم</label>
+            <select id="landZoning">
+              <option value="">اختر</option>
+              <option value="residential">سكني</option>
+              <option value="commercial">تجاري</option>
+              <option value="industrial">صناعي</option>
+              <option value="agricultural">زراعي</option>
+              <option value="mixed">مختلط</option>
+            </select>
+          </div>
+
+          <div class="al-field">
+            <label for="landTabu">الطابو</label>
+            <select id="landTabu">
+              <option value="">اختر</option>
+              <option value="green">أخضر</option>
+              <option value="blue">أزرق</option>
+              <option value="organized">منظم</option>
+              <option value="unorganized">غير منظم</option>
+            </select>
+          </div>
+
+          <div class="al-field full">
+            <label>المرافق</label>
+            <div class="checkbox-row">
+              <label class="filter-option"><input type="checkbox" id="landWater"><span>ماء</span></label>
+              <label class="filter-option"><input type="checkbox" id="landElectric"><span>كهرباء</span></label>
+              <label class="filter-option"><input type="checkbox" id="landSewage"><span>صرف صحي</span></label>
+              <label class="filter-option"><input type="checkbox" id="landStreet"><span>شارع معبد</span></label>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ===== تفاصيل المكتب/المحل ===== -->
+      <div class="al-section" id="commercialSection" style="display:none;">
+        <h3 class="al-section-title"><i data-lucide="briefcase"></i> تفاصيل المكان التجاري</h3>
+        <div class="al-grid al-grid-3">
+
+          <div class="al-field">
+            <label for="commercialArea">المساحة (م²)</label>
+            <input type="number" id="commercialArea" placeholder="مثال: 100">
+          </div>
+
+          <div class="al-field">
+            <label for="commercialFloor">الطابق</label>
+            <input type="number" id="commercialFloor" placeholder="مثال: 1">
+          </div>
+
+          <div class="al-field">
+            <label for="commercialAge">عمر البناء (سنة)</label>
+            <input type="number" id="commercialAge" placeholder="مثال: 5">
+          </div>
+
+          <div class="al-field full">
+            <label>المرافق</label>
+            <div class="checkbox-row">
+              <label class="filter-option"><input type="checkbox" id="commElectric"><span>كهرباء</span></label>
+              <label class="filter-option"><input type="checkbox" id="commWater"><span>ماء</span></label>
+              <label class="filter-option"><input type="checkbox" id="commAC"><span>تكييف</span></label>
+              <label class="filter-option"><input type="checkbox" id="commParking"><span>موقف سيارة</span></label>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ===== تفاصيل السيارة ===== -->
+      <div class="al-section" id="carSection" style="display:none;">
+        <h3 class="al-section-title"><i data-lucide="car"></i> تفاصيل السيارة</h3>
+        <div class="al-grid al-grid-3">
+
+          <div class="al-field">
+            <label for="model">الموديل / الطراز <span class="required">*</span></label>
+            <input type="text" id="model" placeholder="مثال: كامري">
+            <span class="error-msg" id="modelError"></span>
+          </div>
+
+          <div class="al-field">
+            <label for="year">سنة الصنع <span class="required">*</span></label>
+            <input type="number" id="year" placeholder="مثال: 2020" min="1950" max="2030">
+            <span class="error-msg" id="yearError"></span>
+          </div>
+
+          <div class="al-field" id="conditionField">
+            <label for="condition">الحالة <span class="required">*</span></label>
+            <select id="condition">
+              <option value="">اختر</option>
+              <option value="new">جديد</option>
+              <option value="used">مستعمل</option>
+            </select>
+            <span class="error-msg" id="conditionError"></span>
+          </div>
+
+          <div class="al-field" id="kmField">
+            <label for="km">الكيلومترات (كم)</label>
+            <input type="number" id="km" placeholder="مثال: 50000">
+          </div>
+
+          <div class="al-field">
+            <label for="transmission">ناقل الحركة</label>
+            <select id="transmission">
+              <option value="">اختر</option>
+              <option value="automatic">أوتوماتيك</option>
+              <option value="manual">عادي</option>
+            </select>
+          </div>
+
+          <div class="al-field">
+            <label for="fuel">الوقود</label>
+            <select id="fuel">
+              <option value="">اختر</option>
+              <option value="petrol">بنزين</option>
+              <option value="diesel">ديزل</option>
+              <option value="electric">كهرباء</option>
+              <option value="hybrid">هايبرد</option>
+            </select>
+          </div>
+
+          <div class="al-field">
+            <label for="color">اللون</label>
+            <input type="text" id="color" placeholder="مثال: أبيض">
+          </div>
+
+          <div class="al-field">
+            <label for="bodyType">نوع الجسم</label>
+            <select id="bodyType">
+              <option value="">اختر</option>
+              <option value="sedan">سيدان</option>
+              <option value="suv">SUV</option>
+              <option value="hatchback">هاتشباك</option>
+              <option value="pickup">بيك أب</option>
+              <option value="coupe">كوبيه</option>
+              <option value="van">فان</option>
+            </select>
+          </div>
+
+          <div class="al-field" id="carInsuranceField" style="display:none;">
+            <label for="carInsurance">التأمين</label>
+            <select id="carInsurance">
+              <option value="">اختر</option>
+              <option value="yes">مؤمنة</option>
+              <option value="no">غير مؤمنة</option>
+            </select>
+          </div>
+
+          <div class="al-field" id="minDaysField" style="display:none;">
+            <label for="minDays">أقل مدة إيجار (أيام)</label>
+            <input type="number" id="minDays" placeholder="مثال: 1">
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ===== الوصف ===== -->
+      <div class="al-section">
+        <h3 class="al-section-title"><i data-lucide="file-text"></i> الوصف التفصيلي</h3>
+        <div class="al-field full">
+          <label for="description">اكتب وصفاً تفصيلياً <span class="required">*</span></label>
+          <textarea id="description" placeholder="اكتب وصفاً دقيقاً..." required></textarea>
+          <span class="hint">الحد الأدنى 30 حرفاً</span>
+          <span class="error-msg" id="descriptionError"></span>
+        </div>
+      </div>
+
+      <!-- ===== الصور ===== -->
+      <div class="al-section">
+        <h3 class="al-section-title"><i data-lucide="image"></i> صور الإعلان</h3>
+        <label class="al-upload" for="imageInput" id="uploadArea">
+          <input type="file" id="imageInput" accept="image/*" multiple>
+          <i data-lucide="upload-cloud"></i>
+          <h4>اسحب الصور هنا أو اضغط للاختيار</h4>
+          <p>حتى 10 صور - JPG/PNG - 5MB كحد أقصى للصورة</p>
+        </label>
+        <div class="al-preview" id="imagePreview"></div>
+      </div>
+
+      <!-- ===== الأزرار ===== -->
+      <div class="al-actions">
+        <button type="button" class="btn btn-outline" id="cancelBtn">
+          <i data-lucide="x"></i><span>إلغاء</span>
+        </button>
+        <button type="submit" class="btn btn-primary" id="submitBtn">
+          <i data-lucide="send"></i><span>نشر الإعلان</span>
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<!-- ============ شاشة النجاح ============ -->
+<div id="step4" class="al-step" style="display:none;">
+  <div class="al-card">
+    <div class="al-success">
+      <div class="al-success-icon"><i data-lucide="check"></i></div>
+      <h2>تم نشر إعلانك بنجاح!</h2>
+      <p>إعلانك الآن مرئي لجميع المستخدمين.<br>يمكنك إدارته من صفحة "حسابي".</p>
+      <div class="al-success-actions">
+        <a href="account.html" class="btn btn-primary"><i data-lucide="user"></i><span>الذهاب لحسابي</span></a>
+        <button class="btn btn-outline" id="addAnotherBtn"><i data-lucide="plus"></i><span>أضف إعلان آخر</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<footer class="footer">
+<div class="container">
+<div class="footer-grid">
+<div class="footer-col">
+<a href="../index.html" class="logo">
+<span class="logo-icon"><i data-lucide="home"></i></span>
+<span class="logo-text">سوق</span>
+</a>
+<p class="footer-desc">منصة عربية متكاملة لبيع وشراء وإيجار العقارات والسيارات.</p>
+</div>
+<div class="footer-col">
+<h4>روابط سريعة</h4>
+<a href="properties.html">عقارات</a>
+<a href="cars.html">سيارات</a>
+<a href="about.html">من نحن</a>
+<a href="contact.html">اتصل بنا</a>
+</div>
+<div class="footer-col">
+<h4>الحساب</h4>
+<a href="login.html">تسجيل الدخول</a>
+<a href="register.html">إنشاء حساب</a>
+<a href="add-listing.html">أضف إعلان</a>
+<a href="favorites.html">المفضلة</a>
+</div>
+<div class="footer-col">
+<h4>تواصل معنا</h4>
+<a href="https://wa.me/963930932794?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C%20%D8%A3%D8%B1%D9%8A%D8%AF%20%D8%A7%D9%84%D8%A7%D8%B3%D8%AA%D9%81%D8%B3%D8%A7%D8%B1%20%D8%B9%D9%86%20%D8%A7%D9%84%D9%85%D9%86%D8%B5%D8%A9" target="_blank" rel="noopener">
+<i data-lucide="phone"></i>
++963 930 932 794
+</a>
+<a href="mailto:info@souq.com">
+<i data-lucide="mail"></i>
+info@souq.com
+</a>
+<div class="social">
+<a href="https://www.facebook.com/share/19bQUfW9mc/" target="_blank" rel="noopener" class="social-icon" title="فيسبوك">
+<i data-lucide="facebook"></i>
+</a>
+<a href="#" class="social-icon" title="إنستغرام">
+<i data-lucide="instagram"></i>
+</a>
+<a href="#" class="social-icon" title="تويتر">
+<i data-lucide="twitter"></i>
+</a>
+</div>
+</div>
+</div>
+<div class="footer-bottom"><p>© 2026 سوق. جميع الحقوق محفوظة.</p></div>
+</div></footer>
+
+<nav class="bottom-nav">
+<a href="../index.html" class="bottom-nav-item"><i data-lucide="home"></i><span>الرئيسية</span></a>
+<a href="search.html" class="bottom-nav-item"><i data-lucide="search"></i><span>البحث</span></a>
+<a href="add-listing.html" class="bottom-nav-item add-btn active"><div class="add-icon"><i data-lucide="plus"></i></div><span>أضف</span></a>
+<a href="favorites.html" class="bottom-nav-item"><i data-lucide="heart"></i><span>المفضلة</span></a>
+<a href="account.html" class="bottom-nav-item"><i data-lucide="user"></i><span>حسابي</span></a>
+</nav>
+
+<script src="../js/api.js"></script>
+<script src="../js/add-listing.js"></script>
+
+<script>
+  window.addEventListener('load', function() {
+    if (window.lucide) window.lucide.createIcons();
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,viewport-fit=cover">
+<title>البحث | سوق</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/pages.css">
+</head>
+<body>
+<header class="header">
+<div class="container header-inner">
+<a href="../index.html" class="logo"><span class="logo-icon"><i data-lucide="home"></i></span><span class="logo-text">سوق</span></a>
+<nav class="nav">
+<a href="../index.html">الرئيسية</a><a href="properties.html">عقارات</a><a href="cars.html">سيارات</a>
+<a href="about.html">من نحن</a><a href="contact.html">اتصل بنا</a></nav>
+<div class="header-actions">
+<a href="add-listing.html" class="btn btn-primary"><i data-lucide="plus"></i><span>أضف إعلان</span></a>
+</div></div></header>
+
+<div class="container">
+<div class="search-hero">
+<h1>ابحث في آلاف الإعلانات</h1>
+<div class="search-tabs-row">
+<button class="tab active" data-type="all"><i data-lucide="layers"></i>الكل</button>
+<button class="tab" data-type="property"><i data-lucide="building-2"></i>عقارات</button>
+<button class="tab" data-type="car"><i data-lucide="car"></i>سيارات</button>
+</div>
+<div class="search-big-input">
+<i data-lucide="search"></i>
+<input type="text" id="searchInput" placeholder="ابحث بعنوان الإعلان، المدينة، أو الكلمات المفتاحية...">
+</div>
+</div>
+
+<div style="display:flex;justify-content:space-between;align-items:center;margin:30px 0 20px;flex-wrap:wrap;gap:12px;">
+<p style="font-size:14px;color:var(--text-secondary);"><strong id="searchCount" style="color:var(--text-primary);">0</strong> نتيجة</p>
+<select class="sort-select" id="searchSort" style="padding:9px 14px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-family:inherit;cursor:pointer;">
+<option value="newest">الأحدث</option>
+<option value="price-asc">الأرخص أولاً</option>
+<option value="price-desc">الأغلى أولاً</option>
+</select>
+</div>
+
+<div class="properties-grid" id="searchResults"></div>
+<div class="pagination" id="searchPagination"></div>
+</div>
+
+<footer class="footer">
+<div class="container">
+<div class="footer-bottom"><p>© 2026 سوق. جميع الحقوق محفوظة.</p></div>
+</div></footer>
+
+<nav class="bottom-nav">
+<a href="../index.html" class="bottom-nav-item"><i data-lucide="home"></i><span>الرئيسية</span></a>
+<a href="search.html" class="bottom-nav-item active"><i data-lucide="search"></i><span>البحث</span></a>
+<a href="add-listing.html" class="bottom-nav-item add-btn"><div class="add-icon"><i data-lucide="plus"></i></div><span>أضف</span></a>
+<a href="favorites.html" class="bottom-nav-item"><i data-lucide="heart"></i><span>المفضلة</span></a>
+<a href="account.html" class="bottom-nav-item"><i data-lucide="user"></i><span>حسابي</span></a>
+</nav>
+
+<script src="../js/api.js"></script>
+<script>
+function initIcons(){if(window.lucide)window.lucide.createIcons();}
+
+const SAMPLE=[
+  {id:'1001',type:'property',purpose:'sale',title:'شقة فاخرة بتشطيب سوبر ديلوكس في المزة',location:'دمشق - المزة',price:185000,currency:'USD',icon:'building-2'},
+  {id:'1002',type:'property',purpose:'rent',title:'فيلا مستقلة مع مسبح وحديقة واسعة',location:'دمشق - قدسيا',price:950,currency:'USD',icon:'home'},
+  {id:'1003',type:'property',purpose:'sale',title:'أرض سكنية 500م على شارعين',location:'ريف دمشق - جرمانا',price:75000,currency:'USD',icon:'trees'},
+  {id:'1004',type:'property',purpose:'rent',title:'مكتب تجاري مجهز بالكامل',location:'دمشق - أبو رمانة',price:600,currency:'USD',icon:'briefcase'},
+  {id:'2001',type:'car',purpose:'sale',title:'تويوتا كامري 2022 - فل كامل',location:'دمشق - المزة',price:28500,currency:'USD',icon:'car'},
+  {id:'2002',type:'car',purpose:'rent',title:'هيونداي إلنترا 2020 - نظيفة جداً',location:'حلب - العزيزية',price:45,currency:'USD',icon:'car-front'},
+  {id:'2003',type:'car',purpose:'sale',title:'كيا سبورتاج 2021 - بحالة الوكالة',location:'دمشق - قدسيا',price:32000,currency:'USD',icon:'car'},
+  {id:'2004',type:'car',purpose:'rent',title:'مرسيدس E200 2019 - فخامة',location:'حمص - الوعر',price:70,currency:'USD',icon:'car-front'}
+];
+
+let currentType='all';
+let allResults=[];
+let currentQuery='';
+let currentSort='newest';
+
+async function loadAll(){
+  const stored=await API.Listings.getAll();
+  allResults=[...stored,...SAMPLE];
+  // إزالة التكرار
+  const seen=new Set();
+  allResults=allResults.filter(l=>{if(seen.has(l.id))return false;seen.add(l.id);return true;});
+}
+
+function filterResults(){
+  let r=allResults;
+  if(currentType!=='all')r=r.filter(l=>l.type===currentType);
+  if(currentQuery){
+    const q=currentQuery.toLowerCase();
+    r=r.filter(l=>l.title.toLowerCase().includes(q)||(l.location||'').toLowerCase().includes(q));
+  }
+  if(currentSort==='price-asc')r.sort((a,b)=>a.price-b.price);
+  else if(currentSort==='price-desc')r.sort((a,b)=>b.price-a.price);
+  return r;
+}
+
+function render(){
+  const r=filterResults();
+  document.getElementById('searchCount').textContent=r.length;
+  const grid=document.getElementById('searchResults');
+  if(!r.length){
+    grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1;">
+      <i data-lucide="search-x"></i>
+      <h3>لا توجد نتائج</h3>
+      <p>جرّب البحث بكلمات مختلفة</p>
+    </div>`;
+    initIcons();return;
+  }
+  grid.innerHTML=r.map(l=>{
+    const purposeText=l.purpose==='sale'?'للبيع':'للإيجار';
+    const purposeClass=l.purpose==='sale'?'sale':'rent';
+    const icon=l.icon||(l.type==='property'?'building-2':'car');
+    const priceText=l.purpose==='sale'?`${l.price.toLocaleString('en-US')} ${l.currency}`:`${l.price} ${l.currency}/شهر`;
+    return `<a href="details.html?id=${l.id}&type=${l.type}" class="card">
+      <div class="card-image">
+        <i data-lucide="${icon}"></i>
+        <span class="card-badge ${purposeClass}">${purposeText}</span>
+      </div>
+      <div class="card-body">
+        <h3 class="card-title">${l.title}</h3>
+        <p class="card-location"><i data-lucide="map-pin"></i>${l.location}</p>
+        <p class="card-price">${priceText}</p>
+      </div>
+    </a>`;
+  }).join('');
+  initIcons();
+}
+
+document.addEventListener('DOMContentLoaded',async()=>{
+  initIcons();
+  await loadAll();
+  render();
+
+  // من URL query
+  const params=new URLSearchParams(window.location.search);
+  const q=params.get('q')||params.get('location')||'';
+  if(q){document.getElementById('searchInput').value=q;currentQuery=q;render();}
+
+  document.getElementById('searchInput').addEventListener('input',e=>{
+    currentQuery=e.target.value.trim();render();
+  });
+
+  document.querySelectorAll('.search-tabs-row .tab').forEach(t=>{
+    t.addEventListener('click',()=>{
+      document.querySelectorAll('.search-tabs-row .tab').forEach(x=>x.classList.remove('active'));
+      t.classList.add('active');
+      currentType=t.dataset.type;
+      render();
+    });
+  });
+
+  document.getElementById('searchSort').addEventListener('change',e=>{
+    currentSort=e.target.value;render();
+  });
+});
+
+</script>
+<script src="../js/auth-guard.js"></script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <title>تسجيل الدخول | سوق</title>
+  <meta name="description" content="سجّل دخولك إلى منصة سوق للعقارات والسيارات">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/auth.css">
+</head>
+<body class="auth-page">
+
+  <!-- زر العودة -->
+  <a href="../index.html" class="auth-back" title="العودة للرئيسية">
+    <i data-lucide="arrow-right"></i>
+  </a>
+
+  <div class="auth-wrap">
+
+    <!-- ===== الجانب المرئي (Brand Side) ===== -->
+    <div class="auth-brand">
+
+      <div class="auth-brand-content">
+        <a href="../index.html" class="logo auth-logo">
+          <span class="logo-icon"><i data-lucide="home"></i></span>
+          <span class="logo-text">سوق</span>
+        </a>
+
+        <h1 class="auth-brand-title">
+          مرحباً بعودتك إلى
+          <span class="gradient-text">سوق</span>
+        </h1>
+
+        <p class="auth-brand-subtitle">
+          سجّل دخولك للوصول إلى إعلاناتك المفضلة، إدارة إعلاناتك، والتواصل مع البائعين بسهولة.
+        </p>
+
+        <ul class="auth-features">
+          <li>
+            <i data-lucide="check-circle-2"></i>
+            <span>آلاف الإعلانات العقارية والسيارات</span>
+          </li>
+          <li>
+            <i data-lucide="check-circle-2"></i>
+            <span>تواصل مباشر عبر واتساب</span>
+          </li>
+          <li>
+            <i data-lucide="check-circle-2"></i>
+            <span>حفظ الإعلانات في المفضلة</span>
+          </li>
+          <li>
+            <i data-lucide="check-circle-2"></i>
+            <span>أضف إعلانك في دقائق</span>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+
+    <!-- ===== نموذج تسجيل الدخول ===== -->
+    <div class="auth-form-side">
+
+      <div class="auth-form-wrap">
+
+        <div class="auth-form-header">
+          <h2 class="auth-form-title">تسجيل الدخول</h2>
+          <p class="auth-form-subtitle">
+            ليس لديك حساب؟
+            <a href="register.html">أنشئ حساباً جديداً</a>
+          </p>
+        </div>
+
+        <!-- تنبيه خطأ -->
+        <div class="auth-alert error" id="authError" style="display:none;">
+          <i data-lucide="alert-circle"></i>
+          <span id="authErrorText"></span>
+        </div>
+
+        <!-- نموذج -->
+        <form class="auth-form" id="loginForm" novalidate>
+
+          <!-- البريد الإلكتروني -->
+          <div class="form-field">
+            <label for="email">البريد الإلكتروني</label>
+            <div class="field-input">
+              <i data-lucide="mail"></i>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                placeholder="example@email.com"
+                autocomplete="email"
+                required
+              >
+            </div>
+            <span class="field-error" id="emailError"></span>
+          </div>
+
+          <!-- كلمة المرور -->
+          <div class="form-field">
+            <label for="password">كلمة المرور</label>
+            <div class="field-input">
+              <i data-lucide="lock"></i>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="••••••••"
+                autocomplete="current-password"
+                required
+              >
+              <button type="button" class="toggle-password" id="togglePassword" title="إظهار كلمة المرور">
+                <i data-lucide="eye"></i>
+              </button>
+            </div>
+            <span class="field-error" id="passwordError"></span>
+          </div>
+
+          <!-- تذكرني + نسيت كلمة المرور -->
+          <div class="form-extras">
+            <label class="remember-me">
+              <input type="checkbox" id="rememberMe">
+              <span>تذكرني</span>
+            </label>
+            <a href="forgot-password.html" class="forgot-link">
+              نسيت كلمة المرور؟
+            </a>
+          </div>
+
+          <!-- زر الدخول -->
+          <button type="submit" class="btn btn-primary btn-block" id="loginBtn">
+            <i data-lucide="log-in"></i>
+            <span>تسجيل الدخول</span>
+          </button>
+
+        </form>
+
+
+        
+
+
+        <!-- ملاحظة -->
+        <p class="auth-note">
+          بتسجيلك في الموقع، أنت توافق على
+          <a href="terms.html">الشروط والأحكام</a>
+          و
+          <a href="privacy.html">سياسة الخصوصية</a>
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+</body>
+</html>
