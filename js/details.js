@@ -4,14 +4,14 @@ let currentListing = null;
 let currentImageIndex = 0;
 
 const MOCK_LISTINGS = {
-  '1001':{id:'1001',type:'property',purpose:'sale',title:'شقة فاخرة بتشطيب سوبر ديلوكس في المزة',location:'دمشق - المزة',price:185000,currency:'USD',featured:true,description:'شقة فاخرة بمساحة 180 متر مربع، تتكون من 3 غرف نوم، صالون واسع، مطبخ حديث، 2 حمام.\n\nتشطيب سوبر ديلوكس، طابق ثالث من أصل 5، عمر البناء 3 سنوات، مع مصعد وموقف سيارة خاص.',images:[],specs:[{icon:'building-2',label:'نوع العقار',value:'شقة'},{icon:'square',label:'المساحة',value:'180 م²'},{icon:'bed-double',label:'الغرف',value:'3 غرف'},{icon:'bath',label:'الحمامات',value:'2'},{icon:'layers',label:'الطابق',value:'الثالث'},{icon:'calendar',label:'عمر البناء',value:'3 سنوات'},{icon:'sofa',label:'الفرش',value:'مفروش'},{icon:'flame',label:'التدفئة',value:'مركزية'}]},
-  '1002':{id:'1002',type:'property',purpose:'rent',title:'فيلا مستقلة مع مسبح وحديقة واسعة',location:'دمشق - قدسيا',price:950,currency:'USD',featured:true,description:'فيلا مستقلة بتصميم عصري، مساحة 350 متر مربع موزعة على طابقين، 5 غرف نوم، صالون كبير، مطبخ مجهز، 4 حمامات، حديقة خاصة 200م، مسبح، موقف سيارتين.',images:[],specs:[{icon:'home',label:'نوع العقار',value:'فيلا'},{icon:'square',label:'المساحة',value:'350 م²'},{icon:'bed-double',label:'الغرف',value:'5'},{icon:'bath',label:'الحمامات',value:'4'},{icon:'waves',label:'المسبح',value:'متوفر'},{icon:'trees',label:'الحديقة',value:'200 م²'},{icon:'car',label:'موقف',value:'متوفر'},{icon:'flame',label:'التدفئة',value:'مركزية'}]},
-  '1003':{id:'1003',type:'property',purpose:'sale',title:'أرض سكنية 500م على شارعين',location:'ريف دمشق - جرمانا',price:75000,currency:'USD',featured:false,description:'أرض سكنية بمساحة 500 متر مربع، على شارعين (شرقي وغربي)، منظمة ضمن المخطط التنظيمي، جاهزة للبناء مباشرة.',images:[],specs:[{icon:'trees',label:'النوع',value:'أرض'},{icon:'square',label:'المساحة',value:'500 م²'},{icon:'route',label:'الواجهات',value:'شارعين'},{icon:'file-check',label:'الطابو',value:'منظم'}]},
-  '1004':{id:'1004',type:'property',purpose:'rent',title:'مكتب تجاري مجهز بالكامل في أبو رمانة',location:'دمشق - أبو رمانة',price:600,currency:'USD',featured:false,description:'مكتب تجاري بمساحة 120 متر مربع في منطقة حيوية، مجهز بالكامل بالأثاث والمعدات المكتبية، مكيفات، حمام، مطبخ صغير.',images:[],specs:[{icon:'briefcase',label:'النوع',value:'مكتب'},{icon:'square',label:'المساحة',value:'120 م²'},{icon:'layers',label:'الطابق',value:'الثاني'},{icon:'snowflake',label:'التكييف',value:'متوفر'},{icon:'sofa',label:'الفرش',value:'مجهز'},{icon:'car',label:'موقف',value:'متوفر'}]},
-  '2001':{id:'2001',type:'car',purpose:'sale',title:'تويوتا كامري 2022 - فل كامل',location:'دمشق - المزة',price:28500,currency:'USD',featured:true,description:'تويوتا كامري 2022 فل كامل، ماشية 35,000 كم فقط، بحالة الوكالة، صيانة دورية في الوكالة، بدون حوادث نهائياً.\n\nالمواصفات: فتحة سقف، جلد، شاشة، كاميرا خلفية، حساسات، مثبت سرعة، مقاعد كهربائية.',images:[],specs:[{icon:'car',label:'الماركة',value:'تويوتا'},{icon:'tag',label:'الموديل',value:'كامري'},{icon:'calendar',label:'السنة',value:'2022'},{icon:'gauge',label:'الكيلومترات',value:'35,000 كم'},{icon:'settings-2',label:'ناقل الحركة',value:'أوتوماتيك'},{icon:'fuel',label:'الوقود',value:'بنزين'},{icon:'palette',label:'اللون',value:'أبيض'},{icon:'sparkles',label:'الحالة',value:'مستعمل'}]},
-  '2002':{id:'2002',type:'car',purpose:'rent',title:'هيونداي إلنترا 2020 - نظيفة جداً',location:'حلب - العزيزية',price:45,currency:'USD',featured:true,description:'هيونداي إلنترا 2020 للإيجار اليومي، ماشية 85,000 كم، حالة ممتازة، مكيفة، أوتوماتيك، اقتصادية بالوقود.',images:[],specs:[{icon:'car',label:'الماركة',value:'هيونداي'},{icon:'tag',label:'الموديل',value:'إلنترا'},{icon:'calendar',label:'السنة',value:'2020'},{icon:'gauge',label:'الكيلومترات',value:'85,000 كم'},{icon:'settings-2',label:'ناقل الحركة',value:'أوتوماتيك'},{icon:'fuel',label:'الوقود',value:'بنزين'},{icon:'palette',label:'اللون',value:'فضي'},{icon:'sparkles',label:'الحالة',value:'مستعمل'}]},
-  '2003':{id:'2003',type:'car',purpose:'sale',title:'كيا سبورتاج 2021 - بحالة الوكالة',location:'دمشق - قدسيا',price:32000,currency:'USD',featured:false,description:'كيا سبورتاج 2021، ماشية 45,000 كم، حالة ممتازة، صيانة دورية، بدون حوادث.',images:[],specs:[{icon:'car',label:'الماركة',value:'كيا'},{icon:'tag',label:'الموديل',value:'سبورتاج'},{icon:'calendar',label:'السنة',value:'2021'},{icon:'gauge',label:'الكيلومترات',value:'45,000 كم'},{icon:'settings-2',label:'ناقل الحركة',value:'أوتوماتيك'},{icon:'fuel',label:'الوقود',value:'بنزين'},{icon:'palette',label:'اللون',value:'أسود'},{icon:'sparkles',label:'الحالة',value:'مستعمل'}]},
-  '2004':{id:'2004',type:'car',purpose:'rent',title:'مرسيدس E200 2019 - فخامة',location:'حمص - الوعر',price:70,currency:'USD',featured:false,description:'مرسيدس E200 2019 للإيجار اليومي، فخامة وأداء عالي، مكيفة، أوتوماتيك، بحالة ممتازة.',images:[],specs:[{icon:'car',label:'الماركة',value:'مرسيدس'},{icon:'tag',label:'الموديل',value:'E200'},{icon:'calendar',label:'السنة',value:'2019'},{icon:'gauge',label:'الكيلومترات',value:'70,000 كم'},{icon:'settings-2',label:'ناقل الحركة',value:'أوتوماتيك'},{icon:'fuel',label:'الوقود',value:'بنزين'},{icon:'palette',label:'اللون',value:'أسود'},{icon:'sparkles',label:'الحالة',value:'مستعمل'}]}
+  '1001':{id:'1001',type:'property',purpose:'sale',title:'شقة فاخرة بتشطيب سوبر ديلوكس في المزة',location:'دمشق - المزة',price:185000,currency:'USD',featured:true,whatsapp:'0930000001',description:'شقة فاخرة بمساحة 180 متر مربع، تتكون من 3 غرف نوم، صالون واسع، مطبخ حديث، 2 حمام.\n\nتشطيب سوبر ديلوكس، طابق ثالث من أصل 5، عمر البناء 3 سنوات، مع مصعد وموقف سيارة خاص.',images:[],specs:[{icon:'building-2',label:'نوع العقار',value:'شقة'},{icon:'square',label:'المساحة',value:'180 م²'},{icon:'bed-double',label:'الغرف',value:'3 غرف'},{icon:'bath',label:'الحمامات',value:'2'},{icon:'layers',label:'الطابق',value:'الثالث'},{icon:'calendar',label:'عمر البناء',value:'3 سنوات'},{icon:'sofa',label:'الفرش',value:'مفروش'},{icon:'flame',label:'التدفئة',value:'مركزية'}]},
+  '1002':{id:'1002',type:'property',purpose:'rent',title:'فيلا مستقلة مع مسبح وحديقة واسعة',location:'دمشق - قدسيا',price:950,currency:'USD',featured:true,whatsapp:'0930000002',description:'فيلا مستقلة بتصميم عصري، مساحة 350 متر مربع موزعة على طابقين، 5 غرف نوم، صالون كبير، مطبخ مجهز، 4 حمامات، حديقة خاصة 200م، مسبح، موقف سيارتين.',images:[],specs:[{icon:'home',label:'نوع العقار',value:'فيلا'},{icon:'square',label:'المساحة',value:'350 م²'},{icon:'bed-double',label:'الغرف',value:'5'},{icon:'bath',label:'الحمامات',value:'4'},{icon:'waves',label:'المسبح',value:'متوفر'},{icon:'trees',label:'الحديقة',value:'200 م²'},{icon:'car',label:'موقف',value:'متوفر'},{icon:'flame',label:'التدفئة',value:'مركزية'}]},
+  '1003':{id:'1003',type:'property',purpose:'sale',title:'أرض سكنية 500م على شارعين',location:'ريف دمشق - جرمانا',price:75000,currency:'USD',featured:false,whatsapp:'0930000003',description:'أرض سكنية بمساحة 500 متر مربع، على شارعين (شرقي وغربي)، منظمة ضمن المخطط التنظيمي، جاهزة للبناء مباشرة.',images:[],specs:[{icon:'trees',label:'النوع',value:'أرض'},{icon:'square',label:'المساحة',value:'500 م²'},{icon:'route',label:'الواجهات',value:'شارعين'},{icon:'file-check',label:'الطابو',value:'منظم'}]},
+  '1004':{id:'1004',type:'property',purpose:'rent',title:'مكتب تجاري مجهز بالكامل في أبو رمانة',location:'دمشق - أبو رمانة',price:600,currency:'USD',featured:false,whatsapp:'0930000004',description:'مكتب تجاري بمساحة 120 متر مربع في منطقة حيوية، مجهز بالكامل بالأثاث والمعدات المكتبية، مكيفات، حمام، مطبخ صغير.',images:[],specs:[{icon:'briefcase',label:'النوع',value:'مكتب'},{icon:'square',label:'المساحة',value:'120 م²'},{icon:'layers',label:'الطابق',value:'الثاني'},{icon:'snowflake',label:'التكييف',value:'متوفر'},{icon:'sofa',label:'الفرش',value:'مجهز'},{icon:'car',label:'موقف',value:'متوفر'}]},
+  '2001':{id:'2001',type:'car',purpose:'sale',title:'تويوتا كامري 2022 - فل كامل',location:'دمشق - المزة',price:28500,currency:'USD',featured:true,whatsapp:'0930000005',description:'تويوتا كامري 2022 فل كامل، ماشية 35,000 كم فقط، بحالة الوكالة، صيانة دورية في الوكالة، بدون حوادث نهائياً.\n\nالمواصفات: فتحة سقف، جلد، شاشة، كاميرا خلفية، حساسات، مثبت سرعة، مقاعد كهربائية.',images:[],specs:[{icon:'car',label:'الماركة',value:'تويوتا'},{icon:'tag',label:'الموديل',value:'كامري'},{icon:'calendar',label:'السنة',value:'2022'},{icon:'gauge',label:'الكيلومترات',value:'35,000 كم'},{icon:'settings-2',label:'ناقل الحركة',value:'أوتوماتيك'},{icon:'fuel',label:'الوقود',value:'بنزين'},{icon:'palette',label:'اللون',value:'أبيض'},{icon:'sparkles',label:'الحالة',value:'مستعمل'}]},
+  '2002':{id:'2002',type:'car',purpose:'rent',title:'هيونداي إلنترا 2020 - نظيفة جداً',location:'حلب - العزيزية',price:45,currency:'USD',featured:true,whatsapp:'0930000006',description:'هيونداي إلنترا 2020 للإيجار اليومي، ماشية 85,000 كم، حالة ممتازة، مكيفة، أوتوماتيك، اقتصادية بالوقود.',images:[],specs:[{icon:'car',label:'الماركة',value:'هيونداي'},{icon:'tag',label:'الموديل',value:'إلنترا'},{icon:'calendar',label:'السنة',value:'2020'},{icon:'gauge',label:'الكيلومترات',value:'85,000 كم'},{icon:'settings-2',label:'ناقل الحركة',value:'أوتوماتيك'},{icon:'fuel',label:'الوقود',value:'بنزين'},{icon:'palette',label:'اللون',value:'فضي'},{icon:'sparkles',label:'الحالة',value:'مستعمل'}]},
+  '2003':{id:'2003',type:'car',purpose:'sale',title:'كيا سبورتاج 2021 - بحالة الوكالة',location:'دمشق - قدسيا',price:32000,currency:'USD',featured:false,whatsapp:'0930000007',description:'كيا سبورتاج 2021، ماشية 45,000 كم، حالة ممتازة، صيانة دورية، بدون حوادث.',images:[],specs:[{icon:'car',label:'الماركة',value:'كيا'},{icon:'tag',label:'الموديل',value:'سبورتاج'},{icon:'calendar',label:'السنة',value:'2021'},{icon:'gauge',label:'الكيلومترات',value:'45,000 كم'},{icon:'settings-2',label:'ناقل الحركة',value:'أوتوماتيك'},{icon:'fuel',label:'الوقود',value:'بنزين'},{icon:'palette',label:'اللون',value:'أسود'},{icon:'sparkles',label:'الحالة',value:'مستعمل'}]},
+  '2004':{id:'2004',type:'car',purpose:'rent',title:'مرسيدس E200 2019 - فخامة',location:'حمص - الوعر',price:70,currency:'USD',featured:false,whatsapp:'0930000008',description:'مرسيدس E200 2019 للإيجار اليومي، فخامة وأداء عالي، مكيفة، أوتوماتيك، بحالة ممتازة.',images:[],specs:[{icon:'car',label:'الماركة',value:'مرسيدس'},{icon:'tag',label:'الموديل',value:'E200'},{icon:'calendar',label:'السنة',value:'2019'},{icon:'gauge',label:'الكيلومترات',value:'70,000 كم'},{icon:'settings-2',label:'ناقل الحركة',value:'أوتوماتيك'},{icon:'fuel',label:'الوقود',value:'بنزين'},{icon:'palette',label:'اللون',value:'أسود'},{icon:'sparkles',label:'الحالة',value:'مستعمل'}]}
 };
 
 function initIcons(){if(window.lucide)window.lucide.createIcons();}
@@ -53,10 +53,60 @@ function renderListing(l){
   const msg=`مرحباً، انا مهتم بـ ${typeText} ورقم الإعلان هو: ${l.id}`;
   document.getElementById('whatsappBtn').href=`https://wa.me/${BROKER_PHONE}?text=${encodeURIComponent(msg)}`;
 
+  // ✅ زر واتساب البائع (للأدمن فقط)
+  setupSellerWhatsapp(l);
+
   renderGallery(l.images||[],l);
   setupFavorite(l.id);
   document.getElementById('loadingState').style.display='none';
   document.getElementById('detailsContent').style.display='grid';
+  initIcons();
+}
+
+/* ==========================================
+   زر واتساب البائع (يظهر فقط للأدمن)
+   ========================================== */
+function setupSellerWhatsapp(listing){
+  const btn=document.getElementById('sellerWhatsappBtn');
+  if(!btn)return;
+
+  // التحقق: هل المستخدم أدمن؟
+  const isAdmin = window.API && API.Users && API.Users.isAdmin && API.Users.isAdmin();
+  if(!isAdmin){
+    btn.style.display='none';
+    return;
+  }
+
+  // استخراج رقم واتساب البائع (من حقول متعددة محتملة)
+  let sellerPhone = listing.whatsapp || 
+                    (listing.details && listing.details._whatsapp) || 
+                    '';
+
+  // تنظيف الرقم
+  sellerPhone = String(sellerPhone).replace(/[^0-9+]/g,'');
+  if(sellerPhone.startsWith('+')) sellerPhone = sellerPhone.substring(1);
+
+  // إذا ما في رقم
+  if(!sellerPhone){
+    btn.style.display='flex';
+    btn.style.background='var(--danger)';
+    btn.style.borderStyle='solid';
+    btn.href='#';
+    btn.innerHTML=`<i data-lucide="alert-circle"></i><span>لا يوجد رقم للبائع</span>`;
+    btn.onclick=(e)=>{e.preventDefault();alert('لم يقم البائع بإدخال رقم واتساب لهذا الإعلان.');};
+    initIcons();
+    return;
+  }
+
+  // تجهيز الرسالة
+  const typeText = listing.type==='property'?'العقار':'السيارة';
+  const message = `مرحباً، تواصل معك فريق سوق بخصوص ${typeText} رقم #${listing.id}\n${listing.title}`;
+
+  btn.href=`https://wa.me/${sellerPhone}?text=${encodeURIComponent(message)}`;
+  btn.style.display='flex';
+  btn.style.background='';
+  btn.innerHTML=`<i data-lucide="user-check"></i><span>واتساب البائع (${sellerPhone})</span>`;
+
   initIcons();
 }
 
