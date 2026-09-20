@@ -290,6 +290,20 @@ const API_BASE = (function() {
       return Promise.resolve({ success: true, listing: listings[index] });
     },
 
+    // ✅ دالة جديدة: تغيير حالة الإعلان (متاح/مباع/مؤجر)
+    updateStatus: function(id, status) {
+      if (MODE === 'server') return httpPost('/update_listing.php', { id: id, status: status });
+
+      const listings = read(KEYS.LISTINGS, []);
+      const index = listings.findIndex(function(l) { return l.id === id; });
+      if (index === -1) return Promise.resolve({ success: false, error: 'الإعلان غير موجود' });
+
+      listings[index].status = status;
+      listings[index].updatedAt = new Date().toISOString();
+      write(KEYS.LISTINGS, listings);
+      return Promise.resolve({ success: true, listing: listings[index] });
+    },
+
     delete: function(id) {
       if (MODE === 'server') return httpPost('/delete_listing.php', { id: id });
 
