@@ -7,14 +7,40 @@ $data = getInput();
 $id = $data['id'] ?? '';
 if (!$id) respond(['success' => false, 'error' => 'معرف مطلوب']);
 
-$fields = []; $values = [];
-foreach (['title', 'description', 'price', 'status', 'featured', 'type', 'purpose'] as $f) {
-    if (isset($data[$f])) { $fields[] = "$f = ?"; $values[] = $data[$f]; }
+$fields = [];
+$values = [];
+
+foreach ([
+    'title',
+    'description',
+    'price',
+    'status',
+    'type',
+    'purpose'
+] as $field) {
+    if (array_key_exists($field, $data)) {
+        $fields[] = "$field = ?";
+        $values[] = $data[$field];
+    }
+}
+
+if (array_key_exists('featured', $data)) {
+    $fields[] = 'is_featured = ?';
+    $values[] = $data['featured'] ? 1 : 0;
 }
 
 if (!empty($fields)) {
     $values[] = $id;
-    $pdo->prepare('UPDATE listings SET ' . implode(', ', $fields) . ', updated_at = CURRENT_TIMESTAMP WHERE id = ?')->execute($values);
+
+    $sql = '
+        UPDATE listings
+        SET ' . implode(', ', $fields) . ',
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+    ';
+
+    $pdo->prepare($sql)->execute($values);
 }
+
 
 respond(['success' => true]);
