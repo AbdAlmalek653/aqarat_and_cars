@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,viewport-fit=cover">
+<title>لوحة التحكم | سوق</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/pages.css">
+<link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+
+<header class="header">
+<div class="container header-inner">
+<a href="../index.html" class="logo"><span class="logo-icon"><i data-lucide="home"></i></span><span class="logo-text">سوق</span></a>
+<nav class="nav">
+<a href="../index.html">الرئيسية</a>
+<a href="properties.html">عقارات</a>
+<a href="cars.html">سيارات</a>
+<a href="about.html">من نحن</a>
+<a href="contact.html">اتصل بنا</a>
+</nav>
+<div class="header-actions">
+<button class="btn-icon" title="البحث"><i data-lucide="search"></i></button>
+<a href="add-listing.html" class="btn btn-primary">
+<i data-lucide="plus"></i>
+<span>أضف إعلان</span>
+</a>
+</div>
+</div>
+</header>
+
+<div class="container">
+<nav class="breadcrumb">
+<a href="../index.html"><i data-lucide="home"></i> الرئيسية</a>
+<i data-lucide="chevron-left"></i>
+<span class="current">لوحة التحكم</span>
+</nav>
+
+<!-- ===== رسالة: غير مصرح ===== -->
+<div id="noAccess" style="display:none;text-align:center;padding:80px 20px;">
+<i data-lucide="shield-x" style="width:80px;height:80px;color:var(--danger);opacity:.6;margin-bottom:20px;"></i>
+<h2 style="font-size:24px;margin-bottom:10px;">لا تملك صلاحية الوصول</h2>
+<p style="color:var(--text-secondary);margin-bottom:24px;">هذه الصفحة مخصصة للمشرفين فقط</p>
+<a href="../index.html" class="btn btn-primary"><i data-lucide="home"></i><span>العودة للرئيسية</span></a>
+</div>
+
+<!-- ===== لوحة التحكم ===== -->
+<div class="admin-dashboard" id="adminDashboard" style="display:none;">
+
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <div class="admin-user-box">
+      <div class="admin-avatar" id="adminAvatar">م</div>
+      <div>
+        <div class="admin-name" id="adminName">—</div>
+        <div class="admin-role-badge" id="adminRole">—</div>
+      </div>
+    </div>
+
+    <nav class="admin-menu">
+      <button class="admin-menu-btn active" data-tab="overview">
+        <i data-lucide="layout-dashboard"></i>
+        <span>نظرة عامة</span>
+      </button>
+      <button class="admin-menu-btn" data-tab="listings">
+        <i data-lucide="list"></i>
+        <span>إدارة الإعلانات</span>
+        <span class="admin-badge" id="badgeListings">0</span>
+      </button>
+      <button class="admin-menu-btn" data-tab="users" id="usersTabBtn">
+        <i data-lucide="users"></i>
+        <span>إدارة المستخدمين</span>
+        <span class="admin-badge" id="badgeUsers">0</span>
+      </button>
+      <button class="admin-menu-btn" data-tab="reports">
+        <i data-lucide="alert-triangle"></i>
+        <span>البلاغات</span>
+        <span class="admin-badge" id="badgeReports">0</span>
+      </button>
+      <button class="admin-menu-btn danger" id="adminLogoutBtn">
+        <i data-lucide="log-out"></i>
+        <span>تسجيل الخروج</span>
+      </button>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <main class="admin-main">
+
+    <!-- ========== Tab: Overview ========== -->
+    <section class="admin-tab active" data-tab="overview">
+      <div class="admin-page-header">
+        <h1>نظرة عامة</h1>
+        <p>ملخص شامل لنشاط المنصة</p>
+      </div>
+
+      <div class="admin-stats">
+        <div class="admin-stat-card">
+          <div class="admin-stat-icon blue"><i data-lucide="building-2"></i></div>
+          <div class="admin-stat-info">
+            <div class="admin-stat-num" id="statTotalProps">0</div>
+            <div class="admin-stat-lbl">إجمالي العقارات</div>
+          </div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="admin-stat-icon green"><i data-lucide="car"></i></div>
+          <div class="admin-stat-info">
+            <div class="admin-stat-num" id="statTotalCars">0</div>
+            <div class="admin-stat-lbl">إجمالي السيارات</div>
+          </div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="admin-stat-icon orange"><i data-lucide="users"></i></div>
+          <div class="admin-stat-info">
+            <div class="admin-stat-num" id="statTotalUsers">0</div>
+            <div class="admin-stat-lbl">إجمالي المستخدمين</div>
+          </div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="admin-stat-icon purple"><i data-lucide="eye"></i></div>
+          <div class="admin-stat-info">
+            <div class="admin-stat-num" id="statTotalViews">0</div>
+            <div class="admin-stat-lbl">إجمالي المشاهدات</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-two-cols">
+        <div class="admin-panel-card">
+          <div class="admin-panel-header">
+            <h3><i data-lucide="clock"></i> أحدث الإعلانات</h3>
+            <button class="admin-link-btn" onclick="switchAdminTab('listings')">
+              عرض الكل <i data-lucide="arrow-left"></i>
+            </button>
+          </div>
+          <div id="recentListings"></div>
+        </div>
+
+        <div class="admin-panel-card">
+          <div class="admin-panel-header">
+            <h3><i data-lucide="user-plus"></i> أحدث المستخدمين</h3>
+            <button class="admin-link-btn" onclick="switchAdminTab('users')">
+              عرض الكل <i data-lucide="arrow-left"></i>
+            </button>
+          </div>
+          <div id="recentUsers"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Tab: Listings ========== -->
+    <section class="admin-tab" data-tab="listings">
+      <div class="admin-page-header">
+        <h1>إدارة الإعلانات</h1>
+        <p>جميع الإعلانات المنشورة على المنصة</p>
+      </div>
+
+      <div class="admin-filters">
+        <input type="text" id="searchListings" placeholder="🔍 ابحث بالعنوان أو المدينة..." class="admin-search-input">
+        <select id="filterType" class="admin-select">
+          <option value="">كل الأنواع</option>
+          <option value="property">عقارات</option>
+          <option value="car">سيارات</option>
+        </select>
+        <select id="filterStatus" class="admin-select">
+          <option value="">كل الحالات</option>
+          <option value="active">متاح</option>
+          <option value="sold">مباع</option>
+          <option value="rented">مؤجر</option>
+        </select>
+      </div>
+
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>الإعلان</th>
+              <th>النوع</th>
+              <th>السعر</th>
+              <th>الحالة</th>
+              <th>البائع</th>
+              <th>واتساب</th>
+              <th>إجراءات</th>
+            </tr>
+          </thead>
+          <tbody id="listingsTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ========== Tab: Users ========== -->
+    <section class="admin-tab" data-tab="users">
+      <div class="admin-page-header">
+        <h1>إدارة المستخدمين</h1>
+        <p>جميع الحسابات المسجلة على المنصة</p>
+      </div>
+
+      <div class="admin-filters">
+        <input type="text" id="searchUsers" placeholder="🔍 ابحث بالاسم أو البريد..." class="admin-search-input">
+        <select id="filterRole" class="admin-select">
+          <option value="">كل الأدوار</option>
+          <option value="user">مستخدم</option>
+          <option value="admin">أدمن</option>
+          <option value="super_admin">أدمن عام</option>
+        </select>
+      </div>
+
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>الاسم</th>
+              <th>البريد</th>
+              <th>الهاتف</th>
+              <th>الدور</th>
+              <th>تاريخ التسجيل</th>
+              <th>إجراءات</th>
+            </tr>
+          </thead>
+          <tbody id="usersTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ========== Tab: Reports ========== -->
+    <section class="admin-tab" data-tab="reports">
+      <div class="admin-page-header">
+        <h1>البلاغات</h1>
+        <p>بلاغات المستخدمين على الإعلانات</p>
+      </div>
+
+      <div id="reportsContent"></div>
+    </section>
+
+  </main>
+</div>
+
+</div>
+
+<nav class="bottom-nav">
+<a href="../index.html" class="bottom-nav-item"><i data-lucide="home"></i><span>الرئيسية</span></a>
+<a href="search.html" class="bottom-nav-item"><i data-lucide="search"></i><span>البحث</span></a>
+<a href="add-listing.html" class="bottom-nav-item add-btn"><div class="add-icon"><i data-lucide="plus"></i></div><span>أضف</span></a>
+<a href="favorites.html" class="bottom-nav-item"><i data-lucide="heart"></i><span>المفضلة</span></a>
+<a href="account.html" class="bottom-nav-item"><i data-lucide="user"></i><span>حسابي</span></a>
+</nav>
+
+<script src="../js/api.js"></script>
+<script src="../js/header-state.js"></script>
+<script src="../js/admin.js"></script>
+</body>
+</html>
