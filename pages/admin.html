@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>لوحة الإدارة | سوق</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/admin.css">
+</head>
+<body data-dashboard-role="admin">
+<header class="admin-header">
+  <div class="admin-header-inner">
+    <a class="logo" href="../index.html"><span class="logo-icon"><i data-lucide="home"></i></span><span class="logo-text">سوق</span></a>
+    <div class="admin-title"><span class="eyebrow">لوحة الإدارة</span><strong id="dashboardTitle">الأدمن</strong></div>
+    <div class="admin-header-actions"><a class="btn btn-outline" href="account.html"><i data-lucide="user"></i> حسابي</a><button class="btn btn-danger" id="logoutBtn"><i data-lucide="log-out"></i> خروج</button></div>
+  </div>
+</header>
+<main class="admin-shell">
+  <div id="accessDenied" class="admin-message" hidden><i data-lucide="shield-alert"></i><h2>غير مصرح بالدخول</h2><p>هذه الصفحة مخصصة لحسابات الإدارة فقط.</p><a href="login.html" class="btn btn-primary">تسجيل الدخول</a></div>
+  <div id="dashboardContent" hidden>
+    <div class="welcome-row"><div><p class="eyebrow">مرحباً بك</p><h1 id="welcomeName">لوحة التحكم</h1><p class="muted">إدارة الإعلانات ومتابعة نشاط المنصة من مكان واحد.</p></div><button class="btn btn-primary" id="refreshBtn"><i data-lucide="refresh-cw"></i> تحديث البيانات</button></div>
+    <section class="stats-grid" id="statsGrid"></section>
+    <section class="admin-card">
+      <div class="card-heading"><div><h2>إدارة الإعلانات</h2><p class="muted">مراجعة الحالة وتثبيت الإعلانات المميزة.</p></div><select id="statusFilter" class="admin-select"><option value="">كل الإعلانات</option><option value="pending">قيد المراجعة</option><option value="active">نشطة</option><option value="rejected">مرفوضة</option><option value="sold">مباعة</option><option value="rented">مؤجرة</option></select></div>
+      <div class="table-wrap"><table><thead><tr><th>الإعلان</th><th>المالك</th><th>النوع</th><th>السعر</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody id="listingsTable"><tr><td colspan="6" class="empty-cell">جاري التحميل...</td></tr></tbody></table></div>
+    </section>
+    <section class="admin-card super-only" hidden>
+      <div class="card-heading"><div><h2>إدارة المستخدمين</h2><p class="muted">متاحة للسوبر أدمن فقط.</p></div></div>
+      <div class="table-wrap"><table><thead><tr><th>المستخدم</th><th>البريد</th><th>الدور</th><th>الإعلانات</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody id="usersTable"><tr><td colspan="6" class="empty-cell">جاري التحميل...</td></tr></tbody></table></div>
+    </section>
+  </div>
+</main>
+<div id="toast" class="admin-toast" role="status"></div>
+<script src="../js/api.js"></script>
+<script src="../js/admin.js"></script>
+</body>
+</html>

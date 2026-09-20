@@ -1,14 +1,19 @@
-FROM php:8.2-apache
+FROM php:8.2-cli
 
-# تثبيت متطلبات ومكتبات SQLite وPDO
+# تثبيت متطلبات SQLite
 RUN apt-get update && apt-get install -y libsqlite3-dev \
-    && docker-php-ext-install pdo pdo_sqlite
+    && docker-php-ext-install pdo pdo_sqlite \
+    && rm -rf /var/lib/apt/lists/*
 
-# نسخ ملفات المشروع
-COPY . /var/www/html/
+# تحديد مجلد العمل ونسخ الملفات
+WORKDIR /app
+COPY . /app
 
-# ضبط الصلاحيات ليتمكن PHP من القراءة والكتابة في قاعدة بيانات SQLite
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 775 /var/www/html
+# ضبط الصلاحيات لقاعدة البيانات والملفات
+RUN chmod -R 777 /app
 
+# المنفذ الافتراضي 80
 EXPOSE 80
+
+# تشغيل خادم PHP الداخلي والاستماع للمنفذ المعين من المنصة أو 80 افتراضياً
+CMD ["sh", "-c", "php -S 0.0.0.0:${PORT:-80} -t /app"]
