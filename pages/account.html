@@ -1,138 +1,174 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,viewport-fit=cover">
-<title>حسابي | سوق</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/lucide@latest"></script>
-<link rel="stylesheet" href="../css/style.css">
-<link rel="stylesheet" href="../css/pages.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,viewport-fit=cover">
+    <title>حسابي | سوق</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/pages.css">
+    <link rel="stylesheet" href="../css/responsive.css">
 </head>
+
 <body>
-<header class="header">
-<div class="container header-inner">
-<a href="../index.html" class="logo"><span class="logo-icon"><i data-lucide="home"></i></span><span class="logo-text">سوق</span></a>
-<nav class="nav">
-<a href="../index.html">الرئيسية</a><a href="properties.html">عقارات</a><a href="cars.html">سيارات</a>
-<a href="about.html">من نحن</a><a href="contact.html">اتصل بنا</a></nav>
-<div class="header-actions">
-<button class="btn-icon"><i data-lucide="search"></i></button>
-<a href="add-listing.html" class="btn btn-primary"><i data-lucide="plus"></i><span>أضف إعلان</span></a>
-</div></div></header>
+    <header class="header">
+        <div class="container header-inner">
+            <a href="../index.html" class="logo"><span class="logo-icon"><i data-lucide="home"></i></span><span
+                    class="logo-text">سوق</span></a>
+            <nav class="nav">
+                <a href="../index.html">الرئيسية</a><a href="properties.html">عقارات</a><a href="cars.html">سيارات</a>
+                <a href="about.html">من نحن</a><a href="contact.html">اتصل بنا</a>
+            </nav>
+            <div class="header-actions">
+                <button class="btn-icon"><i data-lucide="search"></i></button>
+                <a href="add-listing.html" class="btn btn-primary"><i data-lucide="plus"></i><span>أضف إعلان</span></a>
+            </div>
+        </div>
+    </header>
 
-<div class="container">
-<nav class="breadcrumb">
-<a href="../index.html"><i data-lucide="home"></i> الرئيسية</a>
-<i data-lucide="chevron-left"></i>
-<span class="current">حسابي</span>
-</nav>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../index.html"><i data-lucide="home"></i> الرئيسية</a>
+            <i data-lucide="chevron-left"></i>
+            <span class="current">حسابي</span>
+        </nav>
 
-<div id="notLoggedIn" style="display:none;text-align:center;padding:80px 20px;">
-<i data-lucide="user-x" style="width:80px;height:80px;color:var(--text-muted);opacity:.4;margin-bottom:20px;"></i>
-<h2 style="font-size:22px;margin-bottom:10px;">يجب تسجيل الدخول</h2>
-<p style="color:var(--text-secondary);margin-bottom:24px;">سجّل دخولك لعرض حسابك وإعلاناتك</p>
-<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-<a href="login.html" class="btn btn-primary"><i data-lucide="log-in"></i><span>تسجيل الدخول</span></a>
-<a href="register.html" class="btn btn-outline"><i data-lucide="user-plus"></i><span>إنشاء حساب</span></a>
-</div>
-</div>
+        <div id="notLoggedIn" style="display:none;text-align:center;padding:80px 20px;">
+            <i data-lucide="user-x"
+                style="width:80px;height:80px;color:var(--text-muted);opacity:.4;margin-bottom:20px;"></i>
+            <h2 style="font-size:22px;margin-bottom:10px;">يجب تسجيل الدخول</h2>
+            <p style="color:var(--text-secondary);margin-bottom:24px;">سجّل دخولك لعرض حسابك وإعلاناتك</p>
+            <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+                <a href="login.html" class="btn btn-primary"><i data-lucide="log-in"></i><span>تسجيل الدخول</span></a>
+                <a href="register.html" class="btn btn-outline"><i data-lucide="user-plus"></i><span>إنشاء
+                        حساب</span></a>
+            </div>
+        </div>
 
-<div class="account-layout" id="accountContent" style="display:none;">
-<aside class="account-sidebar">
-<div class="account-user">
-<div class="account-avatar" id="userAvatar">م</div>
-<div class="account-name" id="userName">—</div>
-<div class="account-email" id="userEmail">—</div>
-</div>
-<div class="account-menu">
-<button class="account-menu-item active" data-tab="overview">
-<i data-lucide="layout-dashboard"></i><span>نظرة عامة</span></button>
-<button class="account-menu-item" data-tab="listings">
-<i data-lucide="list"></i><span>إعلاناتي</span><span class="badge" id="listingsBadge">0</span></button>
-	<button class="account-menu-item" data-tab="profile">
-	<i data-lucide="user"></i><span>الملف الشخصي</span></button>
-	<a class="account-menu-item admin-menu-link" id="adminDashboardLink" href="admin.html" style="display:none;">
-	<i data-lucide="shield-check"></i><span>لوحة الإدارة</span></a>
-	<a class="account-menu-item superadmin-menu-link" id="superAdminLink" href="superadmin.html" style="display:none;">
-	<i data-lucide="crown"></i><span>لوحة السوبر أدمن</span></a>
-	<button class="account-menu-item danger" id="logoutBtn">
-<i data-lucide="log-out"></i><span>تسجيل الخروج</span></button>
-</div>
-</aside>
+        <div class="account-layout" id="accountContent" style="display:none;">
+            <aside class="account-sidebar">
+                <div class="account-user">
+                    <div class="account-avatar" id="userAvatar">م</div>
+                    <div class="account-name" id="userName">—</div>
+                    <div class="account-email" id="userEmail">—</div>
+                </div>
+                <div class="account-menu">
+                    <button class="account-menu-item active" data-tab="overview">
+                        <i data-lucide="layout-dashboard"></i><span>نظرة عامة</span></button>
+                    <button class="account-menu-item" data-tab="listings">
+                        <i data-lucide="list"></i><span>إعلاناتي</span><span class="badge"
+                            id="listingsBadge">0</span></button>
+                    <button class="account-menu-item" data-tab="profile">
+                        <i data-lucide="user"></i><span>الملف الشخصي</span></button>
+                    <button class="account-menu-item danger" id="logoutBtn">
+                        <i data-lucide="log-out"></i><span>تسجيل الخروج</span></button>
+                </div>
+            </aside>
 
-<main class="account-content">
+            <main class="account-content">
 
-<section class="account-tab active" data-tab="overview">
-<div class="account-tab-header">
-<h2>نظرة عامة</h2>
-<p>ملخص حسابك ونشاطك</p>
-</div>
-<div class="account-stats">
-<div class="account-stat"><div class="account-stat-icon"><i data-lucide="list"></i></div>
-<div><div class="account-stat-number" id="statTotal">0</div><div class="account-stat-label">إعلان</div></div></div>
-<div class="account-stat"><div class="account-stat-icon"><i data-lucide="check-circle"></i></div>
-<div><div class="account-stat-number" id="statActive">0</div><div class="account-stat-label">نشط</div></div></div>
-<div class="account-stat"><div class="account-stat-icon"><i data-lucide="eye"></i></div>
-<div><div class="account-stat-number" id="statViews">0</div><div class="account-stat-label">مشاهدة</div></div></div>
-<div class="account-stat"><div class="account-stat-icon"><i data-lucide="heart"></i></div>
-<div><div class="account-stat-number" id="statFavs">0</div><div class="account-stat-label">مفضلة</div></div></div>
-</div>
-<a href="add-listing.html" class="btn btn-primary" style="width:100%;justify-content:center;padding:14px;">
-<i data-lucide="plus"></i><span>أضف إعلان جديد</span></a>
-</section>
+                <section class="account-tab active" data-tab="overview">
+                    <div class="account-tab-header">
+                        <h2>نظرة عامة</h2>
+                        <p>ملخص حسابك ونشاطك</p>
+                    </div>
+                    <div class="account-stats">
+                        <div class="account-stat">
+                            <div class="account-stat-icon"><i data-lucide="list"></i></div>
+                            <div>
+                                <div class="account-stat-number" id="statTotal">0</div>
+                                <div class="account-stat-label">إعلان</div>
+                            </div>
+                        </div>
+                        <div class="account-stat">
+                            <div class="account-stat-icon"><i data-lucide="check-circle"></i></div>
+                            <div>
+                                <div class="account-stat-number" id="statActive">0</div>
+                                <div class="account-stat-label">نشط</div>
+                            </div>
+                        </div>
+                        <div class="account-stat">
+                            <div class="account-stat-icon"><i data-lucide="eye"></i></div>
+                            <div>
+                                <div class="account-stat-number" id="statViews">0</div>
+                                <div class="account-stat-label">مشاهدة</div>
+                            </div>
+                        </div>
+                        <div class="account-stat">
+                            <div class="account-stat-icon"><i data-lucide="heart"></i></div>
+                            <div>
+                                <div class="account-stat-number" id="statFavs">0</div>
+                                <div class="account-stat-label">مفضلة</div>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="add-listing.html" class="btn btn-primary"
+                        style="width:100%;justify-content:center;padding:14px;">
+                        <i data-lucide="plus"></i><span>أضف إعلان جديد</span></a>
+                </section>
 
-<section class="account-tab" data-tab="listings">
-<div class="account-tab-header">
-<h2>إعلاناتي</h2>
-<p>جميع الإعلانات اللي نشرتها</p>
-</div>
-<div id="myListings"></div>
-</section>
+                <section class="account-tab" data-tab="listings">
+                    <div class="account-tab-header">
+                        <h2>إعلاناتي</h2>
+                        <p>جميع الإعلانات اللي نشرتها</p>
+                    </div>
+                    <div id="myListings"></div>
+                </section>
 
-<section class="account-tab" data-tab="profile">
-<div class="account-tab-header">
-<h2>الملف الشخصي</h2>
-<p>معلومات حسابك</p>
-</div>
-<div class="static-card" style="padding:24px;">
-<div class="al-field" style="margin-bottom:16px;">
-<label>الاسم الكامل</label>
-<input type="text" id="editName" style="width:100%;padding:12px 14px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-family:inherit;">
-</div>
-<div class="al-field" style="margin-bottom:16px;">
-<label>البريد الإلكتروني</label>
-<input type="email" id="editEmail" disabled style="width:100%;padding:12px 14px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-muted);font-family:inherit;">
-</div>
-<div class="al-field" style="margin-bottom:20px;">
-<label>رقم الهاتف</label>
-<input type="tel" id="editPhone" style="width:100%;padding:12px 14px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-family:inherit;">
-</div>
-<button class="btn btn-primary" id="saveProfileBtn">
-<i data-lucide="save"></i><span>حفظ التغييرات</span></button>
-</div>
-</section>
+                <section class="account-tab" data-tab="profile">
+                    <div class="account-tab-header">
+                        <h2>الملف الشخصي</h2>
+                        <p>معلومات حسابك</p>
+                    </div>
+                    <div class="static-card" style="padding:24px;">
+                        <div class="al-field" style="margin-bottom:16px;">
+                            <label>الاسم الكامل</label>
+                            <input type="text" id="editName"
+                                style="width:100%;padding:12px 14px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-family:inherit;">
+                        </div>
+                        <div class="al-field" style="margin-bottom:16px;">
+                            <label>البريد الإلكتروني</label>
+                            <input type="email" id="editEmail" disabled
+                                style="width:100%;padding:12px 14px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-muted);font-family:inherit;">
+                        </div>
+                        <div class="al-field" style="margin-bottom:20px;">
+                            <label>رقم الهاتف</label>
+                            <input type="tel" id="editPhone"
+                                style="width:100%;padding:12px 14px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-family:inherit;">
+                        </div>
+                        <button class="btn btn-primary" id="saveProfileBtn">
+                            <i data-lucide="save"></i><span>حفظ التغييرات</span></button>
+                    </div>
+                </section>
 
-</main>
-</div>
-</div>
+            </main>
+        </div>
+    </div>
 
-<footer class="footer">
-<div class="container">
-<div class="footer-bottom"><p>© 2026 سوق. جميع الحقوق محفوظة.</p></div>
-</div></footer>
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>© 2026 سوق. جميع الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
 
-<nav class="bottom-nav">
-<a href="../index.html" class="bottom-nav-item"><i data-lucide="home"></i><span>الرئيسية</span></a>
-<a href="search.html" class="bottom-nav-item"><i data-lucide="search"></i><span>البحث</span></a>
-<a href="add-listing.html" class="bottom-nav-item add-btn"><div class="add-icon"><i data-lucide="plus"></i></div><span>أضف</span></a>
-<a href="favorites.html" class="bottom-nav-item"><i data-lucide="heart"></i><span>المفضلة</span></a>
-<a href="account.html" class="bottom-nav-item active"><i data-lucide="user"></i><span>حسابي</span></a>
-</nav>
+    <nav class="bottom-nav">
+        <a href="../index.html" class="bottom-nav-item"><i data-lucide="home"></i><span>الرئيسية</span></a>
+        <a href="search.html" class="bottom-nav-item"><i data-lucide="search"></i><span>البحث</span></a>
+        <a href="add-listing.html" class="bottom-nav-item add-btn">
+            <div class="add-icon"><i data-lucide="plus"></i></div><span>أضف</span>
+        </a>
+        <a href="favorites.html" class="bottom-nav-item"><i data-lucide="heart"></i><span>المفضلة</span></a>
+        <a href="account.html" class="bottom-nav-item active"><i data-lucide="user"></i><span>حسابي</span></a>
+    </nav>
 
-<script src="../js/api.js"></script>
-<script src="../js/account.js"></script>
-<script src="../js/auth-guard.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/account.js"></script>
+    <script src="../js/auth-guard.js"></script>
 </body>
+
 </html>
