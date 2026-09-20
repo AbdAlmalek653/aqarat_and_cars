@@ -1,8 +1,13 @@
 /* ==========================================
-   حماية أزرار "أضف إعلان" - يعمل على كل الصفحات
+   ملف الحماية + إضافة زر الأدمن تلقائياً
+   يعمل على كل الصفحات
    ========================================== */
 
 (function() {
+
+  /* ==========================================
+     1) حماية أزرار "أضف إعلان"
+     ========================================== */
   function protectButtons() {
     if (!window.API || !API.Auth) return;
 
@@ -32,9 +37,68 @@
     });
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', protectButtons);
-  } else {
-    protectButtons();
+  /* ==========================================
+     2) إضافة زر "لوحة التحكم" للأدمن تلقائياً
+     ========================================== */
+  function injectAdminButton() {
+    if (!window.API || !API.Users || !API.Users.isAdmin || !API.Users.isAdmin()) {
+      return;
+    }
+
+    if (document.getElementById('adminPanelBtn')) return;
+
+    const headerActions = document.querySelector('.header-actions');
+    if (!headerActions) return;
+
+    const isInPages = window.location.pathname.includes('/pages/');
+    const adminLink = isInPages ? 'admin.html' : 'pages/admin.html';
+
+    const btn = document.createElement('a');
+    btn.href = adminLink;
+    btn.className = 'btn-admin-panel';
+    btn.id = 'adminPanelBtn';
+    btn.innerHTML = `
+      <i data-lucide="shield-check"></i>
+      <span>لوحة التحكم</span>
+    `;
+
+    const addBtn = headerActions.querySelector('.btn-primary');
+    if (addBtn) {
+      headerActions.insertBefore(btn, addBtn);
+    } else {
+      headerActions.appendChild(btn);
+    }
+
+    if (window.lucide) {
+      window.lucide.createIcons();
+    }
   }
+
+  /* ==========================================
+     3) زر "لوحة التحكم" الثابت (لو موجود في HTML)
+     ========================================== */
+  function showStaticAdminButton() {
+    const btn = document.getElementById('adminPanelBtn');
+    if (!btn) return;
+
+    if (window.API && API.Users && API.Users.isAdmin && API.Users.isAdmin()) {
+      btn.style.display = 'inline-flex';
+    }
+  }
+
+  /* ==========================================
+     التشغيل
+     ========================================== */
+  function init() {
+    protectButtons();
+    injectAdminButton();
+    showStaticAdminButton();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
 })();

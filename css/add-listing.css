@@ -412,3 +412,69 @@
   .al-step-label { font-size: 10px; }
   .al-step-num { width: 34px; height: 34px; font-size: 13px; }
 }
+/* ==========================================
+   تنسيق قسم المرافق (Checkboxes) ليكون أوضح
+   ========================================== */
+
+.checkbox-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.filter-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #1a1e29; /* نفس لون خلفية الحقول */
+    border: 1px solid #2a2f3a;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    user-select: none;
+}
+
+.filter-option:hover {
+    border-color: #3b82f6; /* لون الإطار عند تمرير الماوس */
+    background-color: #1e2433;
+}
+
+.filter-option input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #4b5563;
+    border-radius: 4px;
+    background-color: transparent;
+    position: relative;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+/* عند تحديد الخيار */
+.filter-option input[type="checkbox"]:checked {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+}
+
+/* علامة الصح داخل المربع */
+.filter-option input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.filter-option span {
+    color: #e5e7eb;
+    font-size: 0.9rem;
+    font-weight: 500;
+} 
