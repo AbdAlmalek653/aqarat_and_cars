@@ -1,19 +1,24 @@
 FROM php:8.2-cli
 
-# تثبيت متطلبات SQLite
-RUN apt-get update && apt-get install -y libsqlite3-dev \
+# تثبيت SQLite وPDO SQLite
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libsqlite3-dev \
     && docker-php-ext-install pdo pdo_sqlite \
     && rm -rf /var/lib/apt/lists/*
 
-# تحديد مجلد العمل ونسخ الملفات
+# مجلد المشروع
 WORKDIR /app
+
+# نسخ ملفات المشروع
 COPY . /app
 
-# ضبط الصلاحيات لقاعدة البيانات والملفات
-RUN chmod -R 777 /app
+# صلاحيات مناسبة
+RUN find /app -type d -exec chmod 755 {} \; \
+    && find /app -type f -exec chmod 644 {} \; \
+    && if [ -f /app/database/souq.db ]; then chmod 664 /app/database/souq.db; fi
 
-# المنفذ الافتراضي 80
+# المنفذ الافتراضي
 EXPOSE 80
 
-# تشغيل خادم PHP الداخلي والاستماع للمنفذ المعين من المنصة أو 80 افتراضياً
+# استخدام PORT الذي تحدده منصة الاستضافة أو 80 محلياً
 CMD ["sh", "-c", "php -S 0.0.0.0:${PORT:-80} -t /app"]
