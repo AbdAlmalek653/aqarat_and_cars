@@ -1,24 +1,24 @@
-FROM php:8.2-cli
+FROM php:8.2-apache
 
-# تثبيت SQLite وPDO SQLite
 RUN apt-get update \
     && apt-get install -y --no-install-recommends libsqlite3-dev \
     && docker-php-ext-install pdo pdo_sqlite \
     && rm -rf /var/lib/apt/lists/*
 
-# مجلد المشروع
-WORKDIR /app
+WORKDIR /var/www/html
 
-# نسخ ملفات المشروع
-COPY . /app
+COPY . /var/www/html/
 
-# صلاحيات مناسبة
-RUN find /app -type d -exec chmod 755 {} \; \
-    && find /app -type f -exec chmod 644 {} \; \
-    && if [ -f /app/database/souq.db ]; then chmod 664 /app/database/souq.db; fi
+# نسخ نسخة ابتدائية خارج مجلد الـ Volume
+RUN mkdir -p /opt/seed/database \
+    && if [ -f /var/www/html/database/souq.db ]; then \
+         cp /var/www/html/database/souq.db /opt/seed/database/souq.db; \
+       fi \
+    && cp /var/www/html/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh \
+    && chmod +x /usr/local/bin/docker-entrypoint.sh \
+    && chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html
 
-# المنفذ الافتراضي
 EXPOSE 80
 
-# استخدام PORT الذي تحدده منصة الاستضافة أو 80 محلياً
-CMD ["sh", "-c", "php -S 0.0.0.0:${PORT:-80} -t /app"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
