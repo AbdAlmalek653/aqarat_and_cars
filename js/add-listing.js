@@ -454,9 +454,10 @@ function setupFormSubmit() {
       city: document.getElementById('city').value,
       area: document.getElementById('area').value.trim(),
       address: document.getElementById('address').value.trim(),
-      whatsapp: document.getElementById('whatsapp').value.trim(),  // ✅ جديد
+      whatsapp: document.getElementById('whatsapp').value.trim(),
       price: document.getElementById('price').value,
       currency: document.getElementById('currency').value,
+      negotiable: document.getElementById('negotiable').checked, // ✅ السعر قابل للتفاوض
       description: document.getElementById('description').value.trim(),
       images: uploadedImages.map(img => img.data),
       details: buildDetails()
@@ -499,9 +500,15 @@ function buildDetails() {
       details.rooms = document.getElementById('rooms').value;
       details.bathrooms = document.getElementById('bathrooms').value;
       details.floor = document.getElementById('floor').value;
-      details.totalFloors = document.getElementById('totalFloors').value;
-      details.age = document.getElementById('age').value;
+      
+      // ✅ استبدال حقلي "إجمالي الطوابق" و "عمر البناء" بالحقلين الجديدين
+      details.direction = document.getElementById('direction').value;
+      details.vacancyType = document.getElementById('vacancyType').value;
+
       details.heating = document.getElementById('heating').value;
+      
+      // ✅ حقل نوع الإكساء
+      details.finishingType = document.getElementById('finishingType').value;
 
       if (state.purpose === 'rent') {
         details.furnished = document.getElementById('furnished').value;

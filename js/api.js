@@ -1,4 +1,4 @@
-/* ==========================================
+ /* ==========================================
    طبقة البيانات الموحدة
    ========================================== */
 
@@ -8,6 +8,7 @@ let MODE = 'local';
 const API_BASE = (function() {
   return window.location.pathname.includes('/pages/') ? '../api' : 'api';
 })();
+
   const KEYS = {
     USERS: 'souq_users',
     LISTINGS: 'souq_listings',
@@ -147,10 +148,6 @@ const API_BASE = (function() {
       return u && u.role === 'user';
     },
 
-    /* ==========================================
-       إنشاء حسابات الأدمن الافتراضية
-       (تعمل مرة واحدة فقط)
-       ========================================== */
     seedAdmins: function() {
       const seeded = localStorage.getItem('souq_admins_seeded');
       if (seeded === '1') return;
@@ -260,6 +257,7 @@ const API_BASE = (function() {
         description: listingData.description || '',
         price: Number(listingData.price) || 0,
         currency: listingData.currency || 'USD',
+        negotiable: listingData.negotiable || '',
         city: listingData.city || '',
         area: listingData.area || '',
         address: listingData.address || '',
@@ -286,6 +284,19 @@ const API_BASE = (function() {
       if (index === -1) return Promise.resolve({ success: false, error: 'الإعلان غير موجود' });
 
       listings[index] = Object.assign({}, listings[index], updates, { updatedAt: new Date().toISOString() });
+      write(KEYS.LISTINGS, listings);
+      return Promise.resolve({ success: true, listing: listings[index] });
+    },
+
+    updateStatus: function(id, status) {
+      if (MODE === 'server') return httpPost('/update_listing.php', { id: id, status: status });
+
+      const listings = read(KEYS.LISTINGS, []);
+      const index = listings.findIndex(function(l) { return l.id === id; });
+      if (index === -1) return Promise.resolve({ success: false, error: 'الإعلان غير موجود' });
+
+      listings[index].status = status;
+      listings[index].updatedAt = new Date().toISOString();
       write(KEYS.LISTINGS, listings);
       return Promise.resolve({ success: true, listing: listings[index] });
     },
