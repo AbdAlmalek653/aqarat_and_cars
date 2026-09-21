@@ -1,102 +1,374 @@
-const AdminDashboard = (() => {
-  const requiredRole = document.body.dataset.dashboardRole || 'admin';
-  const API_BASE = '../api';
-  const statusLabels = {active:'نشط', pending:'قيد المراجعة', rejected:'مرفوض', sold:'مباع', rented:'مؤجر', expired:'منتهي'};
-  const roleLabels = {user:'مستخدم', agent:'وكيل', admin:'أدمن', super_admin:'سوبر أدمن'};
-  const iconNames = {users:'users', listings:'layout-list', pending:'clock-3', active:'check-circle-2', featured:'star'};
+/* ==========================================
+   لوحة التحكم - Admin Dashboard
+   ========================================== */
 
-  const $ = id => document.getElementById(id);
-  const escapeHtml = value => String(value ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[c]));
+let currentAdmin = null;
+let allListings = [];
+let allUsers = [];
 
-  async function request(path, options = {}) {
-    const response = await fetch(`${API_BASE}/${path}`, {credentials:'include', headers:{'Content-Type':'application/json'}, ...options});
-    let data;
-    try { data = await response.json(); } catch (_) { throw new Error('استجابة غير صالحة من الخادم'); }
-    if (!response.ok || data.success === false) throw new Error(data.error || 'حدث خطأ في الخادم');
-    return data;
-  }
+function initIcons() { if (window.lucide) window.lucide.createIcons(); }
 
-  function showToast(message, error = false) {
-    const toast = $('toast');
-    toast.textContent = message;
-    toast.style.borderColor = error ? 'rgba(239,68,68,.5)' : 'rgba(16,185,129,.45)';
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 3000);
-  }
+/* ==========================================
+   التحقق من الصلاحيات
+   ========================================== */
+function checkAccess() {
+  const user = API.Users.getCurrent();
 
-  function initIcons() { if (window.lucide) window.lucide.createIcons(); }
-
-  async function checkAccess() {
-    try {
-      const result = await request('me.php');
-      const user = result.user;
-      const allowed = requiredRole === 'super_admin'
-        ? user.role === 'super_admin'
-        : ['admin', 'super_admin'].includes(user.role);
-      if (!allowed) throw new Error('ليس لديك صلاحية الدخول إلى هذه الصفحة');
-      $('dashboardContent').hidden = false;
-      $('welcomeName').textContent = `مرحباً، ${user.name}`;
-      document.querySelectorAll('.super-only').forEach(el => { el.hidden = requiredRole !== 'super_admin'; });
-      if (requiredRole === 'super_admin' && $('dashboardTitle')) $('dashboardTitle').textContent = 'السوبر أدمن';
-      await refreshAll();
-    } catch (error) {
-      $('accessDenied').hidden = false;
-      showToast(error.message, true);
-    }
-  }
-
-  async function loadStats() {
-    const {stats} = await request('admin_stats.php');
-    const cards = [
-      ['users', 'المستخدمون', stats.users],
-      ['listings', 'كل الإعلانات', stats.listings],
-      ['pending', 'قيد المراجعة', stats.pending],
-      ['active', 'الإعلانات النشطة', stats.active],
-      ['featured', 'إعلانات مميزة', stats.featured]
-    ];
-    $('statsGrid').innerHTML = cards.map(([key, label, value]) => `<div class="stat-card"><div class="stat-icon"><i data-lucide="${iconNames[key]}"></i></div><div><div class="stat-value">${Number(value).toLocaleString('ar')}</div><div class="stat-label">${label}</div></div></div>`).join('');
+  if (!user || !API.Users.isAdmin()) {
+    document.getElementById('noAccess').style.display = 'block';
+    document.getElementById('adminDashboard').style.display = 'none';
     initIcons();
+    return false;
   }
 
-  function statusClass(status) { return status === 'active' ? 'status-active' : status === 'pending' ? 'status-pending' : status === 'rejected' ? 'status-rejected' : 'status-other'; }
+  currentAdmin = user;
+  document.getElementById('adminDashboard').style.display = 'grid';
+  document.getElementById('adminName').textContent = user.name;
+  document.getElementById('adminAvatar').textContent = (user.name || 'م').charAt(0);
 
-  async function loadListings() {
-    const status = $('statusFilter').value;
-    const {listings} = await request(`admin_listings.php${status ? `?status=${encodeURIComponent(status)}` : ''}`);
-    $('listingsTable').innerHTML = listings.length ? listings.map(listing => {
-      const statusOptions = Object.entries(statusLabels).map(([value, label]) => `<option value="${value}" ${listing.status === value ? 'selected' : ''}>${label}</option>`).join('');
-      return `<tr><td><span class="listing-name">${escapeHtml(listing.title)}</span><span class="listing-sub">${escapeHtml(listing.city_name || '—')} · ${escapeHtml(listing.id)}</span></td><td>${escapeHtml(listing.owner_name || '—')}<span class="listing-sub">${escapeHtml(listing.owner_email || '')}</span></td><td>${listing.type === 'car' ? 'سيارة' : 'عقار'}</td><td>${Number(listing.price).toLocaleString('en-US')} ${escapeHtml(listing.currency)}</td><td><span class="status-pill ${statusClass(listing.status)}">${statusLabels[listing.status] || listing.status}</span>${listing.is_featured ? '<span class="listing-sub">★ مميز</span>' : ''}</td><td><div class="table-actions"><select class="action-select" data-status-id="${escapeHtml(listing.id)}">${statusOptions}</select><button class="small-btn ${listing.is_featured ? 'featured' : ''}" data-feature-id="${escapeHtml(listing.id)}" data-featured="${listing.is_featured ? '1' : '0'}">${listing.is_featured ? 'إلغاء التمييز' : 'تمييز'}</button></div></td></tr>`;
-    }).join('') : '<tr><td colspan="6" class="empty-cell">لا توجد إعلانات.</td></tr>';
-    document.querySelectorAll('[data-status-id]').forEach(select => select.addEventListener('change', () => updateListing(select.dataset.statusId, {status:select.value})));
-    document.querySelectorAll('[data-feature-id]').forEach(button => button.addEventListener('click', () => updateListing(button.dataset.featureId, {featured:button.dataset.featured !== '1'})));
+  const roleEl = document.getElementById('adminRole');
+  if (user.role === 'super_admin') {
+    roleEl.textContent = 'أدمن عام';
+    roleEl.classList.add('super');
+  } else {
+    roleEl.textContent = 'أدمن';
   }
 
-  async function updateListing(id, changes) {
-    try { await request('admin_update_listing.php', {method:'POST', body:JSON.stringify({id, ...changes})}); showToast('تم حفظ تعديل الإعلان'); await refreshAll(); }
-    catch (error) { showToast(error.message, true); }
+  // إذا مو super_admin، اخفِ تبويب المستخدمين
+  if (user.role !== 'super_admin') {
+    document.getElementById('usersTabBtn').style.display = 'none';
   }
 
-  async function loadUsers() {
-    if (requiredRole !== 'super_admin') return;
-    const {users} = await request('admin_users.php');
-    $('usersTable').innerHTML = users.length ? users.map(user => `<tr class="${user.is_active ? '' : 'user-inactive'}"><td><span class="listing-name">${escapeHtml(user.name)}</span><span class="listing-sub">${escapeHtml(user.id)}</span></td><td>${escapeHtml(user.email)}</td><td><select class="action-select" data-role-id="${escapeHtml(user.id)}">${Object.entries(roleLabels).map(([value,label]) => `<option value="${value}" ${user.role === value ? 'selected' : ''}>${label}</option>`).join('')}</select></td><td>${user.listings_count}</td><td>${user.is_active ? 'نشط' : 'معطل'}</td><td><button class="small-btn" data-active-id="${escapeHtml(user.id)}" data-active="${user.is_active ? '1' : '0'}">${user.is_active ? 'تعطيل' : 'تفعيل'}</button></td></tr>`).join('') : '<tr><td colspan="6" class="empty-cell">لا يوجد مستخدمون.</td></tr>';
-    document.querySelectorAll('[data-role-id]').forEach(select => select.addEventListener('change', () => updateUser(select.dataset.roleId, {role:select.value})));
-    document.querySelectorAll('[data-active-id]').forEach(button => button.addEventListener('click', () => updateUser(button.dataset.activeId, {is_active:button.dataset.active !== '1'})));
+  return true;
+}
+
+/* ==========================================
+   تحميل البيانات
+   ========================================== */
+async function loadData() {
+  try {
+    const [listings, users] = await Promise.all([
+      API.Listings.getAll(),
+      currentAdmin.role === 'super_admin' ? API.Users.getAll() : Promise.resolve([])
+    ]);
+
+    allListings = listings || [];
+    allUsers = users || [];
+
+    renderOverview();
+    renderListingsTable();
+    if (currentAdmin.role === 'super_admin') renderUsersTable();
+    renderReports();
+
+  } catch (e) {
+    console.error('خطأ في تحميل البيانات:', e);
+  }
+}
+
+/* ==========================================
+   Overview
+   ========================================== */
+function renderOverview() {
+  const props = allListings.filter(l => l.type === 'property');
+  const cars = allListings.filter(l => l.type === 'car');
+  const totalViews = allListings.reduce((sum, l) => sum + (l.views || 0), 0);
+
+  document.getElementById('statTotalProps').textContent = props.length;
+  document.getElementById('statTotalCars').textContent = cars.length;
+  document.getElementById('statTotalUsers').textContent = allUsers.length;
+  document.getElementById('statTotalViews').textContent = totalViews.toLocaleString('en-US');
+
+  document.getElementById('badgeListings').textContent = allListings.length;
+  document.getElementById('badgeUsers').textContent = allUsers.length;
+
+  // أحدث الإعلانات
+  const recent = [...allListings]
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, 5);
+
+  const recentEl = document.getElementById('recentListings');
+  if (!recent.length) {
+    recentEl.innerHTML = `<div class="admin-empty"><i data-lucide="inbox"></i><p>لا توجد إعلانات</p></div>`;
+  } else {
+    recentEl.innerHTML = recent.map(l => {
+      const icon = l.type === 'property' ? 'building-2' : 'car';
+      const typeText = l.type === 'property' ? 'عقار' : 'سيارة';
+      return `<div class="admin-recent-item">
+        <div class="admin-recent-icon"><i data-lucide="${icon}"></i></div>
+        <div class="admin-recent-info">
+          <div class="admin-recent-title">${l.title}</div>
+          <div class="admin-recent-sub">${typeText} · ${l.city || '—'}</div>
+        </div>
+      </div>`;
+    }).join('');
   }
 
-  async function updateUser(id, changes) {
-    try { await request('admin_update_user.php', {method:'POST', body:JSON.stringify({id, ...changes})}); showToast('تم حفظ تعديل المستخدم'); await refreshAll(); }
-    catch (error) { showToast(error.message, true); }
+  // أحدث المستخدمين
+  const recentUsersEl = document.getElementById('recentUsers');
+  if (currentAdmin.role === 'super_admin') {
+    const recentU = [...allUsers]
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .slice(0, 5);
+
+    if (!recentU.length) {
+      recentUsersEl.innerHTML = `<div class="admin-empty"><i data-lucide="users"></i><p>لا يوجد مستخدمون</p></div>`;
+    } else {
+      recentUsersEl.innerHTML = recentU.map(u => `
+        <div class="admin-recent-item">
+          <div class="admin-recent-icon"><i data-lucide="user"></i></div>
+          <div class="admin-recent-info">
+            <div class="admin-recent-title">${u.name}</div>
+            <div class="admin-recent-sub">${u.email}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+  } else {
+    recentUsersEl.innerHTML = `<div class="admin-empty"><i data-lucide="lock"></i><p>متاح للأدمن العام فقط</p></div>`;
   }
 
-  async function refreshAll() {
-    try { await Promise.all([loadStats(), loadListings(), loadUsers()]); initIcons(); }
-    catch (error) { showToast(error.message, true); }
-  }
-
-  $('refreshBtn').addEventListener('click', refreshAll);
-  $('statusFilter').addEventListener('change', loadListings);
-  $('logoutBtn').addEventListener('click', async () => { try { await request('logout.php', {method:'POST', body:'{}'}); } finally { window.location.href = 'login.html'; } });
   initIcons();
-  checkAccess();
-})();
+}
+
+/* ==========================================
+   إدارة الإعلانات
+   ========================================== */
+function renderListingsTable() {
+  const search = (document.getElementById('searchListings')?.value || '').toLowerCase().trim();
+  const typeFilter = document.getElementById('filterType')?.value || '';
+  const statusFilter = document.getElementById('filterStatus')?.value || '';
+
+  let filtered = allListings;
+
+  if (typeFilter) filtered = filtered.filter(l => l.type === typeFilter);
+  if (statusFilter) filtered = filtered.filter(l => (l.status || 'active') === statusFilter);
+  if (search) {
+    filtered = filtered.filter(l =>
+      (l.title || '').toLowerCase().includes(search) ||
+      (l.city || '').toLowerCase().includes(search) ||
+      (l.area || '').toLowerCase().includes(search)
+    );
+  }
+
+  const tbody = document.getElementById('listingsTable');
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="admin-empty"><i data-lucide="inbox"></i><p>لا توجد إعلانات مطابقة</p></div></td></tr>`;
+    initIcons();
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(l => {
+    const typeText = l.type === 'property' ? 'عقار' : 'سيارة';
+    const statusText = { active: 'متاح', sold: 'مباع', rented: 'مؤجر' }[l.status || 'active'];
+    const price = l.purpose === 'sale'
+      ? `${Number(l.price).toLocaleString('en-US')} ${l.currency || 'USD'}`
+      : `${l.price} ${l.currency || 'USD'}`;
+
+    const seller = allUsers.find(u => u.id === l.userId);
+    const sellerName = seller ? seller.name : 'مستخدم';
+
+    const wa = l.whatsapp || (l.details && l.details._whatsapp) || '';
+    const waClean = String(wa).replace(/[^0-9]/g, '');
+
+    return `<tr>
+      <td>
+        <div class="admin-table-title">${l.title}</div>
+        <div class="admin-table-sub">#${l.id}</div>
+      </td>
+      <td><span class="admin-tag ${l.type}">${typeText}</span></td>
+      <td>${price}</td>
+      <td><span class="admin-tag ${l.status || 'active'}">${statusText}</span></td>
+      <td>${sellerName}</td>
+      <td>
+        ${waClean
+          ? `<a href="https://wa.me/${waClean}" target="_blank" class="admin-icon-btn wa" title="واتساب البائع"><i data-lucide="message-circle"></i></a>`
+          : `<span style="color:var(--text-muted);font-size:12px;">—</span>`
+        }
+      </td>
+      <td>
+        <div class="admin-actions">
+          <a href="details.html?id=${l.id}&type=${l.type}" class="admin-icon-btn" title="عرض"><i data-lucide="eye"></i></a>
+          <button class="admin-icon-btn danger" onclick="adminDeleteListing('${l.id}')" title="حذف"><i data-lucide="trash-2"></i></button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  initIcons();
+}
+
+window.adminDeleteListing = async function(id) {
+  if (!confirm('⚠️ هل أنت متأكد من حذف هذا الإعلان نهائياً؟')) return;
+  if (!confirm('🔴 تأكيد أخير: سيتم الحذف نهائياً بدون إمكانية الاسترجاع.')) return;
+
+  const result = await API.Listings.delete(id);
+  if (result.success) {
+    allListings = allListings.filter(l => l.id !== id);
+    renderOverview();
+    renderListingsTable();
+  } else {
+    alert(result.error || 'فشل الحذف');
+  }
+};
+
+/* ==========================================
+   إدارة المستخدمين
+   ========================================== */
+function renderUsersTable() {
+  if (currentAdmin.role !== 'super_admin') return;
+
+  const search = (document.getElementById('searchUsers')?.value || '').toLowerCase().trim();
+  const roleFilter = document.getElementById('filterRole')?.value || '';
+
+  let filtered = allUsers;
+  if (roleFilter) filtered = filtered.filter(u => (u.role || 'user') === roleFilter);
+  if (search) {
+    filtered = filtered.filter(u =>
+      (u.name || '').toLowerCase().includes(search) ||
+      (u.email || '').toLowerCase().includes(search)
+    );
+  }
+
+  const tbody = document.getElementById('usersTable');
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="admin-empty"><i data-lucide="users"></i><p>لا يوجد مستخدمون مطابقون</p></div></td></tr>`;
+    initIcons();
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(u => {
+    const role = u.role || 'user';
+    const roleText = { user: 'مستخدم', admin: 'أدمن', super_admin: 'أدمن عام' }[role];
+    const created = u.createdAt ? new Date(u.createdAt).toLocaleDateString('ar-EG') : '—';
+    const isSelf = u.id === currentAdmin.id;
+
+    return `<tr>
+      <td><div class="admin-table-title">${u.name}</div></td>
+      <td>${u.email}</td>
+      <td>${u.phone || '—'}</td>
+      <td><span class="admin-tag ${role}">${roleText}</span></td>
+      <td>${created}</td>
+      <td>
+        <div class="admin-actions">
+          ${!isSelf ? `
+            <button class="admin-icon-btn" onclick="adminChangeRole('${u.id}')" title="تغيير الدور"><i data-lucide="shield"></i></button>
+            <button class="admin-icon-btn danger" onclick="adminDeleteUser('${u.id}')" title="حذف"><i data-lucide="trash-2"></i></button>
+          ` : `<span style="color:var(--text-muted);font-size:11px;">أنت</span>`}
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  initIcons();
+}
+
+window.adminChangeRole = async function(id) {
+  const user = allUsers.find(u => u.id === id);
+  if (!user) return;
+
+  const newRole = prompt(
+    `تغيير دور "${user.name}"\n\nأدخل: user (مستخدم) أو admin (أدمن)`,
+    user.role || 'user'
+  );
+
+  if (!newRole || !['user', 'admin'].includes(newRole)) return;
+
+  user.role = newRole;
+  const users = JSON.parse(localStorage.getItem('souq_users') || '[]');
+  const idx = users.findIndex(u => u.id === id);
+  if (idx > -1) {
+    users[idx].role = newRole;
+    localStorage.setItem('souq_users', JSON.stringify(users));
+  }
+  renderUsersTable();
+  alert('✅ تم تحديث الدور');
+};
+
+window.adminDeleteUser = async function(id) {
+  const user = allUsers.find(u => u.id === id);
+  if (!user) return;
+
+  if (!confirm(`⚠️ هل أنت متأكد من حذف المستخدم "${user.name}"؟`)) return;
+  if (!confirm('🔴 سيتم حذف الحساب نهائياً.')) return;
+
+  const users = JSON.parse(localStorage.getItem('souq_users') || '[]');
+  const filtered = users.filter(u => u.id !== id);
+  localStorage.setItem('souq_users', JSON.stringify(filtered));
+
+  allUsers = filtered;
+  renderOverview();
+  renderUsersTable();
+  alert('✅ تم حذف المستخدم');
+};
+
+/* ==========================================
+   البلاغات
+   ========================================== */
+function renderReports() {
+  const el = document.getElementById('reportsContent');
+  if (!el) return;
+
+  el.innerHTML = `
+    <div class="admin-panel-card">
+      <div class="admin-empty">
+        <i data-lucide="check-circle"></i>
+        <h3 style="font-size:18px;margin-bottom:8px;color:var(--text-primary);">لا توجد بلاغات حالياً</h3>
+        <p>جميع الإعلانات تعمل بشكل جيد</p>
+      </div>
+    </div>
+  `;
+  initIcons();
+}
+
+/* ==========================================
+   Tab Switching
+   ========================================== */
+window.switchAdminTab = function(tab) {
+  document.querySelectorAll('.admin-menu-btn[data-tab]').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === tab);
+  });
+  document.querySelectorAll('.admin-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.tab === tab);
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  initIcons();
+};
+
+function setupTabs() {
+  document.querySelectorAll('.admin-menu-btn[data-tab]').forEach(btn => {
+    btn.addEventListener('click', () => switchAdminTab(btn.dataset.tab));
+  });
+
+  document.getElementById('adminLogoutBtn')?.addEventListener('click', () => {
+    if (!confirm('هل تريد تسجيل الخروج؟')) return;
+    API.Users.logout();
+    window.location.href = '../index.html';
+  });
+}
+
+function setupFilters() {
+  ['searchListings', 'filterType', 'filterStatus'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', renderListingsTable);
+    document.getElementById(id)?.addEventListener('change', renderListingsTable);
+  });
+
+  ['searchUsers', 'filterRole'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', renderUsersTable);
+    document.getElementById(id)?.addEventListener('change', renderUsersTable);
+  });
+}
+
+/* ==========================================
+   تشغيل
+   ========================================== */
+document.addEventListener('DOMContentLoaded', async () => {
+  initIcons();
+
+  if (!checkAccess()) return;
+
+  setupTabs();
+  setupFilters();
+  await loadData();
+
+  initIcons();
+});
