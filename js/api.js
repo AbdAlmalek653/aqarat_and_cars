@@ -4,7 +4,7 @@
 
 const API = (function() {
 
-let MODE = 'local';
+let MODE = 'server';
 const API_BASE = (function() {
   return window.location.pathname.includes('/pages/') ? '../api' : 'api';
 })();
@@ -98,7 +98,12 @@ const API_BASE = (function() {
     },
 
     login: function(email, password) {
-      if (MODE === 'server') return httpPost('/login.php', { email: email, password: password });
+      if (MODE === 'server') {
+        return httpPost('/login.php', { email: email, password: password }).then(function(result) {
+          if (result.success && result.user) write(KEYS.CURRENT_USER, result.user);
+          return result;
+        });
+      }
 
       const user = read(KEYS.USERS, []).find(function(u) { return u.email === email; });
       if (!user) return Promise.resolve({ success: false, error: 'لا يوجد حساب بهذا البريد' });
@@ -116,7 +121,12 @@ const API_BASE = (function() {
     },
 
     logout: function() {
-      if (MODE === 'server') return httpPost('/logout.php', {});
+      if (MODE === 'server') {
+        return httpPost('/logout.php', {}).then(function(result) {
+          localStorage.removeItem(KEYS.CURRENT_USER);
+          return result;
+        });
+      }
       localStorage.removeItem(KEYS.CURRENT_USER);
     },
 

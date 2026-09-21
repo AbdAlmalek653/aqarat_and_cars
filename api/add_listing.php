@@ -75,3 +75,14 @@ $stmt->execute([
     $data['address'] ?? '',
     $details
 ]);
+
+respond([
+    'success' => true,
+    'listing' => [
+        'id' => $id,
+        'userId' => $userId,
+        'type' => $data['type'],
+        'purpose' => $data['purpose'],
+        'title' => $data['title']
+    ]
+]);
