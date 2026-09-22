@@ -14,8 +14,8 @@ COPY . /var/www/html/
 # نسخ نسخة ابتدائية خارج مجلد الـ Volume
 RUN mkdir -p /opt/seed/database \
     && if [ -f /var/www/html/database/souq.db ]; then \
-         cp /var/www/html/database/souq.db /opt/seed/database/souq.db; \
-       fi \
+    cp /var/www/html/database/souq.db /opt/seed/database/souq.db; \
+    fi \
     && cp /var/www/html/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh \
     && chmod +x /usr/local/bin/docker-entrypoint.sh \
     && chown -R www-data:www-data /var/www/html \
