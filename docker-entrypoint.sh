@@ -21,4 +21,6 @@ chown -R www-data:www-data "$DB_DIR"
 chmod 775 "$DB_DIR"
 chmod 664 "$DB_FILE"
 
-exec apache2-foreground
+PORT="${PORT:-8080}"
+exec php -S "0.0.0.0:${PORT}" -t /var/www/html
+
