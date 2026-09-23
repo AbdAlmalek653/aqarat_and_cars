@@ -159,6 +159,20 @@ const API = (function () {
       }
     },
 
+    validateSession: function () {
+      if (MODE !== 'server') return Promise.resolve(this.getCurrent());
+      return httpGet('/me.php').then(function (result) {
+        if (result.success && result.user) {
+          write(KEYS.CURRENT_USER, result.user);
+          return result.user;
+        }
+        localStorage.removeItem(KEYS.CURRENT_USER);
+        return null;
+      }).catch(function () {
+        return null;
+      });
+    },
+
     isLoggedIn: function () {
       return this.getCurrent() !== null;
     },

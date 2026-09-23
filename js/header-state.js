@@ -103,9 +103,10 @@
         sessionStorage.removeItem('souq_redirect_after_login');
 
         // ✅ API.Users.logout() يتكفل بمسح الجلسة الحقيقية (souq_current_user)
-        if (API.Users.logout) API.Users.logout();
-
-        window.location.href = paths.index;
+        const logoutRequest = API.Users.logout ? API.Users.logout() : Promise.resolve();
+        Promise.resolve(logoutRequest).finally(() => {
+          window.location.href = paths.index;
+        });
       }
     });
 

@@ -84,8 +84,9 @@ window.deleteListing=async function(id){
 function setupLogout(){
   document.getElementById('logoutBtn')?.addEventListener('click',()=>{
     if(!confirm('هل تريد تسجيل الخروج؟'))return;
-    API.Users.logout();
-    window.location.href='../index.html';
+    Promise.resolve(API.Users.logout()).finally(() => {
+      window.location.href='../index.html';
+    });
   });
 }
 
