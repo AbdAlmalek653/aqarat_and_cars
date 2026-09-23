@@ -398,7 +398,11 @@ const API = (function () {
      ========================================== */
   const Favorites = {
     getAll: function () {
-      if (MODE === 'server') return httpGet('/favorites.php');
+      if (MODE === 'server') {
+        return httpGet('/favorites.php').then(function (result) {
+          return Array.isArray(result.favorites) ? result.favorites : [];
+        });
+      }
       const user = Users.getCurrent();
       if (!user) return Promise.resolve([]);
       const all = read(KEYS.FAVORITES, {});
