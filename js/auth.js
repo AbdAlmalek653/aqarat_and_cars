@@ -232,6 +232,7 @@ function setupRegisterForm() {
   const nameInput = document.getElementById('name');
   const emailInput = document.getElementById('email');
   const phoneInput = document.getElementById('phone');
+  const countryCodeSelect = document.getElementById('countryCode');
   const passwordInput = document.getElementById('password');
   const confirmInput = document.getElementById('confirmPassword');
   const termsCheck = document.getElementById('terms');
@@ -248,6 +249,7 @@ function setupRegisterForm() {
     const name = nameInput.value.trim();
     const email = emailInput.value.trim();
     const phone = phoneInput.value.trim();
+    const countryCode = countryCodeSelect ? countryCodeSelect.value : '+963';
     const password = passwordInput.value;
     const confirm = confirmInput.value;
 
@@ -272,8 +274,8 @@ function setupRegisterForm() {
     if (!phone) {
       showFieldError('phone', 'الرجاء إدخال رقم الهاتف');
       hasError = true;
-    } else if (!/^[0-9+\s-]{8,15}$/.test(phone)) {
-      showFieldError('phone', 'رقم الهاتف غير صحيح');
+    } else if (!/^[0-9\s-]{6,12}$/.test(phone)) {
+      showFieldError('phone', 'رقم الهاتف غير صحيح (6-12 رقم بدون رمز الدولة)');
       hasError = true;
     }
 
@@ -315,9 +317,12 @@ function setupRegisterForm() {
       return;
     }
 
+    // ✅ دمج رمز الدولة مع الرقم (إزالة أي رموز غير رقمية)
+    const fullPhone = countryCode + phone.replace(/\D/g, '');
+
     setTimeout(async () => {
       try {
-        const result = await API.Users.create({ name, email, phone, password });
+        const result = await API.Users.create({ name, email, phone: fullPhone, password });
 
         if (!result.success) {
           showAlert(result.error || 'حدث خطأ أثناء إنشاء الحساب');
