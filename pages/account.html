@@ -51,9 +51,13 @@
 <i data-lucide="layout-dashboard"></i><span>نظرة عامة</span></button>
 <button class="account-menu-item" data-tab="listings">
 <i data-lucide="list"></i><span>إعلاناتي</span><span class="badge" id="listingsBadge">0</span></button>
-<button class="account-menu-item" data-tab="profile">
-<i data-lucide="user"></i><span>الملف الشخصي</span></button>
-<button class="account-menu-item danger" id="logoutBtn">
+	<button class="account-menu-item" data-tab="profile">
+	<i data-lucide="user"></i><span>الملف الشخصي</span></button>
+	<a class="account-menu-item admin-menu-link" id="adminDashboardLink" href="admin.html" style="display:none;">
+	<i data-lucide="shield-check"></i><span>لوحة الإدارة</span></a>
+	<a class="account-menu-item superadmin-menu-link" id="superAdminLink" href="superadmin.html" style="display:none;">
+	<i data-lucide="crown"></i><span>لوحة السوبر أدمن</span></a>
+	<button class="account-menu-item danger" id="logoutBtn">
 <i data-lucide="log-out"></i><span>تسجيل الخروج</span></button>
 </div>
 </aside>
