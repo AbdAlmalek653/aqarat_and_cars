@@ -77,7 +77,7 @@ const API = (function () {
   const Users = {
     getAll: function () {
       if (MODE === 'server') {
-        return httpGet('/users.php').then(function (result) {
+        return httpGet('/admin_users.php').then(function (result) {
           return result.users || [];
         });
       }
@@ -237,6 +237,22 @@ const API = (function () {
       write(KEYS.USERS, users);
       localStorage.setItem('souq_admins_seeded', '1');
       console.log('✅ تم إنشاء حسابات الأدمن بنجاح');
+    }
+  };
+
+  const Stats = {
+    get: function () {
+      if (MODE === 'server') {
+        return httpGet('/stats.php').then(function (result) {
+          return result.stats || {};
+        });
+      }
+      return Promise.resolve({
+        users: read(KEYS.USERS, []).length,
+        listings: read(KEYS.LISTINGS, []).length,
+        properties: read(KEYS.LISTINGS, []).filter(function (listing) { return listing.type === 'property'; }).length,
+        cars: read(KEYS.LISTINGS, []).filter(function (listing) { return listing.type === 'car'; }).length
+      });
     }
   };
 
@@ -441,6 +457,7 @@ const API = (function () {
      ========================================== */
   return {
     Users: Users,
+    Stats: Stats,
     Listings: Listings,
     Favorites: Favorites,
     Auth: Auth,

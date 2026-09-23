@@ -273,14 +273,11 @@ async function loadFeaturedCars() {
    ========================================== */
 async function loadStats() {
   try {
-    const allListings = await API.Listings.getAll();
-    const properties = allListings.filter(l => l.type === 'property');
-    const cars = allListings.filter(l => l.type === 'car');
-    const users = await API.Users.getAll();
+    const stats = await API.Stats.get();
 
-    animateNumber('statProperties', properties.length);
-    animateNumber('statCars', cars.length);
-    animateNumber('statUsers', users.length);
+    animateNumber('statProperties', stats.properties || 0);
+    animateNumber('statCars', stats.cars || 0);
+    animateNumber('statUsers', stats.users || 0);
   } catch (e) {
     console.error('خطأ في تحميل الإحصائيات:', e);
   }
@@ -378,7 +375,7 @@ function setupWelcomeModal() {
   }, 800);
 }
 
-window.closeWelcome = function() {
+window.closeWelcome = function () {
   const modal = document.getElementById('welcomeModal');
   if (modal) {
     modal.classList.remove('show');
