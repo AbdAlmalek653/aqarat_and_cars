@@ -1,4 +1,8 @@
 FROM php:8.2-cli
+<<<<<<< HEAD
+=======
+
+>>>>>>> bd8cd504fc3b94278c0ca2a2586e7c00b022f31b
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends libsqlite3-dev \

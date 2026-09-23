@@ -21,5 +21,11 @@ chown -R www-data:www-data "$DB_DIR"
 chmod 775 "$DB_DIR"
 chmod 664 "$DB_FILE"
 
+<<<<<<< HEAD
 PORT="${PORT:-80}"
 exec php -S "0.0.0.0:${PORT}" -t /var/www/html
+=======
+PORT="${PORT:-8080}"
+exec php -S "0.0.0.0:${PORT}" -t /var/www/html
+
+>>>>>>> bd8cd504fc3b94278c0ca2a2586e7c00b022f31b
