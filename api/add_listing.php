@@ -75,3 +75,27 @@ $stmt->execute([
     $data['address'] ?? '',
     $details
 ]);
+
+$images = $data['images'] ?? [];
+if (is_array($images) && count($images) > 0) {
+    $imageStmt = $pdo->prepare(
+        'INSERT INTO listing_images (listing_id, url, sort_order) VALUES (?, ?, ?)'
+    );
+    foreach ($images as $sortOrder => $imageUrl) {
+        if (!is_string($imageUrl) || trim($imageUrl) === '') {
+            continue;
+        }
+        $imageStmt->execute([$id, $imageUrl, (int)$sortOrder]);
+    }
+}
+
+respond([
+    'success' => true,
+    'listing' => [
+        'id' => $id,
+        'userId' => $userId,
+        'type' => $data['type'],
+        'purpose' => $data['purpose'],
+        'title' => $data['title']
+    ]
+]);

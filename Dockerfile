@@ -1,19 +1,25 @@
 FROM php:8.2-cli
 
-# تثبيت متطلبات SQLite
-RUN apt-get update && apt-get install -y libsqlite3-dev \
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libsqlite3-dev \
     && docker-php-ext-install pdo pdo_sqlite \
     && rm -rf /var/lib/apt/lists/*
 
-# تحديد مجلد العمل ونسخ الملفات
-WORKDIR /app
-COPY . /app
+WORKDIR /var/www/html
 
-# ضبط الصلاحيات لقاعدة البيانات والملفات
-RUN chmod -R 777 /app
+COPY . /var/www/html/
 
-# المنفذ الافتراضي 80
+# نسخ نسخة ابتدائية خارج مجلد الـ Volume
+RUN mkdir -p /opt/seed/database \
+    && if [ -f /var/www/html/database/souq.db ]; then \
+    cp /var/www/html/database/souq.db /opt/seed/database/souq.db; \
+    fi \
+    && cp /var/www/html/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh \
+    && chmod +x /usr/local/bin/docker-entrypoint.sh \
+    && chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html
+
 EXPOSE 80
 
-# تشغيل خادم PHP الداخلي والاستماع للمنفذ المعين من المنصة أو 80 افتراضياً
-CMD ["sh", "-c", "php -S 0.0.0.0:${PORT:-80} -t /app"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

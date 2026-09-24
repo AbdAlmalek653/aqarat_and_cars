@@ -95,6 +95,7 @@
       className: 'btn-header-logout',
       iconName: 'log-out',
       text: 'خروج',
+
       onClick: (e) => {
         if (e) e.preventDefault();
 
@@ -118,6 +119,7 @@
 
         // التوجيه المباشر للصفحة الرئيسية
         window.location.href = paths.index;
+
       }
     });
 

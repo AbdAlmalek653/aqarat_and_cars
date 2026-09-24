@@ -434,7 +434,8 @@ function setupFormSubmit() {
     e.preventDefault();
     hideAlert();
 
-    if (!API.Users.isLoggedIn()) {
+    const sessionUser = await API.Users.validateSession();
+    if (!sessionUser) {
       showAlert('يجب تسجيل الدخول أولاً.');
       setTimeout(() => { window.location.href = 'login.html'; }, 1500);
       return;

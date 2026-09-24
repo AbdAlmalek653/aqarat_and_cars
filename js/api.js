@@ -1,13 +1,13 @@
- /* ==========================================
-   طبقة البيانات الموحدة
-   ========================================== */
+/* ==========================================
+  طبقة البيانات الموحدة
+  ========================================== */
 
-const API = (function() {
+const API = (function () {
 
-let MODE = 'local';
-const API_BASE = (function() {
-  return window.location.pathname.includes('/pages/') ? '../api' : 'api';
-})();
+  let MODE = 'server';
+  const API_BASE = (function () {
+    return window.location.pathname.includes('/pages/') ? '../api' : 'api';
+  })();
 
   const KEYS = {
     USERS: 'souq_users',
@@ -43,7 +43,7 @@ const API_BASE = (function() {
   }
 
   function httpGet(url) {
-    return fetch(API_BASE + url, { credentials: 'include' }).then(function(r) { return r.json(); });
+    return fetch(API_BASE + url, { credentials: 'include' }).then(function (r) { return r.json(); });
   }
 
   function httpPost(url, data) {
@@ -52,33 +52,53 @@ const API_BASE = (function() {
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
       body: JSON.stringify(data)
-    }).then(function(r) { return r.json(); });
+    }).then(function (r) { return r.json(); });
+  }
+
+  function normalizeListing(listing) {
+    if (!listing) return listing;
+    const details = listing.details || {};
+    return Object.assign({}, listing, {
+      userId: listing.userId || listing.user_id,
+      city: listing.city || listing.city_slug,
+      cityName: listing.cityName || listing.city_name,
+      subType: listing.subType || details.subType,
+      createdAt: listing.createdAt || listing.created_at,
+      updatedAt: listing.updatedAt || listing.updated_at,
+      featured: listing.featured !== undefined
+        ? listing.featured
+        : Boolean(listing.is_featured)
+    });
   }
 
   /* ==========================================
      المستخدمين
      ========================================== */
   const Users = {
-    getAll: function() {
-      if (MODE === 'server') return httpGet('/users.php');
+    getAll: function () {
+      if (MODE === 'server') {
+        return httpGet('/admin_users.php').then(function (result) {
+          return result.users || [];
+        });
+      }
       return Promise.resolve(read(KEYS.USERS, []));
     },
 
-    getById: function(id) {
+    getById: function (id) {
       if (MODE === 'server') return httpGet('/user.php?id=' + id);
-      return Promise.resolve(read(KEYS.USERS, []).find(function(u) { return u.id === id; }));
+      return Promise.resolve(read(KEYS.USERS, []).find(function (u) { return u.id === id; }));
     },
 
-    getByEmail: function(email) {
+    getByEmail: function (email) {
       if (MODE === 'server') return httpGet('/user.php?email=' + email);
-      return Promise.resolve(read(KEYS.USERS, []).find(function(u) { return u.email === email; }));
+      return Promise.resolve(read(KEYS.USERS, []).find(function (u) { return u.email === email; }));
     },
 
-    create: function(userData) {
+    create: function (userData) {
       if (MODE === 'server') return httpPost('/register.php', userData);
 
       const users = read(KEYS.USERS, []);
-      if (users.find(function(u) { return u.email === userData.email; })) {
+      if (users.find(function (u) { return u.email === userData.email; })) {
         return Promise.resolve({ success: false, error: 'البريد الإلكتروني مستخدم مسبقاً' });
       }
 
@@ -97,10 +117,15 @@ const API_BASE = (function() {
       return Promise.resolve({ success: true, user: newUser });
     },
 
-    login: function(email, password) {
-      if (MODE === 'server') return httpPost('/login.php', { email: email, password: password });
+    login: function (email, password) {
+      if (MODE === 'server') {
+        return httpPost('/login.php', { email: email, password: password }).then(function (result) {
+          if (result.success && result.user) write(KEYS.CURRENT_USER, result.user);
+          return result;
+        });
+      }
 
-      const user = read(KEYS.USERS, []).find(function(u) { return u.email === email; });
+      const user = read(KEYS.USERS, []).find(function (u) { return u.email === email; });
       if (!user) return Promise.resolve({ success: false, error: 'لا يوجد حساب بهذا البريد' });
       if (user.password !== password) return Promise.resolve({ success: false, error: 'كلمة المرور غير صحيحة' });
 
@@ -115,12 +140,17 @@ const API_BASE = (function() {
       return Promise.resolve({ success: true, user: sessionUser });
     },
 
-    logout: function() {
-      if (MODE === 'server') return httpPost('/logout.php', {});
+    logout: function () {
+      if (MODE === 'server') {
+        return httpPost('/logout.php', {}).then(function (result) {
+          localStorage.removeItem(KEYS.CURRENT_USER);
+          return result;
+        });
+      }
       localStorage.removeItem(KEYS.CURRENT_USER);
     },
 
-    getCurrent: function() {
+    getCurrent: function () {
       try {
         const raw = localStorage.getItem(KEYS.CURRENT_USER);
         return raw ? JSON.parse(raw) : null;
@@ -129,26 +159,40 @@ const API_BASE = (function() {
       }
     },
 
-    isLoggedIn: function() {
+    validateSession: function () {
+      if (MODE !== 'server') return Promise.resolve(this.getCurrent());
+      return httpGet('/me.php').then(function (result) {
+        if (result.success && result.user) {
+          write(KEYS.CURRENT_USER, result.user);
+          return result.user;
+        }
+        localStorage.removeItem(KEYS.CURRENT_USER);
+        return null;
+      }).catch(function () {
+        return null;
+      });
+    },
+
+    isLoggedIn: function () {
       return this.getCurrent() !== null;
     },
 
-    isSuperAdmin: function() {
+    isSuperAdmin: function () {
       const u = this.getCurrent();
       return u && u.role === 'super_admin';
     },
 
-    isAdmin: function() {
+    isAdmin: function () {
       const u = this.getCurrent();
       return u && (u.role === 'admin' || u.role === 'super_admin');
     },
 
-    isRegularUser: function() {
+    isRegularUser: function () {
       const u = this.getCurrent();
       return u && u.role === 'user';
     },
 
-    seedAdmins: function() {
+    seedAdmins: function () {
       const seeded = localStorage.getItem('souq_admins_seeded');
       if (seeded === '1') return;
 
@@ -184,8 +228,8 @@ const API_BASE = (function() {
         }
       ];
 
-      admins.forEach(function(admin) {
-        if (!users.find(function(u) { return u.email === admin.email; })) {
+      admins.forEach(function (admin) {
+        if (!users.find(function (u) { return u.email === admin.email; })) {
           users.push(admin);
         }
       });
@@ -196,51 +240,87 @@ const API_BASE = (function() {
     }
   };
 
+  const Stats = {
+    get: function () {
+      if (MODE === 'server') {
+        return httpGet('/stats.php').then(function (result) {
+          return result.stats || {};
+        });
+      }
+      return Promise.resolve({
+        users: read(KEYS.USERS, []).length,
+        listings: read(KEYS.LISTINGS, []).length,
+        properties: read(KEYS.LISTINGS, []).filter(function (listing) { return listing.type === 'property'; }).length,
+        cars: read(KEYS.LISTINGS, []).filter(function (listing) { return listing.type === 'car'; }).length
+      });
+    }
+  };
+
   /* ==========================================
      الإعلانات
      ========================================== */
   const Listings = {
-    getAll: function(filters) {
+    getAll: function (filters) {
       if (MODE === 'server') {
         const q = filters ? new URLSearchParams(filters).toString() : '';
-        return httpGet('/listings.php' + (q ? '?' + q : ''));
+        return httpGet('/listings.php' + (q ? '?' + q : '')).then(function (result) {
+          return (result.listings || []).map(normalizeListing);
+        });
       }
       return Promise.resolve(read(KEYS.LISTINGS, []));
     },
 
-    getById: function(id) {
-      if (MODE === 'server') return httpGet('/listing.php?id=' + id);
-      return Promise.resolve(read(KEYS.LISTINGS, []).find(function(l) { return l.id === id; }));
+    getById: function (id) {
+      if (MODE === 'server') {
+        return httpGet('/listing.php?id=' + encodeURIComponent(id)).then(function (result) {
+          return normalizeListing(result.listing);
+        });
+      }
+      return Promise.resolve(read(KEYS.LISTINGS, []).find(function (l) { return l.id === id; }));
     },
 
-    getByType: function(type) {
-      if (MODE === 'server') return httpGet('/listings.php?type=' + type);
-      return Promise.resolve(read(KEYS.LISTINGS, []).filter(function(l) { return l.type === type; }));
+    getByType: function (type) {
+      if (MODE === 'server') {
+        return httpGet('/listings.php?type=' + encodeURIComponent(type)).then(function (result) {
+          return (result.listings || []).map(normalizeListing);
+        });
+      }
+      return Promise.resolve(read(KEYS.LISTINGS, []).filter(function (l) { return l.type === type; }));
     },
 
-    getByUser: function(userId) {
-      if (MODE === 'server') return httpGet('/my_listings.php');
-      return Promise.resolve(read(KEYS.LISTINGS, []).filter(function(l) { return l.userId === userId; }));
+    getByUser: function (userId) {
+      if (MODE === 'server') {
+        return httpGet('/my_listings.php').then(function (result) {
+          return (result.listings || []).map(normalizeListing);
+        });
+      }
+      return Promise.resolve(read(KEYS.LISTINGS, []).filter(function (l) { return l.userId === userId; }));
     },
 
-    getFeatured: function(type, limit) {
+    getFeatured: function (type, limit) {
       limit = limit || 4;
-      if (MODE === 'server') return httpGet('/listings.php?type=' + type + '&featured=1&limit=' + limit);
+      if (MODE === 'server') {
+        return httpGet('/listings.php?type=' + encodeURIComponent(type) + '&featured=1&limit=' + limit)
+          .then(function (result) { return (result.listings || []).map(normalizeListing); });
+      }
       return Promise.resolve(read(KEYS.LISTINGS, [])
-        .filter(function(l) { return l.type === type && l.featured; })
+        .filter(function (l) { return l.type === type && l.featured; })
         .slice(0, limit));
     },
 
-    getLatest: function(type, limit) {
+    getLatest: function (type, limit) {
       limit = limit || 4;
-      if (MODE === 'server') return httpGet('/listings.php?type=' + type + '&limit=' + limit);
+      if (MODE === 'server') {
+        return httpGet('/listings.php?type=' + encodeURIComponent(type) + '&limit=' + limit)
+          .then(function (result) { return (result.listings || []).map(normalizeListing); });
+      }
       return Promise.resolve(read(KEYS.LISTINGS, [])
-        .filter(function(l) { return l.type === type; })
-        .sort(function(a, b) { return new Date(b.createdAt) - new Date(a.createdAt); })
+        .filter(function (l) { return l.type === type; })
+        .sort(function (a, b) { return new Date(b.createdAt) - new Date(a.createdAt); })
         .slice(0, limit));
     },
 
-    create: function(listingData) {
+    create: function (listingData) {
       if (MODE === 'server') return httpPost('/add_listing.php', listingData);
 
       const user = Users.getCurrent();
@@ -276,11 +356,11 @@ const API_BASE = (function() {
       return Promise.resolve({ success: true, listing: newListing });
     },
 
-    update: function(id, updates) {
+    update: function (id, updates) {
       if (MODE === 'server') return httpPost('/update_listing.php', Object.assign({ id: id }, updates));
 
       const listings = read(KEYS.LISTINGS, []);
-      const index = listings.findIndex(function(l) { return l.id === id; });
+      const index = listings.findIndex(function (l) { return l.id === id; });
       if (index === -1) return Promise.resolve({ success: false, error: 'الإعلان غير موجود' });
 
       listings[index] = Object.assign({}, listings[index], updates, { updatedAt: new Date().toISOString() });
@@ -288,11 +368,11 @@ const API_BASE = (function() {
       return Promise.resolve({ success: true, listing: listings[index] });
     },
 
-    updateStatus: function(id, status) {
+    updateStatus: function (id, status) {
       if (MODE === 'server') return httpPost('/update_listing.php', { id: id, status: status });
 
       const listings = read(KEYS.LISTINGS, []);
-      const index = listings.findIndex(function(l) { return l.id === id; });
+      const index = listings.findIndex(function (l) { return l.id === id; });
       if (index === -1) return Promise.resolve({ success: false, error: 'الإعلان غير موجود' });
 
       listings[index].status = status;
@@ -301,11 +381,11 @@ const API_BASE = (function() {
       return Promise.resolve({ success: true, listing: listings[index] });
     },
 
-    delete: function(id) {
+    delete: function (id) {
       if (MODE === 'server') return httpPost('/delete_listing.php', { id: id });
 
       const listings = read(KEYS.LISTINGS, []);
-      const filtered = listings.filter(function(l) { return l.id !== id; });
+      const filtered = listings.filter(function (l) { return l.id !== id; });
       if (filtered.length === listings.length) return Promise.resolve({ success: false, error: 'الإعلان غير موجود' });
 
       write(KEYS.LISTINGS, filtered);
@@ -317,21 +397,25 @@ const API_BASE = (function() {
      المفضلة
      ========================================== */
   const Favorites = {
-    getAll: function() {
-      if (MODE === 'server') return httpGet('/favorites.php');
+    getAll: function () {
+      if (MODE === 'server') {
+        return httpGet('/favorites.php').then(function (result) {
+          return Array.isArray(result.favorites) ? result.favorites : [];
+        });
+      }
       const user = Users.getCurrent();
       if (!user) return Promise.resolve([]);
       const all = read(KEYS.FAVORITES, {});
       return Promise.resolve(all[user.id] || []);
     },
 
-    isFavorite: function(listingId) {
-      return this.getAll().then(function(favs) {
+    isFavorite: function (listingId) {
+      return this.getAll().then(function (favs) {
         return favs.indexOf(listingId) !== -1;
       });
     },
 
-    toggle: function(listingId) {
+    toggle: function (listingId) {
       if (MODE === 'server') return httpPost('/toggle_favorite.php', { listing_id: listingId });
 
       const user = Users.getCurrent();
@@ -341,7 +425,7 @@ const API_BASE = (function() {
       const userFavs = all[user.id] || [];
 
       if (userFavs.indexOf(listingId) !== -1) {
-        all[user.id] = userFavs.filter(function(id) { return id !== listingId; });
+        all[user.id] = userFavs.filter(function (id) { return id !== listingId; });
       } else {
         userFavs.push(listingId);
         all[user.id] = userFavs;
@@ -359,15 +443,15 @@ const API_BASE = (function() {
      حماية الصفحات
      ========================================== */
   const Auth = {
-    isLoggedIn: function() {
+    isLoggedIn: function () {
       return Users.getCurrent() !== null;
     },
 
-    isAdmin: function() {
+    isAdmin: function () {
       return Users.isAdmin();
     },
 
-    isSuperAdmin: function() {
+    isSuperAdmin: function () {
       return Users.isSuperAdmin();
     }
   };
@@ -377,18 +461,19 @@ const API_BASE = (function() {
      ========================================== */
   return {
     Users: Users,
+    Stats: Stats,
     Listings: Listings,
     Favorites: Favorites,
     Auth: Auth,
     generateId: generateId,
-    setMode: function(mode) {
+    setMode: function (mode) {
       if (mode === 'local' || mode === 'server') {
         MODE = mode;
       }
     },
-    getMode: function() { return MODE; },
-    clearAll: function() {
-      Object.keys(KEYS).forEach(function(key) {
+    getMode: function () { return MODE; },
+    clearAll: function () {
+      Object.keys(KEYS).forEach(function (key) {
         localStorage.removeItem(KEYS[key]);
       });
       localStorage.removeItem('souq_admins_seeded');
@@ -402,7 +487,7 @@ window.API = API;
 /* ==========================================
    تشغيل تلقائي عند فتح أي صفحة
    ========================================== */
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   if (window.API && API.Users && API.Users.seedAdmins) {
     API.Users.seedAdmins();
   }
