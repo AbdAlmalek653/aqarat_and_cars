@@ -144,6 +144,94 @@
     </div>
   </section>
 
+  <!-- ===================== ✨ الفلتر المتدرج (أحدث الإعلانات) ===================== -->
+  <section class="section" id="latestSection">
+    <div class="container">
+
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">
+            <i data-lucide="sparkles"></i>
+            <span>تصفح الإعلانات</span>
+          </h2>
+          <p class="section-subtitle">اختر ما يناسبك وشاهد الإعلانات فوراً</p>
+        </div>
+      </div>
+
+      <!-- صندوق الفلتر المتدرج -->
+      <div class="cascade-filter" id="cascadeFilter">
+
+        <!-- الخطوة 1: النوع -->
+        <div class="cascade-step" data-step="1">
+          <div class="cascade-step-title">
+            <span class="cascade-step-num">1</span>
+            <span>اختر النوع</span>
+          </div>
+          <div class="cascade-options">
+            <button class="cascade-btn" data-type="property">
+              <i data-lucide="building-2"></i>
+              <span>عقارات</span>
+            </button>
+            <button class="cascade-btn" data-type="car">
+              <i data-lucide="car"></i>
+              <span>سيارات</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- الخطوة 2: الغرض -->
+        <div class="cascade-step locked" data-step="2">
+          <div class="cascade-step-title">
+            <span class="cascade-step-num">2</span>
+            <span>اختر الغرض</span>
+          </div>
+          <div class="cascade-options">
+            <button class="cascade-btn" data-purpose="sale" disabled>
+              <i data-lucide="tag"></i>
+              <span>للبيع</span>
+            </button>
+            <button class="cascade-btn" data-purpose="rent" disabled>
+              <i data-lucide="key-round"></i>
+              <span>للإيجار</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- الخطوة 3: عرض النتائج -->
+        <div class="cascade-step locked" data-step="3">
+          <div class="cascade-step-title">
+            <span class="cascade-step-num">3</span>
+            <span>شاهد النتائج</span>
+          </div>
+          <button class="cascade-show-btn" id="cascadeShowBtn" disabled>
+            <i data-lucide="search"></i>
+            <span>عرض الإعلانات</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- شبكة الإعلانات -->
+      <div class="grid grid-4" id="latestGrid" style="display:none;"></div>
+
+      <!-- حالة فارغة -->
+      <div id="cascadeEmpty" style="display:none;" class="empty-state">
+        <div class="empty-icon-wrap">
+          <div class="empty-icon"><i data-lucide="inbox"></i></div>
+          <div class="empty-icon-ring"></div>
+          <div class="empty-icon-ring ring-2"></div>
+        </div>
+        <h3 class="empty-title">لا توجد إعلانات مطابقة</h3>
+        <p class="empty-subtitle">جرّب تغيير الفلتر أو تصفح كل الإعلانات</p>
+        <a href="pages/search.html" class="empty-cta-btn">
+          <span class="empty-cta-icon"><i data-lucide="search"></i></span>
+          تصفح كل الإعلانات
+        </a>
+      </div>
+
+    </div>
+  </section>
+
   <!-- ===================== عقارات مميزة ===================== -->
   <section class="section">
     <div class="container">
