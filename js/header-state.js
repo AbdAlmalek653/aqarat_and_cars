@@ -88,25 +88,38 @@
     }
 
     // ==========================================
-    // 4) إضافة زر "خروج"
+    // 4) إضافة زر "خروج" (يحتفظ ببيانات "تذكرني")
     // ==========================================
     const logoutBtn = createButton({
       href: '#',
       className: 'btn-header-logout',
       iconName: 'log-out',
       text: 'خروج',
-      onClick: () => {
-        if (!confirm('هل تريد تسجيل الخروج؟')) return;
 
-        // تنظيف بيانات "تذكرني" والتحويل
-        localStorage.removeItem('souq_remembered_user');
-        sessionStorage.removeItem('souq_redirect_after_login');
+      onClick: (e) => {
+        if (e) e.preventDefault();
 
-        // ✅ API.Users.logout() يتكفل بمسح الجلسة الحقيقية (souq_current_user)
-        const logoutRequest = API.Users.logout ? API.Users.logout() : Promise.resolve();
-        Promise.resolve(logoutRequest).finally(() => {
-          window.location.href = paths.index;
-        });
+        // ✅ مسح الجلسة الحقيقية فقط، مع الاحتفاظ ببيانات "تذكرني"
+        try {
+          localStorage.removeItem('souq_current_user');
+          // ⚠️ لا نمسح souq_remembered_user حتى تبقى بيانات "تذكرني"
+          sessionStorage.removeItem('souq_redirect_after_login');
+        } catch (err) {
+          console.error('خطأ في مسح الجلسة:', err);
+        }
+
+        // استدعاء دالة الـ API كاحتياط إضافي
+        try {
+          if (window.API && API.Users && API.Users.logout) {
+            API.Users.logout();
+          }
+        } catch (err) {
+          console.error('خطأ في API.Users.logout:', err);
+        }
+
+        // التوجيه المباشر للصفحة الرئيسية
+        window.location.href = paths.index;
+
       }
     });
 
