@@ -3,6 +3,8 @@ require_once 'config.php';
 require_once 'helpers.php';
 
 try {
+    error_log('ADMIN SEED VERSION 2026-09-26-1206');
+
     $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
 
     /*
@@ -104,15 +106,29 @@ try {
         'admins' => $results
     ]);
 
-} catch (Throwable $e) {
+} } catch (Throwable $e) {
     if (isset($pdo) && $pdo->inTransaction()) {
         $pdo->rollBack();
     }
 
+    error_log(
+        'ADMIN SEED ERROR: ' .
+        $e->getMessage() .
+        ' in ' .
+        $e->getFile() .
+        ':' .
+        $e->getLine()
+    );
+
     http_response_code(500 );
 
-    respond([
+    echo json_encode([
         'success' => false,
-        'error' => 'فشل إنشاء حسابات الإدارة'
-    ]);
+        'error' => $e->getMessage(),
+        'file' => basename($e->getFile()),
+        'line' => $e->getLine()
+    ], JSON_UNESCAPED_UNICODE);
+
+    exit;
 }
+
