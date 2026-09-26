@@ -117,28 +117,54 @@ const API = (function () {
       return Promise.resolve({ success: true, user: newUser });
     },
 
-    login: function (email, password) {
-      if (MODE === 'server') {
-        return httpPost('/login.php', { email: email, password: password }).then(function (result) {
-          if (result.success && result.user) write(KEYS.CURRENT_USER, result.user);
-          return result;
-        });
+    login: function(email, password) {
+  if (MODE === 'server') {
+    return httpPost('/login.php', {
+      email: email,
+      password: password
+    } ).then(function(result) {
+      if (result.success && result.user) {
+        write(KEYS.CURRENT_USER, result.user);
       }
 
-      const user = read(KEYS.USERS, []).find(function (u) { return u.email === email; });
-      if (!user) return Promise.resolve({ success: false, error: 'لا يوجد حساب بهذا البريد' });
-      if (user.password !== password) return Promise.resolve({ success: false, error: 'كلمة المرور غير صحيحة' });
+      return result;
+    });
+  }
 
-      const sessionUser = {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        role: user.role || 'user'
-      };
-      write(KEYS.CURRENT_USER, sessionUser);
-      return Promise.resolve({ success: true, user: sessionUser });
-    },
+  const user = read(KEYS.USERS, []).find(function(u) {
+    return u.email === email;
+  });
+
+  if (!user) {
+    return Promise.resolve({
+      success: false,
+      error: 'لا يوجد حساب بهذا البريد'
+    });
+  }
+
+  if (user.password !== password) {
+    return Promise.resolve({
+      success: false,
+      error: 'كلمة المرور غير صحيحة'
+    });
+  }
+
+  const sessionUser = {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    phone: user.phone,
+    role: user.role || 'user'
+  };
+
+  write(KEYS.CURRENT_USER, sessionUser);
+
+  return Promise.resolve({
+    success: true,
+    user: sessionUser
+  });
+}
+,
 
     logout: function () {
       if (MODE === 'server') {
