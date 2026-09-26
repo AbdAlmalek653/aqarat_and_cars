@@ -18,22 +18,22 @@ try {
         [
             'id' => 'ADMIN_SUPER_001',
             'name' => 'أبو أيمن',
-            'email' => 'ضع-بريد-السوبر-أدمن-هنا',
-            'password' => 'ضع-كلمة-مرور-قوية-هنا',
+            'email' => 'ahmadkhleef9900@gmail.com',
+            'password' => 'Ahmad112111',
             'role' => 'super_admin'
         ],
         [
             'id' => 'ADMIN_002',
             'name' => 'أبو برهو',
-            'email' => 'ضع-بريد-الأدمن-هنا',
-            'password' => 'ضع-كلمة-مرور-قوية-هنا',
+            'email' =>  'ahmadGh9900@gmail.com',
+            'password' => 'AhmadGh112111',
             'role' => 'admin'
         ],
         [
             'id' => 'ADMIN_003',
             'name' => 'أبو فاروق',
-            'email' => 'ضع-بريد-أدمن-آخر-هنا',
-            'password' => 'ضع-كلمة-مرور-قوية-هنا',
+            'email' => 'abdmlk9900@gmail.com',
+            'password' => 'Abdmlk112111',
             'role' => 'admin'
         ]
     ];
