@@ -5,8 +5,80 @@
 let currentAdmin = null;
 let allListings = [];
 let allUsers = [];
+const ADMIN_API_BASE = '../api';
+const listingStatusLabels = {
+  active: 'متاح',
+  pending: 'قيد المراجعة',
+  rejected: 'مرفوض',
+  sold: 'مباع',
+  rented: 'مؤجر',
+  expired: 'منتهي'
+};
+const roleLabels = { user: 'مستخدم', agent: 'وكيل', admin: 'أدمن', super_admin: 'أدمن عام' };
 
 function initIcons() { if (window.lucide) window.lucide.createIcons(); }
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>'"]/g, function (character) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;' }[character];
+  });
+}
+
+async function adminRequest(path, options) {
+  const response = await fetch(`${ADMIN_API_BASE}/${path}`, {
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    ...options
+  });
+  let result;
+  try {
+    result = await response.json();
+  } catch (_) {
+    throw new Error('استجابة غير صالحة من الخادم');
+  }
+  if (!response.ok || result.success === false) {
+    throw new Error(result.error || 'حدث خطأ في الخادم');
+  }
+  return result;
+}
+
+function showAdminMessage(message) {
+  alert(message);
+}
+
+async function updateAdminListing(id, changes) {
+  try {
+    await adminRequest('admin_update_listing.php', {
+      method: 'POST',
+      body: JSON.stringify({ id, ...changes })
+    });
+    showAdminMessage('تم حفظ تعديل الإعلان');
+    await loadData();
+  } catch (error) {
+    showAdminMessage(error.message);
+  }
+}
+
+async function editAdminListing(id, currentTitle, currentPrice) {
+  const title = prompt('عنوان الإعلان:', currentTitle || '');
+  if (title === null) return;
+  const price = prompt('السعر:', currentPrice || '0');
+  if (price === null) return;
+  await updateAdminListing(id, { title: title.trim(), price: price.trim() });
+}
+
+async function updateAdminUser(id, changes) {
+  try {
+    await adminRequest('admin_update_user.php', {
+      method: 'POST',
+      body: JSON.stringify({ id, ...changes })
+    });
+    showAdminMessage('تم حفظ تعديل المستخدم');
+    await loadData();
+  } catch (error) {
+    showAdminMessage(error.message);
+  }
+}
 
 /* ==========================================
    التحقق من الصلاحيات
@@ -48,8 +120,21 @@ function checkAccess() {
 async function loadData() {
   try {
     const [listings, users] = await Promise.all([
-      API.Listings.getAll(),
-      currentAdmin.role === 'super_admin' ? API.Users.getAll() : Promise.resolve([])
+      adminRequest('admin_listings.php').then(function (result) {
+        return (result.listings || []).map(function (listing) {
+          return Object.assign({}, listing, {
+            userId: listing.userId || listing.user_id,
+            city: listing.city || listing.city_name,
+            createdAt: listing.createdAt || listing.created_at,
+            featured: listing.featured !== undefined
+              ? listing.featured
+              : Boolean(listing.is_featured)
+          });
+        });
+      }),
+      currentAdmin.role === 'super_admin'
+        ? adminRequest('admin_users.php').then(function (result) { return result.users || []; })
+        : Promise.resolve([])
     ]);
 
     allListings = listings || [];
@@ -159,45 +244,71 @@ function renderListingsTable() {
 
   tbody.innerHTML = filtered.map(l => {
     const typeText = l.type === 'property' ? 'عقار' : 'سيارة';
-    const statusText = { active: 'متاح', sold: 'مباع', rented: 'مؤجر' }[l.status || 'active'];
+    const status = l.status || 'active';
+    const statusText = listingStatusLabels[status] || status;
     const price = l.purpose === 'sale'
       ? `${Number(l.price).toLocaleString('en-US')} ${l.currency || 'USD'}`
       : `${l.price} ${l.currency || 'USD'}`;
 
     const seller = allUsers.find(u => u.id === l.userId);
-    const sellerName = seller ? seller.name : 'مستخدم';
+    const sellerName = l.owner_name || (seller ? seller.name : 'مستخدم');
 
     const wa = l.whatsapp || (l.details && l.details._whatsapp) || '';
     const waClean = String(wa).replace(/[^0-9]/g, '');
 
+    const title = escapeHtml(l.title);
+    const listingId = escapeHtml(l.id);
+    const isFeatured = Boolean(l.featured || l.is_featured);
+
     return `<tr>
       <td>
-        <div class="admin-table-title">${l.title}</div>
-        <div class="admin-table-sub">#${l.id}</div>
+        <div class="admin-table-title">${title}</div>
+        <div class="admin-table-sub">#${listingId}</div>
       </td>
       <td><span class="admin-tag ${l.type}">${typeText}</span></td>
-      <td>${price}</td>
-      <td><span class="admin-tag ${l.status || 'active'}">${statusText}</span></td>
-      <td>${sellerName}</td>
+      <td>${escapeHtml(price)}</td>
+      <td><span class="admin-tag ${status}">${escapeHtml(statusText)}</span>${isFeatured ? '<div class="admin-table-sub">★ مميز</div>' : ''}</td>
+      <td>${escapeHtml(sellerName)}</td>
       <td>
         ${waClean
-          ? `<a href="https://wa.me/${waClean}" target="_blank" class="admin-icon-btn wa" title="واتساب البائع"><i data-lucide="message-circle"></i></a>`
-          : `<span style="color:var(--text-muted);font-size:12px;">—</span>`
-        }
+        ? `<a href="https://wa.me/${waClean}" target="_blank" class="admin-icon-btn wa" title="واتساب البائع"><i data-lucide="message-circle"></i></a>`
+        : `<span style="color:var(--text-muted);font-size:12px;">—</span>`
+      }
       </td>
       <td>
         <div class="admin-actions">
-          <a href="details.html?id=${l.id}&type=${l.type}" class="admin-icon-btn" title="عرض"><i data-lucide="eye"></i></a>
-          <button class="admin-icon-btn danger" onclick="adminDeleteListing('${l.id}')" title="حذف"><i data-lucide="trash-2"></i></button>
+          <a href="details.html?id=${encodeURIComponent(l.id)}&type=${encodeURIComponent(l.type)}" class="admin-icon-btn" title="عرض"><i data-lucide="eye"></i></a>
+          <select class="admin-select admin-action-select" data-status-id="${listingId}" title="تغيير الحالة">
+            ${Object.entries(listingStatusLabels).map(([value, label]) => `<option value="${value}" ${status === value ? 'selected' : ''}>${label}</option>`).join('')}
+          </select>
+          <button class="admin-icon-btn ${isFeatured ? 'featured' : ''}" data-feature-id="${listingId}" data-featured="${isFeatured ? '1' : '0'}" title="${isFeatured ? 'إلغاء التمييز' : 'تمييز'}"><i data-lucide="star"></i></button>
+          <button class="admin-icon-btn" data-edit-id="${listingId}" data-edit-title="${escapeHtml(l.title)}" data-edit-price="${escapeHtml(l.price)}" title="تعديل"><i data-lucide="pencil"></i></button>
+          <button class="admin-icon-btn danger" onclick="adminDeleteListing('${listingId}')" title="حذف"><i data-lucide="trash-2"></i></button>
         </div>
       </td>
     </tr>`;
   }).join('');
 
+  document.querySelectorAll('[data-status-id]').forEach(function (select) {
+    select.addEventListener('change', function () {
+      updateAdminListing(select.dataset.statusId, { status: select.value });
+    });
+  });
+  document.querySelectorAll('[data-feature-id]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      updateAdminListing(button.dataset.featureId, { featured: button.dataset.featured !== '1' });
+    });
+  });
+  document.querySelectorAll('[data-edit-id]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      editAdminListing(button.dataset.editId, button.dataset.editTitle, button.dataset.editPrice);
+    });
+  });
+
   initIcons();
 }
 
-window.adminDeleteListing = async function(id) {
+window.adminDeleteListing = async function (id) {
   if (!confirm('⚠️ هل أنت متأكد من حذف هذا الإعلان نهائياً؟')) return;
   if (!confirm('🔴 تأكيد أخير: سيتم الحذف نهائياً بدون إمكانية الاسترجاع.')) return;
 
@@ -238,31 +349,47 @@ function renderUsersTable() {
 
   tbody.innerHTML = filtered.map(u => {
     const role = u.role || 'user';
-    const roleText = { user: 'مستخدم', admin: 'أدمن', super_admin: 'أدمن عام' }[role];
-    const created = u.createdAt ? new Date(u.createdAt).toLocaleDateString('ar-EG') : '—';
+    const roleText = roleLabels[role] || role;
+    const createdAt = u.createdAt || u.created_at;
+    const created = createdAt ? new Date(createdAt).toLocaleDateString('ar-EG') : '—';
     const isSelf = u.id === currentAdmin.id;
+    const userId = escapeHtml(u.id);
+    const isActive = u.is_active !== false;
 
     return `<tr>
-      <td><div class="admin-table-title">${u.name}</div></td>
-      <td>${u.email}</td>
-      <td>${u.phone || '—'}</td>
-      <td><span class="admin-tag ${role}">${roleText}</span></td>
+      <td><div class="admin-table-title">${escapeHtml(u.name)}</div></td>
+      <td>${escapeHtml(u.email)}</td>
+      <td>${escapeHtml(u.phone || '—')}</td>
+      <td><span class="admin-tag ${role}">${escapeHtml(roleText)}</span></td>
       <td>${created}</td>
       <td>
         <div class="admin-actions">
           ${!isSelf ? `
-            <button class="admin-icon-btn" onclick="adminChangeRole('${u.id}')" title="تغيير الدور"><i data-lucide="shield"></i></button>
-            <button class="admin-icon-btn danger" onclick="adminDeleteUser('${u.id}')" title="حذف"><i data-lucide="trash-2"></i></button>
+            <select class="admin-select admin-action-select" data-role-id="${userId}" title="تغيير الدور">
+              ${Object.entries(roleLabels).map(([value, label]) => `<option value="${value}" ${role === value ? 'selected' : ''}>${label}</option>`).join('')}
+            </select>
+            <button class="admin-icon-btn" data-active-id="${userId}" data-active="${isActive ? '1' : '0'}" title="${isActive ? 'تعطيل' : 'تفعيل'}"><i data-lucide="${isActive ? 'user-round-x' : 'user-round-check'}"></i></button>
           ` : `<span style="color:var(--text-muted);font-size:11px;">أنت</span>`}
         </div>
       </td>
     </tr>`;
   }).join('');
 
+  document.querySelectorAll('[data-role-id]').forEach(function (select) {
+    select.addEventListener('change', function () {
+      updateAdminUser(select.dataset.roleId, { role: select.value });
+    });
+  });
+  document.querySelectorAll('[data-active-id]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      updateAdminUser(button.dataset.activeId, { is_active: button.dataset.active !== '1' });
+    });
+  });
+
   initIcons();
 }
 
-window.adminChangeRole = async function(id) {
+window.adminChangeRole = async function (id) {
   const user = allUsers.find(u => u.id === id);
   if (!user) return;
 
@@ -284,7 +411,7 @@ window.adminChangeRole = async function(id) {
   alert('✅ تم تحديث الدور');
 };
 
-window.adminDeleteUser = async function(id) {
+window.adminDeleteUser = async function (id) {
   const user = allUsers.find(u => u.id === id);
   if (!user) return;
 
@@ -323,7 +450,7 @@ function renderReports() {
 /* ==========================================
    Tab Switching
    ========================================== */
-window.switchAdminTab = function(tab) {
+window.switchAdminTab = function (tab) {
   document.querySelectorAll('.admin-menu-btn[data-tab]').forEach(b => {
     b.classList.toggle('active', b.dataset.tab === tab);
   });
