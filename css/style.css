@@ -191,7 +191,6 @@ img { max-width: 100%; display: block; }
   z-index: 1;
 }
 
-/* خلفية متوهجة قوية عند التمرير */
 .nav a::before {
   content: '';
   position: absolute;
@@ -205,7 +204,6 @@ img { max-width: 100%; display: block; }
   z-index: -1;
 }
 
-/* توهج خارجي قوي */
 .nav a::after {
   content: '';
   position: absolute;
@@ -230,9 +228,7 @@ img { max-width: 100%; display: block; }
     0 0 30px rgba(245, 158, 11, 0.3);
 }
 
-.nav a:hover::before {
-  opacity: 1;
-}
+.nav a:hover::before { opacity: 1; }
 
 .nav a:hover::after {
   box-shadow:
@@ -242,7 +238,6 @@ img { max-width: 100%; display: block; }
     inset 0 0 25px rgba(59, 130, 246, 0.15);
 }
 
-/* الرابط النشط (الصفحة الحالية) - توهج دائم قوي */
 .nav a.active,
 .nav a[aria-current="page"] {
   color: #ffffff;
@@ -261,9 +256,7 @@ img { max-width: 100%; display: block; }
 }
 
 .nav a.active::before,
-.nav a[aria-current="page"]::before {
-  opacity: 1;
-}
+.nav a[aria-current="page"]::before { opacity: 1; }
 
 .nav a.active::after,
 .nav a[aria-current="page"]::after {
@@ -274,7 +267,6 @@ img { max-width: 100%; display: block; }
     inset 0 0 30px rgba(59, 130, 246, 0.2);
 }
 
-/* نبض التوهج للرابط النشط */
 @keyframes navPulse {
   0%, 100% {
     box-shadow:
@@ -292,9 +284,7 @@ img { max-width: 100%; display: block; }
   }
 }
 
-.nav a:active {
-  transform: translateY(0);
-}
+.nav a:active { transform: translateY(0); }
 
 .header-actions { display: flex; align-items: center; gap: 10px; }
 
@@ -416,9 +406,7 @@ img { max-width: 100%; display: block; }
   z-index: 1;
 }
 
-.hero-subtitle-deco:last-child {
-  animation-delay: 1s;
-}
+.hero-subtitle-deco:last-child { animation-delay: 1s; }
 
 @keyframes subtitleGlow {
   0%, 100% { box-shadow: 0 0 0 rgba(59, 130, 246, 0); }
@@ -1314,19 +1302,12 @@ img { max-width: 100%; display: block; }
   stroke: currentColor;
 }
 
-.social-icon:hover svg[fill="currentColor"] {
-  fill: white;
-}
-
-.social-icon:hover svg[stroke="currentColor"] {
-  fill: none;
-  stroke: white;
-}
+.social-icon:hover svg[fill="currentColor"] { fill: white; }
+.social-icon:hover svg[stroke="currentColor"] { fill: none; stroke: white; }
 
 /* ==========================================
    19. أزرار الهيدر الديناميكية (موحّدة)
    ========================================== */
-
 .btn-admin-panel,
 .btn-header-account,
 .btn-header-logout {
@@ -1368,9 +1349,7 @@ img { max-width: 100%; display: block; }
 
 .btn-admin-panel:hover::after,
 .btn-header-account:hover::after,
-.btn-header-logout:hover::after {
-  right: 100%;
-}
+.btn-header-logout:hover::after { right: 100%; }
 
 .btn-admin-panel svg,
 .btn-admin-panel span,
@@ -1433,9 +1412,7 @@ img { max-width: 100%; display: block; }
   box-shadow: 0 10px 24px rgba(59, 130, 246, 0.35);
 }
 
-.btn-header-account:hover::before {
-  opacity: 1;
-}
+.btn-header-account:hover::before { opacity: 1; }
 
 /* ===== 2) زر لوحة التحكم (أحمر/ذهبي للأدمن) ===== */
 .btn-admin-panel {
@@ -1475,13 +1452,8 @@ img { max-width: 100%; display: block; }
   box-shadow: 0 10px 24px rgba(239, 68, 68, 0.35);
 }
 
-.btn-admin-panel:hover::before {
-  opacity: 1;
-}
-
-.btn-admin-panel svg {
-  filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.6));
-}
+.btn-admin-panel:hover::before { opacity: 1; }
+.btn-admin-panel svg { filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.6)); }
 
 /* ===== 3) زر الخروج (رمادي هادئ) ===== */
 .btn-header-logout {
@@ -1549,9 +1521,7 @@ img { max-width: 100%; display: block; }
   pointer-events: none;
 }
 
-.header-actions .btn-primary:hover::after {
-  right: 100%;
-}
+.header-actions .btn-primary:hover::after { right: 100%; }
 
 /* ==========================================
    20. التوافق مع الجوال (Responsive)
@@ -1559,14 +1529,8 @@ img { max-width: 100%; display: block; }
 
 /* ===== Tablet (أقل من 1024px) ===== */
 @media (max-width: 1024px) {
-  .nav {
-    gap: 4px;
-    margin: 0 8px;
-  }
-  .nav a {
-    padding: 10px 16px;
-    font-size: 14px;
-  }
+  .nav { gap: 4px; margin: 0 8px; }
+  .nav a { padding: 10px 16px; font-size: 14px; }
   .container { padding: 0 16px; }
   .footer-grid { grid-template-columns: 1fr 1fr; gap: 30px; }
 }
@@ -1577,7 +1541,6 @@ img { max-width: 100%; display: block; }
 
   .header-inner { padding: 12px 16px; gap: 12px; }
 
-  /* إخفاء روابط التنقل في الجوال */
   .nav { display: none; }
 
   .logo-text { font-size: 18px; }
@@ -1601,9 +1564,7 @@ img { max-width: 100%; display: block; }
 
   .btn-header-account span,
   .btn-header-logout span,
-  .btn-admin-panel span {
-    display: none;
-  }
+  .btn-admin-panel span { display: none; }
 
   .btn-login { padding: 9px 16px; font-size: 13px; }
   .btn-login span { display: none; }
@@ -1624,7 +1585,6 @@ img { max-width: 100%; display: block; }
 
   .hero-subtitle-text { letter-spacing: 0.1px; line-height: 1.6; }
   .hero-subtitle-deco { font-size: 7px; }
-
   .hero-content { margin-bottom: 28px; }
 
   .search-box { padding: 16px; border-radius: var(--radius); }
@@ -1791,11 +1751,7 @@ img { max-width: 100%; display: block; }
   animation: emptyFloat 3s ease-in-out infinite;
 }
 
-.empty-icon svg {
-  width: 42px;
-  height: 42px;
-  stroke-width: 2;
-}
+.empty-icon svg { width: 42px; height: 42px; stroke-width: 2; }
 
 @keyframes emptyFloat {
   0%, 100% { transform: translateY(0) rotate(0deg); }
@@ -1870,12 +1826,7 @@ img { max-width: 100%; display: block; }
   color: var(--text-secondary);
 }
 
-.empty-feature svg {
-  width: 15px;
-  height: 15px;
-  color: var(--success);
-  flex-shrink: 0;
-}
+.empty-feature svg { width: 15px; height: 15px; color: var(--success); flex-shrink: 0; }
 
 .empty-cta-btn {
   position: relative;
@@ -1915,9 +1866,7 @@ img { max-width: 100%; display: block; }
   box-shadow: 0 18px 45px rgba(59, 130, 246, 0.6);
 }
 
-.empty-cta-btn:active {
-  transform: translateY(-2px) scale(1);
-}
+.empty-cta-btn:active { transform: translateY(-2px) scale(1); }
 
 .empty-cta-icon {
   width: 30px;
@@ -1930,32 +1879,18 @@ img { max-width: 100%; display: block; }
   transition: var(--transition);
 }
 
-.empty-cta-icon svg {
-  width: 16px;
-  height: 16px;
-  color: white;
-}
+.empty-cta-icon svg { width: 16px; height: 16px; color: white; }
 
 .empty-cta-btn:hover .empty-cta-icon {
   background: rgba(255, 255, 255, 0.3);
   transform: rotate(90deg);
 }
 
-.empty-cta-arrow {
-  width: 18px;
-  height: 18px;
-  transition: transform 0.3s ease;
-}
-
-.empty-cta-btn:hover .empty-cta-arrow {
-  transform: translateX(-6px);
-}
+.empty-cta-arrow { width: 18px; height: 18px; transition: transform 0.3s ease; }
+.empty-cta-btn:hover .empty-cta-arrow { transform: translateX(-6px); }
 
 @media (max-width: 768px) {
-  .empty-state {
-    padding: 40px 18px;
-    min-height: 350px;
-  }
+  .empty-state { padding: 40px 18px; min-height: 350px; }
   .empty-bg-glow { width: 300px; height: 300px; }
   .empty-icon-wrap { width: 100px; height: 100px; margin-bottom: 22px; }
   .empty-icon { width: 70px; height: 70px; }
@@ -2009,25 +1944,459 @@ img { max-width: 100%; display: block; }
   border-color: rgba(59, 130, 246, 0.3);
 }
 
-.card-meta-chip svg {
-  width: 12px;
-  height: 12px;
+.card-meta-chip svg { width: 12px; height: 12px; color: var(--primary); flex-shrink: 0; }
+
+@media (max-width: 768px) {
+  .card-meta { gap: 5px; margin-bottom: 12px; padding-bottom: 12px; }
+  .card-meta-chip { padding: 3px 8px; font-size: 11px; }
+  .card-meta-chip svg { width: 11px; height: 11px; }
+}
+
+/* ==========================================
+   23. زر تسجيل الدخول - تنسيق محصّن للجوال
+   ========================================== */
+
+@media (max-width: 900px) {
+  .header-actions {
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .btn-login {
+    padding: 8px 12px;
+    font-size: 12px;
+    gap: 4px;
+    max-width: 44px;
+    height: 38px;
+    justify-content: center;
+  }
+
+  .btn-login span { display: none; }
+
+  .btn-login svg {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+  }
+}
+
+@media (max-width: 400px) {
+  .header-actions { gap: 4px; }
+
+  .btn-login {
+    padding: 6px 10px;
+    height: 34px;
+  }
+
+  .btn-login svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* ==========================================
+   24. ✨ الفلتر المتدرج (Cascade Filter) - شامل
+   ========================================== */
+
+/* ===== الأساسيات (لكل الأجهزة) ===== */
+.cascade-filter {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin-bottom: 32px;
+  position: relative;
+  overflow: hidden;
+}
+
+.cascade-filter::before {
+  content: '';
+  position: absolute;
+  top: -100px; right: -100px;
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.1), transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.cascade-step {
+  position: relative;
+  padding: 18px 0;
+  border-bottom: 1px dashed var(--border);
+  transition: all 0.4s ease;
+}
+
+.cascade-step:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.cascade-step:first-child {
+  padding-top: 0;
+}
+
+.cascade-step.locked {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.cascade-step.locked .cascade-step-num {
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+  box-shadow: none;
+}
+
+.cascade-step.active {
+  opacity: 1;
+  pointer-events: auto;
+  animation: stepActivate 0.4s ease;
+}
+
+@keyframes stepActivate {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.cascade-step-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  position: relative;
+  z-index: 1;
+}
+
+.cascade-step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 800;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
+}
+
+.cascade-options {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
+}
+
+.cascade-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 28px;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.cascade-btn svg {
+  width: 20px;
+  height: 20px;
   color: var(--primary);
+  transition: all 0.3s ease;
   flex-shrink: 0;
 }
 
-@media (max-width: 768px) {
-  .card-meta {
-    gap: 5px;
+.cascade-btn span {
+  position: relative;
+  z-index: 1;
+}
+
+.cascade-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg,
+    rgba(59, 130, 246, 0.15),
+    rgba(245, 158, 11, 0.1));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.cascade-btn:hover:not(:disabled) {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(59, 130, 246, 0.25);
+}
+
+.cascade-btn:hover:not(:disabled)::before { opacity: 1; }
+.cascade-btn:hover:not(:disabled) svg { transform: scale(1.15); color: var(--accent); }
+
+.cascade-btn.selected {
+  background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+  border-color: transparent;
+  color: white;
+  box-shadow:
+    0 0 0 2px var(--primary),
+    0 10px 24px rgba(59, 130, 246, 0.4);
+}
+
+.cascade-btn.selected svg { color: white; }
+.cascade-btn.selected::before { opacity: 0; }
+
+.cascade-btn.selected::after {
+  content: '✓';
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 20px;
+  height: 20px;
+  background: white;
+  color: var(--primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 900;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.cascade-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.cascade-show-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 36px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+  color: white;
+  border: none;
+  border-radius: var(--radius-full);
+  font-size: 16px;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.cascade-show-btn svg { width: 20px; height: 20px; }
+
+.cascade-show-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: right 0.6s ease;
+}
+
+.cascade-show-btn:not(:disabled):hover::before { right: 100%; }
+
+.cascade-show-btn:not(:disabled):hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 15px 40px rgba(59, 130, 246, 0.6);
+}
+
+.cascade-show-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* ===== 💻 الحاسوب (1024px وأكثر) - تصميم أفقي ===== */
+@media (min-width: 1024px) {
+  .cascade-filter {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 30px;
+    align-items: start;
+    padding: 32px 28px;
+  }
+
+  .cascade-step {
+    border-bottom: none;
+    border-left: 1px dashed var(--border);
+    padding: 0 0 0 28px;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  .cascade-step:first-child {
+    border-left: none;
+    padding-left: 0;
+  }
+
+  .cascade-options {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .cascade-btn {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 16px 22px;
+    font-size: 15px;
+  }
+
+  .cascade-btn svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .cascade-show-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 18px 32px;
+    font-size: 15px;
+    margin-top: 6px;
+  }
+}
+
+/* ===== 📱 التابلت (768px - 1023px) - عمودي واسع ===== */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .cascade-filter {
+    padding: 26px;
+  }
+
+  .cascade-step {
+    padding: 20px 0;
+  }
+
+  .cascade-step-title {
+    font-size: 16px;
+    margin-bottom: 16px;
+  }
+
+  .cascade-step-num {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  .cascade-options {
+    gap: 14px;
+  }
+
+  .cascade-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 16px 24px;
+    font-size: 15px;
+    min-width: 180px;
+  }
+
+  .cascade-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .cascade-show-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 16px 32px;
+    font-size: 16px;
+  }
+}
+
+/* ===== 📱 الجوال (أقل من 768px) - عمودي مضغوط ===== */
+@media (max-width: 767px) {
+  .cascade-filter {
+    padding: 18px;
+    border-radius: var(--radius);
+    margin-bottom: 24px;
+  }
+
+  .cascade-step {
+    padding: 14px 0;
+  }
+
+  .cascade-step-title {
+    font-size: 14px;
     margin-bottom: 12px;
-    padding-bottom: 12px;
+    gap: 10px;
   }
-  .card-meta-chip {
-    padding: 3px 8px;
+
+  .cascade-step-num {
+    width: 26px;
+    height: 26px;
+    font-size: 12px;
+  }
+
+  .cascade-options {
+    gap: 8px;
+  }
+
+  .cascade-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 12px 14px;
+    font-size: 13px;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .cascade-btn svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  .cascade-btn.selected::after {
+    width: 18px;
+    height: 18px;
     font-size: 11px;
+    top: 4px;
+    right: 4px;
   }
-  .card-meta-chip svg {
-    width: 11px;
-    height: 11px;
+
+  .cascade-show-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 14px 24px;
+    font-size: 15px;
+  }
+}
+
+/* ===== 📱 جوال صغير جداً (أقل من 400px) ===== */
+@media (max-width: 400px) {
+  .cascade-btn {
+    padding: 10px 10px;
+    font-size: 12px;
+    gap: 4px;
+  }
+
+  .cascade-btn svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .cascade-step-title {
+    font-size: 13px;
+  }
+
+  .cascade-step-num {
+    width: 24px;
+    height: 24px;
+    font-size: 11px;
   }
 }

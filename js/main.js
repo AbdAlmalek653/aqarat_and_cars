@@ -20,7 +20,6 @@ function createCard(item, type) {
     ? `${priceNum.toLocaleString('en-US')} ${item.currency || 'USD'}`
     : `${priceNum} ${item.currency || 'USD'} <small>/ يوم</small>`;
 
-  // تحديد الأيقونة حسب النوع
   let icon = type === 'property' ? 'building-2' : 'car';
   if (item.subType === 'villa') icon = 'home';
   if (item.subType === 'land') icon = 'trees';
@@ -29,7 +28,6 @@ function createCard(item, type) {
   if (item.subType === 'chalet') icon = 'tent';
   if (item.subType === 'arabic-house') icon = 'landmark';
 
-  // الصورة الأولى إن وجدت
   const firstImage = item.images && item.images.length > 0 ? item.images[0] : null;
   const imageContent = firstImage
     ? `<img src="${firstImage}" alt="${item.title}" loading="lazy">`
@@ -39,7 +37,6 @@ function createCard(item, type) {
     ? `<span class="card-badge featured">⭐ مميز</span>`
     : '';
 
-  /* ===== ترجمة المحافظة ===== */
   const cityNames = {
     damascus: 'دمشق', 'rif-dimashq': 'ريف دمشق', aleppo: 'حلب',
     homs: 'حمص', hama: 'حماة', latakia: 'اللاذقية',
@@ -53,7 +50,6 @@ function createCard(item, type) {
   if (item.area) locationText = locationText ? `${locationText} - ${item.area}` : item.area;
   if (!locationText) locationText = item.location || '—';
 
-  /* ===== بناء شارات المواصفات المختصرة ===== */
   const d = item.details || {};
   let chips = [];
 
@@ -66,22 +62,16 @@ function createCard(item, type) {
       volkswagen: 'فولكس فاجن', audi: 'أودي', lexus: 'لكزس', other: 'أخرى'
     };
 
-    // الماركة
     if (d.brandName) chips.push({ icon: 'car', text: d.brandName });
     else if (d.brand) chips.push({ icon: 'car', text: brandNames[d.brand] || d.brand });
 
-    // الموديل
     if (d.model) chips.push({ icon: 'tag', text: d.model });
-
-    // السنة
     if (d.year) chips.push({ icon: 'calendar', text: d.year });
 
-    // الكيلومترات (فقط للبيع)
     if (d.km && item.purpose === 'sale') {
       chips.push({ icon: 'gauge', text: `${Number(d.km).toLocaleString('en-US')} كم` });
     }
 
-    // ناقل الحركة
     if (d.transmission) {
       chips.push({
         icon: 'settings-2',
@@ -89,31 +79,23 @@ function createCard(item, type) {
       });
     }
   } else {
-    // عقارات
     const typeNames = {
       apartment: 'شقة', villa: 'فيلا', 'arabic-house': 'بيت عربي',
       land: 'أرض', office: 'مكتب', shop: 'محل تجاري',
       chalet: 'شاليه', building: 'بناء كامل'
     };
 
-    // نوع العقار
     if (item.subType) {
       chips.push({ icon: 'building-2', text: typeNames[item.subType] || item.subType });
     } else if (d.propertyType) {
       chips.push({ icon: 'building-2', text: typeNames[d.propertyType] || d.propertyType });
     }
 
-    // المساحة
     const area = d.area || d.landArea || d.commercialArea;
     if (area) chips.push({ icon: 'square', text: `${area} م²` });
-
-    // عدد الغرف
     if (d.rooms) chips.push({ icon: 'bed-double', text: `${d.rooms} غرف` });
-
-    // الحمامات
     if (d.bathrooms) chips.push({ icon: 'bath', text: `${d.bathrooms} حمام` });
 
-    // الفرش (للايجار)
     if (d.furnished && item.purpose === 'rent') {
       const furnishedText = {
         furnished: 'مفروش',
@@ -124,10 +106,8 @@ function createCard(item, type) {
     }
   }
 
-  // نأخذ أول 3 مواصفات فقط
   chips = chips.slice(0, 3);
 
-  // بناء HTML للـ chips
   const chipsHTML = chips.length
     ? `<div class="card-meta">
         ${chips.map(c => `
@@ -391,6 +371,116 @@ document.addEventListener('keydown', (e) => {
 });
 
 /* ==========================================
+   ✨ الفلتر المتدرج (Cascade Filter)
+   ========================================== */
+const cascadeState = {
+  type: null,      // 'property' أو 'car'
+  purpose: null    // 'sale' أو 'rent'
+};
+
+function setupCascadeFilter() {
+  // ===== اختيار النوع =====
+  document.querySelectorAll('.cascade-btn[data-type]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.cascade-btn[data-type]').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+
+      cascadeState.type = btn.dataset.type;
+      cascadeState.purpose = null;
+
+      // تفعيل الخطوة 2
+      const step2 = document.querySelector('.cascade-step[data-step="2"]');
+      step2.classList.remove('locked');
+      step2.classList.add('active');
+
+      step2.querySelectorAll('.cascade-btn').forEach(b => {
+        b.disabled = false;
+        b.classList.remove('selected');
+      });
+
+      // قفل الخطوة 3
+      const step3 = document.querySelector('.cascade-step[data-step="3"]');
+      step3.classList.add('locked');
+      step3.classList.remove('active');
+      document.getElementById('cascadeShowBtn').disabled = true;
+
+      // إخفاء النتائج السابقة
+      document.getElementById('latestGrid').style.display = 'none';
+      document.getElementById('cascadeEmpty').style.display = 'none';
+
+      initIcons();
+    });
+  });
+
+  // ===== اختيار الغرض =====
+  document.querySelectorAll('.cascade-btn[data-purpose]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+
+      document.querySelectorAll('.cascade-btn[data-purpose]').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+
+      cascadeState.purpose = btn.dataset.purpose;
+
+      // تفعيل الخطوة 3
+      const step3 = document.querySelector('.cascade-step[data-step="3"]');
+      step3.classList.remove('locked');
+      step3.classList.add('active');
+
+      document.getElementById('cascadeShowBtn').disabled = false;
+
+      initIcons();
+    });
+  });
+
+  // ===== زر "عرض الإعلانات" =====
+  const showBtn = document.getElementById('cascadeShowBtn');
+  if (showBtn) {
+    showBtn.addEventListener('click', handleCascadeShow);
+  }
+}
+
+async function handleCascadeShow() {
+  if (!cascadeState.type || !cascadeState.purpose) return;
+
+  const grid = document.getElementById('latestGrid');
+  const emptyStateEl = document.getElementById('cascadeEmpty');
+
+  grid.style.display = 'grid';
+  emptyStateEl.style.display = 'none';
+  grid.innerHTML = '<p style="text-align:center;padding:40px;grid-column:1/-1;color:var(--text-secondary);">جاري التحميل...</p>';
+
+  try {
+    const allListings = await API.Listings.getAll();
+    let listings = allListings.filter(l =>
+      l.type === cascadeState.type && l.purpose === cascadeState.purpose
+    );
+
+    // ترتيب حسب الأحدث
+    listings.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    if (listings.length === 0) {
+      grid.style.display = 'none';
+      emptyStateEl.style.display = 'flex';
+      initIcons();
+      return;
+    }
+
+    grid.innerHTML = listings.map(item => createCard(item, item.type)).join('');
+    initIcons();
+
+    // Scroll للنتائج
+    setTimeout(() => {
+      grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+
+  } catch (err) {
+    console.error('خطأ في تحميل الإعلانات:', err);
+    grid.innerHTML = '<p style="text-align:center;color:var(--danger);grid-column:1/-1;">فشل التحميل</p>';
+  }
+}
+
+/* ==========================================
    تشغيل عند التحميل
    ========================================== */
 document.addEventListener('DOMContentLoaded', () => {
@@ -400,5 +490,6 @@ document.addEventListener('DOMContentLoaded', () => {
   setupSearchTabs();
   setupSearchForm();
   setupWelcomeModal();
+  setupCascadeFilter();  // ✅ تشغيل الفلتر المتدرج
   initIcons();
 });

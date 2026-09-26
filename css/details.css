@@ -1,0 +1,743 @@
+/* ==========================================
+   صفحة تفاصيل الإعلان - Responsive كامل
+   ========================================== */
+
+/* ===== الهيكل الرئيسي (Layout) ===== */
+.details-layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 24px;
+  padding: 24px 0 60px;
+  align-items: start;
+}
+
+/* ===== معرض الصور ===== */
+.details-gallery {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.gallery-main {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  max-height: 520px;
+  background: var(--bg-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.gallery-main img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gallery-main > svg {
+  width: 80px;
+  height: 80px;
+  color: var(--text-muted);
+  opacity: 0.3;
+}
+
+.gallery-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(8px);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  transition: var(--transition);
+  z-index: 2;
+  user-select: none;
+}
+
+.gallery-nav:hover {
+  background: rgba(59, 130, 246, 0.85);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.gallery-nav.prev { right: 12px; }
+.gallery-nav.next { left: 12px; }
+.gallery-nav svg { width: 22px; height: 22px; }
+
+.gallery-counter {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 600;
+  z-index: 2;
+}
+
+.gallery-thumbs {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  background: var(--bg-card);
+}
+
+.gallery-thumbs::-webkit-scrollbar { height: 6px; }
+.gallery-thumbs::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+.gallery-thumbs img,
+.gallery-thumbs .thumb-item {
+  width: 80px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+
+.gallery-thumbs img:hover,
+.gallery-thumbs .thumb-item:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.gallery-thumbs img.active,
+.gallery-thumbs .thumb-item.active {
+  border-color: var(--primary);
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.5);
+}
+
+/* ===== كروت المعلومات ===== */
+.info-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  margin-bottom: 20px;
+}
+
+.info-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.info-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.info-title {
+  font-size: clamp(20px, 3vw, 26px);
+  font-weight: 800;
+  line-height: 1.4;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+}
+
+.info-price {
+  font-size: clamp(24px, 4vw, 32px);
+  font-weight: 800;
+  color: var(--accent);
+  margin-bottom: 12px;
+  letter-spacing: -0.5px;
+}
+
+.info-location {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  padding-bottom: 18px;
+  margin-bottom: 18px;
+  border-bottom: 1px dashed var(--border);
+}
+
+.info-location svg {
+  width: 16px;
+  height: 16px;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+}
+
+.section-heading svg {
+  width: 20px;
+  height: 20px;
+  color: var(--primary);
+}
+
+/* ===== شبكة المواصفات ===== */
+.specs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.spec-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: var(--transition);
+}
+
+.spec-item:hover {
+  border-color: var(--primary);
+  background: var(--bg-hover);
+}
+
+.spec-icon {
+  width: 34px;
+  height: 34px;
+  background: var(--primary-soft);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.spec-icon svg { width: 16px; height: 16px; }
+
+.spec-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.spec-label {
+  font-size: 10.5px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.spec-value {
+  font-size: 13.5px;
+  color: var(--text-primary);
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ===== الوصف ===== */
+.description-text {
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.9;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* ===== الشريط الجانبي ===== */
+.details-sidebar {
+  position: sticky;
+  top: 90px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ad-id {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+.ad-id svg { width: 14px; height: 14px; }
+.ad-id strong { color: var(--text-primary); font-weight: 700; }
+
+/* ===== بطاقة البائع ===== */
+.seller-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+}
+
+.seller-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px dashed var(--border);
+}
+
+.seller-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 20px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.seller-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.seller-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.seller-role {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.seller-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn-block-full {
+  width: 100%;
+  justify-content: center;
+  padding: 13px 20px;
+  font-size: 14px;
+}
+
+.btn-whatsapp {
+  background: linear-gradient(135deg, #25D366, #128C7E);
+  color: white;
+  border: none;
+}
+
+.btn-whatsapp:hover {
+  background: linear-gradient(135deg, #128C7E, #075E54);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(37, 211, 102, 0.4);
+}
+
+.btn-seller-whatsapp {
+  background: linear-gradient(135deg, #F59E0B, #B45309);
+  color: white;
+}
+
+.action-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.btn-icon-text {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-icon-text:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.btn-icon-text.active {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.btn-icon-text svg { width: 16px; height: 16px; }
+
+.safety-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: var(--radius);
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.safety-note svg {
+  width: 16px;
+  height: 16px;
+  color: var(--success);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* ===== لوحة الأدمن ===== */
+.admin-panel {
+  background: linear-gradient(135deg,
+    rgba(239, 68, 68, 0.08),
+    rgba(245, 158, 11, 0.06));
+  border: 1.5px solid rgba(239, 68, 68, 0.35);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+}
+
+.admin-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 800;
+  color: #FCA5A5;
+  margin-bottom: 14px;
+}
+
+.admin-panel-header svg { width: 18px; height: 18px; }
+
+.admin-status-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+  font-size: 13px;
+}
+
+.admin-label { color: var(--text-muted); }
+
+.admin-current-status {
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: 11.5px;
+}
+
+.admin-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.admin-status-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 6px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.admin-status-btn svg { width: 16px; height: 16px; }
+
+.admin-status-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.admin-status-btn.active-btn:hover {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: var(--success);
+  color: var(--success);
+}
+
+.admin-status-btn.sold-btn:hover {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.admin-status-btn.rented-btn:hover {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.admin-delete-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius);
+  color: #FCA5A5;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.admin-delete-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: var(--danger);
+  color: white;
+}
+
+.admin-delete-btn svg { width: 16px; height: 16px; }
+
+/* ==========================================
+   📱 Responsive - الجوال (أقل من 900px)
+   ========================================== */
+@media (max-width: 900px) {
+  .details-layout {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 16px 0 100px;
+  }
+
+  .details-sidebar {
+    position: static;
+    order: 2;
+  }
+
+  .details-layout > div:first-child {
+    order: 1;
+  }
+
+  .gallery-main {
+    aspect-ratio: 4 / 3;
+    max-height: 400px;
+  }
+
+  .gallery-nav {
+    width: 38px;
+    height: 38px;
+  }
+
+  .gallery-nav svg { width: 18px; height: 18px; }
+  .gallery-nav.prev { right: 8px; }
+  .gallery-nav.next { left: 8px; }
+
+  .gallery-thumbs img,
+  .gallery-thumbs .thumb-item {
+    width: 70px;
+    height: 52px;
+  }
+
+  .info-card {
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+
+  .info-title {
+    font-size: 19px;
+    line-height: 1.4;
+  }
+
+  .info-price {
+    font-size: 24px;
+  }
+
+  .section-heading {
+    font-size: 15.5px;
+    margin-bottom: 12px;
+  }
+
+  .specs-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .spec-item {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .spec-icon {
+    width: 30px;
+    height: 30px;
+  }
+
+  .spec-icon svg { width: 14px; height: 14px; }
+
+  .spec-label { font-size: 10px; }
+  .spec-value { font-size: 12.5px; }
+
+  .description-text {
+    font-size: 14px;
+    line-height: 1.8;
+  }
+
+  .seller-card {
+    padding: 16px;
+  }
+
+  .seller-avatar {
+    width: 44px;
+    height: 44px;
+    font-size: 18px;
+  }
+
+  .seller-name { font-size: 14px; }
+  .seller-role { font-size: 11px; }
+
+  .btn-block-full {
+    padding: 12px 18px;
+    font-size: 13.5px;
+  }
+}
+
+/* ==========================================
+   📱 جوال صغير (أقل من 480px)
+   ========================================== */
+@media (max-width: 480px) {
+  .details-layout {
+    padding: 12px 0 90px;
+  }
+
+  .gallery-main {
+    aspect-ratio: 1 / 1;
+    max-height: 320px;
+  }
+
+  .gallery-nav {
+    width: 34px;
+    height: 34px;
+  }
+
+  .gallery-nav svg { width: 16px; height: 16px; }
+
+  .gallery-counter {
+    font-size: 11px;
+    padding: 4px 10px;
+  }
+
+  .gallery-thumbs {
+    padding: 10px;
+    gap: 6px;
+  }
+
+  .gallery-thumbs img,
+  .gallery-thumbs .thumb-item {
+    width: 60px;
+    height: 45px;
+  }
+
+  .info-card {
+    padding: 14px;
+    border-radius: var(--radius);
+  }
+
+  .info-title { font-size: 17px; }
+  .info-price { font-size: 22px; }
+  .info-location { font-size: 13px; }
+
+  .specs-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .spec-item {
+    padding: 9px 10px;
+    border-radius: 10px;
+  }
+
+  .spec-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+  }
+
+  .spec-icon svg { width: 13px; height: 13px; }
+
+  .spec-label { font-size: 9.5px; }
+  .spec-value { font-size: 11.5px; }
+
+  .description-text {
+    font-size: 13.5px;
+  }
+
+  .action-row {
+    gap: 6px;
+  }
+
+  .btn-icon-text {
+    padding: 9px 8px;
+    font-size: 12px;
+  }
+
+  .btn-icon-text svg { width: 14px; height: 14px; }
+
+  .admin-actions {
+    gap: 5px;
+  }
+
+  .admin-status-btn {
+    padding: 8px 4px;
+    font-size: 10px;
+  }
+
+  .admin-status-btn svg { width: 14px; height: 14px; }
+
+  .ad-id { font-size: 11.5px; }
+}
