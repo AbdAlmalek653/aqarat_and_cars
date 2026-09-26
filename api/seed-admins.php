@@ -106,7 +106,7 @@ try {
         'admins' => $results
     ]);
 
-} } catch (Throwable $e) {
+ } catch (Throwable $e) {
     if (isset($pdo) && $pdo->inTransaction()) {
         $pdo->rollBack();
     }
