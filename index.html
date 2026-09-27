@@ -39,6 +39,7 @@
         <button class="btn-icon" title="البحث">
           <i data-lucide="search"></i>
         </button>
+        <!-- تم التأكد من أن النص هنا هو "تسجيل الدخول" -->
         <a href="pages/login.html" class="btn-login">
           <i data-lucide="log-in"></i>
           <span>تسجيل الدخول</span>
@@ -52,7 +53,7 @@
     </div>
   </header>
 
-  <!-- ===================== Hero ===================== -->
+  <!-- ===================== Hero + الفلتر المتدرج ===================== -->
   <section class="hero">
     <div class="container">
       <div class="hero-content">
@@ -63,103 +64,17 @@
         <h1 class="hero-title">
           ابحث عن <span class="gradient-text">عقارك</span> أو <span class="gradient-text">سيارتك</span> المثالية
         </h1>
-<p class="hero-subtitle">
-  <span class="hero-subtitle-deco">◆</span>
-  <span class="hero-subtitle-text">
-    منصة عربية موثوقة لبيع وشراء وإيجار العقارات والسيارات بأسعار تنافسية
-  </span>
-  <span class="hero-subtitle-deco">◆</span>
-</p>
+        <p class="hero-subtitle">
+          <span class="hero-subtitle-deco">◆</span>
+          <span class="hero-subtitle-text">
+            اختر ما يناسبك من الأسفل وشاهد الإعلانات فوراً
+          </span>
+          <span class="hero-subtitle-deco">◆</span>
+        </p>
       </div>
 
-      <div class="search-box">
-        <div class="search-tabs">
-          <button class="tab active" data-type="property">
-            <i data-lucide="building-2"></i>
-            عقارات
-          </button>
-          <button class="tab" data-type="car">
-            <i data-lucide="car"></i>
-            سيارات
-          </button>
-        </div>
-
-        <form class="search-form" id="searchForm">
-          <div class="form-group">
-            <i data-lucide="map-pin"></i>
-            <input type="text" placeholder="المدينة أو المنطقة..." id="searchLocation">
-          </div>
-
-          <div class="form-group">
-            <i data-lucide="tag"></i>
-            <select id="searchPurpose">
-              <option value="">الغرض</option>
-              <option value="sale">بيع</option>
-              <option value="rent">إيجار</option>
-            </select>
-          </div>
-
-          <button type="submit" class="btn btn-primary btn-lg">
-            <i data-lucide="search"></i>
-            <span>ابحث الآن</span>
-          </button>
-        </form>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===================== إحصائيات ===================== -->
-  <section class="stats-section">
-    <div class="container">
-      <div class="stats-grid">
-        <div class="stat-item">
-          <div class="stat-icon"><i data-lucide="home"></i></div>
-          <div>
-            <h3 class="stat-number" id="statProperties">0</h3>
-            <p class="stat-label">عقار متاح</p>
-          </div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-icon"><i data-lucide="car"></i></div>
-          <div>
-            <h3 class="stat-number" id="statCars">0</h3>
-            <p class="stat-label">سيارة معروضة</p>
-          </div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-icon"><i data-lucide="users"></i></div>
-          <div>
-            <h3 class="stat-number" id="statUsers">0</h3>
-            <p class="stat-label">مستخدم نشط</p>
-          </div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-icon"><i data-lucide="map-pinned"></i></div>
-          <div>
-            <h3 class="stat-number" id="statCities">14</h3>
-            <p class="stat-label">محافظة</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===================== ✨ الفلتر المتدرج (أحدث الإعلانات) ===================== -->
-  <section class="section" id="latestSection">
-    <div class="container">
-
-      <div class="section-header">
-        <div>
-          <h2 class="section-title">
-            <i data-lucide="sparkles"></i>
-            <span>تصفح الإعلانات</span>
-          </h2>
-          <p class="section-subtitle">اختر ما يناسبك وشاهد الإعلانات فوراً</p>
-        </div>
-      </div>
-
-      <!-- صندوق الفلتر المتدرج -->
-      <div class="cascade-filter" id="cascadeFilter">
+      <!-- ⭐ الفلتر المتدرج داخل الـ Hero -->
+      <div class="cascade-filter cascade-filter-hero" id="cascadeFilter">
 
         <!-- الخطوة 1: النوع -->
         <div class="cascade-step" data-step="1">
@@ -197,10 +112,41 @@
           </div>
         </div>
 
-        <!-- الخطوة 3: عرض النتائج -->
+        <!-- الخطوة 3: المحافظة -->
         <div class="cascade-step locked" data-step="3">
           <div class="cascade-step-title">
             <span class="cascade-step-num">3</span>
+            <span>اختر المحافظة</span>
+          </div>
+          <div class="cascade-city-wrap">
+            <div class="cascade-city-select">
+              <i data-lucide="map-pin"></i>
+              <select id="cascadeCity" disabled>
+                <option value="">— اختر المحافظة —</option>
+                <option value="damascus">دمشق</option>
+                <option value="rif-dimashq">ريف دمشق</option>
+                <option value="aleppo">حلب</option>
+                <option value="homs">حمص</option>
+                <option value="hama">حماة</option>
+                <option value="latakia">اللاذقية</option>
+                <option value="tartus">طرطوس</option>
+                <option value="daraa">درعا</option>
+                <option value="sweida">السويداء</option>
+                <option value="quneitra">القنيطرة</option>
+                <option value="deir-ezzor">دير الزور</option>
+                <option value="raqqa">الرقة</option>
+                <option value="hasakah">الحسكة</option>
+                <option value="idlib">إدلب</option>
+              </select>
+              <i data-lucide="chevron-down" class="cascade-city-arrow"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- الخطوة 4: عرض النتائج -->
+        <div class="cascade-step locked" data-step="4">
+          <div class="cascade-step-title">
+            <span class="cascade-step-num">4</span>
             <span>شاهد النتائج</span>
           </div>
           <button class="cascade-show-btn" id="cascadeShowBtn" disabled>
@@ -210,9 +156,53 @@
         </div>
 
       </div>
+    </div>
+  </section>
+
+  <!-- ===================== ⬇️ شريط النزول للإعلانات (بعرض كامل) ===================== -->
+  <a href="#stats-section" class="scroll-strip" id="scrollDownBtn" aria-label="انتقل إلى الإعلانات">
+    <!-- رسومات متحركة في الخلفية -->
+    <div class="scroll-strip-bg">
+      <span class="scroll-strip-dot"></span>
+      <span class="scroll-strip-dot"></span>
+      <span class="scroll-strip-dot"></span>
+      <span class="scroll-strip-dot"></span>
+      <span class="scroll-strip-dot"></span>
+      <span class="scroll-strip-wave"></span>
+      <span class="scroll-strip-wave wave-2"></span>
+    </div>
+
+    <!-- المحتوى -->
+    <div class="scroll-strip-content">
+      <span class="scroll-strip-line"></span>
+      <div class="scroll-strip-text">
+        <i data-lucide="sparkles" class="scroll-strip-icon-left"></i>
+        <span>إضغط هنا لتصفح كافة الإعلانات </span>
+        <i data-lucide="chevron-down" class="scroll-strip-arrow"></i>
+      </div>
+      <span class="scroll-strip-line"></span>
+    </div>
+  </a>
+
+  <!-- ===================== النتائج (تظهر بعد البحث) ===================== -->
+  <section class="section results-section" id="resultsSection" style="display:none;">
+    <div class="container">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">
+            <i data-lucide="search-check"></i>
+            <span>نتائج البحث</span>
+          </h2>
+          <p class="section-subtitle">الإعلانات المطابقة لاختياراتك</p>
+        </div>
+        <button class="link-more" id="clearResultsBtn" type="button" style="background:none;border:none;cursor:pointer;">
+          إغلاق النتائج
+          <i data-lucide="x"></i>
+        </button>
+      </div>
 
       <!-- شبكة الإعلانات -->
-      <div class="grid grid-4" id="latestGrid" style="display:none;"></div>
+      <div class="grid grid-4" id="latestGrid"></div>
 
       <!-- حالة فارغة -->
       <div id="cascadeEmpty" style="display:none;" class="empty-state">
@@ -228,7 +218,42 @@
           تصفح كل الإعلانات
         </a>
       </div>
+    </div>
+  </section>
 
+  <!-- ===================== إحصائيات ===================== -->
+  <section class="stats-section" id="stats-section">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-icon"><i data-lucide="home"></i></div>
+          <div>
+            <h3 class="stat-number" id="statProperties">0</h3>
+            <p class="stat-label">عقار متاح</p>
+          </div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon"><i data-lucide="car"></i></div>
+          <div>
+            <h3 class="stat-number" id="statCars">0</h3>
+            <p class="stat-label">سيارة معروضة</p>
+          </div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon"><i data-lucide="users"></i></div>
+          <div>
+            <h3 class="stat-number" id="statUsers">0</h3>
+            <p class="stat-label">مستخدم نشط</p>
+          </div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon"><i data-lucide="map-pinned"></i></div>
+          <div>
+            <h3 class="stat-number" id="statCities">14</h3>
+            <p class="stat-label">محافظة</p>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -506,9 +531,10 @@
       <i data-lucide="heart"></i>
       <span>المفضلة</span>
     </a>
+    <!-- تم تغيير "حسابي" إلى "تسجيل الدخول" -->
     <a href="pages/account.html" class="bottom-nav-item">
       <i data-lucide="user"></i>
-      <span>حسابي</span>
+      <span>تسجيل الدخول</span>
     </a>
   </nav>
 

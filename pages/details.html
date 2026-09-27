@@ -111,6 +111,11 @@
 </button>
 </div>
 
+<button type="button" class="admin-edit-btn" id="adminEditBtn">
+<i data-lucide="pencil"></i>
+<span>تعديل الإعلان</span>
+</button>
+
 <button type="button" class="admin-delete-btn" id="adminDeleteBtn">
 <i data-lucide="trash-2"></i>
 <span>حذف الإعلان نهائياً</span>
@@ -147,6 +152,108 @@
 </div>
 </aside>
 </div>
+</div>
+
+<!-- ===================== نافذة تعديل الإعلان ===================== -->
+<div class="edit-modal" id="editModal">
+  <div class="edit-modal-overlay" onclick="closeEditModal()"></div>
+  <div class="edit-modal-content">
+    <button class="edit-modal-close" onclick="closeEditModal()" type="button">
+      <i data-lucide="x"></i>
+    </button>
+
+    <div class="edit-modal-header">
+      <i data-lucide="pencil"></i>
+      <h2>تعديل الإعلان</h2>
+    </div>
+
+    <form id="editForm" class="edit-form">
+
+      <div class="edit-field">
+        <label for="editTitle">عنوان الإعلان</label>
+        <input type="text" id="editTitle" required>
+      </div>
+
+      <div class="edit-row">
+        <div class="edit-field">
+          <label for="editPrice">السعر</label>
+          <input type="number" id="editPrice" required>
+        </div>
+        <div class="edit-field">
+          <label for="editCurrency">العملة</label>
+          <select id="editCurrency">
+            <option value="USD">دولار أمريكي</option>
+            <option value="SYP">ليرة سورية</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="edit-row">
+        <div class="edit-field">
+          <label for="editCity">المحافظة</label>
+          <select id="editCity">
+            <option value="damascus">دمشق</option>
+            <option value="rif-dimashq">ريف دمشق</option>
+            <option value="aleppo">حلب</option>
+            <option value="homs">حمص</option>
+            <option value="hama">حماة</option>
+            <option value="latakia">اللاذقية</option>
+            <option value="tartus">طرطوس</option>
+            <option value="daraa">درعا</option>
+            <option value="sweida">السويداء</option>
+            <option value="quneitra">القنيطرة</option>
+            <option value="deir-ezzor">دير الزور</option>
+            <option value="raqqa">الرقة</option>
+            <option value="hasakah">الحسكة</option>
+            <option value="idlib">إدلب</option>
+          </select>
+        </div>
+        <div class="edit-field">
+          <label for="editArea">المنطقة</label>
+          <input type="text" id="editArea">
+        </div>
+      </div>
+
+      <div class="edit-field">
+        <label for="editDescription">الوصف</label>
+        <textarea id="editDescription" rows="5"></textarea>
+      </div>
+
+      <div class="edit-row">
+        <div class="edit-field">
+          <label for="editWhatsapp">رقم الواتساب</label>
+          <input type="tel" id="editWhatsapp">
+        </div>
+        <div class="edit-field">
+          <label for="editStatus">الحالة</label>
+          <select id="editStatus">
+            <option value="active">متاح</option>
+            <option value="sold">مباع</option>
+            <option value="rented">مؤجر</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="edit-field edit-checkbox">
+        <label class="edit-toggle">
+          <input type="checkbox" id="editFeatured">
+          <span>⭐ إعلان مميز</span>
+        </label>
+      </div>
+
+      <div class="edit-actions">
+        <button type="button" class="btn btn-outline" onclick="closeEditModal()">
+          <i data-lucide="x"></i>
+          <span>إلغاء</span>
+        </button>
+        <button type="submit" class="btn btn-primary" id="editSaveBtn">
+          <i data-lucide="save"></i>
+          <span>حفظ التعديلات</span>
+        </button>
+      </div>
+
+    </form>
+  </div>
 </div>
 
 <footer class="footer">

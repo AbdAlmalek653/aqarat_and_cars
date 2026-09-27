@@ -19,7 +19,8 @@ function initIcons() { if (window.lucide) window.lucide.createIcons(); }
    ========================================== */
 function showStep(n) {
   ['step1','step2','step3','step4'].forEach((id, i) => {
-    document.getElementById(id).style.display = (i + 1 === n) ? 'block' : 'none';
+    const el = document.getElementById(id);
+    if (el) el.style.display = (i + 1 === n) ? 'block' : 'none';
   });
   updateStepsIndicator(n);
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -321,7 +322,7 @@ function validateForm() {
 
   if (!document.getElementById('city').value) { showFieldError('city', 'الرجاء اختيار المحافظة'); ok = false; }
 
-  // ✅ التحقق من رقم الواتساب
+  // التحقق من رقم الواتساب
   const whatsapp = document.getElementById('whatsapp').value.trim();
   if (!whatsapp) {
     showFieldError('whatsapp', 'الرجاء إدخال رقم الواتساب');
@@ -415,6 +416,27 @@ function hideAlert() {
 }
 
 /* ==========================================
+   تحديث الإحصائيات بعد الإضافة
+   ========================================== */
+function updateStatsAfterListing(type) {
+  // القيم الافتراضية (نفس القيم الموجودة في about.html و index.html)
+  const DEFAULT_PROPS = 6500;
+  const DEFAULT_CARS = 3800;
+
+  try {
+    if (type === 'property') {
+      let current = parseInt(localStorage.getItem('propsCount')) || DEFAULT_PROPS;
+      localStorage.setItem('propsCount', current + 1);
+    } else if (type === 'car') {
+      let current = parseInt(localStorage.getItem('carsCount')) || DEFAULT_CARS;
+      localStorage.setItem('carsCount', current + 1);
+    }
+  } catch (e) {
+    console.warn('لم يتم تحديث الإحصائيات:', e);
+  }
+}
+
+/* ==========================================
    إرسال النموذج
    ========================================== */
 function setupFormSubmit() {
@@ -458,7 +480,7 @@ function setupFormSubmit() {
       whatsapp: document.getElementById('whatsapp').value.trim(),
       price: document.getElementById('price').value,
       currency: document.getElementById('currency').value,
-      negotiable: document.getElementById('negotiable').checked, // ✅ السعر قابل للتفاوض
+      negotiable: document.getElementById('negotiable').checked,
       description: document.getElementById('description').value.trim(),
       images: uploadedImages.map(img => img.data),
       details: buildDetails()
@@ -477,6 +499,15 @@ function setupFormSubmit() {
         initIcons();
         return;
       }
+
+      // ✅ زيادة العداد المناسب في localStorage
+      updateStatsAfterListing(state.type);
+
+      // ✅ علامة لإعادة تحميل بيانات الصفحة الرئيسية عند الرجوع
+      try {
+        sessionStorage.setItem('souq_reload_home', '1');
+      } catch (err) {}
+
       showStep(4);
       initIcons();
     }, 700);
@@ -502,13 +533,11 @@ function buildDetails() {
       details.bathrooms = document.getElementById('bathrooms').value;
       details.floor = document.getElementById('floor').value;
       
-      // ✅ استبدال حقلي "إجمالي الطوابق" و "عمر البناء" بالحقلين الجديدين
       details.direction = document.getElementById('direction').value;
       details.vacancyType = document.getElementById('vacancyType').value;
 
       details.heating = document.getElementById('heating').value;
       
-      // ✅ حقل نوع الإكساء
       details.finishingType = document.getElementById('finishingType').value;
 
       if (state.purpose === 'rent') {
@@ -609,6 +638,25 @@ function resetForm() {
 }
 
 /* ==========================================
+   ✅ قراءة النوع من الرابط (Preselect Type)
+   ========================================== */
+function checkPreselectedType() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const preselectType = urlParams.get('type');
+
+  if (preselectType === 'property' || preselectType === 'car') {
+    state.type = preselectType;
+
+    const purposeNameEl = document.getElementById('purposeTypeName');
+    if (purposeNameEl) {
+      purposeNameEl.textContent = preselectType === 'property' ? 'العقار' : 'السيارة';
+    }
+
+    showStep(2);
+  }
+}
+
+/* ==========================================
    تشغيل
    ========================================== */
 document.addEventListener('DOMContentLoaded', () => {
@@ -629,4 +677,7 @@ document.addEventListener('DOMContentLoaded', () => {
     state.purpose = null;
     showStep(1);
   });
+
+  // ✅ التحقق من النوع المُمرَّر في الرابط
+  checkPreselectedType();
 });
