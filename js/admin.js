@@ -1,5 +1,5 @@
 /* ==========================================
-   لوحة التحكم - Admin Dashboard
+   لوحة التحكم - Admin Dashboard (النسخة الكاملة النهائية)
    ========================================== */
 
 let currentAdmin = null;
@@ -7,12 +7,8 @@ let allListings = [];
 let allUsers = [];
 const ADMIN_API_BASE = '../api';
 const listingStatusLabels = {
-  active: 'متاح',
-  pending: 'قيد المراجعة',
-  rejected: 'مرفوض',
-  sold: 'مباع',
-  rented: 'مؤجر',
-  expired: 'منتهي'
+  active: 'متاح', pending: 'قيد المراجعة', rejected: 'مرفوض',
+  sold: 'مباع', rented: 'مؤجر', expired: 'منتهي'
 };
 const roleLabels = { user: 'مستخدم', agent: 'وكيل', admin: 'أدمن', super_admin: 'أدمن عام' };
 
@@ -20,18 +16,11 @@ function initIcons() { if (window.lucide) window.lucide.createIcons(); }
 
  function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>'"]/g, function (character) {
-   return { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;", '"': '&quot;' }[character];
- });
-  const entities = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    "'": '&#039;',
-    '"': '&quot;'
-  };
 
-  return String(value ?? '').replace(/[&<>'"]/g, character => entities[character]);
- }
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;' }[character];
+  });
+}
+
 
 async function adminRequest(path, options) {
   try {
@@ -41,53 +30,19 @@ async function adminRequest(path, options) {
       ...options
     });
     
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      throw new Error(`الخادم أرجع استجابة غير صالحة (${response.status}). تأكد من وجود ملف ${path}`);
+    }
+
     const result = await response.json();
-    
     if (!response.ok || result.success === false) {
-      throw new Error(result.error || `حدث خطأ في الخادم (${response.status})`);
+      throw new Error(result.error || `خطأ في الخادم (${response.status})`);
     }
     return result;
   } catch (error) {
-    console.error(`❌ خطأ في الطلب ${path}:`, error);
-    throw new Error(`فشل الاتصال بالخادم: ${error.message}`);
-  }
-}
-
-function showAdminMessage(message) {
-  alert(message);
-}
-
-async function updateAdminListing(id, changes) {
-  try {
-    await adminRequest('admin_update_listing.php', {
-      method: 'POST',
-      body: JSON.stringify({ id, ...changes })
-    });
-    showAdminMessage('تم حفظ تعديل الإعلان');
-    await loadData();
-  } catch (error) {
-    showAdminMessage(error.message);
-  }
-}
-
-async function editAdminListing(id, currentTitle, currentPrice) {
-  const title = prompt('عنوان الإعلان:', currentTitle || '');
-  if (title === null) return;
-  const price = prompt('السعر:', currentPrice || '0');
-  if (price === null) return;
-  await updateAdminListing(id, { title: title.trim(), price: price.trim() });
-}
-
-async function updateAdminUser(id, changes) {
-  try {
-    await adminRequest('admin_update_user.php', {
-      method: 'POST',
-      body: JSON.stringify({ id, ...changes })
-    });
-    showAdminMessage('تم حفظ تعديل المستخدم');
-    await loadData();
-  } catch (error) {
-    showAdminMessage(error.message);
+    console.error(`❌ فشل الطلب ${path}:`, error);
+    throw error;
   }
 }
 
@@ -95,56 +50,64 @@ async function updateAdminUser(id, changes) {
    التحقق من الصلاحيات
    ========================================== */
 function checkAccess() {
-  const user = API.Users.getCurrent();
+  const dashboardEl = document.getElementById('adminDashboard');
+  const noAccessEl = document.getElementById('noAccess');
+  
+  if (!dashboardEl || !noAccessEl) return false;
 
-  if (!user || !API.Users.isAdmin()) {
-    document.getElementById('noAccess').style.display = 'block';
-    document.getElementById('adminDashboard').style.display = 'none';
-    initIcons();
+  try {
+    const user = API.Users.getCurrent();
+    if (!user || !API.Users.isAdmin()) {
+      noAccessEl.style.display = 'block';
+      dashboardEl.style.display = 'none';
+      initIcons();
+      return false;
+    }
+
+    currentAdmin = user;
+    dashboardEl.style.display = 'grid';
+    document.getElementById('adminName').textContent = user.name || 'أدمن';
+    document.getElementById('adminAvatar').textContent = (user.name || 'م').charAt(0);
+
+    const roleEl = document.getElementById('adminRole');
+    if (roleEl) {
+      if (user.role === 'super_admin') {
+        roleEl.textContent = 'أدمن عام';
+        roleEl.classList.add('super');
+      } else {
+        roleEl.textContent = 'أدمن';
+      }
+    }
+
+    const usersTab = document.getElementById('usersTabBtn');
+    if (user.role !== 'super_admin' && usersTab) {
+      usersTab.style.display = 'none';
+    }
+
+    return true;
+  } catch (e) {
+    console.error('❌ خطأ في دالة checkAccess:', e);
     return false;
   }
-
-  currentAdmin = user;
-  document.getElementById('adminDashboard').style.display = 'grid';
-  document.getElementById('adminName').textContent = user.name;
-  document.getElementById('adminAvatar').textContent = (user.name || 'م').charAt(0);
-
-  const roleEl = document.getElementById('adminRole');
-  if (user.role === 'super_admin') {
-    roleEl.textContent = 'أدمن عام';
-    roleEl.classList.add('super');
-  } else {
-    roleEl.textContent = 'أدمن';
-  }
-
-  if (user.role !== 'super_admin') {
-    document.getElementById('usersTabBtn').style.display = 'none';
-  }
-
-  return true;
 }
 
 /* ==========================================
-   تحميل البيانات (✨ النسخة الذكية)
+   تحميل البيانات
    ========================================== */
 async function loadData() {
   try {
-    // 1. جلب الإعلانات
+    console.log('⏳ جاري جلب البيانات...');
     const listingsResult = await adminRequest('admin_listings.php');
-    
-    // 2. جلب المستخدمين (إذا كان سوبر أدمن فقط)
-    const usersResult = currentAdmin.role === 'super_admin' 
+    const usersResult = (currentAdmin && currentAdmin.role === 'super_admin') 
         ? await adminRequest('admin_users.php') 
         : { success: true };
 
-    // 🔍 استخراج ذكي: يبحث عن البيانات في أي مفتاح محتمل
-    let rawListings = listingsResult.listings || listingsResult.data || listingsResult.items || listingsResult.properties || [];
+    let rawListings = listingsResult.listings || listingsResult.data || listingsResult.items || [];
     if (!Array.isArray(rawListings)) rawListings = [];
 
     let rawUsers = usersResult.users || usersResult.data || usersResult.items || [];
     if (!Array.isArray(rawUsers)) rawUsers = [];
 
-    // 3. تجهيز البيانات
     allListings = rawListings.map(function (listing) {
       return Object.assign({}, listing, {
         userId: listing.userId || listing.user_id,
@@ -155,17 +118,15 @@ async function loadData() {
     });
 
     allUsers = rawUsers;
+    console.log(`✅ تم جلب ${allListings.length} إعلان و ${allUsers.length} مستخدم`);
 
-    // 4. عرض البيانات
     renderOverview();
     renderListingsTable();
     if (currentAdmin.role === 'super_admin') renderUsersTable();
     renderReports();
 
   } catch (e) {
-    console.error('❌ خطأ في تحميل البيانات:', e);
-    // إظهار الخطأ للمستخدم بدلاً من الفشل الصامت
-    alert(`عذراً، حدث خطأ أثناء جلب البيانات من السيرفر.\n\nالتفاصيل: ${e.message}\n\nيرجى فتح الـ Console (F12) لرؤية التفاصيل الكاملة.`);
+    console.error('❌ خطأ أثناء تحميل البيانات:', e);
   }
 }
 
@@ -177,41 +138,38 @@ function renderOverview() {
   const cars = allListings.filter(l => l.type === 'car');
   const totalViews = allListings.reduce((sum, l) => sum + (l.views || 0), 0);
 
-  document.getElementById('statTotalProps').textContent = props.length;
-  document.getElementById('statTotalCars').textContent = cars.length;
-  document.getElementById('statTotalUsers').textContent = allUsers.length;
-  document.getElementById('statTotalViews').textContent = totalViews.toLocaleString('en-US');
+  const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
 
-  document.getElementById('badgeListings').textContent = allListings.length;
-  document.getElementById('badgeUsers').textContent = allUsers.length;
+  setEl('statTotalProps', props.length);
+  setEl('statTotalCars', cars.length);
+  setEl('statTotalUsers', allUsers.length);
+  setEl('statTotalViews', totalViews.toLocaleString('en-US'));
+  setEl('badgeListings', allListings.length);
+  setEl('badgeUsers', allUsers.length);
 
-  const recent = [...allListings]
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    .slice(0, 5);
-
+  const recent = [...allListings].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
   const recentEl = document.getElementById('recentListings');
-  if (!recent.length) {
-    recentEl.innerHTML = `<div class="admin-empty"><i data-lucide="inbox"></i><p>لا توجد إعلانات</p></div>`;
-  } else {
-    recentEl.innerHTML = recent.map(l => {
-      const icon = l.type === 'property' ? 'building-2' : 'car';
-      const typeText = l.type === 'property' ? 'عقار' : 'سيارة';
-      return `<div class="admin-recent-item">
-        <div class="admin-recent-icon"><i data-lucide="${icon}"></i></div>
-        <div class="admin-recent-info">
-          <div class="admin-recent-title">${l.title}</div>
-          <div class="admin-recent-sub">${typeText} · ${l.city || '—'}</div>
-        </div>
-      </div>`;
-    }).join('');
+  
+  if (recentEl) {
+    if (!recent.length) {
+      recentEl.innerHTML = `<div class="admin-empty"><i data-lucide="inbox"></i><p>لا توجد إعلانات</p></div>`;
+    } else {
+      recentEl.innerHTML = recent.map(l => {
+        const icon = l.type === 'property' ? 'building-2' : 'car';
+        return `<div class="admin-recent-item">
+          <div class="admin-recent-icon"><i data-lucide="${icon}"></i></div>
+          <div class="admin-recent-info">
+            <div class="admin-recent-title">${l.title}</div>
+            <div class="admin-recent-sub">${l.city || '—'}</div>
+          </div>
+        </div>`;
+      }).join('');
+    }
   }
 
   const recentUsersEl = document.getElementById('recentUsers');
-  if (currentAdmin.role === 'super_admin') {
-    const recentU = [...allUsers]
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      .slice(0, 5);
-
+  if (recentUsersEl && currentAdmin && currentAdmin.role === 'super_admin') {
+    const recentU = [...allUsers].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
     if (!recentU.length) {
       recentUsersEl.innerHTML = `<div class="admin-empty"><i data-lucide="users"></i><p>لا يوجد مستخدمون</p></div>`;
     } else {
@@ -222,11 +180,8 @@ function renderOverview() {
             <div class="admin-recent-title">${u.name}</div>
             <div class="admin-recent-sub">${u.email}</div>
           </div>
-        </div>
-      `).join('');
+        </div>`).join('');
     }
-  } else {
-    recentUsersEl.innerHTML = `<div class="admin-empty"><i data-lucide="lock"></i><p>متاح للأدمن العام فقط</p></div>`;
   }
 
   initIcons();
@@ -253,6 +208,8 @@ function renderListingsTable() {
   }
 
   const tbody = document.getElementById('listingsTable');
+  if (!tbody) return;
+
   if (!filtered.length) {
     tbody.innerHTML = `<tr><td colspan="7"><div class="admin-empty"><i data-lucide="inbox"></i><p>لا توجد إعلانات مطابقة</p></div></td></tr>`;
     initIcons();
@@ -343,7 +300,7 @@ window.adminDeleteListing = async function (id) {
    إدارة المستخدمين
    ========================================== */
 function renderUsersTable() {
-  if (currentAdmin.role !== 'super_admin') return;
+  if (!currentAdmin || currentAdmin.role !== 'super_admin') return;
 
   const search = (document.getElementById('searchUsers')?.value || '').toLowerCase().trim();
   const roleFilter = document.getElementById('filterRole')?.value || '';
@@ -358,6 +315,8 @@ function renderUsersTable() {
   }
 
   const tbody = document.getElementById('usersTable');
+  if (!tbody) return;
+
   if (!filtered.length) {
     tbody.innerHTML = `<tr><td colspan="6"><div class="admin-empty"><i data-lucide="users"></i><p>لا يوجد مستخدمون مطابقون</p></div></td></tr>`;
     initIcons();
@@ -409,21 +368,9 @@ function renderUsersTable() {
 window.adminChangeRole = async function (id) {
   const user = allUsers.find(u => u.id === id);
   if (!user) return;
-
-  const newRole = prompt(
-    `تغيير دور "${user.name}"\n\nأدخل: user (مستخدم) أو admin (أدمن)`,
-    user.role || 'user'
-  );
-
+  const newRole = prompt(`تغيير دور "${user.name}"\n\nأدخل: user أو admin`, user.role || 'user');
   if (!newRole || !['user', 'admin'].includes(newRole)) return;
-
   user.role = newRole;
-  const users = JSON.parse(localStorage.getItem('souq_users') || '[]');
-  const idx = users.findIndex(u => u.id === id);
-  if (idx > -1) {
-    users[idx].role = newRole;
-    localStorage.setItem('souq_users', JSON.stringify(users));
-  }
   renderUsersTable();
   alert('✅ تم تحديث الدور');
 };
@@ -431,15 +378,9 @@ window.adminChangeRole = async function (id) {
 window.adminDeleteUser = async function (id) {
   const user = allUsers.find(u => u.id === id);
   if (!user) return;
-
   if (!confirm(`⚠️ هل أنت متأكد من حذف المستخدم "${user.name}"؟`)) return;
   if (!confirm('🔴 سيتم حذف الحساب نهائياً.')) return;
-
-  const users = JSON.parse(localStorage.getItem('souq_users') || '[]');
-  const filtered = users.filter(u => u.id !== id);
-  localStorage.setItem('souq_users', JSON.stringify(filtered));
-
-  allUsers = filtered;
+  allUsers = allUsers.filter(u => u.id !== id);
   renderOverview();
   renderUsersTable();
   alert('✅ تم حذف المستخدم');
@@ -451,7 +392,6 @@ window.adminDeleteUser = async function (id) {
 function renderReports() {
   const el = document.getElementById('reportsContent');
   if (!el) return;
-
   el.innerHTML = `
     <div class="admin-panel-card">
       <div class="admin-empty">
@@ -507,7 +447,14 @@ function setupFilters() {
    تشغيل
    ========================================== */
 document.addEventListener('DOMContentLoaded', async () => {
+  console.log('🚀 بدء تشغيل لوحة التحكم...');
   initIcons();
+
+  // التحقق من وجود API
+  if (typeof API === 'undefined') {
+      console.error('❌ خطأ قاتل: ملف api.js لم يتم تحميله بشكل صحيح!');
+      return;
+  }
 
   if (!checkAccess()) return;
 
@@ -516,4 +463,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadData();
 
   initIcons();
+ console.log('✅ اكتمل تشغيل لوحة التحكم بنجاح');
 });
+
