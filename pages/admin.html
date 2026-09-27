@@ -11,6 +11,114 @@
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/pages.css">
   <link rel="stylesheet" href="../css/admin.css">
+  
+  <!-- ✨ كود الطوارئ: إجبار لوحة التحكم على التوافق مع الجوال ✨ -->
+  <style>
+    @media (max-width: 768px) {
+      /* 1. لوحة التحكم عمود واحد */
+      .admin-dashboard {
+        display: block !important;
+        padding: 15px 0 !important;
+      }
+
+      /* 2. القائمة الجانبية تصبح شريطاً أفقياً */
+      .admin-sidebar {
+        position: static !important;
+        width: 100% !important;
+        margin-bottom: 20px !important;
+        padding: 15px !important;
+        border-radius: 15px !important;
+      }
+
+      .admin-user-box {
+        display: none !important;
+      }
+
+      /* 3. شريط أفقي للأزرار */
+      .admin-menu {
+        display: flex !important;
+        flex-direction: row !important;
+        overflow-x: auto !important;
+        gap: 8px !important;
+        padding-bottom: 8px !important;
+        scrollbar-width: none !important;
+      }
+      .admin-menu::-webkit-scrollbar { display: none !important; }
+
+      .admin-menu-btn {
+        flex: 0 0 auto !important;
+        padding: 10px 16px !important;
+        font-size: 13px !important;
+        white-space: nowrap !important;
+      }
+
+      .admin-menu-btn.danger { display: none !important; }
+
+      /* 4. إحصائيات 2x2 */
+      .admin-stats {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 10px !important;
+      }
+
+      .admin-stat-card {
+        display: flex !important;
+        flex-direction: column !important;
+        text-align: center !important;
+        padding: 15px 10px !important;
+      }
+
+      .admin-stat-icon {
+        margin: 0 auto 8px !important;
+      }
+
+      .admin-stat-num {
+        font-size: 18px !important;
+      }
+
+      /* 5. الجداول قابلة للتمرير */
+      .admin-table-wrap {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        margin: 0 -15px !important;
+        padding: 0 15px !important;
+      }
+
+      .admin-table {
+        min-width: 700px !important;
+      }
+
+      /* 6. الفلاتر بعرض كامل */
+      .admin-filters {
+        flex-direction: column !important;
+        gap: 10px !important;
+      }
+
+      .admin-search-input, 
+      .admin-select {
+        width: 100% !important;
+        min-width: 0 !important;
+      }
+
+      /* 7. الأزرار في الجدول */
+      .admin-actions {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 5px !important;
+      }
+
+      .admin-icon-btn {
+        width: 34px !important;
+        height: 34px !important;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .admin-stats {
+        grid-template-columns: 1fr !important;
+      }
+    }
+  </style>
 </head>
 
 <body>
