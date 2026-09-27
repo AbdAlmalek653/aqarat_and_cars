@@ -735,4 +735,4 @@ document.addEventListener('DOMContentLoaded', () => {
     loadFeaturedCars();
     loadStats();
   }, 10000);
-});
+});git push origin ahmad
