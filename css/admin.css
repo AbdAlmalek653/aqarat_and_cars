@@ -141,8 +141,15 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .admin-page-header {
@@ -200,10 +207,25 @@
   height: 24px;
 }
 
-.admin-stat-icon.blue { background: rgba(59, 130, 246, 0.15); color: #60A5FA; }
-.admin-stat-icon.green { background: rgba(16, 185, 129, 0.15); color: #34D399; }
-.admin-stat-icon.orange { background: rgba(245, 158, 11, 0.15); color: #FBBF24; }
-.admin-stat-icon.purple { background: rgba(139, 92, 246, 0.15); color: #A78BFA; }
+.admin-stat-icon.blue {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60A5FA;
+}
+
+.admin-stat-icon.green {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34D399;
+}
+
+.admin-stat-icon.orange {
+  background: rgba(245, 158, 11, 0.15);
+  color: #FBBF24;
+}
+
+.admin-stat-icon.purple {
+  background: rgba(139, 92, 246, 0.15);
+  color: #A78BFA;
+}
 
 .admin-stat-num {
   font-size: 24px;
@@ -386,18 +408,57 @@
   font-weight: 700;
 }
 
-.admin-tag.property { background: rgba(59, 130, 246, 0.15); color: #93C5FD; }
-.admin-tag.car { background: rgba(16, 185, 129, 0.15); color: #6EE7B7; }
-.admin-tag.active { background: rgba(16, 185, 129, 0.15); color: #6EE7B7; }
-.admin-tag.sold { background: rgba(239, 68, 68, 0.15); color: #FCA5A5; }
-.admin-tag.rented { background: rgba(245, 158, 11, 0.15); color: #FBBF24; }
-.admin-tag.user { background: rgba(100, 116, 139, 0.2); color: #94A3B8; }
-.admin-tag.admin { background: rgba(59, 130, 246, 0.15); color: #93C5FD; }
-.admin-tag.super_admin { background: rgba(239, 68, 68, 0.15); color: #FCA5A5; }
+.admin-tag.property {
+  background: rgba(59, 130, 246, 0.15);
+  color: #93C5FD;
+}
+
+.admin-tag.car {
+  background: rgba(16, 185, 129, 0.15);
+  color: #6EE7B7;
+}
+
+.admin-tag.active {
+  background: rgba(16, 185, 129, 0.15);
+  color: #6EE7B7;
+}
+
+.admin-tag.sold {
+  background: rgba(239, 68, 68, 0.15);
+  color: #FCA5A5;
+}
+
+.admin-tag.rented {
+  background: rgba(245, 158, 11, 0.15);
+  color: #FBBF24;
+}
+
+.admin-tag.user {
+  background: rgba(100, 116, 139, 0.2);
+  color: #94A3B8;
+}
+
+.admin-tag.admin {
+  background: rgba(59, 130, 246, 0.15);
+  color: #93C5FD;
+}
+
+.admin-tag.super_admin {
+  background: rgba(239, 68, 68, 0.15);
+  color: #FCA5A5;
+}
 
 .admin-actions {
   display: flex;
   gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.admin-action-select {
+  min-width: 108px;
+  padding: 7px 8px;
+  font-size: 12px;
 }
 
 .admin-icon-btn {
@@ -503,28 +564,34 @@
     grid-template-columns: 1fr;
     gap: 16px;
   }
+
   .admin-sidebar {
     position: static;
     padding: 16px;
   }
+
   .admin-menu {
     flex-direction: row;
     overflow-x: auto;
     gap: 6px;
     padding-bottom: 4px;
   }
+
   .admin-menu-btn {
     white-space: nowrap;
     flex-shrink: 0;
     padding: 9px 12px;
     font-size: 12.5px;
   }
+
   .admin-menu-btn span:not(.admin-badge) {
     display: inline;
   }
+
   .admin-menu-btn.danger {
     display: none;
   }
+
   .admin-two-cols {
     grid-template-columns: 1fr;
   }
@@ -534,20 +601,25 @@
   .admin-table-wrap {
     overflow-x: auto;
   }
+
   .admin-table {
     min-width: 700px;
   }
+
   .admin-stats {
     grid-template-columns: 1fr 1fr;
   }
+
   .admin-stat-card {
     padding: 14px;
     gap: 10px;
   }
+
   .admin-stat-icon {
     width: 42px;
     height: 42px;
   }
+
   .admin-stat-num {
     font-size: 18px;
   }

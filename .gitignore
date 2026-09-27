@@ -1,7 +1,10 @@
 *.sqlite
+
+*.db
+.env
+vendor/
 database/*.db
 database/*.db-*
 database/*.sqlite
 database/*.sqlite3
-.env
-vendor/
+
