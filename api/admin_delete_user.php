@@ -2,44 +2,20 @@
 require_once 'config.php';
 require_once 'helpers.php';
 
-// التحقق من أن المستخدم الحالي أدمن
-requireAdmin($pdo);
-
-// التحقق الإضافي: هل هو سوبر أدمن؟ (لأن الحذف صلاحية خطيرة)
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'super_admin') {
-    respond(['success' => false, 'error' => 'فقط السوبر أدمن يمكنه حذف المستخدمين'], 403);
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
 
-// قراءة البيانات المرسلة
-$input = json_decode(file_get_contents('php://input'), true);
-$id = $input['id'] ?? null;
-
-if (!$id) {
-    respond(['success' => false, 'error' => 'معرف المستخدم مطلوب'], 400);
-}
-
-// منع المستخدم من حذف نفسه
-if ($id == $_SESSION['user_id']) {
-    respond(['success' => false, 'error' => 'لا يمكنك حذف حسابك الخاص'], 400);
-}
-
-try {
-    // التحقق من وجود المستخدم أولاً
-    $checkStmt = $pdo->prepare("SELECT id, name FROM users WHERE id = ?");
-    $checkStmt->execute([$id]);
-    $user = $checkStmt->fetch();
-
-    if (!$user) {
-        respond(['success' => false, 'error' => 'المستخدم غير موجود'], 404);
-    }
-
-    // تنفيذ الحذف
-    $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
-    $stmt->execute([$id]);
-
-    respond(['success' => true, 'message' => 'تم حذف المستخدم بنجاح']);
-
-} catch (PDOException $e) {
-    respond(['success' => false, 'error' => 'خطأ في قاعدة البيانات: ' . $e->getMessage()], 500);
-}
+// كود تشخيصي: نطبع محتوى الجلسة لنرى ما يملكه السيرفر
+header('Content-Type: application/json');
+echo json_encode([
+    'success' => false,
+    'error' => 'بيانات التشخيص',
+    'debug' => [
+        'session_all' => $_SESSION, // هذا سيعرض كل المتغيرات الموجودة في الجلسة
+        'session_role' => $_SESSION['role'] ?? 'غير موجود',
+        'session_user_id' => $_SESSION['user_id'] ?? 'غير موجود'
+    ]
+]);
+exit;
 ?>
