@@ -246,6 +246,111 @@
       </main>
     </div>
 
+    <!-- ===================== نافذة تعديل الإعلان (للأدمن) ===================== -->
+    <div class="edit-modal" id="adminEditModal" style="display:none;">
+      <div class="edit-modal-overlay" onclick="closeAdminEditModal()"></div>
+      <div class="edit-modal-content">
+        <button class="edit-modal-close" onclick="closeAdminEditModal()" type="button">
+          <i data-lucide="x"></i>
+        </button>
+
+        <div class="edit-modal-header">
+          <i data-lucide="pencil"></i>
+          <h2>تعديل الإعلان</h2>
+        </div>
+
+        <form id="adminEditForm" class="edit-form">
+          <input type="hidden" id="adminEditId">
+
+          <div class="edit-field">
+            <label for="adminEditTitle">عنوان الإعلان</label>
+            <input type="text" id="adminEditTitle" required>
+          </div>
+
+          <div class="edit-row">
+            <div class="edit-field">
+              <label for="adminEditPrice">السعر</label>
+              <input type="number" id="adminEditPrice" required>
+            </div>
+            <div class="edit-field">
+              <label for="adminEditCurrency">العملة</label>
+              <select id="adminEditCurrency">
+                <option value="USD">دولار أمريكي</option>
+                <option value="SYP">ليرة سورية</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="edit-row">
+            <div class="edit-field">
+              <label for="adminEditCity">المحافظة</label>
+              <select id="adminEditCity">
+                <option value="damascus">دمشق</option>
+                <option value="rif-dimashq">ريف دمشق</option>
+                <option value="aleppo">حلب</option>
+                <option value="homs">حمص</option>
+                <option value="hama">حماة</option>
+                <option value="latakia">اللاذقية</option>
+                <option value="tartus">طرطوس</option>
+                <option value="daraa">درعا</option>
+                <option value="sweida">السويداء</option>
+                <option value="quneitra">القنيطرة</option>
+                <option value="deir-ezzor">دير الزور</option>
+                <option value="raqqa">الرقة</option>
+                <option value="hasakah">الحسكة</option>
+                <option value="idlib">إدلب</option>
+              </select>
+            </div>
+            <div class="edit-field">
+              <label for="adminEditArea">المنطقة</label>
+              <input type="text" id="adminEditArea">
+            </div>
+          </div>
+
+          <div class="edit-field">
+            <label for="adminEditDescription">الوصف</label>
+            <textarea id="adminEditDescription" rows="4"></textarea>
+          </div>
+
+          <div class="edit-row">
+            <div class="edit-field">
+              <label for="adminEditWhatsapp">رقم الواتساب</label>
+              <input type="tel" id="adminEditWhatsapp">
+            </div>
+            <div class="edit-field">
+              <label for="adminEditStatus">الحالة</label>
+              <select id="adminEditStatus">
+                <option value="active">متاح</option>
+                <option value="pending">قيد المراجعة</option>
+                <option value="sold">مباع</option>
+                <option value="rented">مؤجر</option>
+                <option value="rejected">مرفوض</option>
+                <option value="expired">منتهي</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="edit-field edit-checkbox">
+            <label class="edit-toggle">
+              <input type="checkbox" id="adminEditFeatured">
+              <span>⭐ إعلان مميز</span>
+            </label>
+          </div>
+
+          <div class="edit-actions">
+            <button type="button" class="btn btn-outline" onclick="closeAdminEditModal()">
+              <i data-lucide="x"></i>
+              <span>إلغاء</span>
+            </button>
+            <button type="submit" class="btn btn-primary" id="adminEditSaveBtn">
+              <i data-lucide="save"></i>
+              <span>حفظ التعديلات</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
   </div>
 
   <nav class="bottom-nav">
