@@ -20,26 +20,28 @@ function initIcons() { if (window.lucide) window.lucide.createIcons(); }
 
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>'"]/g, function (character) {
-    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;' }[character];
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;", '"': '&quot;' }[character];
   });
 }
 
 async function adminRequest(path, options) {
-  const response = await fetch(`${ADMIN_API_BASE}/${path}`, {
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-    ...options
-  });
-  let result;
   try {
-    result = await response.json();
-  } catch (_) {
-    throw new Error('استجابة غير صالحة من الخادم');
+    const response = await fetch(`${ADMIN_API_BASE}/${path}`, {
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      ...options
+    });
+    
+    const result = await response.json();
+    
+    if (!response.ok || result.success === false) {
+      throw new Error(result.error || `حدث خطأ في الخادم (${response.status})`);
+    }
+    return result;
+  } catch (error) {
+    console.error(`❌ خطأ في الطلب ${path}:`, error);
+    throw new Error(`فشل الاتصال بالخادم: ${error.message}`);
   }
-  if (!response.ok || result.success === false) {
-    throw new Error(result.error || 'حدث خطأ في الخادم');
-  }
-  return result;
 }
 
 function showAdminMessage(message) {
@@ -106,7 +108,6 @@ function checkAccess() {
     roleEl.textContent = 'أدمن';
   }
 
-  // إذا مو super_admin، اخفِ تبويب المستخدمين
   if (user.role !== 'super_admin') {
     document.getElementById('usersTabBtn').style.display = 'none';
   }
@@ -115,38 +116,47 @@ function checkAccess() {
 }
 
 /* ==========================================
-   تحميل البيانات
+   تحميل البيانات (✨ النسخة الذكية)
    ========================================== */
 async function loadData() {
   try {
-    const [listings, users] = await Promise.all([
-      adminRequest('admin_listings.php').then(function (result) {
-        return (result.listings || []).map(function (listing) {
-          return Object.assign({}, listing, {
-            userId: listing.userId || listing.user_id,
-            city: listing.city || listing.city_name,
-            createdAt: listing.createdAt || listing.created_at,
-            featured: listing.featured !== undefined
-              ? listing.featured
-              : Boolean(listing.is_featured)
-          });
-        });
-      }),
-      currentAdmin.role === 'super_admin'
-        ? adminRequest('admin_users.php').then(function (result) { return result.users || []; })
-        : Promise.resolve([])
-    ]);
+    // 1. جلب الإعلانات
+    const listingsResult = await adminRequest('admin_listings.php');
+    
+    // 2. جلب المستخدمين (إذا كان سوبر أدمن فقط)
+    const usersResult = currentAdmin.role === 'super_admin' 
+        ? await adminRequest('admin_users.php') 
+        : { success: true };
 
-    allListings = listings || [];
-    allUsers = users || [];
+    // 🔍 استخراج ذكي: يبحث عن البيانات في أي مفتاح محتمل
+    let rawListings = listingsResult.listings || listingsResult.data || listingsResult.items || listingsResult.properties || [];
+    if (!Array.isArray(rawListings)) rawListings = [];
 
+    let rawUsers = usersResult.users || usersResult.data || usersResult.items || [];
+    if (!Array.isArray(rawUsers)) rawUsers = [];
+
+    // 3. تجهيز البيانات
+    allListings = rawListings.map(function (listing) {
+      return Object.assign({}, listing, {
+        userId: listing.userId || listing.user_id,
+        city: listing.city || listing.city_name,
+        createdAt: listing.createdAt || listing.created_at,
+        featured: listing.featured !== undefined ? listing.featured : Boolean(listing.is_featured)
+      });
+    });
+
+    allUsers = rawUsers;
+
+    // 4. عرض البيانات
     renderOverview();
     renderListingsTable();
     if (currentAdmin.role === 'super_admin') renderUsersTable();
     renderReports();
 
   } catch (e) {
-    console.error('خطأ في تحميل البيانات:', e);
+    console.error('❌ خطأ في تحميل البيانات:', e);
+    // إظهار الخطأ للمستخدم بدلاً من الفشل الصامت
+    alert(`عذراً، حدث خطأ أثناء جلب البيانات من السيرفر.\n\nالتفاصيل: ${e.message}\n\nيرجى فتح الـ Console (F12) لرؤية التفاصيل الكاملة.`);
   }
 }
 
@@ -166,7 +176,6 @@ function renderOverview() {
   document.getElementById('badgeListings').textContent = allListings.length;
   document.getElementById('badgeUsers').textContent = allUsers.length;
 
-  // أحدث الإعلانات
   const recent = [...allListings]
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 5);
@@ -188,7 +197,6 @@ function renderOverview() {
     }).join('');
   }
 
-  // أحدث المستخدمين
   const recentUsersEl = document.getElementById('recentUsers');
   if (currentAdmin.role === 'super_admin') {
     const recentU = [...allUsers]
