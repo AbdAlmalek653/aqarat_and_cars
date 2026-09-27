@@ -279,7 +279,6 @@ async function loadFeaturedProperties() {
     const properties = allListings
       .filter(l => l.type === 'property')
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    // ✅ لا يوجد slice — كل العقارات تظهر
 
     if (properties.length === 0) {
       container.innerHTML = emptyState('property');
@@ -306,7 +305,6 @@ async function loadFeaturedCars() {
     const cars = allListings
       .filter(l => l.type === 'car')
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    // ✅ لا يوجد slice — كل السيارات تظهر
 
     if (cars.length === 0) {
       container.innerHTML = emptyState('car');
@@ -332,17 +330,17 @@ async function loadStats() {
     animateNumber('statUsers', stats.users || 0);
   } catch (e) {
     console.warn('⚠️ فشل جلب الإحصائيات من الـ API. جاري المحاولة من الإعلانات...', e);
-    
+
     try {
-        const allListings = await getCachedListings();
-        if (allListings.length > 0) {
-            const propsCount = allListings.filter(l => l.type === 'property').length;
-            const carsCount = allListings.filter(l => l.type === 'car').length;
-            animateNumber('statProperties', propsCount);
-            animateNumber('statCars', carsCount);
-        }
+      const allListings = await getCachedListings();
+      if (allListings.length > 0) {
+        const propsCount = allListings.filter(l => l.type === 'property').length;
+        const carsCount = allListings.filter(l => l.type === 'car').length;
+        animateNumber('statProperties', propsCount);
+        animateNumber('statCars', carsCount);
+      }
     } catch (fallbackError) {
-        console.error('❌ فشل النظام الاحتياطي أيضاً:', fallbackError);
+      console.error('❌ فشل النظام الاحتياطي أيضاً:', fallbackError);
     }
   }
 }
@@ -476,7 +474,7 @@ function hideResults() {
   if (emptyEl) emptyEl.style.display = 'none';
 }
 
-window.resetCascadeFilter = function() {
+window.resetCascadeFilter = function () {
   cascadeState.type = null;
   cascadeState.purpose = null;
   cascadeState.city = null;
@@ -716,7 +714,7 @@ function setupScrollDownBtn() {
 }
 
 /* ==========================================
-   تشغيل عند التحميل + 🔄 تحديث تلقائي
+   تشغيل عند التحميل + 🔄 تحديث تلقائي كل 10 ثوانٍ
    ========================================== */
 document.addEventListener('DOMContentLoaded', () => {
   loadFeaturedProperties();
@@ -734,5 +732,5 @@ document.addEventListener('DOMContentLoaded', () => {
     loadFeaturedProperties();
     loadFeaturedCars();
     loadStats();
-  }, 10000);
-});git push origin ahmad
+  }, 8000);
+});
