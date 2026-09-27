@@ -52,7 +52,9 @@ input, select, textarea { max-width: 100%; }
    شاشات الجوال (768px)
    ========================================== */
 @media (max-width: 768px) {
-  body { padding-bottom: 72px; }
+  /* ✅ تم تعديل هذه القيمة لمنع اختفاء المحتوى خلف شريط التنقل السفلي */
+  body { padding-bottom: 95px !important; }
+  
   .container { width: min(100% - 28px, 720px); padding-left: 0; padding-right: 0; }
   .header-inner { min-height: 62px; }
   .header .nav { display: none; }
@@ -131,7 +133,7 @@ input, select, textarea { max-width: 100%; }
   /* ====== لوحة التحكم - الجوال ====== */
   .admin-dashboard { grid-template-columns: 1fr; gap: 0; }
   .admin-sidebar { display: block; background: transparent; border: none; padding: 0; margin-bottom: 16px; }
-  .admin-user-box { display: none; } /* نخفي صندوق المستخدم لأنه موجود بالهيدر */
+  .admin-user-box { display: none; }
   .admin-menu { 
     display: flex; 
     flex-direction: row; 
@@ -139,7 +141,7 @@ input, select, textarea { max-width: 100%; }
     gap: 8px; 
     padding-bottom: 10px; 
     border-bottom: 1px solid var(--border);
-    scrollbar-width: none; /* إخفاء شريط التمرير */
+    scrollbar-width: none;
   }
   .admin-menu::-webkit-scrollbar { display: none; }
   .admin-menu-btn { flex: 0 0 auto; padding: 10px 16px; font-size: 13px; white-space: nowrap; border-radius: var(--radius); }
@@ -156,7 +158,7 @@ input, select, textarea { max-width: 100%; }
   .admin-search-input, .admin-select { width: 100%; }
   
   .admin-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -16px; padding: 0 16px; }
-  .admin-table { min-width: 700px; } /* إجبار الجدول على التمرير */
+  .admin-table { min-width: 700px; }
   .admin-actions { flex-direction: row; flex-wrap: wrap; gap: 4px; }
   .admin-icon-btn { width: 34px; height: 34px; }
   .admin-action-select { width: 100px; }

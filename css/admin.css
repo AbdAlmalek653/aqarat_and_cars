@@ -763,7 +763,10 @@
   border-top: 1px solid var(--border);
 }
 
-/* ===== Mobile ===== */
+/* ==========================================
+   🚨 التنسيقات الخاصة بالجوال (Responsive Fixes)
+   ========================================== */
+
 @media (max-width: 968px) {
   .admin-dashboard {
     grid-template-columns: 1fr;
@@ -794,7 +797,7 @@
   }
 
   .admin-menu-btn.danger {
-    display: none;
+    display: none; /* إخفاء زر الخروج لأنه موجود في الهيدر */
   }
 
   .admin-two-cols {
@@ -803,33 +806,56 @@
 }
 
 @media (max-width: 640px) {
+  /* 1. إصلاح حاوية الجدول لتسمح بالتمرير الأفقي */
   .admin-table-wrap {
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .admin-table {
-    min-width: 700px;
+    min-width: 700px; /* إجبار الجدول على عرض ثابت لكي يتم التمرير */
   }
 
+  /* 2. إصلاح كروت الإحصائيات لتكون 2x2 بشكل مرتب */
   .admin-stats {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
 
   .admin-stat-card {
-    padding: 14px;
-    gap: 10px;
+    flex-direction: column; /* الأيقونة فوق والنص تحت */
+    text-align: center;
+    padding: 14px 8px;
+    gap: 8px;
   }
 
   .admin-stat-icon {
     width: 42px;
     height: 42px;
+    margin-bottom: 4px;
   }
 
   .admin-stat-num {
     font-size: 18px;
   }
 
-  /* نافذة التعديل على الجوال */
+  .admin-stat-lbl {
+    font-size: 11px;
+  }
+
+  /* 3. إصلاح الفلاتر والأزرار لتكون عمودية */
+  .admin-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-search-input,
+  .admin-select {
+    width: 100%;
+    min-width: 0;
+  }
+
+  /* 4. إصلاح نافذة التعديل على الجوال */
   .edit-modal-content {
     padding: 22px 16px;
     max-height: 95vh;
