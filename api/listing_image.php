@@ -1,7 +1,6 @@
 <?php
 /**
- * تقديم صورة الإعلان الأولى مباشرة
- * مع ضغط تلقائي للصور الكبيرة
+ * تقديم صورة الإعلان الأولى مع ضغط تلقائي + تخزين مؤقت
  */
 
 require_once 'config.php';
@@ -12,6 +11,24 @@ if (!$id) {
     exit;
 }
 
+// 📁 مجلد كاش الصور
+$imageCacheDir = __DIR__ . '/cache/images';
+if (!is_dir($imageCacheDir)) {
+    mkdir($imageCacheDir, 0755, true);
+}
+
+$cacheFile = $imageCacheDir . '/' . preg_replace('/[^a-zA-Z0-9_-]/', '', $id) . '.jpg';
+
+// ✅ إذا الصورة المضغوطة موجودة (أقل من 30 يوم) → قدّمها فوراً
+if (file_exists($cacheFile) && (time() - filemtime($cacheFile)) < 2592000) {
+    header('Content-Type: image/jpeg');
+    header('Cache-Control: public, max-age=2592000');
+    header('Content-Length: ' . filesize($cacheFile));
+    readfile($cacheFile);
+    exit;
+}
+
+// 📥 جلب الصورة من قاعدة البيانات
 $stmt = $pdo->prepare(
     "SELECT url FROM listing_images 
      WHERE listing_id = ? 
@@ -30,7 +47,7 @@ $url = $row['url'];
 $imageData = null;
 $mime = 'image/jpeg';
 
-// ✅ فك Base64 أو قراءة ملف
+// فك Base64 أو قراءة ملف
 if (strpos($url, 'data:image/') === 0) {
     $parts = explode(',', $url, 2);
     if (count($parts) === 2) {
@@ -54,15 +71,14 @@ if (!$imageData) {
     exit;
 }
 
-// ✅ ضغط تلقائي إذا كانت الصورة أكبر من 100 kB
-if (strlen($imageData) > 100000 && extension_loaded('gd')) {
+// ✅ ضغط الصورة (تصغير إلى 800 بكسل، جودة 75%)
+if (extension_loaded('gd')) {
     $original = @imagecreatefromstring($imageData);
 
     if ($original !== false) {
         $width = imagesx($original);
         $height = imagesy($original);
 
-        // تصغير إلى 800 بكسل عرض كحد أقصى
         $maxWidth = 800;
         if ($width > $maxWidth) {
             $newWidth = $maxWidth;
@@ -80,7 +96,6 @@ if (strlen($imageData) > 100000 && extension_loaded('gd')) {
             $original = $resized;
         }
 
-        // ضغط بجودة 75%
         ob_start();
         imagejpeg($original, null, 75);
         $compressed = ob_get_clean();
@@ -93,7 +108,12 @@ if (strlen($imageData) > 100000 && extension_loaded('gd')) {
     }
 }
 
-// ✅ أرسل الصورة مع كاش 30 يوم
+// 💾 احفظ الصورة المضغوطة في الكاش
+if ($mime === 'image/jpeg') {
+    @file_put_contents($cacheFile, $imageData);
+}
+
+// 📤 أرسل الصورة
 header('Content-Type: ' . $mime);
 header('Cache-Control: public, max-age=2592000');
 header('Content-Length: ' . strlen($imageData));
