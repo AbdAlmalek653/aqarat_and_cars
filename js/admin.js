@@ -14,11 +14,13 @@ const roleLabels = { user: 'مستخدم', agent: 'وكيل', admin: 'أدمن',
 
 function initIcons() { if (window.lucide) window.lucide.createIcons(); }
 
-function escapeHtml(value) {
+ function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>'"]/g, function (character) {
+
     return { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;' }[character];
   });
 }
+
 
 async function adminRequest(path, options) {
   try {
@@ -474,5 +476,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadData();
 
   initIcons();
-  console.log('✅ اكتمل تشغيل لوحة التحكم بنجاح');
+ console.log('✅ اكتمل تشغيل لوحة التحكم بنجاح');
 });
+
