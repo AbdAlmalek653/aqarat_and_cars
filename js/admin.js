@@ -18,11 +18,20 @@ const roleLabels = { user: 'مستخدم', agent: 'وكيل', admin: 'أدمن',
 
 function initIcons() { if (window.lucide) window.lucide.createIcons(); }
 
-function escapeHtml(value) {
-  return String(value ?? '').replace(/[&<>'"]/g, function (character) {
-    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;", '"': '&quot;' }[character];
-  });
-}
+ function escapeHtml(value) {
+-  return String(value ?? '').replace(/[&<>'"]/g, function (character) {
+-    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;", '"': '&quot;' }[character];
+-  });
++  const entities = {
++    '&': '&amp;',
++    '<': '&lt;',
++    '>': '&gt;',
++    "'": '&#039;',
++    '"': '&quot;'
++  };
++
++  return String(value ?? '').replace(/[&<>'"]/g, character => entities[character]);
+ }
 
 async function adminRequest(path, options) {
   try {
