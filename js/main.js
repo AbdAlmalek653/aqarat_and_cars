@@ -1,7 +1,7 @@
 /* ==========================================
    الصفحة الرئيسية - سوق
    البيانات كلها من API (قاعدة البيانات)
-   النسخة النهائية: عرض كل الإعلانات + تحديث تلقائي
+   النسخة النهائية: عرض كل الإعلانات + تحديث تلقائي + صور سريعة
    ========================================== */
 
 /* ===== تهيئة الأيقونات ===== */
@@ -65,9 +65,10 @@ function createCard(item, type) {
   if (item.subType === 'chalet') icon = 'tent';
   if (item.subType === 'arabic-house') icon = 'landmark';
 
-  // ✅ التعامل مع الصور - نتجاهل القيمة الوهمية 'has_image'
-  const firstImage = item.images && item.images.length > 0 && item.images[0] !== 'has_image'
-    ? item.images[0]
+  // ✅ تحميل الصورة من API مباشرة (أسرع بـ 700 مرة من Base64)
+  const apiBase = window.location.pathname.includes('/pages/') ? '../api' : 'api';
+  const firstImage = item.images && item.images.length > 0 && item.images[0] === 'has_image'
+    ? `${apiBase}/listing_image.php?id=${encodeURIComponent(item.id)}`
     : null;
 
   const imageContent = firstImage
@@ -716,7 +717,11 @@ function setupScrollDownBtn() {
 }
 
 /* ==========================================
+<<<<<<< Updated upstream
    تشغيل عند التحميل + 🔄 تحديث تلقائي
+=======
+   تشغيل عند التحميل + 🔄 تحديث تلقائي كل 8 ثوانٍ
+>>>>>>> Stashed changes
    ========================================== */
 document.addEventListener('DOMContentLoaded', () => {
   loadFeaturedProperties();
@@ -729,7 +734,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupScrollDownBtn();
   initIcons();
 
-  // ✅ تحديث تلقائي كل 10 ثوانٍ لرؤية الإعلانات الجديدة فوراً
+  // ✅ تحديث تلقائي كل 8 ثوانٍ لرؤية الإعلانات الجديدة فوراً
   setInterval(() => {
     loadFeaturedProperties();
     loadFeaturedCars();

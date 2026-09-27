@@ -41,7 +41,7 @@ if (isset($_GET['featured']) && $_GET['featured'] == '1') {
 
 $limit = min(max((int)($_GET['limit'] ?? 50), 1), 100);
 
-// ✅ استعلام متوافق مع SQLite (بدون GROUP_CONCAT)
+// ✅ استعلام متوافق مع SQLite
 $sql = '
     SELECT
         l.*,
@@ -57,28 +57,28 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $listings = $stmt->fetchAll();
 
-// 🖼️ جلب الصور لكل إعلان (بطريقة محسّنة)
+// 🖼️ جلب علامة "هل يوجد صورة؟" فقط - بدون الصور نفسها
 $listingIds = array_column($listings, 'id');
-$imagesByListing = [];
+$hasImageByListing = [];
 
 if (!empty($listingIds)) {
     $placeholders = implode(',', array_fill(0, count($listingIds), '?'));
     $imgStmt = $pdo->prepare(
-        "SELECT listing_id, url FROM listing_images 
-         WHERE listing_id IN ($placeholders) 
-         ORDER BY listing_id, sort_order"
+        "SELECT DISTINCT listing_id FROM listing_images 
+         WHERE listing_id IN ($placeholders)"
     );
     $imgStmt->execute($listingIds);
-    $allImages = $imgStmt->fetchAll();
+    $allRows = $imgStmt->fetchAll();
     
-    foreach ($allImages as $img) {
-        $imagesByListing[$img['listing_id']][] = $img['url'];
+    foreach ($allRows as $row) {
+        $hasImageByListing[$row['listing_id']] = true;
     }
 }
 
-// 🎨 معالجة البيانات
+// 🎨 معالجة البيانات - ✅ لا نرسل صور Base64
 foreach ($listings as &$listing) {
-    $listing['images'] = $imagesByListing[$listing['id']] ?? [];
+    // ✅ فقط علامة "has_image" — المتصفح سيحمّل الصورة من listing_image.php
+    $listing['images'] = !empty($hasImageByListing[$listing['id']]) ? ['has_image'] : [];
     $listing['details'] = json_decode($listing['details'] ?? '{}', true) ?: [];
     $listing['price'] = (float)$listing['price'];
     $listing['featured'] = (bool)$listing['is_featured'];
