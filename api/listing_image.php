@@ -1,7 +1,7 @@
 <?php
 /**
  * تقديم صورة الإعلان الأولى مباشرة
- * بدل إرسالها Base64 في listings.php
+ * مع ضغط تلقائي للصور الكبيرة
  */
 
 require_once 'config.php';
@@ -27,38 +27,74 @@ if (!$row || empty($row['url'])) {
 }
 
 $url = $row['url'];
+$imageData = null;
+$mime = 'image/jpeg';
 
-// ✅ إذا كانت Base64
+// ✅ فك Base64 أو قراءة ملف
 if (strpos($url, 'data:image/') === 0) {
     $parts = explode(',', $url, 2);
     if (count($parts) === 2) {
         preg_match('/data:([^;]+);/', $parts[0], $m);
         $mime = $m[1] ?? 'image/jpeg';
-        $binary = base64_decode($parts[1]);
-
-        // كاش لمدة 30 يوم في المتصفح
-        header('Content-Type: ' . $mime);
-        header('Cache-Control: public, max-age=2592000');
-        header('Content-Length: ' . strlen($binary));
-        echo $binary;
-        exit;
+        $imageData = base64_decode($parts[1]);
+    }
+} elseif (strpos($url, 'http') === 0 || strpos($url, '/') === 0) {
+    header('Location: ' . $url, true, 302);
+    exit;
+} else {
+    $filePath = __DIR__ . '/../' . ltrim($url, '/');
+    if (file_exists($filePath)) {
+        $imageData = file_get_contents($filePath);
+        $mime = mime_content_type($filePath) ?: 'image/jpeg';
     }
 }
 
-// ✅ إذا كانت رابط URL عادي
-if (strpos($url, 'http') === 0 || strpos($url, '/') === 0) {
-    header('Location: ' . $url, true, 302);
+if (!$imageData) {
+    http_response_code(404);
     exit;
 }
 
-// ✅ إذا كانت مسار ملف محلي
-$filePath = __DIR__ . '/../' . ltrim($url, '/');
-if (file_exists($filePath)) {
-    $mime = mime_content_type($filePath) ?: 'image/jpeg';
-    header('Content-Type: ' . $mime);
-    header('Cache-Control: public, max-age=2592000');
-    readfile($filePath);
-    exit;
+// ✅ ضغط تلقائي إذا كانت الصورة أكبر من 100 kB
+if (strlen($imageData) > 100000 && extension_loaded('gd')) {
+    $original = @imagecreatefromstring($imageData);
+
+    if ($original !== false) {
+        $width = imagesx($original);
+        $height = imagesy($original);
+
+        // تصغير إلى 800 بكسل عرض كحد أقصى
+        $maxWidth = 800;
+        if ($width > $maxWidth) {
+            $newWidth = $maxWidth;
+            $newHeight = (int)(($height / $width) * $newWidth);
+
+            $resized = imagecreatetruecolor($newWidth, $newHeight);
+            imagecopyresampled(
+                $resized, $original,
+                0, 0, 0, 0,
+                $newWidth, $newHeight,
+                $width, $height
+            );
+
+            imagedestroy($original);
+            $original = $resized;
+        }
+
+        // ضغط بجودة 75%
+        ob_start();
+        imagejpeg($original, null, 75);
+        $compressed = ob_get_clean();
+        imagedestroy($original);
+
+        if ($compressed && strlen($compressed) < strlen($imageData)) {
+            $imageData = $compressed;
+            $mime = 'image/jpeg';
+        }
+    }
 }
 
-http_response_code(404);
+// ✅ أرسل الصورة مع كاش 30 يوم
+header('Content-Type: ' . $mime);
+header('Cache-Control: public, max-age=2592000');
+header('Content-Length: ' . strlen($imageData));
+echo $imageData;
