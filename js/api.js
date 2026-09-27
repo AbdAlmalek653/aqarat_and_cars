@@ -1,5 +1,6 @@
 /* ==========================================
   طبقة البيانات الموحدة
+  النسخة النهائية: بدون كاش لضمان رؤية التحديثات فوراً
   ========================================== */
 
 const API = (function () {
@@ -42,8 +43,14 @@ const API = (function () {
     return prefix + Date.now() + Math.floor(Math.random() * 1000);
   }
 
+  /* ==========================================
+     ✅ دوال HTTP مع منع الكاش
+     ========================================== */
   function httpGet(url) {
-    return fetch(API_BASE + url, { credentials: 'include' }).then(function (r) { return r.json(); });
+    return fetch(API_BASE + url, { 
+      credentials: 'include',
+      cache: 'no-store' // ✅ منع التخزين المؤقت لضمان جلب أحدث البيانات
+    }).then(function (r) { return r.json(); });
   }
 
   function httpPost(url, data) {
@@ -51,6 +58,7 @@ const API = (function () {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
+      cache: 'no-store', // ✅ منع التخزين المؤقت للطلبات أيضاً
       body: JSON.stringify(data)
     }).then(function (r) { return r.json(); });
   }
@@ -118,53 +126,51 @@ const API = (function () {
     },
 
     login: function(email, password) {
-  if (MODE === 'server') {
-    return httpPost('/login.php', {
-      email: email,
-      password: password
-    } ).then(function(result) {
-      if (result.success && result.user) {
-        write(KEYS.CURRENT_USER, result.user);
+      if (MODE === 'server') {
+        return httpPost('/login.php', {
+          email: email,
+          password: password
+        } ).then(function(result) {
+          if (result.success && result.user) {
+            write(KEYS.CURRENT_USER, result.user);
+          }
+          return result;
+        });
       }
 
-      return result;
-    });
-  }
+      const user = read(KEYS.USERS, []).find(function(u) {
+        return u.email === email;
+      });
 
-  const user = read(KEYS.USERS, []).find(function(u) {
-    return u.email === email;
-  });
+      if (!user) {
+        return Promise.resolve({
+          success: false,
+          error: 'لا يوجد حساب بهذا البريد'
+        });
+      }
 
-  if (!user) {
-    return Promise.resolve({
-      success: false,
-      error: 'لا يوجد حساب بهذا البريد'
-    });
-  }
+      if (user.password !== password) {
+        return Promise.resolve({
+          success: false,
+          error: 'كلمة المرور غير صحيحة'
+        });
+      }
 
-  if (user.password !== password) {
-    return Promise.resolve({
-      success: false,
-      error: 'كلمة المرور غير صحيحة'
-    });
-  }
+      const sessionUser = {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role || 'user'
+      };
 
-  const sessionUser = {
-    id: user.id,
-    name: user.name,
-    email: user.email,
-    phone: user.phone,
-    role: user.role || 'user'
-  };
+      write(KEYS.CURRENT_USER, sessionUser);
 
-  write(KEYS.CURRENT_USER, sessionUser);
-
-  return Promise.resolve({
-    success: true,
-    user: sessionUser
-  });
-}
-,
+      return Promise.resolve({
+        success: true,
+        user: sessionUser
+      });
+    },
 
     logout: function () {
       if (MODE === 'server') {

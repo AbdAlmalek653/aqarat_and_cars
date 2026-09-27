@@ -1,6 +1,7 @@
 /* ==========================================
    الصفحة الرئيسية - سوق
    البيانات كلها من API (قاعدة البيانات)
+   النسخة النهائية: بدون كاش لضمان رؤية التحديثات فوراً
    ========================================== */
 
 /* ===== تهيئة الأيقونات ===== */
@@ -30,17 +31,15 @@ const PURPOSE_NAMES = {
 };
 
 /* ==========================================
-   ✨ تحسين الأداء: تخزين الإعلانات مؤقتاً
+   ✨ جلب الإعلانات دائماً من السيرفر (بدون كاش)
    ========================================== */
-let cachedListings = null; // كاش لمنع تكرار الطلبات
-
 async function getCachedListings() {
-  // إذا كانت البيانات موجودة مسبقاً، أرجعها فوراً بدون طلب جديد
-  if (cachedListings) return cachedListings;
-
   try {
-    cachedListings = await API.Listings.getAll();
-    return cachedListings;
+    // ✅ إجبار المتصفح على جلب أحدث البيانات من السيرفر في كل مرة
+    console.log('🔄 جاري جلب أحدث الإعلانات من السيرفر...');
+    const data = await API.Listings.getAll();
+    console.log(`✅ تم جلب ${data ? data.length : 0} إعلان`);
+    return data || [];
   } catch (error) {
     console.error('❌ فشل تحميل الإعلانات من الخادم:', error);
     return [];
@@ -276,7 +275,7 @@ function emptyFilterState() {
 }
 
 /* ==========================================
-   تحميل العقارات المميزة (محسّن)
+   تحميل العقارات المميزة
    ========================================== */
 async function loadFeaturedProperties() {
   const container = document.getElementById('featuredProperties');
@@ -303,7 +302,7 @@ async function loadFeaturedProperties() {
 }
 
 /* ==========================================
-   تحميل السيارات المميزة (محسّن)
+   تحميل السيارات المميزة
    ========================================== */
 async function loadFeaturedCars() {
   const container = document.getElementById('featuredCars');
@@ -342,7 +341,7 @@ async function loadStats() {
   } catch (e) {
     console.warn('⚠️ فشل جلب الإحصائيات من الـ API. جاري المحاولة من الإعلانات...', e);
     
-    // 2. الخطة الاحتياطية: الحساب من الإعلانات المخزنة
+    // 2. الخطة الاحتياطية: الحساب من الإعلانات
     try {
         const allListings = await getCachedListings();
         if (allListings.length > 0) {
@@ -350,7 +349,6 @@ async function loadStats() {
             const carsCount = allListings.filter(l => l.type === 'car').length;
             animateNumber('statProperties', propsCount);
             animateNumber('statCars', carsCount);
-            // لا يمكن حساب المستخدمين من الإعلانات، نتركهم 0 أو نعرض رسالة
         }
     } catch (fallbackError) {
         console.error('❌ فشل النظام الاحتياطي أيضاً:', fallbackError);
