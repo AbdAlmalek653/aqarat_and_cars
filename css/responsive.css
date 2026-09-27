@@ -8,6 +8,9 @@ img, svg, video { max-width: 100%; }
 button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
 input, select, textarea { max-width: 100%; }
 
+/* ==========================================
+   شاشات متوسطة (تابلت عريض ولابتوب صغير)
+   ========================================== */
 @media (max-width: 1100px) {
   .container { width: min(100% - 32px, 1120px); }
   .header-inner { gap: 12px; }
@@ -17,6 +20,9 @@ input, select, textarea { max-width: 100%; }
   .footer-grid { gap: 24px; }
 }
 
+/* ==========================================
+   شاشات التابلت (900px)
+   ========================================== */
 @media (max-width: 900px) {
   .header-inner { padding: 11px 16px; }
   .nav { gap: 9px; font-size: 12px; }
@@ -36,15 +42,22 @@ input, select, textarea { max-width: 100%; }
   .auth-form-side { min-height: calc(100vh - 310px); padding: 40px 28px; }
   .auth-features { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 20px; }
   .stats-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  
+  /* لوحة التحكم - تابلت */
+  .admin-dashboard { grid-template-columns: 220px 1fr; gap: 16px; }
+  .admin-stats { grid-template-columns: repeat(2, 1fr); }
 }
 
+/* ==========================================
+   شاشات الجوال (768px)
+   ========================================== */
 @media (max-width: 768px) {
   body { padding-bottom: 72px; }
   .container { width: min(100% - 28px, 720px); padding-left: 0; padding-right: 0; }
   .header-inner { min-height: 62px; }
   .header .nav { display: none; }
   .header-actions { margin-right: auto; }
-  .header-actions .btn-icon { display: none; } /* إخفاء زر البحث الأصلي، سنعيده بتصميم جديد */
+  .header-actions .btn-icon { display: none; }
   .logo-text { font-size: 18px; }
   .logo-icon { width: 34px; height: 34px; }
   .header-actions .btn { padding: 8px 11px; font-size: 12px; }
@@ -114,11 +127,46 @@ input, select, textarea { max-width: 100%; }
   .admin-card { padding: 15px 12px; }
   .card-heading { align-items: stretch; flex-direction: column; }
   .admin-select { width: 100%; }
+
+  /* ====== لوحة التحكم - الجوال ====== */
+  .admin-dashboard { grid-template-columns: 1fr; gap: 0; }
+  .admin-sidebar { display: block; background: transparent; border: none; padding: 0; margin-bottom: 16px; }
+  .admin-user-box { display: none; } /* نخفي صندوق المستخدم لأنه موجود بالهيدر */
+  .admin-menu { 
+    display: flex; 
+    flex-direction: row; 
+    overflow-x: auto; 
+    gap: 8px; 
+    padding-bottom: 10px; 
+    border-bottom: 1px solid var(--border);
+    scrollbar-width: none; /* إخفاء شريط التمرير */
+  }
+  .admin-menu::-webkit-scrollbar { display: none; }
+  .admin-menu-btn { flex: 0 0 auto; padding: 10px 16px; font-size: 13px; white-space: nowrap; border-radius: var(--radius); }
+  .admin-menu-btn span { display: inline-block !important; }
+  .admin-badge { position: static; margin-right: 6px; }
+  
+  .admin-stats { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .admin-stat-card { flex-direction: column; text-align: center; padding: 16px 10px; }
+  .admin-main { padding: 0; }
+  .admin-page-header h1 { font-size: 22px; }
+  .admin-page-header p { font-size: 13px; }
+  
+  .admin-filters { flex-direction: column; align-items: stretch; }
+  .admin-search-input, .admin-select { width: 100%; }
+  
+  .admin-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -16px; padding: 0 16px; }
+  .admin-table { min-width: 700px; } /* إجبار الجدول على التمرير */
+  .admin-actions { flex-direction: row; flex-wrap: wrap; gap: 4px; }
+  .admin-icon-btn { width: 34px; height: 34px; }
+  .admin-action-select { width: 100px; }
 }
 
+/* ==========================================
+   شاشات الجوال الصغيرة (480px)
+   ========================================== */
 @media (max-width: 480px) {
   .container { width: calc(100% - 24px); }
-  /* تم إلغاء إخفاء النصوص هنا لأننا سنستخدم التصميم الجديد */
   .grid-2, .grid-3, .grid-4, .favorites-grid { grid-template-columns: 1fr; }
   .card-image { height: 190px; }
   .stats-grid { gap: 8px; }
@@ -140,6 +188,10 @@ input, select, textarea { max-width: 100%; }
   .footer-col:first-child { grid-column: auto; }
   .admin-header-actions .btn-danger { font-size: 0; }
   .admin-header-actions .btn-danger svg { margin: 0; }
+
+  /* لوحة التحكم - جوال صغير جداً */
+  .admin-stats { grid-template-columns: 1fr; }
+  .admin-stat-card { flex-direction: row; text-align: right; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -150,7 +202,6 @@ input, select, textarea { max-width: 100%; }
    🚨 إصلاحات الطوارئ للموبايل (المسافات والسكرول)
    ========================================== */
 
-/* 1. منع السكرول الأفقي نهائياً */
 html, body {
     overflow-x: hidden !important;
     width: 100% !important;
@@ -158,7 +209,6 @@ html, body {
 }
 
 @media (max-width: 768px) {
-    /* 2. إصلاح المسافة الفاضية الكبيرة فوق */
     .static-page, .static-hero, .hero, .section, .page-header {
         padding-top: 10px !important;
         padding-bottom: 20px !important;
@@ -170,7 +220,6 @@ html, body {
         padding-top: 0 !important;
     }
 
-    /* 3. إصلاح كروت الإحصائيات (أرقامنا) لتكون 2x2 ومتناسقة */
     .account-stats, .stats-grid {
         display: grid !important;
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -182,21 +231,19 @@ html, body {
 
     .account-stat, .stat-item {
         display: flex !important;
-        flex-direction: column !important; /* الأيقونة فوق والنص تحت */
+        flex-direction: column !important;
         align-items: center !important;
         text-align: center !important;
         padding: 12px 8px !important;
-        min-width: 0 !important; /* عشان ما يطلع عن الشاشة */
+        min-width: 0 !important;
         width: 100% !important;
         box-sizing: border-box !important;
-        background: var(--bg-card); /* تأكد من وجود خلفية */
+        background: var(--bg-card);
         border-radius: var(--radius);
         border: 1px solid var(--border);
     }
 
-    .account-stat-icon, .stat-icon {
-        margin: 0 0 8px 0 !important;
-    }
+    .account-stat-icon, .stat-icon { margin: 0 0 8px 0 !important; }
 }
 
 /* ==========================================
@@ -204,87 +251,44 @@ html, body {
    ========================================== */
 
 @media (max-width: 768px) {
-    /* إلغاء إخفاء زر البحث القديم وإظهاره بشكل كبسولة */
-    .header-actions .btn-icon { 
-        display: inline-flex !important; 
-    }
-
-    /* 1. إلغاء إخفاء النصوص */
-    .header-actions .btn-primary span,
-    .btn-login span,
-    .btn-icon span {
-        display: inline-block !important;
-    }
-
-    /* 2. تحويل الأزرار إلى شكل كبسولة أنيق */
-    .header-actions .btn-primary, 
-    .btn-login,
-    .btn-icon {
+    .header-actions .btn-icon { display: inline-flex !important; }
+    .header-actions .btn-primary span, .btn-login span, .btn-icon span { display: inline-block !important; }
+    .header-actions .btn-primary, .btn-login, .btn-icon {
         padding: 6px 12px !important;
         height: auto !important;
         width: auto !important;
-        border-radius: 30px !important; /* شكل كبسولة وليس دائرة */
+        border-radius: 30px !important;
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
-        gap: 5px !important; /* مسافة بين الأيقونة والنص */
-        background: var(--bg-card) !important; /* خلفية داكنة للأزرار الثانوية */
+        gap: 5px !important;
+        background: var(--bg-card) !important;
         border: 1px solid var(--border) !important;
     }
-
-    /* 3. تصغير حجم الأيقونات قليلاً لتتناسب مع النص */
-    .header-actions .btn-primary svg,
-    .btn-login svg,
-    .btn-icon svg {
+    .header-actions .btn-primary svg, .btn-login svg, .btn-icon svg {
         width: 14px !important;
         height: 14px !important;
         margin: 0 !important;
     }
-
-    /* 4. تنسيق النص داخل الأزرار */
-    .header-actions .btn-primary span,
-    .btn-login span,
-    .btn-icon span {
+    .header-actions .btn-primary span, .btn-login span, .btn-icon span {
         font-size: 11px !important;
         font-weight: 700 !important;
         white-space: nowrap !important;
     }
-
-    /* 5. إعطاء زر "أضف إعلان" لوناً مميزاً (أزرق) */
     .header-actions .btn-primary {
         background: linear-gradient(135deg, var(--primary), var(--primary-hover)) !important;
         border-color: transparent !important;
         color: white !important;
     }
-    .header-actions .btn-primary svg {
-        color: white !important;
-    }
-
-    /* 6. ضبط المسافات في الهيدر */
-    .header-actions {
-        gap: 6px !important;
-    }
-    .header-inner {
-        padding: 8px 10px !important;
-        gap: 6px !important;
-    }
+    .header-actions .btn-primary svg { color: white !important; }
+    .header-actions { gap: 6px !important; }
+    .header-inner { padding: 8px 10px !important; gap: 6px !important; }
 }
 
-/* 7. للشاشات الصغيرة جداً (أقل من 400px): إخفاء نص زر البحث فقط لتوفير المساحة */
 @media (max-width: 400px) {
-    .btn-icon span {
-        display: none !important;
-    }
-    .btn-icon {
-        width: 36px !important;
-        padding: 0 !important;
-        border-radius: 50% !important;
-        justify-content: center !important;
-    }
-    .btn-icon svg {
-        width: 16px !important;
-        height: 16px !important;
-    }
+    .btn-icon span { display: none !important; }
+    .btn-icon { width: 36px !important; padding: 0 !important; border-radius: 50% !important; justify-content: center !important; }
+    .btn-icon svg { width: 16px !important; height: 16px !important; }
 }
 
 /* ==========================================
@@ -292,45 +296,38 @@ html, body {
    ========================================== */
 
 @media (max-width: 768px) {
-    /* 1. الحاوية الرئيسية: خلفية صلبة، ارتفاع مريح، وظل قوي */
     .bottom-nav {
         display: flex !important;
         justify-content: space-around !important;
         align-items: center !important;
-        height: 80px !important; /* ارتفاع مثالي لمنع الضغط */
+        height: 80px !important;
         padding: 5px 8px calc(8px + env(safe-area-inset-bottom)) !important;
-        background: #0f172a !important; /* خلفية داكنة صلبة (بدون شفافية) */
+        background: #0f172a !important;
         border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
-        box-shadow: 0 -8px 25px rgba(0, 0, 0, 0.7) !important; /* ظل قوي للفصل عن المحتوى */
+        box-shadow: 0 -8px 25px rgba(0, 0, 0, 0.7) !important;
         z-index: 1000 !important;
     }
-
-    /* 2. تنسيق كل زر (أيقونة + نص) */
     .bottom-nav-item {
         flex: 1 !important;
         display: flex !important;
         flex-direction: column !important;
         align-items: center !important;
         justify-content: center !important;
-        gap: 6px !important; /* مسافة مريحة بين الأيقونة والنص */
+        gap: 6px !important;
         padding: 0 !important;
-        font-size: 11.5px !important; /* خط أكبر وأوضح */
+        font-size: 11.5px !important;
         font-weight: 700 !important;
-        color: #94a3b8 !important; /* لون رمادي فاتح واضح */
+        color: #94a3b8 !important;
         transition: all 0.3s ease !important;
         text-decoration: none !important;
         min-width: 0 !important;
     }
-
-    /* 3. تكبير الأيقونات وتوضيحها */
     .bottom-nav-item svg {
         width: 24px !important;
         height: 24px !important;
-        stroke-width: 2.2 !important; /* خط أسمك قليلاً للوضوح */
+        stroke-width: 2.2 !important;
         transition: transform 0.3s ease !important;
     }
-
-    /* 4. تنسيق النص */
     .bottom-nav-item span {
         font-family: 'Cairo', sans-serif !important;
         font-size: 11.5px !important;
@@ -338,73 +335,33 @@ html, body {
         overflow: hidden !important;
         text-overflow: ellipsis !important;
     }
-
-    /* 5. حالة التحديد (الزر النشط) */
-    .bottom-nav-item.active {
-        color: #3b82f6 !important; /* اللون الأزرق الأساسي */
-    }
+    .bottom-nav-item.active { color: #3b82f6 !important; }
     .bottom-nav-item.active svg {
-        transform: translateY(-3px) !important; /* حركة بسيطة للأعلى */
-        filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.8)) !important; /* توهج أزرق */
+        transform: translateY(-3px) !important;
+        filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.8)) !important;
     }
-
-    /* 6. زر "أضف" المميز (الأوسط) */
-    .bottom-nav-item.add-btn {
-        position: relative !important;
-        top: -10px !important; /* رفعه للأعلى بشكل ملحوظ */
-    }
-
+    .bottom-nav-item.add-btn { position: relative !important; top: -10px !important; }
     .add-icon {
-        width: 58px !important; /* حجم أكبر */
+        width: 58px !important;
         height: 58px !important;
-        margin-top: -32px !important; /* إبرازه للأعلى */
-        background: linear-gradient(135deg, #3b82f6, #f59e0b) !important; /* التدرج الأزرق-الذهبي */
-        border: 5px solid #0f172a !important; /* حدود بلون الخلفية لعزله (تأثير القطع) */
-        box-shadow: 0 10px 30px rgba(59, 130, 246, 0.7) !important; /* توهج قوي */
+        margin-top: -32px !important;
+        background: linear-gradient(135deg, #3b82f6, #f59e0b) !important;
+        border: 5px solid #0f172a !important;
+        box-shadow: 0 10px 30px rgba(59, 130, 246, 0.7) !important;
         border-radius: 50% !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
         transition: transform 0.2s ease !important;
     }
-
-    .add-icon svg {
-        width: 30px !important;
-        height: 30px !important;
-        stroke-width: 3 !important; /* خط سميك جداً للوضوح */
-        color: white !important;
-    }
-
-    /* 7. نص زر "أضف" ليكون تحت الأيقونة مباشرة وبلون مميز */
-    .bottom-nav-item.add-btn span {
-        margin-top: 8px !important;
-        color: #3b82f6 !important; /* لون أزرق مميز */
-        font-weight: 800 !important;
-        font-size: 11.5px !important;
-    }
-
-    /* تأثير عند الضغط على الزر */
-    .bottom-nav-item:active {
-        transform: scale(0.95) !important;
-    }
+    .add-icon svg { width: 30px !important; height: 30px !important; stroke-width: 3 !important; color: white !important; }
+    .bottom-nav-item.add-btn span { margin-top: 8px !important; color: #3b82f6 !important; font-weight: 800 !important; font-size: 11.5px !important; }
+    .bottom-nav-item:active { transform: scale(0.95) !important; }
 }
 
-/* 8. تعديل بسيط للشاشات الصغيرة جداً (أقل من 380px) */
 @media (max-width: 380px) {
-    .bottom-nav-item span {
-        font-size: 10px !important;
-    }
-    .bottom-nav-item svg {
-        width: 22px !important;
-        height: 22px !important;
-    }
-    .add-icon {
-        width: 52px !important;
-        height: 52px !important;
-        margin-top: -28px !important;
-    }
-    .add-icon svg {
-        width: 26px !important;
-        height: 26px !important;
-    }
+    .bottom-nav-item span { font-size: 10px !important; }
+    .bottom-nav-item svg { width: 22px !important; height: 22px !important; }
+    .add-icon { width: 52px !important; height: 52px !important; margin-top: -28px !important; }
+    .add-icon svg { width: 26px !important; height: 26px !important; }
 }

@@ -343,6 +343,9 @@ function renderUsersTable() {
               ${Object.entries(roleLabels).map(([value, label]) => `<option value="${value}" ${role === value ? 'selected' : ''}>${label}</option>`).join('')}
             </select>
             <button class="admin-icon-btn" data-active-id="${userId}" data-active="${isActive ? '1' : '0'}" title="${isActive ? 'تعطيل' : 'تفعيل'}"><i data-lucide="${isActive ? 'user-round-x' : 'user-round-check'}"></i></button>
+            
+            <!-- ✅ زر حذف المستخدم (يظهر للسوبر أدمن فقط) -->
+            <button class="admin-icon-btn danger" onclick="adminDeleteUser('${userId}')" title="حذف الحساب"><i data-lucide="trash-2"></i></button>
           ` : `<span style="color:var(--text-muted);font-size:11px;">أنت</span>`}
         </div>
       </td>
@@ -363,25 +366,36 @@ function renderUsersTable() {
   initIcons();
 }
 
-window.adminChangeRole = async function (id) {
-  const user = allUsers.find(u => u.id === id);
-  if (!user) return;
-  const newRole = prompt(`تغيير دور "${user.name}"\n\nأدخل: user أو admin`, user.role || 'user');
-  if (!newRole || !['user', 'admin'].includes(newRole)) return;
-  user.role = newRole;
-  renderUsersTable();
-  alert('✅ تم تحديث الدور');
-};
-
+/* ==========================================
+   حذف المستخدم (النسخة الصحيحة)
+   ========================================== */
 window.adminDeleteUser = async function (id) {
   const user = allUsers.find(u => u.id === id);
   if (!user) return;
+
   if (!confirm(`⚠️ هل أنت متأكد من حذف المستخدم "${user.name}"؟`)) return;
-  if (!confirm('🔴 سيتم حذف الحساب نهائياً.')) return;
-  allUsers = allUsers.filter(u => u.id !== id);
-  renderOverview();
-  renderUsersTable();
-  alert('✅ تم حذف المستخدم');
+  if (!confirm('🔴 سيتم حذف الحساب نهائياً ولا يمكن استرجاعه.')) return;
+
+  try {
+    // ✅ استخدام الـ API الحقيقي للحذف من قاعدة البيانات
+    const result = await adminRequest('admin_delete_user.php', {
+        method: 'POST',
+        body: JSON.stringify({ id })
+    });
+
+    if (result.success) {
+        // إزالة المستخدم من الواجهة مباشرة بعد نجاح الحذف
+        allUsers = allUsers.filter(u => u.id !== id);
+        renderOverview();
+        renderUsersTable();
+        alert('✅ تم حذف المستخدم بنجاح');
+    } else {
+        alert(result.error || 'فشل حذف المستخدم');
+    }
+  } catch (error) {
+    console.error('❌ خطأ أثناء حذف المستخدم:', error);
+    alert('حدث خطأ في الخادم أثناء محاولة الحذف. تأكد من وجود ملف admin_delete_user.php');
+  }
 };
 
 /* ==========================================
@@ -448,7 +462,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   console.log('🚀 بدء تشغيل لوحة التحكم...');
   initIcons();
 
-  // التحقق من وجود API
   if (typeof API === 'undefined') {
       console.error('❌ خطأ قاتل: ملف api.js لم يتم تحميله بشكل صحيح!');
       return;

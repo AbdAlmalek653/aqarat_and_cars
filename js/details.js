@@ -638,3 +638,30 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   renderListing(l);
 });
+// ==========================================
+// إخفاء رقم هاتف البائع عن المستخدمين العاديين
+// ==========================================
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. جلب العنصر الخاص بزر واتساب البائع
+    const sellerBtn = document.getElementById('sellerWhatsappBtn'); 
+    
+    // إذا لم نكن في صفحة التفاصيل، توقف
+    if (!sellerBtn) return;
+
+    // 2. جلب بيانات المستخدم الحالي
+    const currentUser = API.Users.getCurrent();
+    
+    // 3. التحقق: هل المستخدم أدمن أو سوبر أدمن؟
+    const isAdmin = currentUser && (currentUser.role === 'admin' || currentUser.role === 'super_admin');
+    
+    // 4. الإخفاء أو الإظهار بناءً على الصلاحية
+    if (isAdmin) {
+        // إذا كان أدمن، نبقيه ظاهراً
+        sellerBtn.style.display = 'flex'; // أو 'block' حسب التصميم
+        console.log('🛡️ أدمن: تم إظهار رقم البائع.');
+    } else {
+        // إذا كان مستخدم عادي، نخفيه (وهو مخفي أصلاً بالـ HTML)
+        sellerBtn.style.display = 'none';
+        console.log('👤 مستخدم عادي: تم إخفاء رقم البائع.');
+    }
+});
