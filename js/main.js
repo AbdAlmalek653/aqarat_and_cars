@@ -1,7 +1,7 @@
 /* ==========================================
    الصفحة الرئيسية - سوق
    البيانات كلها من API (قاعدة البيانات)
-   النسخة النهائية: عرض كل الإعلانات + تحديث تلقائي + صور سريعة
+   النسخة النهائية: عرض كل الإعلانات + تحديث تلقائي ذكي + صور سريعة
    ========================================== */
 
 /* ===== تهيئة الأيقونات ===== */
@@ -715,7 +715,7 @@ function setupScrollDownBtn() {
 }
 
 /* ==========================================
-   تشغيل عند التحميل + 🔄 تحديث تلقائي كل 8 ثوانٍ
+   تشغيل عند التحميل + 🔄 تحديث تلقائي ذكي كل 8 ثوانٍ
    ========================================== */
 document.addEventListener('DOMContentLoaded', () => {
   loadFeaturedProperties();
@@ -728,10 +728,19 @@ document.addEventListener('DOMContentLoaded', () => {
   setupScrollDownBtn();
   initIcons();
 
-  // ✅ تحديث تلقائي كل 8 ثوانٍ لرؤية الإعلانات الجديدة فوراً
-  setInterval(() => {
-    loadFeaturedProperties();
-    loadFeaturedCars();
-    loadStats();
+  // ✅ تحديث تلقائي ذكي - يمنع تكرار الطلبات المتزامنة
+  let isRefreshing = false;
+  setInterval(async () => {
+    if (isRefreshing) return; // امنع التحديث إذا كان هناك واحد قيد التنفيذ
+    isRefreshing = true;
+    try {
+      await Promise.all([
+        loadFeaturedProperties(),
+        loadFeaturedCars(),
+        loadStats()
+      ]);
+    } finally {
+      isRefreshing = false;
+    }
   }, 8000);
 });
