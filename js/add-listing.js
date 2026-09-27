@@ -419,7 +419,6 @@ function hideAlert() {
    تحديث الإحصائيات بعد الإضافة
    ========================================== */
 function updateStatsAfterListing(type) {
-  // القيم الافتراضية (نفس القيم الموجودة في about.html و index.html)
   const DEFAULT_PROPS = 6500;
   const DEFAULT_CARS = 3800;
 
@@ -468,7 +467,7 @@ function setupFormSubmit() {
       return;
     }
 
-    // بناء البيانات
+    // بناء البيانات (تم حذف حقل العنوان التفصيلي وإصلاح حقل التفاوض)
     const data = {
       type: state.type,
       purpose: state.purpose,
@@ -476,11 +475,10 @@ function setupFormSubmit() {
       title: document.getElementById('title').value.trim(),
       city: document.getElementById('city').value,
       area: document.getElementById('area').value.trim(),
-      address: document.getElementById('address').value.trim(),
       whatsapp: document.getElementById('whatsapp').value.trim(),
       price: document.getElementById('price').value,
       currency: document.getElementById('currency').value,
-      negotiable: document.getElementById('negotiable').checked,
+      negotiable: document.getElementById('negotiable').value, // ✅ تم إصلاحه (كان .checked)
       description: document.getElementById('description').value.trim(),
       images: uploadedImages.map(img => img.data),
       details: buildDetails()
@@ -577,7 +575,6 @@ function buildDetails() {
 
   // للسيارة
   if (state.type === 'car') {
-    // إذا اختار "أخرى"، نأخذ الاسم اللي كتبه
     if (state.brand === 'other') {
       details.brand = 'other';
       details.brandName = document.getElementById('otherBrand').value.trim();
@@ -628,7 +625,6 @@ function resetForm() {
   state.brand = null;
   state.customBrand = '';
 
-  // إخفاء حقل الماركة المخصصة
   const otherField = document.getElementById('otherBrandField');
   if (otherField) otherField.style.display = 'none';
   const otherInput = document.getElementById('otherBrand');
@@ -678,6 +674,5 @@ document.addEventListener('DOMContentLoaded', () => {
     showStep(1);
   });
 
-  // ✅ التحقق من النوع المُمرَّر في الرابط
   checkPreselectedType();
 });
