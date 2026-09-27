@@ -1,4 +1,8 @@
 <?php
+// ✅ ارفع حد الذاكرة والوقت لمعالجة الصور الكبيرة
+@ini_set('memory_limit', '256M');
+@set_time_limit(60);
+
 require_once 'config.php';
 
 $id = $_GET['id'] ?? '';
@@ -7,6 +11,25 @@ if (!$id) {
     exit;
 }
 
+// 📁 مجلد الكاش للصور المضغوطة
+$cacheDir = __DIR__ . '/cache/images';
+if (!is_dir($cacheDir)) {
+    @mkdir($cacheDir, 0755, true);
+}
+
+$safeId = preg_replace('/[^a-zA-Z0-9_-]/', '', $id);
+$cacheFile = $cacheDir . '/' . $safeId . '.jpg';
+
+// ✅ إذا الصورة المضغوطة موجودة → قدّمها فوراً
+if (file_exists($cacheFile) && filesize($cacheFile) > 0) {
+    header('Content-Type: image/jpeg');
+    header('Cache-Control: public, max-age=2592000');
+    header('Content-Length: ' . filesize($cacheFile));
+    readfile($cacheFile);
+    exit;
+}
+
+// 📥 جلب الصورة من قاعدة البيانات
 $stmt = $pdo->prepare(
     "SELECT url FROM listing_images 
      WHERE listing_id = ? 
@@ -49,7 +72,9 @@ if (!$imageData) {
     exit;
 }
 
-// ✅ الضغط القوي (بدون تخزين في ملف)
+// ✅ الضغط
+$compressed = null;
+
 if (extension_loaded('gd')) {
     $original = @imagecreatefromstring($imageData);
 
@@ -57,7 +82,7 @@ if (extension_loaded('gd')) {
         $width = imagesx($original);
         $height = imagesy($original);
 
-        // ✅ تصغير إلى 600 بكسل كحد أقصى (بدل 800)
+        // تصغير إلى 600 بكسل
         $maxWidth = 600;
         if ($width > $maxWidth) {
             $newWidth = $maxWidth;
@@ -70,17 +95,17 @@ if (extension_loaded('gd')) {
                 $newWidth, $newHeight,
                 $width, $height
             );
-
             imagedestroy($original);
             $original = $resized;
         }
 
-        // ✅ ضغط بجودة 60% (بدل 75%)
+        // ضغط بجودة 60%
         ob_start();
         imagejpeg($original, null, 60);
         $compressed = ob_get_clean();
         imagedestroy($original);
 
+        // استخدم الصورة المضغوطة فقط إذا كانت أصغر
         if ($compressed && strlen($compressed) < strlen($imageData)) {
             $imageData = $compressed;
             $mime = 'image/jpeg';
@@ -88,6 +113,12 @@ if (extension_loaded('gd')) {
     }
 }
 
+// 💾 احفظ في الكاش (فقط إذا الضغط نجح وصار JPEG)
+if ($compressed && $mime === 'image/jpeg') {
+    @file_put_contents($cacheFile, $imageData);
+}
+
+// 📤 أرسل الصورة
 header('Content-Type: ' . $mime);
 header('Cache-Control: public, max-age=2592000');
 header('Content-Length: ' . strlen($imageData));
