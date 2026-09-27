@@ -96,31 +96,32 @@ async function updateAdminUser(id, changes) {
 }
 
 /* ==========================================
-   التحقق من الصلاحيات
+   التحقق من الصلاحيات (النسخة المحسّنة)
    ========================================== */
-function checkAccess() {
+async function checkAccess() {
   const dashboardEl = document.getElementById('adminDashboard');
   const noAccessEl = document.getElementById('noAccess');
   
   if (!dashboardEl || !noAccessEl) return false;
 
   try {
-    const user = API.Users.getCurrent();
-    if (!user || !API.Users.isAdmin()) {
+    // 1️⃣ قراءة سريعة من localStorage (لعرض الواجهة فوراً)
+    const localUser = API.Users.getCurrent();
+    if (!localUser || !API.Users.isAdmin()) {
       noAccessEl.style.display = 'block';
       dashboardEl.style.display = 'none';
       initIcons();
       return false;
     }
 
-    currentAdmin = user;
+    // 2️⃣ عرض الواجهة مؤقتاً (عشان المستخدم ما ينتظر)
     dashboardEl.style.display = 'grid';
-    document.getElementById('adminName').textContent = user.name || 'أدمن';
-    document.getElementById('adminAvatar').textContent = (user.name || 'م').charAt(0);
+    document.getElementById('adminName').textContent = localUser.name || 'أدمن';
+    document.getElementById('adminAvatar').textContent = (localUser.name || 'م').charAt(0);
 
     const roleEl = document.getElementById('adminRole');
     if (roleEl) {
-      if (user.role === 'super_admin') {
+      if (localUser.role === 'super_admin') {
         roleEl.textContent = 'أدمن عام';
         roleEl.classList.add('super');
       } else {
@@ -129,11 +130,28 @@ function checkAccess() {
     }
 
     const usersTab = document.getElementById('usersTabBtn');
-    if (user.role !== 'super_admin' && usersTab) {
+    if (localUser.role !== 'super_admin' && usersTab) {
       usersTab.style.display = 'none';
     }
 
+    // 3️⃣ ✅ التحقق الحقيقي من الجلسة مع السيرفر
+    const serverUser = await API.Users.validateSession();
+    
+    if (!serverUser) {
+      // الجلسة انتهت فعلاً → طرد المستخدم لصفحة الدخول
+      console.warn('⚠️ الجلسة منتهية، إعادة التوجيه لتسجيل الدخول...');
+      alert('انتهت الجلسة. الرجاء تسجيل الدخول مرة أخرى.');
+      window.location.href = 'login.html';
+      return false;
+    }
+
+    // 4️⃣ تحديث البيانات من السيرفر (لضمان أن الدور صحيح)
+    currentAdmin = serverUser;
+    document.getElementById('adminName').textContent = serverUser.name || 'أدمن';
+    document.getElementById('adminAvatar').textContent = (serverUser.name || 'م').charAt(0);
+
     return true;
+
   } catch (e) {
     console.error('❌ خطأ في دالة checkAccess:', e);
     return false;
@@ -295,8 +313,7 @@ function renderListingsTable() {
       <td>
         ${waClean
         ? `<a href="https://wa.me/${waClean}" target="_blank" class="admin-icon-btn wa" title="واتساب البائع"><i data-lucide="message-circle"></i></a>`
-        : `<span style="color:var(--text-muted);font-size:12px;">—</span>`
-      }
+        : `<span style="color:var(--text-muted);font-size:12px;">—</span>`}
       </td>
       <td>
         <div class="admin-actions">
@@ -510,7 +527,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
   }
 
-  if (!checkAccess()) return;
+  // ✅ await هنا مهمة جداً لأن checkAccess صارت async
+  const hasAccess = await checkAccess();
+  if (!hasAccess) return;
 
   setupTabs();
   setupFilters();
@@ -518,4 +537,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   initIcons();
   console.log('✅ اكتمل تشغيل لوحة التحكم بنجاح');
+
+  // 🔄 فحص الجلسة كل 5 دقائق (اختياري لكن مُستحسن)
+  setInterval(async () => {
+    const user = await API.Users.validateSession();
+    if (!user) {
+      alert('انتهت الجلسة. الرجاء تسجيل الدخول مرة أخرى.');
+      window.location.href = 'login.html';
+    }
+  }, 5 * 60 * 1000);
 });
