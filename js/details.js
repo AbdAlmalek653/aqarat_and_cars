@@ -2,6 +2,7 @@
    صفحة تفاصيل الإعلان
    - المواصفات تظهر للجميع
    - رقم البائع يظهر للأدمن فقط
+   - تعديل الإعلان (للأدمن فقط)
    ========================================== */
 
 const BROKER_PHONE = '963930932794';
@@ -46,13 +47,11 @@ async function fetchListing(id) {
    تحويل details (Object) إلى specs (Array)
    ========================================== */
 function buildSpecsFromDetails(listing) {
-  // إذا كانت specs موجودة مسبقاً → استعملها
   if (listing.specs && listing.specs.length > 0) return listing.specs;
 
   const d = listing.details || {};
   const isProperty = listing.type === 'property';
 
-  /* ===== خريطة الحقول للعقارات ===== */
   const propertyMap = {
     propertyType: { icon: 'building-2', label: 'نوع العقار', translate: {
       apartment: 'شقة', villa: 'فيلا', 'arabic-house': 'بيت عربي',
@@ -75,7 +74,6 @@ function buildSpecsFromDetails(listing) {
     }},
     garden:       { icon: 'trees', label: 'الحديقة', translate: { yes: 'متوفر', no: 'غير متوفر' }},
     pool:         { icon: 'waves', label: 'المسبح', translate: { yes: 'متوفر', no: 'غير متوفر' }},
-    // أرض
     landArea:     { icon: 'square', label: 'مساحة الأرض', suffix: ' م²' },
     landFrontage: { icon: 'route', label: 'عرض الواجهة', suffix: ' م' },
     landDepth:    { icon: 'move-horizontal', label: 'العمق', suffix: ' م' },
@@ -86,13 +84,11 @@ function buildSpecsFromDetails(listing) {
     landTabu:     { icon: 'file-check', label: 'الطابو', translate: {
       green: 'أخضر', blue: 'أزرق', organized: 'منظم', unorganized: 'غير منظم'
     }},
-    // تجاري
     commercialArea:  { icon: 'square', label: 'المساحة', suffix: ' م²' },
     commercialFloor: { icon: 'layers', label: 'الطابق' },
     commercialAge:   { icon: 'calendar', label: 'عمر البناء', suffix: ' سنة' }
   };
 
-  /* ===== خريطة الحقول للسيارات ===== */
   const carMap = {
     brand:        { icon: 'car', label: 'الماركة', translate: {
       toyota: 'تويوتا', hyundai: 'هيونداي', kia: 'كيا',
@@ -128,26 +124,23 @@ function buildSpecsFromDetails(listing) {
 
   const map = isProperty ? propertyMap : carMap;
   const specs = [];
-  const usedLabels = new Set(); // لتجنب التكرار
+  const usedLabels = new Set();
 
   Object.keys(d).forEach(key => {
-    if (key.startsWith('_')) return; // تجاهل حقول مثل _whatsapp
+    if (key.startsWith('_')) return;
     const meta = map[key];
     if (!meta || meta.skip) return;
 
     let value = d[key];
     if (value === '' || value === null || value === undefined) return;
 
-    // تجنب التكرار (مثلاً area و propertyArea بنفس التسمية)
     if (usedLabels.has(meta.label)) return;
     usedLabels.add(meta.label);
 
-    // ترجمة القيم
     if (meta.translate && meta.translate[value]) {
       value = meta.translate[value];
     }
 
-    // إضافة لاحقة
     if (meta.suffix) value = value + meta.suffix;
 
     specs.push({
@@ -224,7 +217,7 @@ function renderListing(l) {
   // الموقع
   document.getElementById('adLocation').textContent = buildLocationText(l);
 
-  // ===== المواصفات (تظهر للجميع) =====
+  // المواصفات
   const specs = buildSpecsFromDetails(l);
   const specsContainer = document.getElementById('adSpecs');
 
@@ -248,12 +241,12 @@ function renderListing(l) {
   // رقم الإعلان
   document.getElementById('adId').textContent = '#' + l.id;
 
-  // ===== زر واتساب الوسيط (للجميع) =====
+  // زر واتساب الوسيط
   const msg = `مرحباً، انا مهتم بـ ${typeText} ورقم الإعلان هو: ${l.id}`;
   document.getElementById('whatsappBtn').href =
     `https://wa.me/${BROKER_PHONE}?text=${encodeURIComponent(msg)}`;
 
-  // ===== زر واتساب البائع (للأدمن فقط) =====
+  // زر واتساب البائع (للأدمن فقط)
   setupSellerWhatsapp(l);
 
   // معرض الصور
@@ -275,23 +268,19 @@ function setupSellerWhatsapp(listing) {
   const btn = document.getElementById('sellerWhatsappBtn');
   if (!btn) return;
 
-  // ✅ التحقق من الصلاحيات
   const isAdmin = window.API && API.Users && API.Users.isAdmin && API.Users.isAdmin();
   if (!isAdmin) {
     btn.style.display = 'none';
     return;
   }
 
-  // استخراج رقم البائع
   let sellerPhone = listing.whatsapp ||
                     (listing.details && listing.details._whatsapp) ||
                     '';
 
-  // تنظيف الرقم
   sellerPhone = String(sellerPhone).replace(/[^0-9+]/g, '');
   if (sellerPhone.startsWith('+')) sellerPhone = sellerPhone.substring(1);
 
-  // إذا ما في رقم
   if (!sellerPhone) {
     btn.style.display = 'flex';
     btn.style.background = 'var(--danger)';
@@ -306,7 +295,6 @@ function setupSellerWhatsapp(listing) {
     return;
   }
 
-  // تجهيز الرسالة
   const typeText = listing.type === 'property' ? 'العقار' : 'السيارة';
   const message = `مرحباً، تواصل معك فريق سوق بخصوص ${typeText} رقم #${listing.id}\n${listing.title}`;
 
@@ -429,11 +417,206 @@ function setupShare() {
 }
 
 /* ==========================================
+   ✏️ تعديل الإعلان (للأدمن)
+   ========================================== */
+
+// فتح نافذة التعديل
+function openEditModal() {
+  if (!currentListing) {
+    alert('لم يتم تحميل الإعلان بعد');
+    return;
+  }
+
+  // التحقق من الصلاحيات
+  const isAdmin = window.API && API.Users && API.Users.isAdmin && API.Users.isAdmin();
+  if (!isAdmin) {
+    alert('هذه الميزة للأدمن فقط');
+    return;
+  }
+
+  // ملء الحقول بالبيانات الحالية
+  document.getElementById('editTitle').value = currentListing.title || '';
+  document.getElementById('editPrice').value = currentListing.price || '';
+  document.getElementById('editCurrency').value = currentListing.currency || 'USD';
+  document.getElementById('editCity').value = currentListing.city || 'damascus';
+  document.getElementById('editArea').value = currentListing.area || '';
+  document.getElementById('editDescription').value = currentListing.description || '';
+  document.getElementById('editWhatsapp').value = currentListing.whatsapp || '';
+  document.getElementById('editStatus').value = currentListing.status || 'active';
+  document.getElementById('editFeatured').checked = !!currentListing.featured;
+
+  // فتح النافذة
+  const modal = document.getElementById('editModal');
+  modal.classList.add('show');
+  document.body.style.overflow = 'hidden';
+
+  if (window.lucide) window.lucide.createIcons();
+}
+
+// إغلاق النافذة
+window.closeEditModal = function() {
+  const modal = document.getElementById('editModal');
+  if (modal) {
+    modal.classList.remove('show');
+    document.body.style.overflow = '';
+  }
+};
+
+// حفظ التعديلات
+async function saveEdit(e) {
+  e.preventDefault();
+  if (!currentListing) return;
+
+  const saveBtn = document.getElementById('editSaveBtn');
+  saveBtn.disabled = true;
+  saveBtn.innerHTML = '<i data-lucide="loader-2" class="spin"></i><span>جاري الحفظ...</span>';
+  if (window.lucide) window.lucide.createIcons();
+
+  const updates = {
+    title: document.getElementById('editTitle').value.trim(),
+    price: Number(document.getElementById('editPrice').value),
+    currency: document.getElementById('editCurrency').value,
+    city: document.getElementById('editCity').value,
+    area: document.getElementById('editArea').value.trim(),
+    description: document.getElementById('editDescription').value.trim(),
+    whatsapp: document.getElementById('editWhatsapp').value.trim(),
+    status: document.getElementById('editStatus').value,
+    featured: document.getElementById('editFeatured').checked
+  };
+
+  try {
+    const result = await API.Listings.update(currentListing.id, updates);
+
+    if (result.success) {
+      // تحديث البيانات الحالية
+      currentListing = Object.assign({}, currentListing, updates);
+
+      // تحديث العناصر المعروضة مباشرة
+      const titleEl = document.getElementById('adTitle');
+      if (titleEl) titleEl.textContent = updates.title;
+
+      const priceEl = document.getElementById('adPrice');
+      if (priceEl) {
+        const priceText = Number(updates.price).toLocaleString('en-US');
+        if (currentListing.purpose === 'sale') {
+          priceEl.innerHTML = `${priceText} ${updates.currency}`;
+        } else {
+          priceEl.innerHTML = `${priceText} ${updates.currency} <small>/ شهرياً</small>`;
+        }
+      }
+
+      const descEl = document.getElementById('adDescription');
+      if (descEl) descEl.textContent = updates.description;
+
+      const locEl = document.getElementById('adLocation');
+      if (locEl) locEl.textContent = buildLocationText(currentListing);
+
+      // تحديث الشارات (لو الإعلان صار مميز)
+      const purposeText = currentListing.purpose === 'sale' ? 'للبيع' : 'للإيجار';
+      const purposeClass = currentListing.purpose === 'sale' ? 'sale' : 'rent';
+      const typeText = currentListing.type === 'property' ? 'عقار' : 'سيارة';
+
+      let badges = `
+        <span class="info-badge ${purposeClass}"><i data-lucide="tag"></i>${purposeText}</span>
+        <span class="info-badge" style="background:var(--bg-secondary);color:var(--text-secondary);">
+          <i data-lucide="${currentListing.type === 'property' ? 'building-2' : 'car'}"></i>${typeText}
+        </span>`;
+      if (updates.featured) {
+        badges += `<span class="info-badge featured"><i data-lucide="star"></i>مميز</span>`;
+      }
+      const badgesEl = document.getElementById('infoBadges');
+      if (badgesEl) badgesEl.innerHTML = badges;
+
+      // تحديث زر واتساب البائع (لو تغير الرقم)
+      setupSellerWhatsapp(currentListing);
+
+      // إغلاق النافذة + رسالة نجاح
+      closeEditModal();
+      showToast('✅ تم حفظ التعديلات بنجاح', 'success');
+    } else {
+      showToast('❌ فشل الحفظ: ' + (result.error || 'خطأ غير معروف'), 'error');
+    }
+  } catch (err) {
+    console.error('خطأ في التعديل:', err);
+    showToast('❌ حدث خطأ أثناء الحفظ', 'error');
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.innerHTML = '<i data-lucide="save"></i><span>حفظ التعديلات</span>';
+    if (window.lucide) window.lucide.createIcons();
+  }
+}
+
+/* ==========================================
+   Toast بسيط (رسالة مؤقتة)
+   ========================================== */
+function showToast(message, type = 'success') {
+  const toast = document.createElement('div');
+  toast.style.cssText = `
+    position: fixed;
+    top: 90px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 14px 24px;
+    background: ${type === 'success' ? 'linear-gradient(135deg, #10B981, #059669)' : 'linear-gradient(135deg, #EF4444, #DC2626)'};
+    color: white;
+    border-radius: 12px;
+    font-family: 'Cairo', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    z-index: 99999;
+    animation: slideDown 0.3s ease;
+    max-width: 90%;
+    text-align: center;
+  `;
+  toast.textContent = message;
+  document.body.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transition = 'opacity 0.3s';
+    setTimeout(() => toast.remove(), 300);
+  }, 2500);
+}
+
+// إضافة keyframe للـ toast
+if (!document.getElementById('toast-animation')) {
+  const style = document.createElement('style');
+  style.id = 'toast-animation';
+  style.textContent = `
+    @keyframes slideDown {
+      from { opacity: 0; transform: translate(-50%, -20px); }
+      to { opacity: 1; transform: translate(-50%, 0); }
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .spin { animation: spin 1s linear infinite; }
+  `;
+  document.head.appendChild(style);
+}
+
+/* ==========================================
    تشغيل
    ========================================== */
 document.addEventListener('DOMContentLoaded', async () => {
   initIcons();
   setupShare();
+
+  // ✏️ ربط زر التعديل ونموذج الحفظ
+  const editBtn = document.getElementById('adminEditBtn');
+  const editForm = document.getElementById('editForm');
+
+  if (editBtn) editBtn.addEventListener('click', openEditModal);
+  if (editForm) editForm.addEventListener('submit', saveEdit);
+
+  // إغلاق النافذة بمفتاح Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      window.closeEditModal();
+    }
+  });
 
   const { id } = getParams();
 
