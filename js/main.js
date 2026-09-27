@@ -1,7 +1,7 @@
 /* ==========================================
    الصفحة الرئيسية - سوق
    البيانات كلها من API (قاعدة البيانات)
-   النسخة النهائية: بدون كاش لضمان رؤية التحديثات فوراً
+   النسخة النهائية: عرض كل الإعلانات + تحديث تلقائي
    ========================================== */
 
 /* ===== تهيئة الأيقونات ===== */
@@ -35,7 +35,6 @@ const PURPOSE_NAMES = {
    ========================================== */
 async function getCachedListings() {
   try {
-    // ✅ إجبار المتصفح على جلب أحدث البيانات من السيرفر في كل مرة
     console.log('🔄 جاري جلب أحدث الإعلانات من السيرفر...');
     const data = await API.Listings.getAll();
     console.log(`✅ تم جلب ${data ? data.length : 0} إعلان`);
@@ -66,7 +65,11 @@ function createCard(item, type) {
   if (item.subType === 'chalet') icon = 'tent';
   if (item.subType === 'arabic-house') icon = 'landmark';
 
-  const firstImage = item.images && item.images.length > 0 ? item.images[0] : null;
+  // ✅ التعامل مع الصور - نتجاهل القيمة الوهمية 'has_image'
+  const firstImage = item.images && item.images.length > 0 && item.images[0] !== 'has_image'
+    ? item.images[0]
+    : null;
+
   const imageContent = firstImage
     ? `<img src="${firstImage}" alt="${item.title}" loading="lazy">`
     : `<i data-lucide="${icon}"></i>`;
@@ -181,7 +184,6 @@ function emptyState(type) {
   return `
     <div class="empty-state" style="grid-column:1/-1;">
       <div class="empty-bg-glow"></div>
-
       <div class="empty-icon-wrap">
         <div class="empty-icon-ring"></div>
         <div class="empty-icon-ring ring-2"></div>
@@ -189,15 +191,12 @@ function emptyState(type) {
           <i data-lucide="${icon}"></i>
         </div>
       </div>
-
       <h3 class="empty-title">
         لا توجد <span class="gradient-text">${pluralText}</span> حالياً
       </h3>
-
       <p class="empty-subtitle">
         كن أول من يضيف إعلان ${text} في منصتنا وابدأ رحلتك معنا
       </p>
-
       <div class="empty-features">
         <div class="empty-feature">
           <i data-lucide="check-circle-2"></i>
@@ -212,7 +211,6 @@ function emptyState(type) {
           <span>تواصل مباشر</span>
         </div>
       </div>
-
       <a href="pages/add-listing.html?type=${type}" class="empty-cta-btn">
         <span class="empty-cta-icon">
           <i data-lucide="plus"></i>
@@ -235,7 +233,6 @@ function emptyFilterState() {
   return `
     <div class="empty-state" style="grid-column:1/-1;">
       <div class="empty-bg-glow"></div>
-
       <div class="empty-icon-wrap">
         <div class="empty-icon-ring"></div>
         <div class="empty-icon-ring ring-2"></div>
@@ -243,15 +240,12 @@ function emptyFilterState() {
           <i data-lucide="search-x"></i>
         </div>
       </div>
-
       <h3 class="empty-title">
         لا توجد <span class="gradient-text">نتائج مطابقة</span>
       </h3>
-
       <p class="empty-subtitle">
         لا توجد ${typeText} ${purposeText} في ${cityText} حالياً
       </p>
-
       <div class="empty-features">
         <div class="empty-feature">
           <i data-lucide="refresh-ccw"></i>
@@ -262,7 +256,6 @@ function emptyFilterState() {
           <span>محافظة أخرى</span>
         </div>
       </div>
-
       <button class="empty-cta-btn" onclick="resetCascadeFilter()" type="button">
         <span class="empty-cta-icon">
           <i data-lucide="rotate-ccw"></i>
@@ -275,7 +268,7 @@ function emptyFilterState() {
 }
 
 /* ==========================================
-   تحميل العقارات المميزة
+   ✅ تحميل كل العقارات (بدون حد)
    ========================================== */
 async function loadFeaturedProperties() {
   const container = document.getElementById('featuredProperties');
@@ -285,8 +278,8 @@ async function loadFeaturedProperties() {
     const allListings = await getCachedListings();
     const properties = allListings
       .filter(l => l.type === 'property')
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      .slice(0, 4);
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    // ✅ لا يوجد slice — كل العقارات تظهر
 
     if (properties.length === 0) {
       container.innerHTML = emptyState('property');
@@ -302,7 +295,7 @@ async function loadFeaturedProperties() {
 }
 
 /* ==========================================
-   تحميل السيارات المميزة
+   ✅ تحميل كل السيارات (بدون حد)
    ========================================== */
 async function loadFeaturedCars() {
   const container = document.getElementById('featuredCars');
@@ -312,8 +305,8 @@ async function loadFeaturedCars() {
     const allListings = await getCachedListings();
     const cars = allListings
       .filter(l => l.type === 'car')
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      .slice(0, 4);
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    // ✅ لا يوجد slice — كل السيارات تظهر
 
     if (cars.length === 0) {
       container.innerHTML = emptyState('car');
@@ -333,7 +326,6 @@ async function loadFeaturedCars() {
    ========================================== */
 async function loadStats() {
   try {
-    // 1. المحاولة الأولى: جلب الإحصائيات مباشرة من الـ API
     const stats = await API.Stats.get();
     animateNumber('statProperties', stats.properties || 0);
     animateNumber('statCars', stats.cars || 0);
@@ -341,7 +333,6 @@ async function loadStats() {
   } catch (e) {
     console.warn('⚠️ فشل جلب الإحصائيات من الـ API. جاري المحاولة من الإعلانات...', e);
     
-    // 2. الخطة الاحتياطية: الحساب من الإعلانات
     try {
         const allListings = await getCachedListings();
         if (allListings.length > 0) {
@@ -472,9 +463,6 @@ const cascadeState = {
   city: null
 };
 
-/* ==========================================
-   إخفاء النتائج
-   ========================================== */
 function hideResults() {
   const resultsSection = document.getElementById('resultsSection');
   const grid = document.getElementById('latestGrid');
@@ -488,9 +476,6 @@ function hideResults() {
   if (emptyEl) emptyEl.style.display = 'none';
 }
 
-/* ==========================================
-   إعادة تعيين الفلتر
-   ========================================== */
 window.resetCascadeFilter = function() {
   cascadeState.type = null;
   cascadeState.purpose = null;
@@ -521,13 +506,9 @@ window.resetCascadeFilter = function() {
   if (showBtn) showBtn.disabled = true;
 
   hideResults();
-
   initIcons();
 };
 
-/* ==========================================
-   ربط الفلتر المتدرج
-   ========================================== */
 function setupCascadeFilter() {
   document.querySelectorAll('.cascade-btn[data-type]').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -630,9 +611,6 @@ function setupCascadeFilter() {
   }
 }
 
-/* ==========================================
-   عرض النتائج - الفلترة بنظام AND
-   ========================================== */
 async function handleCascadeShow() {
   if (!cascadeState.type || !cascadeState.purpose || !cascadeState.city) {
     return;
@@ -718,9 +696,6 @@ async function handleCascadeShow() {
   }
 }
 
-/* ==========================================
-   ⬇️ زر السهم - التمرير السلس للإعلانات
-   ========================================== */
 function setupScrollDownBtn() {
   const scrollDownBtn = document.getElementById('scrollDownBtn');
   if (!scrollDownBtn) return;
@@ -741,7 +716,7 @@ function setupScrollDownBtn() {
 }
 
 /* ==========================================
-   تشغيل عند التحميل
+   تشغيل عند التحميل + 🔄 تحديث تلقائي
    ========================================== */
 document.addEventListener('DOMContentLoaded', () => {
   loadFeaturedProperties();
@@ -753,4 +728,11 @@ document.addEventListener('DOMContentLoaded', () => {
   setupCascadeFilter();
   setupScrollDownBtn();
   initIcons();
+
+  // ✅ تحديث تلقائي كل 10 ثوانٍ لرؤية الإعلانات الجديدة فوراً
+  setInterval(() => {
+    loadFeaturedProperties();
+    loadFeaturedCars();
+    loadStats();
+  }, 10000);
 });
