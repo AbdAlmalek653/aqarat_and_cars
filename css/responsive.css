@@ -286,3 +286,125 @@ html, body {
         height: 16px !important;
     }
 }
+
+/* ==========================================
+   ✨ التنسيق النهائي الاحترافي لشريط التنقل السفلي (Bottom Nav)
+   ========================================== */
+
+@media (max-width: 768px) {
+    /* 1. الحاوية الرئيسية: خلفية صلبة، ارتفاع مريح، وظل قوي */
+    .bottom-nav {
+        display: flex !important;
+        justify-content: space-around !important;
+        align-items: center !important;
+        height: 80px !important; /* ارتفاع مثالي لمنع الضغط */
+        padding: 5px 8px calc(8px + env(safe-area-inset-bottom)) !important;
+        background: #0f172a !important; /* خلفية داكنة صلبة (بدون شفافية) */
+        border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+        box-shadow: 0 -8px 25px rgba(0, 0, 0, 0.7) !important; /* ظل قوي للفصل عن المحتوى */
+        z-index: 1000 !important;
+    }
+
+    /* 2. تنسيق كل زر (أيقونة + نص) */
+    .bottom-nav-item {
+        flex: 1 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important; /* مسافة مريحة بين الأيقونة والنص */
+        padding: 0 !important;
+        font-size: 11.5px !important; /* خط أكبر وأوضح */
+        font-weight: 700 !important;
+        color: #94a3b8 !important; /* لون رمادي فاتح واضح */
+        transition: all 0.3s ease !important;
+        text-decoration: none !important;
+        min-width: 0 !important;
+    }
+
+    /* 3. تكبير الأيقونات وتوضيحها */
+    .bottom-nav-item svg {
+        width: 24px !important;
+        height: 24px !important;
+        stroke-width: 2.2 !important; /* خط أسمك قليلاً للوضوح */
+        transition: transform 0.3s ease !important;
+    }
+
+    /* 4. تنسيق النص */
+    .bottom-nav-item span {
+        font-family: 'Cairo', sans-serif !important;
+        font-size: 11.5px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    /* 5. حالة التحديد (الزر النشط) */
+    .bottom-nav-item.active {
+        color: #3b82f6 !important; /* اللون الأزرق الأساسي */
+    }
+    .bottom-nav-item.active svg {
+        transform: translateY(-3px) !important; /* حركة بسيطة للأعلى */
+        filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.8)) !important; /* توهج أزرق */
+    }
+
+    /* 6. زر "أضف" المميز (الأوسط) */
+    .bottom-nav-item.add-btn {
+        position: relative !important;
+        top: -10px !important; /* رفعه للأعلى بشكل ملحوظ */
+    }
+
+    .add-icon {
+        width: 58px !important; /* حجم أكبر */
+        height: 58px !important;
+        margin-top: -32px !important; /* إبرازه للأعلى */
+        background: linear-gradient(135deg, #3b82f6, #f59e0b) !important; /* التدرج الأزرق-الذهبي */
+        border: 5px solid #0f172a !important; /* حدود بلون الخلفية لعزله (تأثير القطع) */
+        box-shadow: 0 10px 30px rgba(59, 130, 246, 0.7) !important; /* توهج قوي */
+        border-radius: 50% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        transition: transform 0.2s ease !important;
+    }
+
+    .add-icon svg {
+        width: 30px !important;
+        height: 30px !important;
+        stroke-width: 3 !important; /* خط سميك جداً للوضوح */
+        color: white !important;
+    }
+
+    /* 7. نص زر "أضف" ليكون تحت الأيقونة مباشرة وبلون مميز */
+    .bottom-nav-item.add-btn span {
+        margin-top: 8px !important;
+        color: #3b82f6 !important; /* لون أزرق مميز */
+        font-weight: 800 !important;
+        font-size: 11.5px !important;
+    }
+
+    /* تأثير عند الضغط على الزر */
+    .bottom-nav-item:active {
+        transform: scale(0.95) !important;
+    }
+}
+
+/* 8. تعديل بسيط للشاشات الصغيرة جداً (أقل من 380px) */
+@media (max-width: 380px) {
+    .bottom-nav-item span {
+        font-size: 10px !important;
+    }
+    .bottom-nav-item svg {
+        width: 22px !important;
+        height: 22px !important;
+    }
+    .add-icon {
+        width: 52px !important;
+        height: 52px !important;
+        margin-top: -28px !important;
+    }
+    .add-icon svg {
+        width: 26px !important;
+        height: 26px !important;
+    }
+}
