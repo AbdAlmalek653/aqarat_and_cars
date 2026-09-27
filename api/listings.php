@@ -6,10 +6,9 @@ require_once 'helpers.php';
 $cacheDir = __DIR__ . '/cache';
 if (!is_dir($cacheDir)) { mkdir($cacheDir, 0755, true); }
 
-// 🔑 مفتاح الكاش حسب الفلاتر المستخدمة
 $cacheKey = md5(json_encode($_GET));
 $cacheFile = $cacheDir . '/listings_' . $cacheKey . '.json';
-$cacheTime = 30; // كل 30 ثانية
+$cacheTime = 30;
 
 if (file_exists($cacheFile) && (time() - filemtime($cacheFile)) < $cacheTime) {
     $cached = json_decode(file_get_contents($cacheFile), true);
@@ -21,7 +20,6 @@ if (file_exists($cacheFile) && (time() - filemtime($cacheFile)) < $cacheTime) {
 }
 
 // 🏗️ بناء شروط البحث
-// ✅ التعديل: عرض الإعلانات المتاحة (active) وقيد المراجعة (pending) معاً
 $where = ["l.status IN ('active', 'pending')"];
 $params = [];
 
@@ -43,18 +41,15 @@ if (isset($_GET['featured']) && $_GET['featured'] == '1') {
 
 $limit = min(max((int)($_GET['limit'] ?? 50), 1), 100);
 
-// ✅ استعلام واحد فقط لجلب الإعلانات + الصور (بدل 51 استعلام!)
+// ✅ استعلام متوافق مع SQLite (بدون GROUP_CONCAT)
 $sql = '
     SELECT
         l.*,
         lo.name_ar AS city_name,
-        lo.slug AS city_slug,
-        GROUP_CONCAT(li.url ORDER BY li.sort_order SEPARATOR "|||") AS images_raw
+        lo.slug AS city_slug
     FROM listings l
     LEFT JOIN locations lo ON lo.id = l.location_id
-    LEFT JOIN listing_images li ON li.listing_id = l.id
     WHERE ' . implode(' AND ', $where) . '
-    GROUP BY l.id
     ORDER BY l.created_at DESC
     LIMIT ' . $limit;
 
@@ -62,20 +57,29 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $listings = $stmt->fetchAll();
 
-// 🎨 معالجة البيانات في PHP فقط (بدون أي استعلام إضافي)
-foreach ($listings as &$listing) {
-    // فك ضغط الصور
-    $images = [];
-    if (!empty($listing['images_raw'])) {
-        $images = explode('|||', $listing['images_raw']);
+// 🖼️ جلب الصور لكل إعلان (بطريقة محسّنة)
+$listingIds = array_column($listings, 'id');
+$imagesByListing = [];
+
+if (!empty($listingIds)) {
+    $placeholders = implode(',', array_fill(0, count($listingIds), '?'));
+    $imgStmt = $pdo->prepare(
+        "SELECT listing_id, url FROM listing_images 
+         WHERE listing_id IN ($placeholders) 
+         ORDER BY listing_id, sort_order"
+    );
+    $imgStmt->execute($listingIds);
+    $allImages = $imgStmt->fetchAll();
+    
+    foreach ($allImages as $img) {
+        $imagesByListing[$img['listing_id']][] = $img['url'];
     }
-    $listing['images'] = $images;
-    unset($listing['images_raw']); // لا نحتاج إرسالها
+}
 
-    // معالجة التفاصيل
+// 🎨 معالجة البيانات
+foreach ($listings as &$listing) {
+    $listing['images'] = $imagesByListing[$listing['id']] ?? [];
     $listing['details'] = json_decode($listing['details'] ?? '{}', true) ?: [];
-
-    // تحويل الأنواع
     $listing['price'] = (float)$listing['price'];
     $listing['featured'] = (bool)$listing['is_featured'];
     $listing['views'] = (int)$listing['views'];
