@@ -21,8 +21,9 @@ if (file_exists($cacheFile) && (time() - filemtime($cacheFile)) < $cacheTime) {
 }
 
 // 🏗️ بناء شروط البحث
-$where = ['l.status = ?'];
-$params = ['active'];
+// ✅ التعديل: عرض الإعلانات المتاحة (active) وقيد المراجعة (pending) معاً
+$where = ["l.status IN ('active', 'pending')"];
+$params = [];
 
 if (!empty($_GET['type'])) {
     $where[] = 'l.type = ?';
