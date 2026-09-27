@@ -1,6 +1,6 @@
 /* ==========================================
   طبقة البيانات الموحدة
-  النسخة النهائية: بدون كاش لضمان رؤية التحديثات فوراً
+  النسخة النهائية: منع الطلبات المتكررة + كاش ذكي (3 ثوانٍ)
   ========================================== */
 
 const API = (function () {
@@ -44,13 +44,46 @@ const API = (function () {
   }
 
   /* ==========================================
-     ✅ دوال HTTP مع منع الكاش
+     ✅ دوال HTTP مع منع تكرار الطلبات
      ========================================== */
+
+  // 🗂️ مخازن مؤقتة لمنع الطلبات المتكررة
+  const _pendingGets = {}; // الطلبات الجارية حالياً
+  const _getCache = {};    // نتائج آخر 3 ثوانٍ
+
   function httpGet(url) {
-    return fetch(API_BASE + url, { 
+    const fullUrl = API_BASE + url;
+    const now = Date.now();
+    const CACHE_TTL = 3000; // 3 ثوانٍ فقط (لا يؤثر على رؤية التحديثات)
+
+    // 1️⃣ إذا في نفس الطلب قيد التنفيذ حالياً → رجّع نفس الـ Promise
+    if (_pendingGets[fullUrl]) {
+      return _pendingGets[fullUrl];
+    }
+
+    // 2️⃣ إذا نفس الطلب نُفّذ قبل أقل من 3 ثوانٍ → رجّع النتيجة من الذاكرة
+    if (_getCache[fullUrl] && (now - _getCache[fullUrl].time) < CACHE_TTL) {
+      return Promise.resolve(_getCache[fullUrl].data);
+    }
+
+    // 3️⃣ نفّذ طلب جديد
+    const promise = fetch(fullUrl, {
       credentials: 'include',
-      cache: 'no-store' // ✅ منع التخزين المؤقت لضمان جلب أحدث البيانات
-    }).then(function (r) { return r.json(); });
+      cache: 'no-store'
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      // خزّن النتيجة في الذاكرة لـ 3 ثوانٍ
+      _getCache[fullUrl] = { data: data, time: Date.now() };
+      return data;
+    })
+    .finally(function () {
+      // احذف من قائمة الطلبات الجارية
+      delete _pendingGets[fullUrl];
+    });
+
+    _pendingGets[fullUrl] = promise;
+    return promise;
   }
 
   function httpPost(url, data) {
@@ -58,7 +91,7 @@ const API = (function () {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      cache: 'no-store', // ✅ منع التخزين المؤقت للطلبات أيضاً
+      cache: 'no-store',
       body: JSON.stringify(data)
     }).then(function (r) { return r.json(); });
   }
@@ -130,7 +163,7 @@ const API = (function () {
         return httpPost('/login.php', {
           email: email,
           password: password
-        } ).then(function(result) {
+        }).then(function(result) {
           if (result.success && result.user) {
             write(KEYS.CURRENT_USER, result.user);
           }
