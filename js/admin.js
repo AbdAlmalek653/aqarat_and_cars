@@ -14,13 +14,11 @@ const roleLabels = { user: 'مستخدم', agent: 'وكيل', admin: 'أدمن',
 
 function initIcons() { if (window.lucide) window.lucide.createIcons(); }
 
- function escapeHtml(value) {
+function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>'"]/g, function (character) {
-
     return { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;' }[character];
   });
 }
-
 
 async function adminRequest(path, options) {
   try {
@@ -43,6 +41,57 @@ async function adminRequest(path, options) {
   } catch (error) {
     console.error(`❌ فشل الطلب ${path}:`, error);
     throw error;
+  }
+}
+
+/* ==========================================
+   الدوال المفقودة (تمت إضافتها لحل المشكلة)
+   ========================================== */
+
+async function updateAdminListing(id, changes) {
+  try {
+    await adminRequest('admin_update_listing.php', {
+      method: 'POST',
+      body: JSON.stringify({ id, ...changes })
+    });
+    
+    // تحديث البيانات محلياً لتجنب إعادة تحميل الصفحة بالكامل
+    const index = allListings.findIndex(l => l.id === id);
+    if (index > -1) {
+      Object.assign(allListings[index], changes);
+    }
+    
+    renderOverview();
+    renderListingsTable();
+    alert('✅ تم حفظ التعديل بنجاح');
+  } catch (error) {
+    alert('❌ فشل التعديل: ' + error.message);
+  }
+}
+
+window.editAdminListing = async function(id, currentTitle, currentPrice) {
+  const newTitle = prompt('عنوان الإعلان:', currentTitle || '');
+  if (newTitle === null) return;
+  
+  const newPrice = prompt('السعر:', currentPrice || '0');
+  if (newPrice === null) return;
+
+  await updateAdminListing(id, { 
+    title: newTitle.trim(), 
+    price: newPrice.trim() 
+  });
+};
+
+async function updateAdminUser(id, changes) {
+  try {
+    await adminRequest('admin_update_user.php', {
+      method: 'POST',
+      body: JSON.stringify({ id, ...changes })
+    });
+    alert('✅ تم حفظ تعديل المستخدم');
+    await loadData();
+  } catch (error) {
+    alert(error.message);
   }
 }
 
@@ -256,7 +305,10 @@ function renderListingsTable() {
             ${Object.entries(listingStatusLabels).map(([value, label]) => `<option value="${value}" ${status === value ? 'selected' : ''}>${label}</option>`).join('')}
           </select>
           <button class="admin-icon-btn ${isFeatured ? 'featured' : ''}" data-feature-id="${listingId}" data-featured="${isFeatured ? '1' : '0'}" title="${isFeatured ? 'إلغاء التمييز' : 'تمييز'}"><i data-lucide="star"></i></button>
-          <button class="admin-icon-btn" data-edit-id="${listingId}" data-edit-title="${escapeHtml(l.title)}" data-edit-price="${escapeHtml(l.price)}" title="تعديل"><i data-lucide="pencil"></i></button>
+          
+          <!-- ✅ زر التعديل (تم إصلاحه ليعمل مباشرة) -->
+          <button class="admin-icon-btn" onclick="editAdminListing('${listingId}', '${escapeHtml(l.title)}', '${escapeHtml(l.price)}')" title="تعديل"><i data-lucide="pencil"></i></button>
+          
           <button class="admin-icon-btn danger" onclick="adminDeleteListing('${listingId}')" title="حذف"><i data-lucide="trash-2"></i></button>
         </div>
       </td>
@@ -271,11 +323,6 @@ function renderListingsTable() {
   document.querySelectorAll('[data-feature-id]').forEach(function (button) {
     button.addEventListener('click', function () {
       updateAdminListing(button.dataset.featureId, { featured: button.dataset.featured !== '1' });
-    });
-  });
-  document.querySelectorAll('[data-edit-id]').forEach(function (button) {
-    button.addEventListener('click', function () {
-      editAdminListing(button.dataset.editId, button.dataset.editTitle, button.dataset.editPrice);
     });
   });
 
@@ -346,7 +393,6 @@ function renderUsersTable() {
             </select>
             <button class="admin-icon-btn" data-active-id="${userId}" data-active="${isActive ? '1' : '0'}" title="${isActive ? 'تعطيل' : 'تفعيل'}"><i data-lucide="${isActive ? 'user-round-x' : 'user-round-check'}"></i></button>
             
-            <!-- ✅ زر حذف المستخدم (يظهر للسوبر أدمن فقط) -->
             <button class="admin-icon-btn danger" onclick="adminDeleteUser('${userId}')" title="حذف الحساب"><i data-lucide="trash-2"></i></button>
           ` : `<span style="color:var(--text-muted);font-size:11px;">أنت</span>`}
         </div>
@@ -368,9 +414,6 @@ function renderUsersTable() {
   initIcons();
 }
 
-/* ==========================================
-   حذف المستخدم (النسخة الصحيحة)
-   ========================================== */
 window.adminDeleteUser = async function (id) {
   const user = allUsers.find(u => u.id === id);
   if (!user) return;
@@ -379,14 +422,12 @@ window.adminDeleteUser = async function (id) {
   if (!confirm('🔴 سيتم حذف الحساب نهائياً ولا يمكن استرجاعه.')) return;
 
   try {
-    // ✅ استخدام الـ API الحقيقي للحذف من قاعدة البيانات
     const result = await adminRequest('admin_delete_user.php', {
         method: 'POST',
         body: JSON.stringify({ id })
     });
 
     if (result.success) {
-        // إزالة المستخدم من الواجهة مباشرة بعد نجاح الحذف
         allUsers = allUsers.filter(u => u.id !== id);
         renderOverview();
         renderUsersTable();
@@ -476,6 +517,5 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadData();
 
   initIcons();
- console.log('✅ اكتمل تشغيل لوحة التحكم بنجاح');
+  console.log('✅ اكتمل تشغيل لوحة التحكم بنجاح');
 });
-
