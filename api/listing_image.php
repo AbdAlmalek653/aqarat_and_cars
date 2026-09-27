@@ -29,23 +29,25 @@ if (strpos($url, 'http') === 0 && strpos($url, 'data:') !== 0) {
     exit;
 }
 
-// ✅ إذا كانت Base64 → احسب حجمها
+// ✅ إذا كانت Base64
 if (strpos($url, 'data:image/') === 0) {
     $parts = explode(',', $url, 2);
     if (count($parts) === 2) {
         $size = strlen($parts[1]);
 
-        // إذا الصورة كبيرة (> 150 kB في Base64) → استخدم wsrv.nl لضغطها
-        if ($size > 150000) {
+        // ✅ إذا الصورة كبيرة (> 100 kB) → استخدم wsrv.nl لضغطها
+        if ($size > 100000) {
             $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
             $host = $_SERVER['HTTP_HOST'] ?? '';
             $rawUrl = $protocol . '://' . $host . '/api/listing_image_raw.php?id=' . urlencode($id);
 
-            $proxyUrl = 'https://wsrv.nl/?url=' . urlencode($rawUrl) . '&w=600&q=60&output=jpg';
+            // wsrv.nl - خدمة ضغط مجانية
+            $proxyUrl = 'https://wsrv.nl/?url=' . urlencode($rawUrl) . '&w=500&h=400&fit=cover&q=55&output=jpg&il';
             header('Location: ' . $proxyUrl, true, 302);
             exit;
         }
 
+        // صورة صغيرة → أرسلها كما هي
         $binary = base64_decode($parts[1]);
         preg_match('/data:([^;]+);/', $parts[0], $m);
         $mime = $m[1] ?? 'image/jpeg';
