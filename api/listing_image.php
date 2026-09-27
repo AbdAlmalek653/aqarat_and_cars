@@ -49,7 +49,7 @@ if (!$imageData) {
     exit;
 }
 
-// ✅ الضغط (بدون تخزين في ملف)
+// ✅ الضغط القوي (بدون تخزين في ملف)
 if (extension_loaded('gd')) {
     $original = @imagecreatefromstring($imageData);
 
@@ -57,7 +57,8 @@ if (extension_loaded('gd')) {
         $width = imagesx($original);
         $height = imagesy($original);
 
-        $maxWidth = 800;
+        // ✅ تصغير إلى 600 بكسل كحد أقصى (بدل 800)
+        $maxWidth = 600;
         if ($width > $maxWidth) {
             $newWidth = $maxWidth;
             $newHeight = (int)(($height / $width) * $newWidth);
@@ -74,8 +75,9 @@ if (extension_loaded('gd')) {
             $original = $resized;
         }
 
+        // ✅ ضغط بجودة 60% (بدل 75%)
         ob_start();
-        imagejpeg($original, null, 75);
+        imagejpeg($original, null, 60);
         $compressed = ob_get_clean();
         imagedestroy($original);
 
