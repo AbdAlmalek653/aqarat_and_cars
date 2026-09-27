@@ -30,6 +30,24 @@ const PURPOSE_NAMES = {
 };
 
 /* ==========================================
+   ✨ تحسين الأداء: تخزين الإعلانات مؤقتاً
+   ========================================== */
+let cachedListings = null; // كاش لمنع تكرار الطلبات
+
+async function getCachedListings() {
+  // إذا كانت البيانات موجودة مسبقاً، أرجعها فوراً بدون طلب جديد
+  if (cachedListings) return cachedListings;
+
+  try {
+    cachedListings = await API.Listings.getAll();
+    return cachedListings;
+  } catch (error) {
+    console.error('❌ فشل تحميل الإعلانات من الخادم:', error);
+    return [];
+  }
+}
+
+/* ==========================================
    إنشاء كارد إعلان
    ========================================== */
 function createCard(item, type) {
@@ -258,14 +276,14 @@ function emptyFilterState() {
 }
 
 /* ==========================================
-   تحميل العقارات المميزة
+   تحميل العقارات المميزة (محسّن)
    ========================================== */
 async function loadFeaturedProperties() {
   const container = document.getElementById('featuredProperties');
   if (!container) return;
 
   try {
-    const allListings = await API.Listings.getAll();
+    const allListings = await getCachedListings();
     const properties = allListings
       .filter(l => l.type === 'property')
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
@@ -285,14 +303,14 @@ async function loadFeaturedProperties() {
 }
 
 /* ==========================================
-   تحميل السيارات المميزة
+   تحميل السيارات المميزة (محسّن)
    ========================================== */
 async function loadFeaturedCars() {
   const container = document.getElementById('featuredCars');
   if (!container) return;
 
   try {
-    const allListings = await API.Listings.getAll();
+    const allListings = await getCachedListings();
     const cars = allListings
       .filter(l => l.type === 'car')
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
@@ -312,17 +330,31 @@ async function loadFeaturedCars() {
 }
 
 /* ==========================================
-   تحميل الإحصائيات الحقيقية
+   تحميل الإحصائيات الحقيقية (مع نظام احتياطي)
    ========================================== */
 async function loadStats() {
   try {
+    // 1. المحاولة الأولى: جلب الإحصائيات مباشرة من الـ API
     const stats = await API.Stats.get();
-
     animateNumber('statProperties', stats.properties || 0);
     animateNumber('statCars', stats.cars || 0);
     animateNumber('statUsers', stats.users || 0);
   } catch (e) {
-    console.error('خطأ في تحميل الإحصائيات:', e);
+    console.warn('⚠️ فشل جلب الإحصائيات من الـ API. جاري المحاولة من الإعلانات...', e);
+    
+    // 2. الخطة الاحتياطية: الحساب من الإعلانات المخزنة
+    try {
+        const allListings = await getCachedListings();
+        if (allListings.length > 0) {
+            const propsCount = allListings.filter(l => l.type === 'property').length;
+            const carsCount = allListings.filter(l => l.type === 'car').length;
+            animateNumber('statProperties', propsCount);
+            animateNumber('statCars', carsCount);
+            // لا يمكن حساب المستخدمين من الإعلانات، نتركهم 0 أو نعرض رسالة
+        }
+    } catch (fallbackError) {
+        console.error('❌ فشل النظام الاحتياطي أيضاً:', fallbackError);
+    }
   }
 }
 
@@ -634,7 +666,7 @@ async function handleCascadeShow() {
   }, 100);
 
   try {
-    const allListings = await API.Listings.getAll();
+    const allListings = await getCachedListings();
 
     const listings = allListings.filter(l => {
       if (l.type !== cascadeState.type) return false;
@@ -721,6 +753,6 @@ document.addEventListener('DOMContentLoaded', () => {
   setupSearchForm();
   setupWelcomeModal();
   setupCascadeFilter();
-  setupScrollDownBtn();  // ✅ تشغيل زر السهم
+  setupScrollDownBtn();
   initIcons();
 });
