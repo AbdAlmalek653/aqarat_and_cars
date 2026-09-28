@@ -9,15 +9,16 @@ if (!$id) {
     exit;
 }
 
+// ✅ SQLite لا يدعم binding مع OFFSET → نستخدم قيمة مضمّنة
+$offset = max(0, $index);
+
 $stmt = $pdo->prepare(
     "SELECT url FROM listing_images 
      WHERE listing_id = ? 
      ORDER BY sort_order 
-     LIMIT 1 OFFSET ?"
+     LIMIT 1 OFFSET " . $offset
 );
-$stmt->bindValue(1, $id, PDO::PARAM_STR);
-$stmt->bindValue(2, $index, PDO::PARAM_INT);
-$stmt->execute();
+$stmt->execute([$id]);
 $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$row || empty($row['url'])) {
