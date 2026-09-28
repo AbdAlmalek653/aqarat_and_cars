@@ -1,6 +1,6 @@
 /* ==========================================
   طبقة البيانات الموحدة
-  النسخة النهائية: منع الطلبات المتكررة + كاش ذكي (3 ثوانٍ)
+  النسخة المحسّنة: منع الطلبات المتكررة + كاش ذكي (60 ثانية)
   ========================================== */
 
 const API = (function () {
@@ -44,46 +44,123 @@ const API = (function () {
   }
 
   /* ==========================================
-     ✅ دوال HTTP مع منع تكرار الطلبات
+     ✅ دوال HTTP مع منع تكرار الطلبات (النسخة المحسّنة)
      ========================================== */
 
   // 🗂️ مخازن مؤقتة لمنع الطلبات المتكررة
-  const _pendingGets = {}; // الطلبات الجارية حالياً
-  const _getCache = {};    // نتائج آخر 3 ثوانٍ
+  const _pendingGets = {};       // الطلبات الجارية حالياً (Promise)
+  const _memoryCache = {};       // كاش في الذاكرة (يبقى في نفس الجلسة)
+  const MEMORY_CACHE_TTL = 60000; // 60 ثانية
 
-  function httpGet(url) {
+  // 🗄️ كاش دائم في sessionStorage (يبقى بعد تحديث الصفحة)
+  const SESSION_CACHE_TTL = 300000; // 5 دقائق
+  const SESSION_CACHE_PREFIX = 'api_cache_';
+
+  function getSessionCache(key) {
+    try {
+      const raw = sessionStorage.getItem(SESSION_CACHE_PREFIX + key);
+      if (!raw) return null;
+      const entry = JSON.parse(raw);
+      if (Date.now() - entry.time < SESSION_CACHE_TTL) {
+        return entry.data;
+      }
+      sessionStorage.removeItem(SESSION_CACHE_PREFIX + key);
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function setSessionCache(key, data) {
+    try {
+      sessionStorage.setItem(SESSION_CACHE_PREFIX + key, JSON.stringify({
+        data: data,
+        time: Date.now()
+      }));
+    } catch (e) {
+      // sessionStorage ممتلئ أو محظور
+    }
+  }
+
+  function httpGet(url, options) {
+    options = options || {};
+    const forceRefresh = options.forceRefresh || false;
     const fullUrl = API_BASE + url;
-    const now = Date.now();
-    const CACHE_TTL = 3000; // 3 ثوانٍ فقط (لا يؤثر على رؤية التحديثات)
+    const cacheKey = fullUrl;
+
+    // 🔄 إذا طُلب تحديث إجباري، احذف الكاش واذهب للسيرفر
+    if (forceRefresh) {
+      delete _memoryCache[cacheKey];
+      try { sessionStorage.removeItem(SESSION_CACHE_PREFIX + cacheKey); } catch(e) {}
+    }
 
     // 1️⃣ إذا في نفس الطلب قيد التنفيذ حالياً → رجّع نفس الـ Promise
-    if (_pendingGets[fullUrl]) {
-      return _pendingGets[fullUrl];
+    if (_pendingGets[cacheKey]) {
+      console.log('⚡ [Pending] ' + url);
+      return _pendingGets[cacheKey];
     }
 
-    // 2️⃣ إذا نفس الطلب نُفّذ قبل أقل من 3 ثوانٍ → رجّع النتيجة من الذاكرة
-    if (_getCache[fullUrl] && (now - _getCache[fullUrl].time) < CACHE_TTL) {
-      return Promise.resolve(_getCache[fullUrl].data);
+    // 2️⃣ إذا في كاش في الذاكرة ولم ينتهِ → رجّعه
+    if (_memoryCache[cacheKey] && (Date.now() - _memoryCache[cacheKey].time) < MEMORY_CACHE_TTL) {
+      console.log('✅ [Memory Cache] ' + url);
+      return Promise.resolve(_memoryCache[cacheKey].data);
     }
 
-    // 3️⃣ نفّذ طلب جديد
+    // 3️⃣ إذا في كاش في sessionStorage → رجّعه وحدّث الذاكرة
+    const sessionData = getSessionCache(cacheKey);
+    if (sessionData) {
+      console.log('💾 [Session Cache] ' + url);
+      _memoryCache[cacheKey] = { data: sessionData, time: Date.now() };
+      return Promise.resolve(sessionData);
+    }
+
+    // 4️⃣ نفّذ طلب جديد
+    console.log('🌐 [Network] ' + url);
     const promise = fetch(fullUrl, {
       credentials: 'include',
       cache: 'no-store'
     })
     .then(function (r) { return r.json(); })
     .then(function (data) {
-      // خزّن النتيجة في الذاكرة لـ 3 ثوانٍ
-      _getCache[fullUrl] = { data: data, time: Date.now() };
+      // خزّن في الذاكرة
+      _memoryCache[cacheKey] = { data: data, time: Date.now() };
+      // خزّن في sessionStorage
+      setSessionCache(cacheKey, data);
       return data;
     })
     .finally(function () {
-      // احذف من قائمة الطلبات الجارية
-      delete _pendingGets[fullUrl];
+      delete _pendingGets[cacheKey];
     });
 
-    _pendingGets[fullUrl] = promise;
+    _pendingGets[cacheKey] = promise;
     return promise;
+  }
+
+  // 🧹 تفريغ الكاش (يُستدعى بعد إضافة/تعديل/حذف إعلان)
+  function clearApiCache(urlPattern) {
+    if (!urlPattern) {
+      // امسح كل الكاش
+      Object.keys(_memoryCache).forEach(function(k) { delete _memoryCache[k]; });
+      try {
+        Object.keys(sessionStorage).forEach(function(k) {
+          if (k.indexOf(SESSION_CACHE_PREFIX) === 0) sessionStorage.removeItem(k);
+        });
+      } catch(e) {}
+      console.log('🧹 API Cache cleared (all)');
+      return;
+    }
+    // امسح كاش URLs محددة فقط
+    Object.keys(_memoryCache).forEach(function(k) {
+      if (k.indexOf(urlPattern) !== -1) delete _memoryCache[k];
+    });
+    try {
+      Object.keys(sessionStorage).forEach(function(k) {
+        if (k.indexOf(SESSION_CACHE_PREFIX) === 0 && k.indexOf(urlPattern) !== -1) {
+          sessionStorage.removeItem(k);
+        }
+      });
+    } catch(e) {}
+    console.log('🧹 API Cache cleared for: ' + urlPattern);
   }
 
   function httpPost(url, data) {
@@ -93,7 +170,12 @@ const API = (function () {
       credentials: 'include',
       cache: 'no-store',
       body: JSON.stringify(data)
-    }).then(function (r) { return r.json(); });
+    }).then(function (r) {
+      // 🔄 بعد أي POST ناجح، افرغ الكاش المتعلق بالإعلانات
+      clearApiCache('/listings.php');
+      clearApiCache('/stats.php');
+      return r.json();
+    });
   }
 
   function normalizeListing(listing) {
@@ -209,6 +291,7 @@ const API = (function () {
       if (MODE === 'server') {
         return httpPost('/logout.php', {}).then(function (result) {
           localStorage.removeItem(KEYS.CURRENT_USER);
+          clearApiCache('/me.php');
           return result;
         });
       }
@@ -306,9 +389,9 @@ const API = (function () {
   };
 
   const Stats = {
-    get: function () {
+    get: function (options) {
       if (MODE === 'server') {
-        return httpGet('/stats.php').then(function (result) {
+        return httpGet('/stats.php', options).then(function (result) {
           return result.stats || {};
         });
       }
@@ -325,47 +408,47 @@ const API = (function () {
      الإعلانات
      ========================================== */
   const Listings = {
-    getAll: function (filters) {
+    getAll: function (filters, options) {
       if (MODE === 'server') {
         const q = filters ? new URLSearchParams(filters).toString() : '';
-        return httpGet('/listings.php' + (q ? '?' + q : '')).then(function (result) {
+        return httpGet('/listings.php' + (q ? '?' + q : ''), options).then(function (result) {
           return (result.listings || []).map(normalizeListing);
         });
       }
       return Promise.resolve(read(KEYS.LISTINGS, []));
     },
 
-    getById: function (id) {
+    getById: function (id, options) {
       if (MODE === 'server') {
-        return httpGet('/listing.php?id=' + encodeURIComponent(id)).then(function (result) {
+        return httpGet('/listing.php?id=' + encodeURIComponent(id), options).then(function (result) {
           return normalizeListing(result.listing);
         });
       }
       return Promise.resolve(read(KEYS.LISTINGS, []).find(function (l) { return l.id === id; }));
     },
 
-    getByType: function (type) {
+    getByType: function (type, options) {
       if (MODE === 'server') {
-        return httpGet('/listings.php?type=' + encodeURIComponent(type)).then(function (result) {
+        return httpGet('/listings.php?type=' + encodeURIComponent(type), options).then(function (result) {
           return (result.listings || []).map(normalizeListing);
         });
       }
       return Promise.resolve(read(KEYS.LISTINGS, []).filter(function (l) { return l.type === type; }));
     },
 
-    getByUser: function (userId) {
+    getByUser: function (userId, options) {
       if (MODE === 'server') {
-        return httpGet('/my_listings.php').then(function (result) {
+        return httpGet('/my_listings.php', options).then(function (result) {
           return (result.listings || []).map(normalizeListing);
         });
       }
       return Promise.resolve(read(KEYS.LISTINGS, []).filter(function (l) { return l.userId === userId; }));
     },
 
-    getFeatured: function (type, limit) {
+    getFeatured: function (type, limit, options) {
       limit = limit || 4;
       if (MODE === 'server') {
-        return httpGet('/listings.php?type=' + encodeURIComponent(type) + '&featured=1&limit=' + limit)
+        return httpGet('/listings.php?type=' + encodeURIComponent(type) + '&featured=1&limit=' + limit, options)
           .then(function (result) { return (result.listings || []).map(normalizeListing); });
       }
       return Promise.resolve(read(KEYS.LISTINGS, [])
@@ -373,10 +456,10 @@ const API = (function () {
         .slice(0, limit));
     },
 
-    getLatest: function (type, limit) {
+    getLatest: function (type, limit, options) {
       limit = limit || 4;
       if (MODE === 'server') {
-        return httpGet('/listings.php?type=' + encodeURIComponent(type) + '&limit=' + limit)
+        return httpGet('/listings.php?type=' + encodeURIComponent(type) + '&limit=' + limit, options)
           .then(function (result) { return (result.listings || []).map(normalizeListing); });
       }
       return Promise.resolve(read(KEYS.LISTINGS, [])
@@ -537,11 +620,13 @@ const API = (function () {
       }
     },
     getMode: function () { return MODE; },
+    clearApiCache: clearApiCache, // ✨ جديد: لتفريغ الكاش يدوياً
     clearAll: function () {
       Object.keys(KEYS).forEach(function (key) {
         localStorage.removeItem(KEYS[key]);
       });
       localStorage.removeItem('souq_admins_seeded');
+      clearApiCache();
     }
   };
 
