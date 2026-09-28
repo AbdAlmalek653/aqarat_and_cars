@@ -598,3 +598,29 @@ img { max-width: 100%; display: block; }
   #featuredProperties .card-meta, #featuredCars .card-meta { display: none; }
   #featuredProperties .card:hover, #featuredCars .card:hover { transform: none; }
 }
+/* ==========================================
+   🚫 إخفاء قائمة الجوال على الكمبيوتر + حذف العنوان
+   ========================================== */
+
+/* إخفاء قائمة الجوال على الكمبيوتر (فوق 769px) */
+@media (min-width: 769px) {
+  .mobile-menu,
+  .mobile-menu-overlay,
+  .mobile-menu-toggle,
+  .mobile-header-actions {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+}
+
+/* حذف عنوان "القائمة الرئيسية" نهائياً */
+.mobile-menu-title {
+  display: none !important;
+}
+
+/* حذف زر الإغلاق (x) - إن أردت */
+.mobile-menu-close {
+  display: none !important;
+}
