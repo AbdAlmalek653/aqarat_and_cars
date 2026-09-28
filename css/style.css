@@ -1,4 +1,48 @@
 /* ==========================================
+   ✨ خط Cairo - تحميل محلي (Self-Hosted)
+   ========================================== */
+/* cairo-regular - arabic_latin */
+@font-face {
+  font-display: swap;
+  font-family: 'Cairo';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../fonts/cairo-v31-arabic_latin-regular.woff2') format('woff2');
+}
+/* cairo-500 - arabic_latin */
+@font-face {
+  font-display: swap;
+  font-family: 'Cairo';
+  font-style: normal;
+  font-weight: 500;
+  src: url('../fonts/cairo-v31-arabic_latin-500.woff2') format('woff2');
+}
+/* cairo-600 - arabic_latin */
+@font-face {
+  font-display: swap;
+  font-family: 'Cairo';
+  font-style: normal;
+  font-weight: 600;
+  src: url('../fonts/cairo-v31-arabic_latin-600.woff2') format('woff2');
+}
+/* cairo-700 - arabic_latin */
+@font-face {
+  font-display: swap;
+  font-family: 'Cairo';
+  font-style: normal;
+  font-weight: 700;
+  src: url('../fonts/cairo-v31-arabic_latin-700.woff2') format('woff2');
+}
+/* cairo-800 - arabic_latin */
+@font-face {
+  font-display: swap;
+  font-family: 'Cairo';
+  font-style: normal;
+  font-weight: 800;
+  src: url('../fonts/cairo-v31-arabic_latin-800.woff2') format('woff2');
+}
+
+/* ==========================================
    1. المتغيرات (Design System)
    ========================================== */
 :root {
