@@ -28,29 +28,13 @@ if (!$row || empty($row['url'])) {
 
 $url = $row['url'];
 
-// ==========================================
-// ✨ دالة مساعدة: ترويسات التخزين المؤقت الموحدة
-// ==========================================
-function sendCacheHeaders() {
-    // سنة كاملة = 31536000 ثانية
-    header('Cache-Control: public, max-age=31536000, immutable');
-    header('Expires: ' . gmdate('D, d M Y H:i:s', time() + 31536000) . ' GMT');
-    header('Vary: Accept-Encoding');
-    header('Vary: User-Agent');
-}
-
-// ==========================================
-// 1️⃣ رابط URL خارجي → 302 Redirect مع Cache
-// ==========================================
+// إذا كانت رابط URL عادي → أرسلها مباشرة
 if (strpos($url, 'http') === 0 && strpos($url, 'data:') !== 0) {
-    sendCacheHeaders(); // ✅ جديد: يخبر المتصفح بتخزين الـ Redirect
     header('Location: ' . $url, true, 302);
     exit;
 }
 
-// ==========================================
-// 2️⃣ صورة Base64
-// ==========================================
+// ✅ إذا كانت Base64
 if (strpos($url, 'data:image/') === 0) {
     $parts = explode(',', $url, 2);
     if (count($parts) === 2) {
@@ -63,18 +47,17 @@ if (strpos($url, 'data:image/') === 0) {
             $rawUrl = $protocol . '://' . $host . '/api/listing_image_raw.php?id=' . urlencode($id) . '&index=' . $offset;
 
             $proxyUrl = 'https://wsrv.nl/?url=' . urlencode($rawUrl) . '&w=500&h=400&fit=cover&q=55&output=jpg&il';
-            sendCacheHeaders(); // ✅ جديد: يخبر المتصفح بتخزين الـ Redirect
             header('Location: ' . $proxyUrl, true, 302);
             exit;
         }
 
-        // صورة صغيرة → أرسلها مباشرة (بدون 302)
+        // صورة صغيرة → أرسلها كما هي
         $binary = base64_decode($parts[1]);
         preg_match('/data:([^;]+);/', $parts[0], $m);
         $mime = $m[1] ?? 'image/jpeg';
 
-        sendCacheHeaders(); // ✅ استخدام الدالة الموحدة
         header('Content-Type: ' . $mime);
+        header('Cache-Control: public, max-age=2592000');
         header('Content-Length: ' . strlen($binary));
         echo $binary;
         exit;
