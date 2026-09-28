@@ -31,12 +31,20 @@ if (!$listing) {
     ]);
 }
 
-$imageStmt = $pdo->prepare(
-    'SELECT url FROM listing_images WHERE listing_id = ? ORDER BY sort_order'
+// ✅ اجلب عدد الصور فقط (بدون الصور نفسها)
+$countStmt = $pdo->prepare(
+    'SELECT COUNT(*) FROM listing_images WHERE listing_id = ?'
 );
-$imageStmt->execute([$id]);
+$countStmt->execute([$id]);
+$imageCount = (int)$countStmt->fetchColumn();
 
-$listing['images'] = $imageStmt->fetchAll(PDO::FETCH_COLUMN);
+// ✅ نرسل علامات فقط، وليس Base64
+$images = [];
+for ($i = 0; $i < $imageCount; $i++) {
+    $images[] = "has_image:$i";
+}
+
+$listing['images'] = $images;
 $listing['details'] = json_decode(
     $listing['details'] ?? '{}',
     true
