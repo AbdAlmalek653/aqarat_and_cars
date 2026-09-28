@@ -309,7 +309,7 @@ function setupSellerWhatsapp(listing) {
 }
 
 /* ==========================================
-   معرض الصور
+   ✅ معرض الصور - محسّن (صور منفصلة عبر listing_image.php)
    ========================================== */
 function renderGallery(imgs, l) {
   const main = document.getElementById('galleryMain');
@@ -326,13 +326,30 @@ function renderGallery(imgs, l) {
     return;
   }
 
-  main.innerHTML = `<img src="${imgs[0]}" alt="${l.title}">
+  // ✅ تحويل كل عنصر إلى رابط لـ listing_image.php
+  const apiBase = '../api';
+  const imageUrls = imgs.map(function (img, i) {
+    // إذا العنصر من نوع "has_image:N" → استخدم رابط API
+    if (typeof img === 'string' && img.indexOf('has_image:') === 0) {
+      const index = img.split(':')[1] || 0;
+      return `${apiBase}/listing_image.php?id=${encodeURIComponent(l.id)}&index=${index}`;
+    }
+    // وإلا (رابط URL عادي أو Base64 قديم) → استخدمه مباشرة
+    return img;
+  });
+
+  // خزّن الروابط الجديدة لاستخدامها في التنقل
+  currentListing.images = imageUrls;
+
+  main.innerHTML = `<img src="${imageUrls[0]}" alt="${l.title}" loading="eager">
     <div class="gallery-nav prev" onclick="prevImage()"><i data-lucide="chevron-right"></i></div>
     <div class="gallery-nav next" onclick="nextImage()"><i data-lucide="chevron-left"></i></div>
-    <div class="gallery-counter" id="galleryCounter">1 / ${imgs.length}</div>`;
-  thumbs.innerHTML = imgs.map((img, i) =>
-    `<div class="gallery-thumb ${i === 0 ? 'active' : ''}" onclick="goToImage(${i})"><img src="${img}" alt="صورة ${i + 1}"></div>`
-  ).join('');
+    <div class="gallery-counter" id="galleryCounter">1 / ${imageUrls.length}</div>`;
+
+  thumbs.innerHTML = imageUrls.map(function (url, i) {
+    return `<div class="gallery-thumb ${i === 0 ? 'active' : ''}" onclick="goToImage(${i})"><img src="${url}" alt="صورة ${i + 1}" loading="lazy"></div>`;
+  }).join('');
+
   currentImageIndex = 0;
   initIcons();
 }
@@ -638,6 +655,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   renderListing(l);
 });
+
 // ==========================================
 // إخفاء رقم هاتف البائع عن المستخدمين العاديين
 // ==========================================
@@ -657,7 +675,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 4. الإخفاء أو الإظهار بناءً على الصلاحية
     if (isAdmin) {
         // إذا كان أدمن، نبقيه ظاهراً
-        sellerBtn.style.display = 'flex'; // أو 'block' حسب التصميم
+        sellerBtn.style.display = 'flex';
         console.log('🛡️ أدمن: تم إظهار رقم البائع.');
     } else {
         // إذا كان مستخدم عادي، نخفيه (وهو مخفي أصلاً بالـ HTML)
