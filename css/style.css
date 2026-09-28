@@ -3210,7 +3210,7 @@ img { max-width: 100%; display: block; }
 }
 /* ==========================================
    📱 سلايدر أفقي للجوال (Swipe Carousel)
-   يعرض 3 بطاقات + سحب بالإصبع لرؤية المزيد
+   بطاقات أكبر + سحب بالإصبع
    ========================================== */
 
 @media (max-width: 768px) {
@@ -3225,115 +3225,119 @@ img { max-width: 100%; display: block; }
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
-    gap: 10px;
-    padding: 6px 16px 18px;
-    margin: 0 -16px 12px;
+    gap: 8px;
+    padding: 8px 12px 16px;
+    margin: 0 -12px 12px;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    /* إخفاء أي محتوى زائد عن الحد */
-    -webkit-mask-image: linear-gradient(to right, 
-      black 0%, black calc(100% - 30px), transparent 100%);
-    mask-image: linear-gradient(to right, 
-      black 0%, black calc(100% - 30px), transparent 100%);
+    /* تلاشي على حافة الشاشة */
+    -webkit-mask-image: linear-gradient(to left,
+      transparent 0%,
+      black 20px,
+      black 100%);
+    mask-image: linear-gradient(to left,
+      transparent 0%,
+      black 20px,
+      black 100%);
   }
 
-  /* إخفاء شريط التمرير على كل المتصفحات */
+  /* إخفاء شريط التمرير */
   #featuredProperties::-webkit-scrollbar,
   #featuredCars::-webkit-scrollbar {
     display: none;
   }
 
-  /* ✅ حجم البطاقة: 3 بطاقات ظاهرة على الشاشة */
+  /* ✅ حجم البطاقة: 2.85 بطاقة ظاهرة (بطاقة أكبر قليلاً من 3) */
   #featuredProperties .card,
   #featuredCars .card {
-    flex: 0 0 calc((100vw - 62px) / 3);
-    min-width: calc((100vw - 62px) / 3);
-    max-width: calc((100vw - 62px) / 3);
+    flex: 0 0 calc((100vw - 44px) / 2.85);
+    min-width: calc((100vw - 44px) / 2.85);
+    max-width: calc((100vw - 44px) / 2.85);
     scroll-snap-align: start;
     border-radius: 14px;
-    transform: none !important; /* منع تأثير hover */
+    transform: none !important;
   }
 
-  /* ✅ تعديل صورة البطاقة */
+  /* ✅ صورة البطاقة - أكبر قليلاً */
   #featuredProperties .card-image,
   #featuredCars .card-image {
-    height: 90px;
+    height: 110px;
   }
 
-  /* ✅ تعديل جسم البطاقة */
+  /* ✅ جسم البطاقة */
   #featuredProperties .card-body,
   #featuredCars .card-body {
-    padding: 8px;
+    padding: 10px;
   }
 
-  /* ✅ تعديل العنوان */
+  /* ✅ العنوان - أوضح */
   #featuredProperties .card-title,
   #featuredCars .card-title {
-    font-size: 11px;
-    line-height: 1.3;
-    margin-bottom: 4px;
+    font-size: 12.5px;
+    line-height: 1.35;
+    margin-bottom: 6px;
     -webkit-line-clamp: 2;
     display: -webkit-box;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
 
-  /* ✅ تعديل الموقع */
+  /* ✅ الموقع */
   #featuredProperties .card-location,
   #featuredCars .card-location {
-    font-size: 9px;
-    margin-bottom: 6px;
-    gap: 3px;
+    font-size: 10.5px;
+    margin-bottom: 8px;
+    gap: 4px;
   }
 
   #featuredProperties .card-location svg,
   #featuredCars .card-location svg {
-    width: 10px;
-    height: 10px;
+    width: 11px;
+    height: 11px;
   }
 
-  /* ✅ إخفاء الشرائح (chips) على الجوال لتوفير المساحة */
+  /* ✅ إخفاء الشرائح (chips) لتوفير المساحة */
   #featuredProperties .card-meta,
   #featuredCars .card-meta {
     display: none;
   }
 
-  /* ✅ تعديل السعر */
+  /* ✅ السعر - أكبر وأوضح */
   #featuredProperties .card-price,
   #featuredCars .card-price {
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 800;
   }
 
   #featuredProperties .card-price small,
   #featuredCars .card-price small {
-    font-size: 9px;
+    font-size: 10px;
   }
 
-  /* ✅ تعديل الشارة (للبيع/للإيجار) */
+  /* ✅ شارة (للبيع/للإيجار) */
   #featuredProperties .card-badge,
   #featuredCars .card-badge {
-    font-size: 9px;
-    padding: 3px 7px;
-    top: 6px;
-    right: 6px;
+    font-size: 10px;
+    padding: 4px 9px;
+    top: 8px;
+    right: 8px;
   }
 
-  /* ✅ تعديل شارة "مميز" */
+  /* ✅ شارة "مميز" */
   #featuredProperties .card-badge.featured,
   #featuredCars .card-badge.featured {
-    top: 6px;
-    left: 6px;
+    top: 8px;
+    left: 8px;
     right: auto;
-    font-size: 9px;
-    padding: 3px 7px;
+    font-size: 10px;
+    padding: 4px 9px;
   }
 
   /* ✅ أيقونة الإعلان (عند عدم وجود صورة) */
   #featuredProperties .card-image svg,
   #featuredCars .card-image svg {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
   }
 
   /* ✅ إخفاء تأثير hover على الجوال */
@@ -3350,27 +3354,27 @@ img { max-width: 100%; display: block; }
   }
 }
 
-/* ✅ للشاشات الصغيرة جداً (أقل من 380px) */
+/* ✅ للشاشات الصغيرة جداً */
 @media (max-width: 380px) {
   #featuredProperties .card,
   #featuredCars .card {
-    flex: 0 0 calc((100vw - 54px) / 3);
-    min-width: calc((100vw - 54px) / 3);
-    max-width: calc((100vw - 54px) / 3);
+    flex: 0 0 calc((100vw - 38px) / 2.85);
+    min-width: calc((100vw - 38px) / 2.85);
+    max-width: calc((100vw - 38px) / 2.85);
   }
 
   #featuredProperties .card-image,
   #featuredCars .card-image {
-    height: 80px;
+    height: 95px;
   }
 
   #featuredProperties .card-title,
   #featuredCars .card-title {
-    font-size: 10px;
+    font-size: 11.5px;
   }
 
   #featuredProperties .card-price,
   #featuredCars .card-price {
-    font-size: 11px;
+    font-size: 13px;
   }
 }
