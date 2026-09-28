@@ -9,11 +9,7 @@
   <!-- ✅ favicon - أيقونة الموقع -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
 
-  
-  
-  
-
-  <!-- ✅ تم تعديل رابط مكتبة Lucide ليصبح محلياً لتسريع الموقع -->
+  <!-- ✅ مكتبة Lucide محلية -->
   <script src="js/lucide.min.js"></script>
 
   <link rel="stylesheet" href="css/style.css">
@@ -24,13 +20,11 @@
   <header class="header">
     <div class="container header-inner">
 
-      <!-- الشعار -->
       <a href="index.html" class="logo">
         <span class="logo-icon"><i data-lucide="home"></i></span>
         <span class="logo-text">سوق</span>
       </a>
 
-      <!-- روابط التنقل للكمبيوتر (مخفية على الجوال) -->
       <nav class="nav desktop-only">
         <a href="index.html" class="active">الرئيسية</a>
         <a href="pages/properties.html">عقارات</a>
@@ -39,9 +33,7 @@
         <a href="pages/contact.html">اتصل بنا</a>
       </nav>
 
-      <!-- أزرار الكمبيوتر (بدون زر البحث) -->
       <div class="header-actions desktop-only" id="desktopActions">
-        <!-- سيتم حقن أزرار تسجيل الدخول/الأدمن هنا عبر header-state.js -->
         <a href="pages/login.html" class="btn-login">
           <i data-lucide="log-in"></i>
           <span>تسجيل الدخول</span>
@@ -52,7 +44,6 @@
         </a>
       </div>
 
-      <!-- ✨ أزرار الجوال (بدون زر بحث) ✨ -->
       <div class="mobile-header-actions mobile-only">
         <a href="pages/add-listing.html" class="btn-add-listing-mobile">
           <i data-lucide="plus-circle"></i>
@@ -66,7 +57,7 @@
     </div>
   </header>
 
-  <!-- ===================== قائمة الجوال المنبثقة (بدون خيار البحث) ===================== -->
+  <!-- ===================== قائمة الجوال ===================== -->
   <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
   <div class="mobile-menu" id="mobileMenu">
     <div class="mobile-menu-header">
@@ -80,7 +71,6 @@
     </div>
     
     <div class="mobile-menu-body">
-      <!-- سيتم نقل أزرار الحساب والأدمن والخروج هنا تلقائياً عبر الكود -->
       <div id="mobileAuthContainer"></div>
     </div>
   </div>
@@ -88,13 +78,19 @@
   <!-- ===================== Hero + الفلتر المتدرج ===================== -->
   <section class="hero">
     <div class="container">
-      <div class="hero-content">
-        <span class="hero-badge">
+      <div class="hero-content has-aura">
+        <span class="hero-badge animated">
           <i data-lucide="sparkles"></i>
           منصة العقارات &amp; السيارات للوساطة الإلكترونية
         </span>
-        <h1 class="hero-title">
-          ابحث عن <span class="gradient-text">عقارك</span> أو <span class="gradient-text">سيارتك</span> المثالية
+
+        <h1 class="hero-title animated">
+          <span class="hero-word">ابحث</span>
+          <span class="hero-word">عن</span>
+          <span class="hero-word gradient-text">عقارك</span>
+          <span class="hero-word">أو</span>
+          <span class="hero-word gradient-text">سيارتك</span>
+          <span class="hero-word">المثالية</span>
         </h1>
         
         <a href="#stats-section" class="scroll-strip" id="scrollDownBtn" aria-label="انتقل إلى الإعلانات">
@@ -109,7 +105,7 @@
           </div>
           <div class="scroll-strip-content">
             <span class="scroll-strip-line"></span>
-            <div class="scroll-strip-text">
+            <div class="scroll-strip-text animated">
               <i data-lucide="sparkles" class="scroll-strip-icon-left"></i>
               <span>إضغط هنا لتصفح كافة الإعلانات</span>
               <i data-lucide="chevron-down" class="scroll-strip-arrow"></i>
@@ -120,19 +116,19 @@
 
         <div class="hero-divider">
           <span class="hero-divider-line"></span>
-          <span class="hero-divider-text">أو</span>
+          <span class="hero-divider-text animated">أو</span>
           <span class="hero-divider-line"></span>
         </div>
       </div>
 
       <!-- الفلتر المتدرج -->
       <div class="cascade-filter cascade-filter-hero" id="cascadeFilter">
-        <div class="cascade-title">
+        <div class="cascade-title animated">
           <div class="cascade-title-line"></div>
           <div class="cascade-title-content">
-            <span class="cascade-title-badge"><i data-lucide="compass"></i><span>رحلة البحث</span></span>
-            <h3 class="cascade-title-text">ابدأ رحلة البحث الآن</h3>
-            <p class="cascade-title-sub">اختر النوع، الغرض، والمحافظة للحصول على نتائج دقيقة</p>
+            <span class="cascade-title-badge animated"><i data-lucide="compass"></i><span>رحلة البحث</span></span>
+            <h3 class="cascade-title-text animated">ابدأ رحلة البحث الآن</h3>
+            <p class="cascade-title-sub animated">اختر النوع، الغرض، والمحافظة للحصول على نتائج دقيقة</p>
           </div>
           <div class="cascade-title-line"></div>
         </div>
@@ -188,29 +184,16 @@
     </div>
   </section>
 
-  <!-- ===================== باقي الصفحة ===================== -->
+  <!-- ===================== قسم النتائج المخفي (المصدر للبيانات) ===================== -->
   <section class="section results-section" id="resultsSection" style="display:none;">
     <div class="container">
-      <div class="section-header">
-        <div>
-          <h2 class="section-title"><i data-lucide="search-check"></i><span>نتائج البحث</span></h2>
-          <p class="section-subtitle">الإعلانات المطابقة لاختياراتك</p>
-        </div>
-        <button class="link-more" id="clearResultsBtn" type="button" style="background:none;border:none;cursor:pointer;">إغلاق النتائج <i data-lucide="x"></i></button>
-      </div>
       <div class="grid grid-4" id="latestGrid"></div>
       <div id="cascadeEmpty" style="display:none;" class="empty-state">
         <div class="empty-icon-wrap">
           <div class="empty-icon"><i data-lucide="inbox"></i></div>
-          <div class="empty-icon-ring"></div>
-          <div class="empty-icon-ring ring-2"></div>
         </div>
         <h3 class="empty-title">لا توجد إعلانات مطابقة</h3>
         <p class="empty-subtitle">جرّب تغيير الفلتر أو تصفح كل الإعلانات</p>
-        <a href="pages/search.html" class="empty-cta-btn">
-          <span class="empty-cta-icon"><i data-lucide="search"></i></span>
-          تصفح كل الإعلانات
-        </a>
       </div>
     </div>
   </section>
@@ -316,6 +299,7 @@
     <a href="pages/account.html" class="bottom-nav-item"><i data-lucide="user"></i><span>تسجيل الدخول</span></a>
   </nav>
 
+  <!-- ===================== نافذة الترحيب ===================== -->
   <div class="welcome-modal" id="welcomeModal">
     <div class="welcome-modal-overlay" onclick="closeWelcome()"></div>
     <div class="welcome-modal-content">
@@ -332,13 +316,66 @@
     </div>
   </div>
 
+  <!-- ===================== 🪟 نافذة نتائج البحث المنبثقة ===================== -->
+  <div class="results-modal" id="resultsModal" aria-hidden="true">
+    <div class="results-modal-overlay" onclick="closeResultsModal()"></div>
+    
+    <div class="results-modal-content" role="dialog" aria-labelledby="resultsModalTitle">
+      
+      <!-- رأس النافذة -->
+      <div class="results-modal-header">
+        <div class="results-modal-title-wrap">
+          <span class="results-modal-icon"><i data-lucide="search-check"></i></span>
+          <div>
+            <h2 class="results-modal-title" id="resultsModalTitle">نتائج البحث</h2>
+            <p class="results-modal-subtitle" id="resultsModalSubtitle">الإعلانات المطابقة لاختياراتك</p>
+          </div>
+        </div>
+        
+        <button class="results-modal-close" onclick="closeResultsModal()" aria-label="إغلاق">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      
+      <!-- شرائح الفلاتر المختارة -->
+      <div class="results-modal-filters" id="resultsModalFilters"></div>
+      
+      <!-- جسم النافذة -->
+      <div class="results-modal-body">
+        <div class="grid grid-4" id="modalLatestGrid"></div>
+        
+        <div id="modalCascadeEmpty" style="display:none;" class="empty-state">
+          <div class="empty-icon-wrap">
+            <div class="empty-icon"><i data-lucide="inbox"></i></div>
+          </div>
+          <h3 class="empty-title">لا توجد إعلانات مطابقة</h3>
+          <p class="empty-subtitle">جرّب تغيير الفلتر أو تصفح كل الإعلانات</p>
+          <a href="pages/search.html" class="empty-cta-btn">
+            <span class="empty-cta-icon"><i data-lucide="search"></i></span>
+            تصفح كل الإعلانات
+          </a>
+        </div>
+      </div>
+      
+      <!-- Footer -->
+      <div class="results-modal-footer">
+        <a href="pages/search.html" class="results-modal-seeall">
+          <i data-lucide="external-link"></i>
+          <span>عرض كل الإعلانات</span>
+        </a>
+      </div>
+      
+    </div>
+  </div>
+
+  <!-- ===================== Scripts ===================== -->
   <script src="js/api.js"></script>
   <script src="js/header-state.js"></script>
   <script src="js/main.js"></script>
   <script src="js/auth-guard.js"></script>
   
-  <!-- ✨ سكريبت إضافي لإدارة قائمة الجوال ونقل الأزرار ✨ -->
   <script>
+    /* ===================== قائمة الجوال + نقل الأزرار ===================== */
     document.addEventListener('DOMContentLoaded', function() {
       const toggleBtn = document.getElementById('mobileMenuToggle');
       const closeBtn = document.getElementById('closeMobileMenu');
@@ -401,6 +438,124 @@
           if (window.lucide) window.lucide.createIcons();
         }
       }, 300);
+    });
+
+    /* ===================== 🪟 Modal نتائج البحث ===================== */
+
+    // فتح النافذة
+    window.openResultsModal = function() {
+      const modal = document.getElementById('resultsModal');
+      if (!modal) return;
+      
+      // نسخ النتائج من #latestGrid إلى #modalLatestGrid
+      const sourceGrid = document.getElementById('latestGrid');
+      const targetGrid = document.getElementById('modalLatestGrid');
+      
+      if (sourceGrid && targetGrid) {
+        targetGrid.innerHTML = sourceGrid.innerHTML;
+      }
+      
+      // نسخ حالة الفراغ
+      const sourceEmpty = document.getElementById('cascadeEmpty');
+      const targetEmpty = document.getElementById('modalCascadeEmpty');
+      
+      if (sourceEmpty && targetEmpty) {
+        const isEmpty = sourceEmpty.style.display !== 'none';
+        targetEmpty.style.display = isEmpty ? 'flex' : 'none';
+        targetGrid.style.display = isEmpty ? 'none' : 'grid';
+      }
+      
+      // تحديث شرائح الفلاتر
+      updateModalFilterChips();
+      
+      // إظهار النافذة
+      modal.classList.add('show');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('modal-open');
+      
+      // إعادة تحميل الأيقونات
+      if (window.lucide) window.lucide.createIcons();
+    };
+
+    // إغلاق النافذة
+    window.closeResultsModal = function() {
+      const modal = document.getElementById('resultsModal');
+      if (!modal) return;
+      
+      modal.classList.remove('show');
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('modal-open');
+    };
+
+    // تحديث شرائح الفلاتر
+    function updateModalFilterChips() {
+      const chipsContainer = document.getElementById('resultsModalFilters');
+      if (!chipsContainer) return;
+      
+      chipsContainer.innerHTML = '';
+      
+      // نوع العقار
+      const typeBtn = document.querySelector('.cascade-btn[data-type].selected');
+      if (typeBtn) {
+        const text = typeBtn.querySelector('span')?.textContent || '';
+        const icon = typeBtn.querySelector('svg')?.outerHTML || '';
+        chipsContainer.insertAdjacentHTML('beforeend',
+          `<span class="results-modal-chip">${icon}<span>${text}</span></span>`);
+      }
+      
+      // الغرض
+      const purposeBtn = document.querySelector('.cascade-btn[data-purpose].selected');
+      if (purposeBtn) {
+        const text = purposeBtn.querySelector('span')?.textContent || '';
+        const icon = purposeBtn.querySelector('svg')?.outerHTML || '';
+        chipsContainer.insertAdjacentHTML('beforeend',
+          `<span class="results-modal-chip">${icon}<span>${text}</span></span>`);
+      }
+      
+      // المحافظة
+      const citySelect = document.getElementById('cascadeCity');
+      if (citySelect && citySelect.value) {
+        const selectedOption = citySelect.options[citySelect.selectedIndex];
+        const cityText = selectedOption?.text || '';
+        chipsContainer.insertAdjacentHTML('beforeend',
+          `<span class="results-modal-chip"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg><span>${cityText}</span></span>`);
+      }
+      
+      // إعادة تحميل الأيقونات
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    // إغلاق بمفتاح ESC
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeResultsModal();
+      }
+    });
+
+    /* ===================== اعتراض زر "عرض الإعلانات" ===================== */
+    window.addEventListener('load', function() {
+      const showBtn = document.getElementById('cascadeShowBtn');
+      
+      if (showBtn) {
+        // اعتراض النقر على الزر (capture phase - يشتغل قبل main.js)
+        showBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          // فتح النافذة بعد تحميل النتائج
+          setTimeout(() => {
+            const grid = document.getElementById('latestGrid');
+            const empty = document.getElementById('cascadeEmpty');
+            
+            const hasResults = grid && grid.children.length > 0;
+            const isEmpty = empty && empty.style.display === 'flex';
+            
+            if (hasResults || isEmpty) {
+              openResultsModal();
+            }
+          }, 600);
+        }, true);
+      }
     });
   </script>
 </body>
