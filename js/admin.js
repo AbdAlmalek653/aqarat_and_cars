@@ -138,9 +138,8 @@ async function checkAccess() {
     const serverUser = await API.Users.validateSession();
     
     if (!serverUser) {
-      // الجلسة انتهت فعلاً → طرد المستخدم لصفحة الدخول
+      // الجلسة انتهت فعلاً → توجيه صامت لصفحة الدخول
       console.warn('⚠️ الجلسة منتهية، إعادة التوجيه لتسجيل الدخول...');
-      alert('انتهت الجلسة. الرجاء تسجيل الدخول مرة أخرى.');
       window.location.href = 'login.html';
       return false;
     }
@@ -538,11 +537,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   initIcons();
   console.log('✅ اكتمل تشغيل لوحة التحكم بنجاح');
 
-  // 🔄 فحص الجلسة كل 5 دقائق (اختياري لكن مُستحسن)
+  // 🔄 فحص الجلسة كل 5 دقائق (توجيه صامت بدون تنبيهات)
   setInterval(async () => {
     const user = await API.Users.validateSession();
     if (!user) {
-      alert('انتهت الجلسة. الرجاء تسجيل الدخول مرة أخرى.');
       window.location.href = 'login.html';
     }
   }, 5 * 60 * 1000);
