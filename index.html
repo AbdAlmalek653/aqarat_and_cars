@@ -14,7 +14,7 @@
 
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body class="has-bottom-nav">
 
   <!-- ===================== الهيدر ===================== -->
   <header class="header">
@@ -305,7 +305,17 @@
     <div class="welcome-modal-content">
       <button class="welcome-close" onclick="closeWelcome()"><i data-lucide="x"></i></button>
       <div class="welcome-modal-icon">
-        <img src="images/site-logo.jpg" alt="شعار سوق" class="welcome-logo-img">
+        <div class="welcome-logo-duo">
+          <span class="logo-duo-item logo-duo-house">
+            <i data-lucide="home"></i>
+          </span>
+          <span class="logo-duo-plus">
+            <i data-lucide="plus"></i>
+          </span>
+          <span class="logo-duo-item logo-duo-car">
+            <i data-lucide="car"></i>
+          </span>
+        </div>
       </div>
       <h2 class="welcome-modal-title">أهلاً وسهلاً بك في <span class="gradient-text">سوق</span></h2>
       <p class="welcome-modal-text">أهلا بكم في منصة العقارات &amp; السيارات للوساطة الإلكترونية، نقدم لكم تجربة مثالية لبيع وشراء أي عقار أو سيارة إلكترونياً</p>
@@ -444,12 +454,10 @@
 
     /* ===================== 🪟 Modal نتائج البحث ===================== */
 
-    // فتح النافذة
     window.openResultsModal = function() {
       const modal = document.getElementById('resultsModal');
       if (!modal) return;
       
-      // نسخ النتائج من #latestGrid إلى #modalLatestGrid
       const sourceGrid = document.getElementById('latestGrid');
       const targetGrid = document.getElementById('modalLatestGrid');
       
@@ -457,7 +465,6 @@
         targetGrid.innerHTML = sourceGrid.innerHTML;
       }
       
-      // نسخ حالة الفراغ
       const sourceEmpty = document.getElementById('cascadeEmpty');
       const targetEmpty = document.getElementById('modalCascadeEmpty');
       
@@ -467,19 +474,15 @@
         targetGrid.style.display = isEmpty ? 'none' : 'grid';
       }
       
-      // تحديث شرائح الفلاتر
       updateModalFilterChips();
       
-      // إظهار النافذة
       modal.classList.add('show');
       modal.setAttribute('aria-hidden', 'false');
       document.body.classList.add('modal-open');
       
-      // إعادة تحميل الأيقونات
       if (window.lucide) window.lucide.createIcons();
     };
 
-    // إغلاق النافذة
     window.closeResultsModal = function() {
       const modal = document.getElementById('resultsModal');
       if (!modal) return;
@@ -489,14 +492,12 @@
       document.body.classList.remove('modal-open');
     };
 
-    // تحديث شرائح الفلاتر
     function updateModalFilterChips() {
       const chipsContainer = document.getElementById('resultsModalFilters');
       if (!chipsContainer) return;
       
       chipsContainer.innerHTML = '';
       
-      // نوع العقار
       const typeBtn = document.querySelector('.cascade-btn[data-type].selected');
       if (typeBtn) {
         const text = typeBtn.querySelector('span')?.textContent || '';
@@ -505,7 +506,6 @@
           `<span class="results-modal-chip">${icon}<span>${text}</span></span>`);
       }
       
-      // الغرض
       const purposeBtn = document.querySelector('.cascade-btn[data-purpose].selected');
       if (purposeBtn) {
         const text = purposeBtn.querySelector('span')?.textContent || '';
@@ -514,7 +514,6 @@
           `<span class="results-modal-chip">${icon}<span>${text}</span></span>`);
       }
       
-      // المحافظة
       const citySelect = document.getElementById('cascadeCity');
       if (citySelect && citySelect.value) {
         const selectedOption = citySelect.options[citySelect.selectedIndex];
@@ -523,28 +522,20 @@
           `<span class="results-modal-chip"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg><span>${cityText}</span></span>`);
       }
       
-      // إعادة تحميل الأيقونات
       if (window.lucide) window.lucide.createIcons();
     }
 
-    // إغلاق بمفتاح ESC
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') {
         closeResultsModal();
       }
     });
 
-    /* ===================== اعتراض زر "عرض الإعلانات" ===================== */
     window.addEventListener('load', function() {
       const showBtn = document.getElementById('cascadeShowBtn');
       
       if (showBtn) {
-        // اعتراض النقر على الزر (capture phase - يشتغل قبل main.js)
         showBtn.addEventListener('click', function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          
-          // فتح النافذة بعد تحميل النتائج
           setTimeout(() => {
             const grid = document.getElementById('latestGrid');
             const empty = document.getElementById('cascadeEmpty');
@@ -553,10 +544,13 @@
             const isEmpty = empty && empty.style.display === 'flex';
             
             if (hasResults || isEmpty) {
+              const resultsSection = document.getElementById('resultsSection');
+              if (resultsSection) resultsSection.style.display = 'none';
+              
               openResultsModal();
             }
-          }, 600);
-        }, true);
+          }, 800);
+        }, false);
       }
     });
   </script>
