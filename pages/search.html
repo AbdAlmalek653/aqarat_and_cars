@@ -4,9 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,viewport-fit=cover">
 <title>البحث | سوق</title>
-<!-- ✅ إضافة الأيقونة (Favicon) -->
 <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
-
 
 <script src="../js/lucide.min.js"></script>
 <link rel="stylesheet" href="../css/style.css">
@@ -98,7 +96,6 @@
 <span class="support-avatar" style="background: linear-gradient(135deg, #F59E0B, #B45309);"><i data-lucide="megaphone"></i></span>
 <span class="support-info">
 <span class="support-name">أبو إبراهيم</span>
-<!-- ✅ تم حذف جملة "المسؤول التنفيذي والإعلامي" -->
 </span>
 <i data-lucide="message-circle" class="support-wa-icon"></i>
 </a>
@@ -195,8 +192,22 @@ function render(){
     if (l.subType === 'office') icon = 'briefcase';
     if (l.subType === 'shop') icon = 'store';
     if (l.subType === 'chalet') icon = 'tent';
+
+    // ✅ إصلاح: التحقق أن الصورة رابط حقيقي قبل استخدامها
     const firstImage = l.images && l.images[0];
-    const imageContent = firstImage ? `<img src="${firstImage}" alt="${l.title}" loading="lazy">` : `<i data-lucide="${icon}"></i>`;
+    const isValidImage = firstImage && typeof firstImage === 'string' && (
+      firstImage.startsWith('http://') ||
+      firstImage.startsWith('https://') ||
+      firstImage.startsWith('/') ||
+      firstImage.startsWith('data:') ||
+      firstImage.startsWith('./') ||
+      firstImage.startsWith('../')
+    );
+
+    const imageContent = isValidImage
+      ? `<img src="${firstImage}" alt="${l.title}" loading="lazy" onerror="this.style.display='none';this.parentElement.innerHTML='<i data-lucide=\\'${icon}\\'></i>';if(window.lucide)window.lucide.createIcons();">`
+      : `<i data-lucide="${icon}"></i>`;
+
     const priceText = l.purpose === 'sale'
       ? `${Number(l.price).toLocaleString('en-US')} ${l.currency || 'USD'}`
       : `${l.price} ${l.currency || 'USD'}/شهر`;
