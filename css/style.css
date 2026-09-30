@@ -1715,3 +1715,577 @@ body.modal-open { overflow: hidden; }
     animation: none !important;
   }
 }
+/* ==========================================
+   🎬 Welcome Modal - Animations احترافية
+   ========================================== */
+
+/* ==========================================
+   🎨 Keyframes الأساسية
+   ========================================== */
+
+/* دخول النافذة */
+@keyframes modalEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(60px) scale(0.9);
+    filter: blur(10px);
+  }
+  60% {
+    opacity: 1;
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+/* دخول العناصر بتتابع (Stagger) */
+@keyframes itemReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* طفو ناعم للوغو */
+@keyframes logoFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(1deg);
+  }
+}
+
+/* توهج نابض للوغو */
+@keyframes logoGlow {
+  0%, 100% {
+    box-shadow:
+      0 0 40px rgba(59, 130, 246, 0.5),
+      0 0 80px rgba(59, 130, 246, 0.2),
+      inset 0 0 20px rgba(255, 255, 255, 0.05);
+  }
+  50% {
+    box-shadow:
+      0 0 60px rgba(59, 130, 246, 0.8),
+      0 0 120px rgba(59, 130, 246, 0.4),
+      0 0 160px rgba(245, 158, 11, 0.3),
+      inset 0 0 30px rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* حلقات متوسعة */
+@keyframes ringExpand {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+/* الأيقونة بيت - قفزة */
+@keyframes houseBounce {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-5px) scale(1.08);
+  }
+}
+
+/* الأيقونة سيارة - قفزة معاكسة */
+@keyframes carBounce {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(5px) scale(1.08);
+  }
+}
+
+/* العلامة + دوران */
+@keyframes plusSpin {
+  0% {
+    transform: rotate(0deg) scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: rotate(180deg) scale(1.3);
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+    opacity: 0.7;
+  }
+}
+
+/* لمعة تمر على اللوغو */
+@keyframes logoShimmer {
+  0% {
+    transform: translateX(-150%) rotate(45deg);
+  }
+  60%, 100% {
+    transform: translateX(250%) rotate(45deg);
+  }
+}
+
+/* تدرج العنوان */
+@keyframes titleGradient {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* توهج العنوان */
+@keyframes titleGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.4))
+            drop-shadow(0 0 30px rgba(245, 158, 11, 0.15));
+  }
+  50% {
+    filter: drop-shadow(0 0 25px rgba(59, 130, 246, 0.7))
+            drop-shadow(0 0 50px rgba(245, 158, 11, 0.3));
+  }
+}
+
+/* لمعان النص الفرعي */
+@keyframes subtitleShimmer {
+  0%, 100% {
+    opacity: 0.8;
+    text-shadow: 0 0 10px rgba(148, 163, 184, 0);
+  }
+  50% {
+    opacity: 1;
+    text-shadow: 0 0 15px rgba(147, 197, 253, 0.4);
+  }
+}
+
+/* زر - نبض خفيف */
+@keyframes buttonPulse {
+  0%, 100% {
+    box-shadow:
+      0 10px 30px rgba(59, 130, 246, 0.4),
+      0 0 0 0 rgba(59, 130, 246, 0.6);
+  }
+  50% {
+    box-shadow:
+      0 15px 40px rgba(59, 130, 246, 0.6),
+      0 0 0 10px rgba(59, 130, 246, 0);
+  }
+}
+
+/* لمعان الزر */
+@keyframes buttonShimmer {
+  0% {
+    transform: translateX(-150%) skewX(-20deg);
+  }
+  60%, 100% {
+    transform: translateX(250%) skewX(-20deg);
+  }
+}
+
+/* أيقونة الزر - سهم يتحرك */
+@keyframes arrowSlide {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-6px);
+  }
+}
+
+/* أيقونة الميزة - دوران خفيف */
+@keyframes featureIconSpin {
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+  }
+  25% {
+    transform: rotate(-10deg) scale(1.15);
+  }
+  75% {
+    transform: rotate(10deg) scale(1.15);
+  }
+}
+
+/* لمعة الميزة */
+@keyframes featureShimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+/* ==========================================
+   🎬 تطبيق الحركات
+   ========================================== */
+
+/* ===== 1) النافذة - دخول سلس ===== */
+
+.welcome-modal.show .welcome-modal-content {
+  animation: modalEnter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* ===== 2) زر الإغلاق - دوران عند hover ===== */
+
+.welcome-close {
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.welcome-close:hover {
+  transform: rotate(90deg) scale(1.1);
+  background: linear-gradient(135deg, var(--danger), #DC2626);
+  color: white;
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.5);
+}
+
+/* ===== 3) اللوغو (بيت + سيارة) ===== */
+
+.welcome-modal-icon {
+  animation: logoFloat 4s ease-in-out infinite;
+}
+
+/* الحلقة الخارجية - توهج نابض */
+.welcome-logo-duo {
+  animation: logoGlow 3s ease-in-out infinite;
+  position: relative;
+  overflow: hidden;
+}
+
+/* لمعة تمر على اللوغو */
+.welcome-logo-duo::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 40px;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.5),
+    rgba(147, 197, 253, 0.6),
+    transparent
+  );
+  animation: logoShimmer 3.5s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 10;
+  filter: blur(2px);
+}
+
+/* حلقات متوسعة حول اللوغو */
+.welcome-modal-icon::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(59, 130, 246, 0.5);
+  animation: ringExpand 3s ease-out infinite;
+  pointer-events: none;
+}
+
+.welcome-modal-icon::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(245, 158, 11, 0.4);
+  animation: ringExpand 3s ease-out 1.5s infinite;
+  pointer-events: none;
+}
+
+/* أيقونة البيت - قفزة */
+.logo-duo-house {
+  animation: houseBounce 2s ease-in-out infinite;
+  transition: all 0.3s ease;
+}
+
+.logo-duo-house svg {
+  transition: all 0.3s ease;
+}
+
+.welcome-logo-duo:hover .logo-duo-house {
+  transform: scale(1.15) rotate(-8deg);
+  box-shadow: 0 8px 24px rgba(96, 165, 250, 0.6);
+}
+
+/* أيقونة السيارة - قفزة معاكسة */
+.logo-duo-car {
+  animation: carBounce 2s ease-in-out infinite;
+  transition: all 0.3s ease;
+}
+
+.logo-duo-car svg {
+  transition: all 0.3s ease;
+}
+
+.welcome-logo-duo:hover .logo-duo-car {
+  transform: scale(1.15) rotate(8deg);
+  box-shadow: 0 8px 24px rgba(251, 191, 36, 0.6);
+}
+
+/* علامة + - دوران */
+.logo-duo-plus svg {
+  animation: plusSpin 4s linear infinite;
+  color: rgba(148, 163, 184, 0.9);
+}
+
+/* ===== 4) العنوان - تدرج + توهج ===== */
+
+.welcome-modal-title {
+  background: linear-gradient(
+    135deg,
+    #F8FAFC 0%,
+    #93C5FD 25%,
+    #F8FAFC 50%,
+    #F59E0B 75%,
+    #F8FAFC 100%
+  );
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: titleGradient 5s ease-in-out infinite,
+             titleGlow 3s ease-in-out infinite;
+  transition: transform 0.3s ease;
+}
+
+.welcome-modal-title:hover {
+  transform: scale(1.03);
+}
+
+/* ===== 5) النص الفرعي - لمعان ===== */
+
+.welcome-modal-text {
+  animation: subtitleShimmer 4s ease-in-out infinite;
+}
+
+/* ===== 6) الميزات - دخول متتابع + hover ===== */
+
+.welcome-feature {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: itemReveal 0.6s ease-out both;
+}
+
+/* تتابع دخول الميزات */
+.welcome-feature:nth-child(1) {
+  animation-delay: 0.5s;
+}
+.welcome-feature:nth-child(2) {
+  animation-delay: 0.65s;
+}
+.welcome-feature:nth-child(3) {
+  animation-delay: 0.8s;
+}
+
+/* لمعة تمر على الميزة */
+.welcome-feature::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50px;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.15),
+    transparent
+  );
+  transition: left 0.6s ease;
+  pointer-events: none;
+}
+
+.welcome-feature:hover::before {
+  left: 150%;
+}
+
+/* hover على الميزة */
+.welcome-feature:hover {
+  background: rgba(59, 130, 246, 0.08);
+  border-color: rgba(59, 130, 246, 0.3);
+  transform: translateX(-8px);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.15);
+}
+
+/* أيقونة الميزة - دوران خفيف */
+.welcome-feature svg {
+  transition: all 0.3s ease;
+}
+
+.welcome-feature:hover svg {
+  transform: scale(1.2) rotate(-10deg);
+  color: var(--accent);
+  filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.6));
+}
+
+/* ===== 7) الزر - نبض + لمعان ===== */
+
+.btn-block-full {
+  position: relative;
+  overflow: hidden;
+  animation: buttonPulse 3s ease-in-out infinite;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* لمعان الزر */
+.btn-block-full::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 80px;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  animation: buttonShimmer 3s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* hover الزر */
+.btn-block-full:hover {
+  transform: translateY(-3px) scale(1.02);
+  animation-play-state: paused;
+  box-shadow:
+    0 20px 50px rgba(59, 130, 246, 0.7),
+    0 0 0 15px rgba(59, 130, 246, 0.1);
+}
+
+/* أيقونة الزر - تحرك */
+.btn-block-full svg {
+  transition: all 0.3s ease;
+  animation: arrowSlide 1.5s ease-in-out infinite;
+}
+
+.btn-block-full:hover svg {
+  transform: translateX(-10px);
+}
+
+/* ===== 8) دخول عناصر النافذة بتتابع ===== */
+
+.welcome-modal.show .welcome-modal-icon {
+  animation: itemReveal 0.6s ease-out 0.1s both,
+             logoFloat 4s ease-in-out 1s infinite;
+}
+
+.welcome-modal.show .welcome-modal-title {
+  animation: itemReveal 0.6s ease-out 0.3s both,
+             titleGradient 5s ease-in-out 1s infinite,
+             titleGlow 3s ease-in-out 1s infinite;
+}
+
+.welcome-modal.show .welcome-modal-text {
+  animation: itemReveal 0.6s ease-out 0.4s both,
+             subtitleShimmer 4s ease-in-out 1s infinite;
+}
+
+.welcome-modal.show .btn-block-full {
+  animation: itemReveal 0.6s ease-out 0.9s both,
+             buttonPulse 3s ease-in-out 1.5s infinite;
+}
+
+/* ==========================================
+   📱 للجوال - تخفيف الحركات (للأداء)
+   ========================================== */
+
+@media (max-width: 768px) {
+  /* إيقاف الحركات المكلفة */
+  .welcome-modal-icon,
+  .welcome-logo-duo,
+  .welcome-modal-title,
+  .welcome-modal-text,
+  .btn-block-full,
+  .logo-duo-house,
+  .logo-duo-car,
+  .logo-duo-plus svg,
+  .welcome-feature svg,
+  .btn-block-full svg,
+  .welcome-modal-icon::before,
+  .welcome-modal-icon::after,
+  .welcome-logo-duo::after,
+  .btn-block-full::before {
+    animation: none !important;
+  }
+
+  /* إبقاء دخول العناصر فقط */
+  .welcome-modal.show .welcome-modal-content {
+    animation: modalEnter 0.4s ease-out both;
+  }
+
+  .welcome-modal.show .welcome-modal-icon,
+  .welcome-modal.show .welcome-modal-title,
+  .welcome-modal.show .welcome-modal-text,
+  .welcome-modal.show .btn-block-full,
+  .welcome-modal.show .welcome-feature {
+    animation: itemReveal 0.5s ease-out both;
+  }
+}
+
+/* ==========================================
+   🎬 Accessibility
+   ========================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .welcome-modal *,
+  .welcome-modal *::before,
+  .welcome-modal *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}/* ==========================================
+   🔧 إصلاح: إظهار عنوان Hero على الجوال
+   ========================================== */
+@media (max-width: 768px) {
+  /* 1) العنوان الرئيسي - يظهر مباشرة */
+  .hero-title {
+    opacity: 1 !important;
+    animation: none !important;
+    filter: none !important;
+  }
+  
+  /* 2) كل كلمة داخل العنوان - تظهر مباشرة */
+  .hero-title .hero-word,
+  .hero-title > * {
+    opacity: 1 !important;
+    animation: none !important;
+    transform: none !important;
+    filter: none !important;
+  }
+  
+  /* 3) الكلمات المميزة (عقارك + سيارتك) - التدرج يبقى */
+  .hero-title .gradient-text {
+    opacity: 1 !important;
+    animation: none !important;
+    background: linear-gradient(135deg, #3B82F6, #F59E0B);
+    background-size: 100% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  /* 4) الخط تحت الكلمات المميزة */
+  .hero-title .gradient-text::after {
+    transform: scaleX(1) !important;
+    opacity: 1 !important;
+  }
+}
