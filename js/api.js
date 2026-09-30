@@ -642,3 +642,56 @@ document.addEventListener('DOMContentLoaded', function () {
     API.Users.seedAdmins();
   }
 });
+/* ==========================================
+   🎯 زر تفاصيل الإعلان - إضافة تلقائية
+   ========================================== */
+(function () {
+  'use strict';
+
+  function addDetailsButton(card) {
+    if (!card || card.querySelector('.card-details-btn')) return;
+
+    const cardBody = card.querySelector('.card-body');
+    if (!cardBody) return;
+
+    const btn = document.createElement('span');
+    btn.className = 'card-details-btn';
+    btn.setAttribute('aria-label', 'تفاصيل الإعلان');
+    btn.innerHTML = '<span>تفاصيل الإعلان</span><i data-lucide="arrow-left"></i>';
+    cardBody.appendChild(btn);
+
+    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+      window.lucide.createIcons();
+    }
+  }
+
+  function scanCards() {
+    document.querySelectorAll('.card').forEach(addDetailsButton);
+  }
+
+  function init() {
+    scanCards();
+
+    // مراقبة الكروت الجديدة
+    const observer = new MutationObserver(function (mutations) {
+      mutations.forEach(function (mutation) {
+        mutation.addedNodes.forEach(function (node) {
+          if (node.nodeType !== 1) return;
+          if (node.classList && node.classList.contains('card')) {
+            addDetailsButton(node);
+          } else if (node.querySelectorAll) {
+            node.querySelectorAll('.card').forEach(addDetailsButton);
+          }
+        });
+      });
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
