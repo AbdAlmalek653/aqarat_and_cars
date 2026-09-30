@@ -369,11 +369,11 @@
         </div>
       </div>
       
-      <!-- Footer -->
+      <!-- ✅ Footer - زر العودة إلى الرئيسية -->
       <div class="results-modal-footer">
-        <a href="pages/search.html" class="results-modal-seeall">
-          <i data-lucide="external-link"></i>
-          <span>عرض كل الإعلانات</span>
+        <a href="index.html" class="results-modal-seeall">
+          <i data-lucide="home"></i>
+          <span>العودة إلى الرئيسية</span>
         </a>
       </div>
       
@@ -465,13 +465,24 @@
         targetGrid.innerHTML = sourceGrid.innerHTML;
       }
       
-      const sourceEmpty = document.getElementById('cascadeEmpty');
+      // ✅ الحل: نفحص عدد الكروت الفعلية في الشبكة (مو display style)
       const targetEmpty = document.getElementById('modalCascadeEmpty');
       
-      if (sourceEmpty && targetEmpty) {
-        const isEmpty = sourceEmpty.style.display !== 'none';
-        targetEmpty.style.display = isEmpty ? 'flex' : 'none';
-        targetGrid.style.display = isEmpty ? 'none' : 'grid';
+      // إذا فيه كروت في الشبكة → يعني في نتائج
+      const hasResults = sourceGrid && sourceGrid.children.length > 0;
+      
+      if (targetEmpty && targetGrid) {
+        if (hasResults) {
+          // فيه نتائج → نخفي رسالة "لا توجد"
+          targetEmpty.style.display = 'none';
+          targetEmpty.setAttribute('hidden', '');
+          targetGrid.style.display = 'grid';
+        } else {
+          // ما فيه نتائج → نعرض الرسالة
+          targetEmpty.style.display = 'flex';
+          targetEmpty.removeAttribute('hidden');
+          targetGrid.style.display = 'none';
+        }
       }
       
       updateModalFilterChips();
@@ -538,12 +549,17 @@
         showBtn.addEventListener('click', function(e) {
           setTimeout(() => {
             const grid = document.getElementById('latestGrid');
-            const empty = document.getElementById('cascadeEmpty');
             
+            // ✅ نفحص عدد الكروت الفعلية
             const hasResults = grid && grid.children.length > 0;
-            const isEmpty = empty && empty.style.display === 'flex';
             
-            if (hasResults || isEmpty) {
+            if (hasResults) {
+              const resultsSection = document.getElementById('resultsSection');
+              if (resultsSection) resultsSection.style.display = 'none';
+              
+              openResultsModal();
+            } else {
+              // ما فيه نتائج → نعرض الرسالة
               const resultsSection = document.getElementById('resultsSection');
               if (resultsSection) resultsSection.style.display = 'none';
               
