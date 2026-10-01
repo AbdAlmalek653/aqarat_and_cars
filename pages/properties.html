@@ -9,10 +9,6 @@
   <!-- ✅ favicon - أيقونة الموقع -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
 
-  
-  
-  
-
   <script src="../js/lucide.min.js"></script>
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/pages.css">
@@ -205,6 +201,17 @@
         </div>
 
         <div class="properties-grid" id="propertiesGrid"></div>
+
+        <!-- ✅ رسالة عدم وجود نتائج + زر الواتساب (مخفية افتراضياً) -->
+        <div id="noResultsMessage" style="display: none; text-align: center; padding: 50px 20px; background: #fff; border-radius: 12px; margin-top: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+          <div style="font-size: 56px; margin-bottom: 15px;">🏠</div>
+          <h3 style="margin-bottom: 10px; color: #333; font-size: 22px;">لا توجد نتائج مطابقة</h3>
+          <p style="color: #666; margin-bottom: 25px; font-size: 16px;">لم نتمكن من العثور على عقارات تطابق معايير البحث الخاصة بك حالياً.</p>
+          <a href="https://wa.me/963930932794?text=مرحبا%20أبو%20أيمن،%20بحثت%20عن%20عقار%20ولم%20أجد%20نتائج%20مطابقة" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 10px; background-color: #25D366; color: white; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px; transition: all 0.3s ease; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);">
+            <i data-lucide="message-circle" style="width: 20px; height: 20px;"></i>
+            تواصل مع أبو أيمن على واتساب
+          </a>
+        </div>
 
         <div class="pagination" id="pagination"></div>
 
