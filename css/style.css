@@ -1459,3 +1459,331 @@ img { display: block; }
     max-width: calc((100vw - 40px) / 2) !important;
   }
 }
+/* ==========================================
+   🔍 صندوق البحث برقم الإعلان
+   ========================================== */
+.admin-search-box {
+  background: linear-gradient(135deg, rgba(26, 36, 56, 0.95) 0%, rgba(17, 24, 39, 0.98) 100%);
+  border: 1.5px solid rgba(59, 130, 246, 0.3);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.admin-search-box::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.admin-search-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  position: relative;
+  z-index: 1;
+}
+
+.admin-search-header svg {
+  width: 22px;
+  height: 22px;
+  color: #60A5FA;
+  padding: 6px;
+  background: rgba(59, 130, 246, 0.15);
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.admin-search-header h3 {
+  font-size: 17px;
+  font-weight: 800;
+  color: #F8FAFC;
+  margin: 0;
+}
+
+.admin-search-hint {
+  font-size: 13px;
+  color: #94A3B8;
+  margin: 0 0 16px 0;
+  position: relative;
+  z-index: 1;
+  line-height: 1.6;
+}
+
+.admin-search-input-wrap {
+  display: flex;
+  gap: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+#listingIdSearch {
+  flex: 1;
+  padding: 14px 18px;
+  background: rgba(11, 17, 32, 0.7);
+  border: 1.5px solid rgba(59, 130, 246, 0.25);
+  border-radius: 12px;
+  color: #F8FAFC;
+  font-family: 'Cairo', monospace;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  outline: none;
+  transition: all 0.3s ease;
+  min-width: 0;
+}
+
+#listingIdSearch::placeholder {
+  color: #64748B;
+  font-weight: 500;
+}
+
+#listingIdSearch:focus {
+  border-color: #3B82F6;
+  background: rgba(59, 130, 246, 0.08);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+}
+
+.admin-search-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 26px;
+  background: linear-gradient(135deg, #3B82F6, #2563EB);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-family: 'Cairo', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.admin-search-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.6);
+  background: linear-gradient(135deg, #2563EB, #1D4ED8);
+}
+
+.admin-search-btn:active {
+  transform: translateY(0);
+}
+
+.admin-search-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* نتيجة البحث */
+.admin-search-result {
+  margin-top: 20px;
+  padding: 20px;
+  border-radius: 14px;
+  position: relative;
+  z-index: 1;
+  animation: fadeInUp 0.4s ease;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.admin-search-result.found {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1.5px solid rgba(16, 185, 129, 0.4);
+}
+
+.admin-search-result.not-found {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1.5px solid rgba(239, 68, 68, 0.4);
+}
+
+.admin-search-result.loading {
+  background: rgba(59, 130, 246, 0.08);
+  border: 1.5px solid rgba(59, 130, 246, 0.3);
+}
+
+.admin-result-card {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  margin-bottom: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.admin-result-image {
+  width: 120px;
+  height: 90px;
+  border-radius: 10px;
+  background: #1A2438;
+  flex-shrink: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-result-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.admin-result-image i {
+  width: 32px;
+  height: 32px;
+  color: #64748B;
+}
+
+.admin-result-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-result-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #F8FAFC;
+  margin: 0 0 8px 0;
+  line-height: 1.4;
+}
+
+.admin-result-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 13px;
+  color: #94A3B8;
+}
+
+.admin-result-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 20px;
+  color: #93C5FD;
+  font-weight: 600;
+}
+
+.admin-result-meta svg {
+  width: 13px;
+  height: 13px;
+}
+
+.admin-result-id {
+  font-family: 'Cairo', monospace;
+  font-size: 12px;
+  color: #F59E0B;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 4px 10px;
+  background: rgba(245, 158, 11, 0.1);
+  border-radius: 6px;
+  direction: ltr;
+  display: inline-block;
+  margin-top: 8px;
+}
+
+.admin-result-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.admin-result-actions a,
+.admin-result-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: 10px;
+  font-family: 'Cairo', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.admin-result-actions .btn-view {
+  background: linear-gradient(135deg, #3B82F6, #2563EB);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+}
+
+.admin-result-actions .btn-view:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.6);
+}
+
+.admin-result-actions .btn-edit {
+  background: rgba(245, 158, 11, 0.15);
+  color: #FBBF24;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.admin-result-actions .btn-edit:hover {
+  background: rgba(245, 158, 11, 0.25);
+  transform: translateY(-2px);
+}
+
+.admin-result-actions svg {
+  width: 14px;
+  height: 14px;
+}
+
+.admin-no-result {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #FCA5A5;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.admin-no-result svg {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .admin-search-box {
+    padding: 18px;
+  }
+  .admin-search-input-wrap {
+    flex-direction: column;
+  }
+  .admin-search-btn {
+    width: 100%;
+  }
+  .admin-result-card {
+    flex-direction: column;
+  }
+  .admin-result-image {
+    width: 100%;
+    height: 150px;
+  }
+}

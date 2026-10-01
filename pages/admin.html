@@ -357,6 +357,30 @@
 
       </main>
     </div>
+    <!-- ===================== 🔍 البحث برقم الإعلان ===================== -->
+<div class="admin-search-box">
+  <div class="admin-search-header">
+    <i data-lucide="search"></i>
+    <h3>البحث برقم الإعلان</h3>
+  </div>
+  <p class="admin-search-hint">الصق رقم الإعلان (مثل: L1790521822990109) للوصول إليه مباشرة</p>
+  
+  <div class="admin-search-input-wrap">
+    <input 
+      type="text" 
+      id="listingIdSearch" 
+      placeholder="L1790521822990109 أو 1790521822990109" 
+      autocomplete="off"
+      dir="ltr"
+    >
+    <button type="button" id="listingIdSearchBtn" class="admin-search-btn">
+      <i data-lucide="search"></i>
+      <span>بحث</span>
+    </button>
+  </div>
+  
+  <div id="listingSearchResult" class="admin-search-result" style="display:none;"></div>
+</div>
 
     <!-- ===================== نافذة تعديل الإعلان (للأدمن) ===================== -->
     <div class="edit-modal" id="adminEditModal" style="display:none;">
