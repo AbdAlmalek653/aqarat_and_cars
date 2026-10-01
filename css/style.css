@@ -1094,3 +1094,312 @@ img { display: block; }
     scroll-behavior: auto !important;
   }
 }
+/* ✅ عشان الأزرار تاخد نفس شكل الروابط */
+.browse-option {
+  font-family: 'Cairo', inherit;
+  cursor: pointer;
+  width: 100%;
+  color: inherit;
+}
+
+.browse-option:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 4px;
+}
+/* ==========================================
+   نافذة اختيار نوع الإعلان - Browse Modal
+   ========================================== */
+.browse-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.browse-modal.show {
+  display: flex !important;
+  opacity: 1;
+}
+
+.browse-modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  cursor: pointer;
+}
+
+.browse-modal-content {
+  position: relative;
+  width: 100%;
+  max-width: 720px;
+  background: linear-gradient(145deg, #141a2e, #0e1322);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 24px;
+  padding: 40px 30px 35px;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+  transform: translateY(20px) scale(0.95);
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.browse-modal.show .browse-modal-content {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+.browse-modal-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.6), transparent);
+}
+
+.browse-modal-close {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 2;
+}
+
+.browse-modal-close:hover {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #ef4444;
+  transform: rotate(90deg);
+}
+
+.browse-modal-close svg {
+  width: 18px;
+  height: 18px;
+}
+
+.browse-modal-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.browse-modal-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+}
+
+.browse-modal-icon svg {
+  width: 32px;
+  height: 32px;
+  color: #fff;
+}
+
+.browse-modal-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.browse-modal-subtitle {
+  font-size: 14px;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.browse-modal-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.browse-option {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 28px 20px 22px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  text-decoration: none;
+  overflow: hidden;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  font-family: 'Cairo', inherit;
+  width: 100%;
+  color: inherit;
+}
+
+.browse-option-bg {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+
+.browse-option-property .browse-option-bg {
+  background: radial-gradient(circle at top, rgba(59, 130, 246, 0.15), transparent 70%);
+}
+
+.browse-option-car .browse-option-bg {
+  background: radial-gradient(circle at top, rgba(16, 185, 129, 0.15), transparent 70%);
+}
+
+.browse-option:hover {
+  transform: translateY(-6px);
+  border-color: rgba(59, 130, 246, 0.4);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.browse-option-car:hover {
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.browse-option:hover .browse-option-bg {
+  opacity: 1;
+}
+
+.browse-option-icon {
+  width: 70px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 1;
+  transition: transform 0.35s ease;
+}
+
+.browse-option-property .browse-option-icon {
+  background: linear-gradient(135deg, #3b82f6, #1e40af);
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+}
+
+.browse-option-car .browse-option-icon {
+  background: linear-gradient(135deg, #10b981, #047857);
+  box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
+}
+
+.browse-option:hover .browse-option-icon {
+  transform: scale(1.1) rotate(-5deg);
+}
+
+.browse-option-icon svg {
+  width: 34px;
+  height: 34px;
+  color: #fff;
+}
+
+.browse-option-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 6px;
+  position: relative;
+  z-index: 1;
+}
+
+.browse-option-desc {
+  font-size: 13px;
+  color: #94a3b8;
+  margin-bottom: 18px;
+  line-height: 1.5;
+  position: relative;
+  z-index: 1;
+}
+
+.browse-option-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  border-radius: 10px;
+  position: relative;
+  z-index: 1;
+  transition: gap 0.3s ease;
+}
+
+.browse-option-property .browse-option-btn {
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.browse-option-car .browse-option-btn {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.browse-option:hover .browse-option-btn {
+  gap: 14px;
+}
+
+.browse-option-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.browse-option:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 4px;
+}
+
+@media (max-width: 640px) {
+  .browse-modal-content {
+    padding: 32px 20px 25px;
+    border-radius: 20px;
+  }
+  .browse-modal-title {
+    font-size: 19px;
+  }
+  .browse-modal-options {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .browse-option {
+    padding: 22px 18px 18px;
+  }
+  .browse-option-icon {
+    width: 56px;
+    height: 56px;
+    margin-bottom: 12px;
+  }
+  .browse-option-icon svg {
+    width: 26px;
+    height: 26px;
+  }
+  .browse-option-title {
+    font-size: 17px;
+  }
+}

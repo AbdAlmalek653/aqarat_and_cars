@@ -1,5 +1,14 @@
 <?php
 
+// ==========================================
+// ✅ إنشاء مجلد الكاش تلقائياً
+// ==========================================
+$__cacheDir = __DIR__ . '/cache/images';
+if (!is_dir($__cacheDir)) {
+    @mkdir($__cacheDir, 0777, true);
+    @chmod($__cacheDir, 0777);
+}
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -15,7 +24,7 @@ header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200 );
+    http_response_code(200);
     exit;
 }
 
@@ -39,7 +48,7 @@ try {
 } catch (Throwable $e) {
     error_log($e->getMessage());
 
-    http_response_code(500 );
+    http_response_code(500);
     echo json_encode([
         'success' => false,
         'error' => 'تعذر الاتصال بقاعدة البيانات'
