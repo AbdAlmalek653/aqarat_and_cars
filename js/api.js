@@ -45,16 +45,12 @@ const API = (function () {
 
   /* ==========================================
      ✅ دوال HTTP مع منع تكرار الطلبات
-     ⚡ الكاش قصير جداً (30 ثانية) لتظهر التعديلات بسرعة
      ========================================== */
 
   const _pendingGets = {};
   const _memoryCache = {};
 
-  // ⚡ تقليل مدة الكاش من 60 ثانية إلى 15 ثانية
   const MEMORY_CACHE_TTL = 15000;
-
-  // ⚡ تقليل مدة الكاش من 5 دقائق إلى 30 ثانية فقط!
   const SESSION_CACHE_TTL = 30000;
   const SESSION_CACHE_PREFIX = 'api_cache_';
 
@@ -88,23 +84,19 @@ const API = (function () {
     const fullUrl = API_BASE + url;
     const cacheKey = fullUrl;
 
-    // 🔄 إذا طُلب تحديث إجباري، احذف الكاش واذهب للسيرفر
     if (forceRefresh) {
       delete _memoryCache[cacheKey];
       try { sessionStorage.removeItem(SESSION_CACHE_PREFIX + cacheKey); } catch(e) {}
     }
 
-    // 1️⃣ منع الطلبات المتكررة المتزامنة
     if (_pendingGets[cacheKey]) {
       return _pendingGets[cacheKey];
     }
 
-    // 2️⃣ كاش الذاكرة (15 ثانية)
     if (!forceRefresh && _memoryCache[cacheKey] && (Date.now() - _memoryCache[cacheKey].time) < MEMORY_CACHE_TTL) {
       return Promise.resolve(_memoryCache[cacheKey].data);
     }
 
-    // 3️⃣ كاش sessionStorage (30 ثانية)
     if (!forceRefresh) {
       const sessionData = getSessionCache(cacheKey);
       if (sessionData) {
@@ -113,7 +105,6 @@ const API = (function () {
       }
     }
 
-    // 4️⃣ طلب جديد من السيرفر
     const promise = fetch(fullUrl, {
       credentials: 'include',
       cache: 'no-store'
@@ -132,7 +123,6 @@ const API = (function () {
     return promise;
   }
 
-  // 🧹 تفريغ الكاش
   function clearApiCache(urlPattern) {
     if (!urlPattern) {
       Object.keys(_memoryCache).forEach(function(k) { delete _memoryCache[k]; });
@@ -163,7 +153,6 @@ const API = (function () {
       cache: 'no-store',
       body: JSON.stringify(data)
     }).then(function (r) {
-      // 🔄 بعد أي POST ناجح، افرغ الكاش فوراً
       clearApiCache('/listings.php');
       clearApiCache('/listing.php');
       clearApiCache('/stats.php');
@@ -627,6 +616,44 @@ const API = (function () {
 })();
 
 window.API = API;
+
+/* ==========================================
+   🖼️ دالة مساعدة عالمية لبناء رابط الصورة
+   ✅ تستخدمها كل الصفحات (properties, cars, favorites, details...)
+   ========================================== */
+window.getListingImageUrl = function (item) {
+  if (!item || !item.images || !Array.isArray(item.images) || item.images.length === 0) {
+    return null;
+  }
+
+  const first = item.images[0];
+  if (!first) return null;
+
+  const apiBase = window.location.pathname.includes('/pages/') ? '../api' : 'api';
+
+  // حالة 1: has_image → API
+  if (first === 'has_image') {
+    return `${apiBase}/listing_image.php?id=${encodeURIComponent(item.id)}&index=0`;
+  }
+
+  // حالة 2: base64
+  if (typeof first === 'string' && first.startsWith('data:image/')) {
+    return first;
+  }
+
+  // حالة 3: URL كامل
+  if (typeof first === 'string' && (first.startsWith('http://') || first.startsWith('https://'))) {
+    return first;
+  }
+
+  // حالة 4: مسار نسبي
+  if (typeof first === 'string' && (first.startsWith('./') || first.startsWith('/'))) {
+    return first;
+  }
+
+  // حالة 5: أي قيمة أخرى → API
+  return `${apiBase}/listing_image.php?id=${encodeURIComponent(item.id)}&index=0`;
+};
 
 /* ==========================================
    تشغيل تلقائي عند فتح أي صفحة
