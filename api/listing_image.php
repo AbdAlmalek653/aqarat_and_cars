@@ -1,6 +1,7 @@
 <?php
 require_once 'config.php';
-
+// ✅✅✅ الحل: أغلق الـ session فوراً عشان ما يعمل قفل
+session_write_close();
 $id = $_GET['id'] ?? '';
 $index = isset($_GET['index']) ? (int)$_GET['index'] : 0;
 $width = isset($_GET['w']) ? (int)$_GET['w'] : 0; // ✅ عرض اختياري (0 = الأصلي)
