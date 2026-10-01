@@ -1,23 +1,73 @@
 # ==========================================
+# ملف .htaccess النهائي - سوق | عقارات وسيارات
+# الإصدار: 2.0 (محسّن للأداء والأمان)
+# ==========================================
+
+# ==========================================
 # 1. منع عرض محتويات المجلدات (أمان)
 # ==========================================
 Options -Indexes
 
 # ==========================================
-# 2. حماية الملفات الحساسة (قاعدة البيانات، إلخ)
+# 2. إجبار HTTPS (مهم لـ Railway و أي استضافة)
 # ==========================================
-<FilesMatch "\.(db|sqlite|sql|md|log)$">
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTPS} off
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+# ==========================================
+# 3. إزالة www (اختياري - يوحد الدومين)
+# ==========================================
+<IfModule mod_rewrite.c>
+  RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+  RewriteRule ^(.*)$ https://%1/$1 [L,R=301]
+</IfModule>
+
+# ==========================================
+# 4. حماية الملفات الحساسة
+# ==========================================
+# قاعدة البيانات والملفات النصية
+<FilesMatch "\.(db|sqlite|sql|md|log|env|lock|bak|old|swp)$">
+    Require all denied
+</FilesMatch>
+
+# ملفات Git والإعدادات
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+<FilesMatch "\.(git|gitignore|htaccess|htpasswd|env)$">
     Require all denied
 </FilesMatch>
 
 # ==========================================
-# 3. التخزين المؤقت للملفات الثابتة (Cache)
+# 5. حماية ملفات PHP الحساسة (حرج جداً!)
+# ==========================================
+# منع الوصول المباشر لملفات الإعداد والدوال
+<FilesMatch "^(config|helpers|seed-admins|seed-data)\.php$">
+    Require all denied
+</FilesMatch>
+
+# ==========================================
+# 6. حماية ملفات الكاش (لا تُتاح للعالم)
+# ==========================================
+<IfModule mod_rewrite.c>
+  RewriteRule ^api/cache/.*$ - [F,L]
+  RewriteRule ^api/cache$ - [F,L]
+</IfModule>
+
+# ==========================================
+# 7. التخزين المؤقت للملفات الثابتة (Cache)
 # ==========================================
 <IfModule mod_expires.c>
   ExpiresActive On
   
   # الصور
   ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType image/avif "access plus 1 year"
   ExpiresByType image/jpeg "access plus 1 year"
   ExpiresByType image/jpg "access plus 1 year"
   ExpiresByType image/png "access plus 1 year"
@@ -44,16 +94,16 @@ Options -Indexes
   # HTML - فترة قصيرة (لأن المحتوى يتغير)
   ExpiresByType text/html "access plus 1 hour"
   
-  # JSON (للـ API) - لا تخزنه لفترة طويلة
+  # JSON (للـ API) - لا تخزنه
   ExpiresByType application/json "access plus 0 seconds"
 </IfModule>
 
 # ==========================================
-# 4. ترويسات Cache-Control (الأقوى)
+# 8. ترويسات Cache-Control (الأقوى)
 # ==========================================
 <IfModule mod_headers.c>
-  # الملفات الثابتة: خزّنها لمدة سنة كاملة
-  <FilesMatch "\.(webp|jpg|jpeg|png|gif|svg|ico|css|js|woff|woff2|ttf|otf)$">
+  # الملفات الثابتة: خزّنها لمدة سنة كاملة (immutable)
+  <FilesMatch "\.(webp|avif|jpg|jpeg|png|gif|svg|ico|css|js|woff|woff2|ttf|otf)$">
     Header set Cache-Control "public, max-age=31536000, immutable"
     Header unset ETag
     Header unset Last-Modified
@@ -64,17 +114,34 @@ Options -Indexes
     Header set Cache-Control "public, max-age=3600, must-revalidate"
   </FilesMatch>
   
-  # JSON: لا تخزين (بيانات لحظية)
+  # JSON: لا تخزين
   <FilesMatch "\.(json)$">
     Header set Cache-Control "no-cache, no-store, must-revalidate"
   </FilesMatch>
 </IfModule>
 
 # ==========================================
-# 5. ضغط الملفات (Gzip Compression)
+# 9. ضغط Brotli (أفضل من Gzip - إذا كان مدعوماً)
+# ==========================================
+<IfModule mod_brotli.c>
+  AddOutputFilterByType BROTLI_COMPRESS text/html
+  AddOutputFilterByType BROTLI_COMPRESS text/plain
+  AddOutputFilterByType BROTLI_COMPRESS text/xml
+  AddOutputFilterByType BROTLI_COMPRESS text/css
+  AddOutputFilterByType BROTLI_COMPRESS text/javascript
+  AddOutputFilterByType BROTLI_COMPRESS application/javascript
+  AddOutputFilterByType BROTLI_COMPRESS application/x-javascript
+  AddOutputFilterByType BROTLI_COMPRESS application/json
+  AddOutputFilterByType BROTLI_COMPRESS application/xml
+  AddOutputFilterByType BROTLI_COMPRESS application/rss+xml
+  AddOutputFilterByType BROTLI_COMPRESS application/xhtml+xml
+  AddOutputFilterByType BROTLI_COMPRESS image/svg+xml
+</IfModule>
+
+# ==========================================
+# 10. ضغط Gzip (احتياطي للمتصفحات القديمة)
 # ==========================================
 <IfModule mod_deflate.c>
-  # ضغط HTML, CSS, JS, XML, JSON
   AddOutputFilterByType DEFLATE text/html
   AddOutputFilterByType DEFLATE text/plain
   AddOutputFilterByType DEFLATE text/xml
@@ -86,42 +153,89 @@ Options -Indexes
   AddOutputFilterByType DEFLATE application/xml
   AddOutputFilterByType DEFLATE application/rss+xml
   AddOutputFilterByType DEFLATE application/xhtml+xml
-  AddOutputFilterByType DEFLATE application/x-font-ttf
   AddOutputFilterByType DEFLATE image/svg+xml
   
   # لا تضغط الصور (فهي مضغوطة أصلاً)
-  SetEnvIfNoCase Request_URI \.(?:gif|jpe?g|png|webp|ico|zip|gz)$ no-gzip dont-vary
+  SetEnvIfNoCase Request_URI \.(?:gif|jpe?g|png|webp|avif|ico|zip|gz|woff2?)$ no-gzip dont-vary
   
   # تأكد من عدم كسر المتصفحات القديمة
   BrowserMatch ^Mozilla/4 gzip-only-text/html
   BrowserMatch ^Mozilla/4\.0[678] no-gzip
   BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
-  Header append Vary User-Agent env=!dont-vary
+  Header append Vary Accept-Encoding env=!dont-vary
 </IfModule>
 
 # ==========================================
-# 6. إزالة ترويسة X-Powered-By (أمان)
+# 11. ترويسات الأمان (Security Headers)
 # ==========================================
 <IfModule mod_headers.c>
+  # منع تضمين الموقع في iframe (ضد Clickjacking)
+  Header always set X-Frame-Options "SAMEORIGIN"
+  
+  # منع تخمين نوع المحتوى
+  Header always set X-Content-Type-Options "nosniff"
+  
+  # سياسة المرجع
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  
+  # سياسة الأذونات (منع الوصول للميزات الحساسة)
+  Header always set Permissions-Policy "geolocation=(self), microphone=(), camera=()"
+  
+  # حماية XSS (قديم لكن لا يضر)
+  Header always set X-XSS-Protection "1; mode=block"
+  
+  # إزالة ترويسة PHP
   Header unset X-Powered-By
   Header always unset X-Powered-By
+  
+  # إزالة ترويسة السيرفر
+  Header unset Server
+  Header always unset Server
 </IfModule>
 
 # ==========================================
-# 7. منع الوصول إلى ملفات معينة
+# 12. ترميز UTF-8 افتراضي
 # ==========================================
-<FilesMatch "^\.(htaccess|htpasswd|env|gitignore)$">
-  Require all denied
-</FilesMatch>
-
-<FilesMatch "\.(git|env|htaccess|htpasswd)$">
-  Require all denied
-</FilesMatch>
+AddDefaultCharset UTF-8
+AddCharset UTF-8 .html .css .js .json .xml .svg
 
 # ==========================================
-# 8. حماية ملفات الكاش (لا تُتاح للعالم)
+# 13. أنواع MIME إضافية
+# ==========================================
+<IfModule mod_mime.c>
+  AddType image/webp .webp
+  AddType image/avif .avif
+  AddType font/woff2 .woff2
+  AddType font/woff .woff
+  AddType application/manifest+json .webmanifest
+  AddType application/json .json
+</IfModule>
+
+# ==========================================
+# 14. منع Hotlinking للصور (اختياري - يوفر باندويث)
 # ==========================================
 <IfModule mod_rewrite.c>
-  RewriteEngine On
-  RewriteRule ^api/cache/.*$ - [F,L]
+  RewriteCond %{HTTP_REFERER} !^$
+  RewriteCond %{HTTP_REFERER} !^https?://(www\.)?aqaratandcars\.com [NC]
+  RewriteCond %{HTTP_REFERER} !^https?://.*\.railway\.app [NC]
+  RewriteCond %{HTTP_REFERER} !^https?://(www\.)?google\. [NC]
+  RewriteCond %{HTTP_REFERER} !^https?://(www\.)?facebook\. [NC]
+  RewriteRule \.(webp|jpg|jpeg|png|gif|svg)$ - [F,NC,L]
 </IfModule>
+
+# ==========================================
+# 15. تحديد حجم الرفع (إذا كان مدعوماً)
+# ==========================================
+<IfModule mod_php.c>
+  php_value upload_max_filesize 10M
+  php_value post_max_size 12M
+  php_value max_execution_time 60
+  php_value memory_limit 256M
+</IfModule>
+
+# ==========================================
+# 16. صفحات الخطأ المخصصة
+# ==========================================
+ErrorDocument 403 /pages/403.html
+ErrorDocument 404 /pages/404.html
+ErrorDocument 500 /pages/500.html

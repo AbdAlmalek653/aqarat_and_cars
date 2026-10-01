@@ -1,5 +1,6 @@
 /* ==========================================
    الصفحة الرئيسية - سوق
+   الإصدار: 2.0 (محسّن للأداء)
    ========================================== */
 
 function initIcons() {
@@ -17,15 +18,32 @@ const CITY_NAMES = {
 const TYPE_NAMES = { property: 'عقارات', car: 'سيارات' };
 const PURPOSE_NAMES = { sale: 'للبيع', rent: 'للإيجار' };
 
+/* ==========================================
+   ✅ تحسين: منع استدعاءات API المتزامنة
+   ========================================== */
+let _listingsPromise = null;
+
 async function getCachedListings(forceRefresh) {
-  try {
-    const options = forceRefresh ? { forceRefresh: true } : {};
-    const data = await API.Listings.getAll(null, options);
-    return data || [];
-  } catch (error) {
-    console.error('❌ فشل تحميل الإعلانات:', error);
-    return [];
+  // ✅ إذا كان هناك طلب قيد التنفيذ، انتظره بدلاً من إطلاق طلب جديد
+  if (_listingsPromise && !forceRefresh) {
+    return _listingsPromise;
   }
+
+  _listingsPromise = (async () => {
+    try {
+      const options = forceRefresh ? { forceRefresh: true } : {};
+      const data = await API.Listings.getAll(null, options);
+      return data || [];
+    } catch (error) {
+      console.error('❌ فشل تحميل الإعلانات:', error);
+      return [];
+    } finally {
+      // ✅ إعادة تعيين بعد فترة قصيرة للسماح بطلبات لاحقة
+      setTimeout(() => { _listingsPromise = null; }, 100);
+    }
+  })();
+
+  return _listingsPromise;
 }
 
 function getImageUrl(item) {
@@ -148,13 +166,65 @@ function emptyFilterState() {
     </div>`;
 }
 
+/* ==========================================
+   ✅ تحسين: استدعاء API واحد لكل الإعلانات المميزة
+   بدلاً من استدعاءين منفصلين (كان يستهلك باندويث مضاعف)
+   ========================================== */
+async function loadAllFeatured(forceRefresh) {
+  const propContainer = document.getElementById('featuredProperties');
+  const carsContainer = document.getElementById('featuredCars');
+
+  if (!propContainer && !carsContainer) return;
+
+  try {
+    // ✅ استدعاء واحد فقط
+    const allListings = await getCachedListings(forceRefresh);
+
+    // تقسيم البيانات على القسمين
+    const properties = allListings
+      .filter(l => l.type === 'property')
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    const cars = allListings
+      .filter(l => l.type === 'car')
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    if (propContainer) {
+      propContainer.innerHTML = properties.length === 0
+        ? emptyState('property')
+        : properties.map(p => createCard(p, 'property')).join('');
+    }
+
+    if (carsContainer) {
+      carsContainer.innerHTML = cars.length === 0
+        ? emptyState('car')
+        : cars.map(c => createCard(c, 'car')).join('');
+    }
+
+    initIcons();
+  } catch (e) {
+    console.error('❌ loadAllFeatured error:', e);
+    if (propContainer) propContainer.innerHTML = emptyState('property');
+    if (carsContainer) carsContainer.innerHTML = emptyState('car');
+    initIcons();
+  }
+}
+
+/* ==========================================
+   ✅ الاحتفاظ بالدالتين للتوافق مع الكود القديم
+   لكنهما الآن تستخدمان نفس الكاش
+   ========================================== */
 async function loadFeaturedProperties(forceRefresh) {
   const container = document.getElementById('featuredProperties');
   if (!container) return;
   try {
     const allListings = await getCachedListings(forceRefresh);
-    const properties = allListings.filter(l => l.type === 'property').sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    container.innerHTML = properties.length === 0 ? emptyState('property') : properties.map(p => createCard(p, 'property')).join('');
+    const properties = allListings
+      .filter(l => l.type === 'property')
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    container.innerHTML = properties.length === 0
+      ? emptyState('property')
+      : properties.map(p => createCard(p, 'property')).join('');
     initIcons();
   } catch (e) {
     container.innerHTML = emptyState('property');
@@ -167,8 +237,12 @@ async function loadFeaturedCars(forceRefresh) {
   if (!container) return;
   try {
     const allListings = await getCachedListings(forceRefresh);
-    const cars = allListings.filter(l => l.type === 'car').sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    container.innerHTML = cars.length === 0 ? emptyState('car') : cars.map(c => createCard(c, 'car')).join('');
+    const cars = allListings
+      .filter(l => l.type === 'car')
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    container.innerHTML = cars.length === 0
+      ? emptyState('car')
+      : cars.map(c => createCard(c, 'car')).join('');
     initIcons();
   } catch (e) {
     container.innerHTML = emptyState('car');
@@ -372,7 +446,8 @@ async function handleCascadeShow() {
   }, 100);
 
   try {
-    const allListings = await getCachedListings(true);
+    // ✅ تحسين: استخدام الكاش بدل forceRefresh (كان يجلب كل الإعلانات من السيرفر كل مرة)
+    const allListings = await getCachedListings(false);
     const listings = allListings.filter(l => l.type === cascadeState.type && l.purpose === cascadeState.purpose && l.city === cascadeState.city);
     listings.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
@@ -413,9 +488,57 @@ async function handleCascadeShow() {
   }
 }
 
+/* ==========================================
+   ✅ تحسين: Auto-refresh ذكي
+   - كل 5 دقائق بدل 30 ثانية (توفير 90% من الطلبات)
+   - يتوقف عند إخفاء الصفحة
+   - استدعاء واحد بدل 3
+   ========================================== */
+const REFRESH_INTERVAL_MS = 5 * 60 * 1000; // 5 دقائق
+let refreshIntervalId = null;
+let isRefreshing = false;
+
+async function performRefresh() {
+  if (isRefreshing) return;
+  if (document.hidden) return;
+  isRefreshing = true;
+  try {
+    // ✅ استدعاء واحد بدل 3 منفصلة
+    await Promise.all([
+      loadAllFeatured(true),
+      loadStats(true)
+    ]);
+  } catch (e) {
+    console.warn('⚠️ Auto-refresh error:', e);
+  } finally {
+    isRefreshing = false;
+  }
+}
+
+function startAutoRefresh() {
+  if (refreshIntervalId) clearInterval(refreshIntervalId);
+  refreshIntervalId = setInterval(performRefresh, REFRESH_INTERVAL_MS);
+}
+
+function stopAutoRefresh() {
+  if (refreshIntervalId) {
+    clearInterval(refreshIntervalId);
+    refreshIntervalId = null;
+  }
+}
+
+// ✅ إيقاف/تشغيل تلقائي حسب حالة الصفحة
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    stopAutoRefresh();
+  } else {
+    startAutoRefresh();
+  }
+});
+
 document.addEventListener('DOMContentLoaded', () => {
-  loadFeaturedProperties(false);
-  loadFeaturedCars(false);
+  // ✅ استدعاء واحد موحد بدل استدعاءين منفصلين
+  loadAllFeatured(false);
   loadStats(false);
   setupSearchTabs();
   setupSearchForm();
@@ -423,17 +546,6 @@ document.addEventListener('DOMContentLoaded', () => {
   setupCascadeFilter();
   initIcons();
 
-  let isRefreshing = false;
-  setInterval(async () => {
-    if (isRefreshing) return;
-    if (document.hidden) return;
-    isRefreshing = true;
-    try {
-      await Promise.all([loadFeaturedProperties(true), loadFeaturedCars(true), loadStats(true)]);
-    } catch (e) {
-      console.warn('⚠️ Auto-refresh error:', e);
-    } finally {
-      isRefreshing = false;
-    }
-  }, 30000);
+  // ✅ تشغيل الـ Auto-refresh الذكي
+  startAutoRefresh();
 });

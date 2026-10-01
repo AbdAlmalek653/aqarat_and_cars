@@ -11,6 +11,7 @@ let state = {
 };
 
 let uploadedImages = [];
+let isProcessingImages = false; // ✅ منع رفع صور أثناء المعالجة
 
 function initIcons() { if (window.lucide) window.lucide.createIcons(); }
 
@@ -243,7 +244,74 @@ function showPropertyFields() {
 }
 
 /* ==========================================
-   رفع الصور
+   🖼️ ضغط الصور في المتصفح (Client-Side Compression)
+   ========================================== */
+/**
+ * يضغط الصورة ويُرجع Data URL بحجم أصغر بكثير.
+ * @param {File} file - ملف الصورة الأصلي
+ * @param {number} maxWidth - أقصى عرض (بكسل)
+ * @param {number} quality - جودة الضغط (0-1)
+ * @returns {Promise<string>} Data URL مضغوط
+ */
+function compressImage(file, maxWidth = 1200, quality = 0.75) {
+  return new Promise((resolve, reject) => {
+    // ✅ إذا كان الملف صغيراً جداً (< 200KB)، لا داعي للضغط
+    if (file.size < 200 * 1024) {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result);
+      reader.onerror = () => reject(new Error('فشل قراءة الملف'));
+      reader.readAsDataURL(file);
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        // ✅ تصغير الأبعاد إذا كانت كبيرة
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        // ✅ تفعيل التنعيم لصور أفضل عند التصغير
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // ✅ إرجاع Data URL بصيغة WebP (أخف بكثير من JPEG)
+        let dataUrl;
+        try {
+          dataUrl = canvas.toDataURL('image/webp', quality);
+          // تحقق إذا كان WebP مدعوم (بعض المتصفحات القديمة ترجع PNG)
+          if (dataUrl.indexOf('data:image/webp') !== 0) {
+            dataUrl = canvas.toDataURL('image/jpeg', quality);
+          }
+        } catch (err) {
+          // fallback إلى JPEG
+          dataUrl = canvas.toDataURL('image/jpeg', quality);
+        }
+
+        resolve(dataUrl);
+      };
+      img.onerror = () => reject(new Error('فشل تحميل الصورة'));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error('فشل قراءة الملف'));
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ==========================================
+   رفع الصور (مع ضغط تلقائي)
    ========================================== */
 function setupImageUpload() {
   const input = document.getElementById('imageInput');
@@ -259,41 +327,140 @@ function setupImageUpload() {
   });
 
   uploadArea.addEventListener('drop', e => {
+    if (isProcessingImages) return;
     const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
     handleFiles(files);
   });
 
-  input.addEventListener('change', () => handleFiles(Array.from(input.files)));
+  input.addEventListener('change', () => {
+    if (isProcessingImages) return;
+    handleFiles(Array.from(input.files));
+  });
 
-  function handleFiles(files) {
+  // ✅ دالة معالجة الملفات - async مع ضغط
+  async function handleFiles(files) {
+    if (isProcessingImages) {
+      showAlert('جاري معالجة الصور، الرجاء الانتظار...');
+      return;
+    }
+
     if (uploadedImages.length + files.length > 10) {
       showAlert('يمكنك اختيار حتى 10 صور فقط');
       return;
     }
-    files.forEach(file => {
-      if (file.size > 5 * 1024 * 1024) {
-        showAlert(`الصورة "${file.name}" أكبر من 5 ميجابايت`);
-        return;
+
+    isProcessingImages = true;
+    input.disabled = true;
+
+    // ✅ إظهار مؤشر المعالجة
+    showProcessingIndicator(true, files.length);
+
+    let processed = 0;
+    let failed = 0;
+
+    for (const file of files) {
+      // ✅ تحقق من الحجم الأصلي
+      if (file.size > 10 * 1024 * 1024) {
+        showAlert(`الصورة "${file.name}" أكبر من 10 ميجابايت`);
+        failed++;
+        continue;
       }
-      const reader = new FileReader();
-      reader.onload = e => {
+
+      try {
+        // ✅ ضغط الصورة (هنا يحدث السحر!)
+        const compressedDataUrl = await compressImage(file, 1200, 0.75);
+
+        // ✅ حساب نسبة التوفير (للعرض في الكونسول فقط)
+        const originalKB = (file.size / 1024).toFixed(0);
+        const compressedKB = Math.round((compressedDataUrl.length * 3) / 4 / 1024);
+        const savings = Math.round((1 - compressedKB / originalKB) * 100);
+        console.log(`✅ ${file.name}: ${originalKB}KB → ~${compressedKB}KB (توفير ${savings}%)`);
+
         uploadedImages.push({
           id: 'img_' + Date.now() + Math.random(),
-          data: e.target.result,
-          name: file.name
+          data: compressedDataUrl,
+          name: file.name,
+          size: compressedKB
         });
+
+        processed++;
         renderPreview();
-      };
-      reader.readAsDataURL(file);
-    });
+      } catch (err) {
+        console.warn('⚠️ فشل ضغط:', file.name, err);
+        // Fallback: استخدم الصورة الأصلية
+        try {
+          const fallbackDataUrl = await new Promise((resolve, reject) => {
+            const r = new FileReader();
+            r.onload = e => resolve(e.target.result);
+            r.onerror = () => reject(new Error('فشل القراءة'));
+            r.readAsDataURL(file);
+          });
+          uploadedImages.push({
+            id: 'img_' + Date.now() + Math.random(),
+            data: fallbackDataUrl,
+            name: file.name,
+            size: Math.round(file.size / 1024)
+          });
+          processed++;
+          renderPreview();
+        } catch (fallbackErr) {
+          failed++;
+        }
+      }
+    }
+
+    // ✅ إخفاء مؤشر المعالجة
+    showProcessingIndicator(false);
+    isProcessingImages = false;
+    input.disabled = false;
     input.value = '';
+
+    if (failed > 0) {
+      showAlert(`تمت معالجة ${processed} صورة، وفشلت ${failed} صورة`);
+    } else if (processed > 0) {
+      console.log(`✅ تمت معالجة ${processed} صورة بنجاح`);
+    }
   }
 
+  // ✅ مؤشر المعالجة
+  function showProcessingIndicator(show, count = 0) {
+    let indicator = document.getElementById('imageProcessingIndicator');
+    if (show) {
+      if (!indicator) {
+        indicator = document.createElement('div');
+        indicator.id = 'imageProcessingIndicator';
+        indicator.style.cssText = `
+          display: flex; align-items: center; justify-content: center; gap: 10px;
+          padding: 12px; margin-top: 10px;
+          background: rgba(59, 130, 246, 0.1);
+          border: 1px dashed rgba(59, 130, 246, 0.5);
+          border-radius: 12px;
+          color: #3B82F6; font-size: 14px; font-weight: 600;
+        `;
+        indicator.innerHTML = `
+          <i data-lucide="loader-2" class="spin" style="animation: spin 1s linear infinite;"></i>
+          <span>جاري ضغط الصور... (0/${count})</span>
+        `;
+        uploadArea.parentNode.insertBefore(indicator, uploadArea.nextSibling);
+        initIcons();
+      } else {
+        const span = indicator.querySelector('span');
+        if (span) span.textContent = `جاري ضغط الصور... (0/${count})`;
+        indicator.style.display = 'flex';
+      }
+    } else if (indicator) {
+      indicator.style.display = 'none';
+    }
+  }
+
+  // ✅ عرض الصور المصغرة
   function renderPreview() {
     preview.innerHTML = uploadedImages.map(img => `
       <div class="al-preview-item">
-        <img src="${img.data}" alt="${img.name}">
-        <button type="button" class="remove" data-id="${img.id}"><i data-lucide="x"></i></button>
+        <img src="${img.data}" alt="${img.name}" loading="lazy">
+        <button type="button" class="remove" data-id="${img.id}" title="حذف">
+          <i data-lucide="x"></i>
+        </button>
       </div>
     `).join('');
 
@@ -303,6 +470,23 @@ function setupImageUpload() {
         renderPreview();
       });
     });
+
+    // ✅ إظهار إجمالي الحجم
+    const totalSize = uploadedImages.reduce((sum, img) => sum + (img.size || 0), 0);
+    let sizeInfo = document.getElementById('imageSizeInfo');
+    if (!sizeInfo) {
+      sizeInfo = document.createElement('div');
+      sizeInfo.id = 'imageSizeInfo';
+      sizeInfo.style.cssText = 'margin-top: 8px; font-size: 13px; color: #64748B; text-align: center;';
+      preview.parentNode.insertBefore(sizeInfo, preview.nextSibling);
+    }
+    if (uploadedImages.length > 0) {
+      sizeInfo.textContent = `📦 ${uploadedImages.length} صورة | الحجم الإجمالي: ${totalSize}KB`;
+      sizeInfo.style.display = 'block';
+    } else {
+      sizeInfo.style.display = 'none';
+    }
+
     initIcons();
   }
 }
@@ -387,6 +571,12 @@ function validateForm() {
   if (!desc) { showFieldError('description', 'الرجاء إدخال الوصف'); ok = false; }
   else if (desc.length < 30) { showFieldError('description', 'الوصف قصير جداً'); ok = false; }
 
+  // ✅ تحقق من الصور
+  if (uploadedImages.length === 0) {
+    showAlert('الرجاء إضافة صورة واحدة على الأقل');
+    ok = false;
+  }
+
   return ok;
 }
 
@@ -455,6 +645,12 @@ function setupFormSubmit() {
     e.preventDefault();
     hideAlert();
 
+    // ✅ تحقق إذا كانت هناك صور قيد المعالجة
+    if (isProcessingImages) {
+      showAlert('جاري معالجة الصور، الرجاء الانتظار حتى الانتهاء...');
+      return;
+    }
+
     const sessionUser = await API.Users.validateSession();
     if (!sessionUser) {
       showAlert('يجب تسجيل الدخول أولاً.');
@@ -467,7 +663,7 @@ function setupFormSubmit() {
       return;
     }
 
-    // بناء البيانات (تم حذف حقل العنوان التفصيلي وإصلاح حقل التفاوض)
+    // بناء البيانات
     const data = {
       type: state.type,
       purpose: state.purpose,
@@ -478,7 +674,7 @@ function setupFormSubmit() {
       whatsapp: document.getElementById('whatsapp').value.trim(),
       price: document.getElementById('price').value,
       currency: document.getElementById('currency').value,
-      negotiable: document.getElementById('negotiable').value, // ✅ تم إصلاحه (كان .checked)
+      negotiable: document.getElementById('negotiable').value,
       description: document.getElementById('description').value.trim(),
       images: uploadedImages.map(img => img.data),
       details: buildDetails()
@@ -530,12 +726,12 @@ function buildDetails() {
       details.rooms = document.getElementById('rooms').value;
       details.bathrooms = document.getElementById('bathrooms').value;
       details.floor = document.getElementById('floor').value;
-      
+
       details.direction = document.getElementById('direction').value;
       details.vacancyType = document.getElementById('vacancyType').value;
 
       details.heating = document.getElementById('heating').value;
-      
+
       details.finishingType = document.getElementById('finishingType').value;
 
       if (state.purpose === 'rent') {
@@ -629,6 +825,10 @@ function resetForm() {
   if (otherField) otherField.style.display = 'none';
   const otherInput = document.getElementById('otherBrand');
   if (otherInput) otherInput.value = '';
+
+  // ✅ إخفاء معلومات الحجم
+  const sizeInfo = document.getElementById('imageSizeInfo');
+  if (sizeInfo) sizeInfo.style.display = 'none';
 
   hideAlert();
 }

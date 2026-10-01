@@ -220,7 +220,10 @@ if (strpos($url, 'http') === 0) {
         exit;
     }
 
-    // ✅ فشل الجلب → placeholder
+    // ✅✅✅ الحل: فشل الجلب → خزّن الـ placeholder في الكاش لتجنب المحاولة في كل مرة
+    $placeholderSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300"><rect fill="#1A2438" width="400" height="300"/><circle cx="200" cy="120" r="40" fill="none" stroke="#334155" stroke-width="3"/><path d="M170 120 L200 95 L230 120 M185 120 L200 105 L215 120" stroke="#475569" stroke-width="3" fill="none"/><text x="200" y="200" fill="#64748B" font-family="Cairo,sans-serif" font-size="16" text-anchor="middle">صورة غير متوفرة</text></svg>';
+    @file_put_contents($cacheFile, $placeholderSvg);
+    
     sendPlaceholder();
 }
 
