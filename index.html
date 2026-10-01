@@ -741,6 +741,282 @@
 
 })();
 </script>
+<script>
+/* ==========================================
+   🍔 قائمة الجوال الذكية - الملف الشخصي / لوحة التحكم / تسجيل خروج
+   ========================================== */
+(function() {
+  'use strict';
+  console.log('📱 Mobile menu items loading...');
 
+  function getCurrentUser() {
+    try {
+      // نحاول بأكثر من طريقة
+      if (window.API && API.Users && API.Users.getCurrent) {
+        return API.Users.getCurrent();
+      }
+      // fallback: من localStorage
+      const u = localStorage.getItem('user');
+      if (u && u !== 'null' && u !== 'undefined') {
+        return JSON.parse(u);
+      }
+      return null;
+    } catch (e) {
+      console.warn('⚠️ Error getting user:', e);
+      return null;
+    }
+  }
+
+  function isAdminUser(user) {
+    if (!user) return false;
+    // نتحقق من كل الاحتمالات
+    if (window.API && API.Users && API.Users.isAdmin && API.Users.isAdmin()) {
+      return true;
+    }
+    const role = user.role || '';
+    return role === 'admin' || role === 'super_admin';
+  }
+
+  function buildMenuItems() {
+    const container = document.getElementById('mobileAuthContainer');
+    if (!container) {
+      console.warn('⚠️ #mobileAuthContainer not found');
+      return;
+    }
+
+    const user = getCurrentUser();
+    const isLoggedIn = !!(user && (user.id || user.email));
+    const isAdmin = isAdminUser(user);
+
+    console.log('👤 user:', user);
+    console.log('✅ isLoggedIn:', isLoggedIn, '| isAdmin:', isAdmin);
+
+    let html = '';
+
+    if (isLoggedIn) {
+      // ✅ اسم المستخدم
+      const userName = user.name || user.username || user.email || 'المستخدم';
+      const userRole = user.role === 'super_admin' ? 'سوبر أدمن' :
+                       user.role === 'admin' ? 'أدمن' : 'مستخدم';
+
+      html += `
+        <div class="mobile-menu-user">
+          <div class="mobile-menu-user-avatar">
+            <i data-lucide="user"></i>
+          </div>
+          <div class="mobile-menu-user-info">
+            <span class="mobile-menu-user-name">${userName}</span>
+            <span class="mobile-menu-user-role">${userRole}</span>
+          </div>
+        </div>
+      `;
+
+      // ✅ الملف الشخصي
+      html += `
+        <a href="/pages/account.html" class="mobile-menu-item mobile-menu-item-account">
+          <i data-lucide="user-circle"></i>
+          <span>الملف الشخصي</span>
+          <i data-lucide="chevron-left" class="mobile-menu-item-arrow"></i>
+        </a>
+      `;
+
+      // ✅ لوحة التحكم (للأدمن والسوبر أدمن فقط)
+      if (isAdmin) {
+        html += `
+          <a href="/pages/admin.html" class="mobile-menu-item mobile-menu-item-admin">
+            <i data-lucide="layout-dashboard"></i>
+            <span>لوحة التحكم</span>
+            <span class="mobile-menu-badge">أدمن</span>
+            <i data-lucide="chevron-left" class="mobile-menu-item-arrow"></i>
+          </a>
+        `;
+      }
+
+      // ✅ إعلاناتي
+      html += `
+        <a href="/pages/my-listings.html" class="mobile-menu-item">
+          <i data-lucide="megaphone"></i>
+          <span>إعلاناتي</span>
+          <i data-lucide="chevron-left" class="mobile-menu-item-arrow"></i>
+        </a>
+      `;
+
+      // ✅ المفضلة
+      html += `
+        <a href="/pages/favorites.html" class="mobile-menu-item">
+          <i data-lucide="heart"></i>
+          <span>المفضلة</span>
+          <i data-lucide="chevron-left" class="mobile-menu-item-arrow"></i>
+        </a>
+      `;
+
+      // ✅ فاصل
+      html += `<div class="mobile-menu-divider"></div>`;
+
+      // ✅ تسجيل الخروج
+      html += `
+        <button type="button" class="mobile-menu-item mobile-menu-item-logout" id="mobileLogoutBtn">
+          <i data-lucide="log-out"></i>
+          <span>تسجيل الخروج</span>
+        </button>
+      `;
+
+    } else {
+      // ❌ غير مسجل
+      html += `
+        <a href="/pages/login.html" class="mobile-menu-item mobile-menu-item-login">
+          <i data-lucide="log-in"></i>
+          <span>تسجيل الدخول</span>
+          <i data-lucide="chevron-left" class="mobile-menu-item-arrow"></i>
+        </a>
+      `;
+
+      html += `
+        <a href="/pages/register.html" class="mobile-menu-item">
+          <i data-lucide="user-plus"></i>
+          <span>إنشاء حساب جديد</span>
+          <i data-lucide="chevron-left" class="mobile-menu-item-arrow"></i>
+        </a>
+      `;
+    }
+
+    container.innerHTML = html;
+
+    // تحديث الأيقونات
+    if (window.lucide) window.lucide.createIcons();
+
+    // ✅ ربط زر تسجيل الخروج
+    const logoutBtn = document.getElementById('mobileLogoutBtn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', async function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('🚪 تسجيل خروج...');
+
+        try {
+          if (window.API && API.Auth && API.Auth.logout) {
+            await API.Auth.logout();
+          } else {
+            // fallback
+            localStorage.removeItem('user');
+            localStorage.removeItem('token');
+            sessionStorage.clear();
+          }
+        } catch (err) {
+          console.warn('⚠️ Logout error:', err);
+          localStorage.removeItem('user');
+          localStorage.removeItem('token');
+        }
+
+        console.log('✅ تم تسجيل الخروج');
+        window.location.href = '/index.html';
+      });
+    }
+
+    console.log('✅ Mobile menu items installed');
+  }
+
+  // تشغيل بعد تحميل الصفحة
+  function run() {
+    // ننتظر لحتى تحمّل الـ API
+    let attempts = 0;
+    const checkInterval = setInterval(function() {
+      attempts++;
+      if (window.API && window.API.Users) {
+        clearInterval(checkInterval);
+        buildMenuItems();
+      } else if (attempts > 20) {
+        // بعد 2 ثانية نتخلى عن الانتظار
+        clearInterval(checkInterval);
+        buildMenuItems();
+      }
+    }, 100);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run);
+  } else {
+    run();
+  }
+
+  // إعادة بناء القائمة عند كل فتح للـ mobile menu (لو تسجل المستخدم بنفس الجلسة)
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('#mobileMenuToggle')) {
+      setTimeout(buildMenuItems, 100);
+    }
+  }, true);
+
+})();
+</script>
+<script>
+/* ==========================================
+   ⚡ Instant Button Feedback
+   - استجابة بصرية فورية بمجرد اللمس (pointerdown)
+   - قبل حتى ما يطلق click event
+   ========================================== */
+(function() {
+  'use strict';
+
+  // قائمة العناصر يلي رح تستجيب
+  const SELECTOR = 'button, a.btn, .btn, .btn-primary, .btn-login, .card, .cascade-btn, .browse-option, .add-type-option, .mobile-menu-item, .bottom-nav-item, .scroll-strip, .link-more';
+
+  function addInstantFeedback(el) {
+    if (el.dataset.instantFeedback === '1') return;
+    el.dataset.instantFeedback = '1';
+
+    // ✅ visual feedback بمجرد اللمس
+    el.addEventListener('pointerdown', function(e) {
+      // تجاهل السكرول/swipe
+      if (e.pointerType === 'touch' && e.isPrimary === false) return;
+      
+      this.style.transitionDuration = '0.05s';
+      this.style.opacity = '0.85';
+
+      // رجّع الحالة الأصلية فوراً
+      const reset = () => {
+        setTimeout(() => {
+          this.style.opacity = '';
+          this.style.transitionDuration = '';
+        }, 80);
+      };
+
+      el.addEventListener('pointerup', reset, { once: true });
+      el.addEventListener('pointercancel', reset, { once: true });
+      el.addEventListener('pointerleave', reset, { once: true });
+    }, { passive: true });
+  }
+
+  // نطبّق على كل العناصر الموجودة
+  function init() {
+    document.querySelectorAll(SELECTOR).forEach(addInstantFeedback);
+    console.log('⚡ Instant feedback applied to', document.querySelectorAll(SELECTOR).length, 'elements');
+  }
+
+  // نطبق عند الجاهزية
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+  // نراقب العناصر الجديدة (بطاقات، إعلانات جديدة)
+  const observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(m) {
+      m.addedNodes.forEach(function(node) {
+        if (node.nodeType === 1) {
+          if (node.matches && node.matches(SELECTOR)) addInstantFeedback(node);
+          if (node.querySelectorAll) {
+            node.querySelectorAll(SELECTOR).forEach(addInstantFeedback);
+          }
+        }
+      });
+    });
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  console.log('⚡ Instant feedback system ready');
+})();
+</script>
 </body>
 </html>

@@ -92,11 +92,12 @@ function processImage($data, $mime, $maxWidth = 0) {
     $newW = $origW;
     $newH = $origH;
 
+    // ✅✅✅ تصغير للصور الكبيرة (1000px بدل 1400 - حجم أصغر)
     $targetWidth = $maxWidth > 0 ? $maxWidth : 0;
-    $shouldResize = ($targetWidth > 0 && $origW > $targetWidth) || ($targetWidth === 0 && $origW > 1400);
+    $shouldResize = ($targetWidth > 0 && $origW > $targetWidth) || ($targetWidth === 0 && $origW > 1000);
 
     if ($shouldResize) {
-        $newW = $targetWidth > 0 ? $targetWidth : 1400;
+        $newW = $targetWidth > 0 ? $targetWidth : 1000;
         $newH = (int)($origH * ($newW / $origW));
     }
 
@@ -113,12 +114,13 @@ function processImage($data, $mime, $maxWidth = 0) {
 
     ob_start();
     if (function_exists('imagewebp')) {
-        imagewebp($newImg, null, 80);
+        // ✅✅✅ ضغط 68% بدل 80% (حجم أقل بـ ~30%)
+        imagewebp($newImg, null, 68);
         $output = ob_get_clean();
         $finalMime = 'image/webp';
         $ext = 'webp';
     } else {
-        imagejpeg($newImg, null, 82);
+        imagejpeg($newImg, null, 72);
         $output = ob_get_clean();
         $finalMime = 'image/jpeg';
         $ext = 'jpg';
@@ -144,8 +146,8 @@ function fetchRemoteImage($url) {
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_FOLLOWLOCATION => true,
         CURLOPT_MAXREDIRS => 2,
-        CURLOPT_TIMEOUT => 3,              // ✅ تقليل من 8 لـ 3 ثواني
-        CURLOPT_CONNECTTIMEOUT => 2,       // ✅ تقليل من 4 لـ 2 ثواني
+        CURLOPT_TIMEOUT => 3,              // ✅ 3 ثواني
+        CURLOPT_CONNECTTIMEOUT => 2,       // ✅ 2 ثواني
         CURLOPT_SSL_VERIFYPEER => false,
         CURLOPT_USERAGENT => 'Mozilla/5.0 (compatible; SouqBot/1.0)',
         CURLOPT_HTTPHEADER => [
@@ -218,7 +220,7 @@ if (strpos($url, 'http') === 0) {
         exit;
     }
 
-    // ✅✅✅ بدل الـ redirect: أرجع placeholder فوراً
+    // ✅ فشل الجلب → placeholder
     sendPlaceholder();
 }
 

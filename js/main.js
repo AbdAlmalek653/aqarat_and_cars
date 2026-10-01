@@ -423,7 +423,7 @@ async function handleCascadeShow() {
 
 /* ==========================================
    تشغيل عند التحميل
-   ⚠️ لا يوجد أي كود لـ Browse Modal هنا
+   ✅ التحديث التلقائي: كل 30 ثانية + توقف لما الصفحة بالخلفية
    ========================================== */
 document.addEventListener('DOMContentLoaded', () => {
   loadFeaturedProperties(false);
@@ -438,9 +438,14 @@ document.addEventListener('DOMContentLoaded', () => {
   let isRefreshing = false;
   setInterval(async () => {
     if (isRefreshing) return;
+    if (document.hidden) return; // ← لا يشتغل لما الصفحة في الخلفية
     isRefreshing = true;
     try {
       await Promise.all([loadFeaturedProperties(true), loadFeaturedCars(true), loadStats(true)]);
-    } finally { isRefreshing = false; }
-  }, 8000);
+    } catch (e) {
+      console.warn('⚠️ Auto-refresh error:', e);
+    } finally {
+      isRefreshing = false;
+    }
+  }, 30000); // ← 30 ثانية
 });
