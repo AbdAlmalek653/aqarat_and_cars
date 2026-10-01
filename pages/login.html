@@ -168,5 +168,31 @@
       if (window.lucide) window.lucide.createIcons();
     });
   </script>
+  <script>
+  // حفظ redirect من الـ URL عند فتح صفحة تسجيل الدخول
+  document.addEventListener('DOMContentLoaded', function() {
+    const params = new URLSearchParams(window.location.search);
+    const redirect = params.get('redirect');
+    if (redirect) {
+      sessionStorage.setItem('login_redirect', decodeURIComponent(redirect));
+    }
+  });
+
+  // في حالة نجاح تسجيل الدخول
+  window.addEventListener('load', function() {
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+      loginForm.addEventListener('submit', function() {
+        const redirect = sessionStorage.getItem('login_redirect');
+        if (redirect) {
+          setTimeout(() => {
+            sessionStorage.removeItem('login_redirect');
+            window.location.href = redirect;
+          }, 1500);
+        }
+      });
+    }
+  });
+</script>
 </body>
 </html>

@@ -41,7 +41,7 @@
           <i data-lucide="plus-circle"></i>
           <span>أضف إعلان</span>
         </a>
-        <button class="mobile-menu-toggle" id="mobileMenuToggle">
+        <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button">
           <i data-lucide="menu"></i>
         </button>
       </div>
@@ -53,7 +53,7 @@
   <div class="mobile-menu" id="mobileMenu">
     <div class="mobile-menu-header">
       <h3 class="mobile-menu-title"><i data-lucide="layout-grid"></i><span>القائمة الرئيسية</span></h3>
-      <button class="mobile-menu-close" id="closeMobileMenu"><i data-lucide="x"></i></button>
+      <button class="mobile-menu-close" id="closeMobileMenu" type="button"><i data-lucide="x"></i></button>
     </div>
     <div class="mobile-menu-body"><div id="mobileAuthContainer"></div></div>
   </div>
@@ -76,7 +76,6 @@
           <span class="hero-word">المثالية</span>
         </h1>
 
-        <!-- ✅ الزر مع id فقط - بدون onclick -->
         <button type="button" class="scroll-strip" id="browseBtn" aria-label="تصفح الإعلانات">
           <div class="scroll-strip-bg">
             <span class="scroll-strip-dot"></span>
@@ -105,7 +104,6 @@
         </div>
       </div>
 
-      <!-- الفلتر المتدرج -->
       <div class="cascade-filter cascade-filter-hero" id="cascadeFilter">
         <div class="cascade-title animated">
           <div class="cascade-title-line"></div>
@@ -168,7 +166,6 @@
     </div>
   </section>
 
-  <!-- قسم النتائج -->
   <section class="section results-section" id="resultsSection" style="display:none;">
     <div class="container">
       <div class="section-header">
@@ -181,7 +178,6 @@
     </div>
   </section>
 
-  <!-- الإحصائيات -->
   <section class="stats-section" id="stats-section">
     <div class="container">
       <div class="stats-grid">
@@ -193,7 +189,6 @@
     </div>
   </section>
 
-  <!-- قسم العقارات -->
   <section class="section" id="propertiesSection">
     <div class="container">
       <div class="section-header">
@@ -204,7 +199,6 @@
     </div>
   </section>
 
-  <!-- قسم السيارات -->
   <section class="section" id="carsSection">
     <div class="container">
       <div class="section-header">
@@ -215,7 +209,6 @@
     </div>
   </section>
 
-  <!-- CTA -->
   <section class="cta-section">
     <div class="container">
       <div class="cta-card">
@@ -234,7 +227,6 @@
     </div>
   </section>
 
-  <!-- Why -->
   <section class="why-section">
     <div class="container">
       <div class="why-header">
@@ -253,7 +245,6 @@
     </div>
   </section>
 
-  <!-- الفوتر -->
   <footer class="footer">
     <div class="container">
       <div class="footer-grid">
@@ -280,7 +271,6 @@
     </div>
   </footer>
 
-  <!-- Bottom Nav -->
   <nav class="bottom-nav">
     <a href="index.html" class="bottom-nav-item active"><i data-lucide="home"></i><span>الرئيسية</span></a>
     <a href="pages/search.html" class="bottom-nav-item"><i data-lucide="search"></i><span>البحث</span></a>
@@ -312,7 +302,7 @@
     </div>
   </div>
 
-  <!-- ===================== نافذة اختيار نوع الإعلان ===================== -->
+  <!-- ===================== نافذة اختيار نوع الإعلان (تصفح) ===================== -->
   <div class="browse-modal" id="browseModal">
     <div class="browse-modal-overlay" data-close-browse></div>
     <div class="browse-modal-content">
@@ -325,7 +315,6 @@
       </div>
 
       <div class="browse-modal-options">
-        <!-- ✅ خيار العقارات -->
         <button type="button" class="browse-option browse-option-property" data-scroll-to="propertiesSection">
           <div class="browse-option-bg"></div>
           <div class="browse-option-icon"><i data-lucide="building-2"></i></div>
@@ -337,7 +326,6 @@
           </span>
         </button>
 
-        <!-- ✅ خيار السيارات -->
         <button type="button" class="browse-option browse-option-car" data-scroll-to="carsSection">
           <div class="browse-option-bg"></div>
           <div class="browse-option-icon"><i data-lucide="car"></i></div>
@@ -352,63 +340,70 @@
     </div>
   </div>
 
+  <!-- ===================== نافذة اختيار نوع الإعلان (إضافة) ===================== -->
+  <div class="add-type-modal" id="addTypeModal">
+    <div class="add-type-overlay" data-close-add-type></div>
+    <div class="add-type-content">
+      <button class="add-type-close" data-close-add-type type="button"><i data-lucide="x"></i></button>
+      <div class="add-type-header">
+        <div class="add-type-icon"><i data-lucide="plus-circle"></i></div>
+        <h2 class="add-type-title">ما نوع الإعلان الذي تريد إضافته؟</h2>
+        <p class="add-type-subtitle">اختر النوع للبدء في إضافة إعلانك</p>
+      </div>
+      <div class="add-type-options">
+        <button type="button" class="add-type-option add-type-property" data-add-type="property">
+          <div class="add-type-option-bg"></div>
+          <div class="add-type-option-icon"><i data-lucide="building-2"></i></div>
+          <h3 class="add-type-option-title">عقار</h3>
+          <p class="add-type-option-desc">شقق، فلل، أراضي، مكاتب ومحلات</p>
+        </button>
+        <button type="button" class="add-type-option add-type-car" data-add-type="car">
+          <div class="add-type-option-bg"></div>
+          <div class="add-type-option-icon"><i data-lucide="car"></i></div>
+          <h3 class="add-type-option-title">سيارة</h3>
+          <p class="add-type-option-desc">جديدة ومستعملة، للبيع والإيجار</p>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- ===================== Scripts ===================== -->
   <script src="js/api.js"></script>
   <script src="js/header-state.js"></script>
   <script src="js/main.js"></script>
   <script src="js/auth-guard.js"></script>
 
-  <!-- ✅✅✅ كل الكود الخاص بنافذة الاختيار هنا - مستقل تماماً -->
+  <!-- ============ السكريبت الأول: نافذة تصفح الإعلانات ============ -->
   <script>
   (function() {
     'use strict';
-
     console.log('🟢 Browse script loading...');
 
-    // ✅ فتح النافذة
     function openBrowseModal() {
-      console.log('🟢 openBrowseModal called');
       const modal = document.getElementById('browseModal');
-      if (!modal) {
-        console.error('❌ #browseModal NOT FOUND');
-        return;
-      }
+      if (!modal) return;
       modal.classList.add('show');
       modal.style.display = 'flex';
-      modal.style.opacity = '1';
       document.body.style.overflow = 'hidden';
       if (window.lucide) window.lucide.createIcons();
     }
 
-    // ✅ إغلاق النافذة
     function closeBrowseModal() {
       const modal = document.getElementById('browseModal');
       if (!modal) return;
       modal.classList.remove('show');
       modal.style.display = '';
-      modal.style.opacity = '';
       document.body.style.overflow = '';
     }
 
-    // ✅ التمرير للقسم
     function scrollToSection(sectionId) {
       closeBrowseModal();
-
       setTimeout(() => {
         const section = document.getElementById(sectionId);
-        if (!section) {
-          console.error('❌ Section not found:', sectionId);
-          return;
-        }
-
+        if (!section) return;
         const headerOffset = 80;
         const elementPosition = section.getBoundingClientRect().top + window.pageYOffset;
-        window.scrollTo({
-          top: elementPosition - headerOffset,
-          behavior: 'smooth'
-        });
-
-        // تأثير إبراز القسم
+        window.scrollTo({ top: elementPosition - headerOffset, behavior: 'smooth' });
         const container = section.querySelector('.container');
         if (container) {
           container.style.transition = 'box-shadow 0.5s ease, border-radius 0.5s ease';
@@ -422,49 +417,214 @@
       }, 350);
     }
 
-    // ✅✅✅ Event Delegation - يلتقط كل الضغطات
     document.addEventListener('click', function(e) {
-      // 1. زر تصفح الإعلانات
       const browseBtn = e.target.closest('#browseBtn');
       if (browseBtn) {
         e.preventDefault();
         e.stopPropagation();
-        console.log('🟢 browseBtn clicked');
         openBrowseModal();
         return false;
       }
-
-      // 2. إغلاق النافذة
       const closeBtn = e.target.closest('[data-close-browse]');
       if (closeBtn) {
         e.preventDefault();
         closeBrowseModal();
         return false;
       }
-
-      // 3. خيارات النافذة (عقارات/سيارات)
       const optionBtn = e.target.closest('[data-scroll-to]');
       if (optionBtn) {
         e.preventDefault();
-        const sectionId = optionBtn.getAttribute('data-scroll-to');
-        console.log('🟢 Option clicked:', sectionId);
-        scrollToSection(sectionId);
+        scrollToSection(optionBtn.getAttribute('data-scroll-to'));
         return false;
       }
-    }, true); // capture: true
+    }, true);
 
-    // ✅ إغلاق بـ ESC
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') closeBrowseModal();
     });
 
-    // ✅ تعريف عام (احتياطي)
     window.openBrowseModal = openBrowseModal;
     window.closeBrowseModal = closeBrowseModal;
     window.scrollToSection = scrollToSection;
-
     console.log('🟢 Browse script loaded successfully');
   })();
   </script>
+
+  <!-- ============ السكريبت الثاني: زر إضافة إعلان (ذكي) ============ -->
+  <script>
+  (function() {
+    'use strict';
+    console.log('🎯 Add-listing guard loading...');
+
+    // فتح النافذة
+    function openAddModal() {
+      const modal = document.getElementById('addTypeModal');
+      if (!modal) {
+        console.error('❌ #addTypeModal NOT FOUND');
+        return;
+      }
+      modal.classList.add('show');
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    // إغلاق النافذة
+    function closeAddModal() {
+      const modal = document.getElementById('addTypeModal');
+      if (!modal) return;
+      modal.classList.remove('show');
+      modal.style.display = '';
+      document.body.style.overflow = '';
+    }
+
+    // معالجة اختيار النوع
+    function handleTypeChoice(type) {
+      let currentUser = null;
+      try {
+        if (window.API && API.Users && API.Users.getCurrent) {
+          currentUser = API.Users.getCurrent();
+        }
+      } catch (e) {}
+
+      const isLoggedIn = !!(currentUser && currentUser.id);
+      const isInPages = window.location.pathname.includes('/pages/');
+      const prefix = isInPages ? '' : 'pages/';
+      const addUrl = `${prefix}add-listing.html?type=${type}`;
+
+      console.log('✅ نوع الإعلان:', type, '| مسجل؟', isLoggedIn);
+
+      if (isLoggedIn) {
+        window.location.href = addUrl;
+      } else {
+        const loginUrl = `${prefix}login.html?redirect=${encodeURIComponent(addUrl)}`;
+        window.location.href = loginUrl;
+      }
+    }
+
+    // Event Delegation
+    document.addEventListener('click', function(e) {
+      // تجاهل الضغطات داخل النافذة نفسها
+      if (e.target.closest('#addTypeModal') && !e.target.closest('[data-add-type]') && !e.target.closest('[data-close-add-type]')) {
+        return;
+      }
+
+      // زر "أضف إعلان" (أي زر بأي مكان)
+      const addBtn = e.target.closest(
+        'a[href*="add-listing"], .btn-add-listing-mobile, .bottom-nav-item.add-btn, .cta-button[href*="add-listing"]'
+      );
+      if (addBtn && !e.target.closest('#addTypeModal')) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('🎯 فتح نافذة اختيار النوع');
+        openAddModal();
+        return false;
+      }
+
+      // زر الإغلاق
+      if (e.target.closest('[data-close-add-type]')) {
+        e.preventDefault();
+        closeAddModal();
+        return false;
+      }
+
+      // اختيار نوع (عقار/سيارة)
+      const typeBtn = e.target.closest('[data-add-type]');
+      if (typeBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const type = typeBtn.getAttribute('data-add-type');
+        closeAddModal();
+        handleTypeChoice(type);
+        return false;
+      }
+    }, true);
+
+    // إغلاق بـ ESC
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeAddModal();
+    });
+
+    console.log('✅ Add-listing guard installed');
+  })();
+  </script>
+
+  <!-- ============ السكريبت الثالث: زر الهامبرغر (3 خطوط) ============ -->
+  <script>
+  (function() {
+    'use strict';
+    console.log('🍔 Mobile menu loading...');
+
+    document.addEventListener('click', function(e) {
+      // زر الهامبرغر
+      if (e.target.closest('#mobileMenuToggle')) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        const menu = document.getElementById('mobileMenu');
+        const overlay = document.getElementById('mobileMenuOverlay');
+        if (menu && overlay) {
+          menu.classList.add('show');
+          menu.style.right = '0';
+          overlay.classList.add('show');
+          overlay.style.opacity = '1';
+          overlay.style.visibility = 'visible';
+          document.body.style.overflow = 'hidden';
+          if (window.lucide) window.lucide.createIcons();
+          console.log('✅ فتح القائمة');
+        }
+        return false;
+      }
+
+      // زر الإغلاق
+      if (e.target.closest('#closeMobileMenu')) {
+        e.preventDefault();
+        e.stopPropagation();
+        const menu = document.getElementById('mobileMenu');
+        const overlay = document.getElementById('mobileMenuOverlay');
+        if (menu && overlay) {
+          menu.classList.remove('show');
+          menu.style.right = '';
+          overlay.classList.remove('show');
+          overlay.style.opacity = '0';
+          overlay.style.visibility = 'hidden';
+          document.body.style.overflow = '';
+          console.log('❌ إغلاق القائمة');
+        }
+        return false;
+      }
+
+      // الـ overlay
+      if (e.target.id === 'mobileMenuOverlay') {
+        const menu = document.getElementById('mobileMenu');
+        const overlay = document.getElementById('mobileMenuOverlay');
+        if (menu && overlay) {
+          menu.classList.remove('show');
+          menu.style.right = '';
+          overlay.classList.remove('show');
+          overlay.style.opacity = '0';
+          overlay.style.visibility = 'hidden';
+          document.body.style.overflow = '';
+        }
+        return false;
+      }
+    }, true);
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        const menu = document.getElementById('mobileMenu');
+        const overlay = document.getElementById('mobileMenuOverlay');
+        if (menu && overlay) {
+          menu.classList.remove('show');
+          overlay.classList.remove('show');
+          document.body.style.overflow = '';
+        }
+      }
+    });
+
+    console.log('✅ Mobile menu installed');
+  })();
+  </script>
+
 </body>
 </html>
