@@ -184,9 +184,15 @@
     </div>
   </section>
 
-  <!-- ===================== قسم النتائج المخفي (المصدر للبيانات) ===================== -->
+  <!-- ===================== قسم النتائج ===================== -->
   <section class="section results-section" id="resultsSection" style="display:none;">
     <div class="container">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title"><i data-lucide="search-check"></i><span>نتائج البحث</span></h2>
+          <p class="section-subtitle">الإعلانات المطابقة لاختياراتك</p>
+        </div>
+      </div>
       <div class="grid grid-4" id="latestGrid"></div>
       <div id="cascadeEmpty" style="display:none;" class="empty-state">
         <div class="empty-icon-wrap">
@@ -328,58 +334,6 @@
     </div>
   </div>
 
-  <!-- ===================== 🪟 نافذة نتائج البحث المنبثقة ===================== -->
-  <div class="results-modal" id="resultsModal" aria-hidden="true">
-    <div class="results-modal-overlay" onclick="closeResultsModal()"></div>
-    
-    <div class="results-modal-content" role="dialog" aria-labelledby="resultsModalTitle">
-      
-      <!-- رأس النافذة -->
-      <div class="results-modal-header">
-        <div class="results-modal-title-wrap">
-          <span class="results-modal-icon"><i data-lucide="search-check"></i></span>
-          <div>
-            <h2 class="results-modal-title" id="resultsModalTitle">نتائج البحث</h2>
-            <p class="results-modal-subtitle" id="resultsModalSubtitle">الإعلانات المطابقة لاختياراتك</p>
-          </div>
-        </div>
-        
-        <button class="results-modal-close" onclick="closeResultsModal()" aria-label="إغلاق">
-          <i data-lucide="x"></i>
-        </button>
-      </div>
-      
-      <!-- شرائح الفلاتر المختارة -->
-      <div class="results-modal-filters" id="resultsModalFilters"></div>
-      
-      <!-- جسم النافذة -->
-      <div class="results-modal-body">
-        <div class="grid grid-4" id="modalLatestGrid"></div>
-        
-        <div id="modalCascadeEmpty" style="display:none;" class="empty-state">
-          <div class="empty-icon-wrap">
-            <div class="empty-icon"><i data-lucide="inbox"></i></div>
-          </div>
-          <h3 class="empty-title">لا توجد إعلانات مطابقة</h3>
-          <p class="empty-subtitle">جرّب تغيير الفلتر أو تصفح كل الإعلانات</p>
-          <a href="pages/search.html" class="empty-cta-btn">
-            <span class="empty-cta-icon"><i data-lucide="search"></i></span>
-            تصفح كل الإعلانات
-          </a>
-        </div>
-      </div>
-      
-      <!-- ✅ Footer - زر العودة إلى الرئيسية -->
-      <div class="results-modal-footer">
-        <a href="index.html" class="results-modal-seeall">
-          <i data-lucide="home"></i>
-          <span>العودة إلى الرئيسية</span>
-        </a>
-      </div>
-      
-    </div>
-  </div>
-
   <!-- ===================== Scripts ===================== -->
   <script src="js/api.js"></script>
   <script src="js/header-state.js"></script>
@@ -450,124 +404,6 @@
           if (window.lucide) window.lucide.createIcons();
         }
       }, 300);
-    });
-
-    /* ===================== 🪟 Modal نتائج البحث ===================== */
-
-    window.openResultsModal = function() {
-      const modal = document.getElementById('resultsModal');
-      if (!modal) return;
-      
-      const sourceGrid = document.getElementById('latestGrid');
-      const targetGrid = document.getElementById('modalLatestGrid');
-      
-      if (sourceGrid && targetGrid) {
-        targetGrid.innerHTML = sourceGrid.innerHTML;
-      }
-      
-      // ✅ الحل: نفحص عدد الكروت الفعلية في الشبكة (مو display style)
-      const targetEmpty = document.getElementById('modalCascadeEmpty');
-      
-      // إذا فيه كروت في الشبكة → يعني في نتائج
-      const hasResults = sourceGrid && sourceGrid.children.length > 0;
-      
-      if (targetEmpty && targetGrid) {
-        if (hasResults) {
-          // فيه نتائج → نخفي رسالة "لا توجد"
-          targetEmpty.style.display = 'none';
-          targetEmpty.setAttribute('hidden', '');
-          targetGrid.style.display = 'grid';
-        } else {
-          // ما فيه نتائج → نعرض الرسالة
-          targetEmpty.style.display = 'flex';
-          targetEmpty.removeAttribute('hidden');
-          targetGrid.style.display = 'none';
-        }
-      }
-      
-      updateModalFilterChips();
-      
-      modal.classList.add('show');
-      modal.setAttribute('aria-hidden', 'false');
-      document.body.classList.add('modal-open');
-      
-      if (window.lucide) window.lucide.createIcons();
-    };
-
-    window.closeResultsModal = function() {
-      const modal = document.getElementById('resultsModal');
-      if (!modal) return;
-      
-      modal.classList.remove('show');
-      modal.setAttribute('aria-hidden', 'true');
-      document.body.classList.remove('modal-open');
-    };
-
-    function updateModalFilterChips() {
-      const chipsContainer = document.getElementById('resultsModalFilters');
-      if (!chipsContainer) return;
-      
-      chipsContainer.innerHTML = '';
-      
-      const typeBtn = document.querySelector('.cascade-btn[data-type].selected');
-      if (typeBtn) {
-        const text = typeBtn.querySelector('span')?.textContent || '';
-        const icon = typeBtn.querySelector('svg')?.outerHTML || '';
-        chipsContainer.insertAdjacentHTML('beforeend',
-          `<span class="results-modal-chip">${icon}<span>${text}</span></span>`);
-      }
-      
-      const purposeBtn = document.querySelector('.cascade-btn[data-purpose].selected');
-      if (purposeBtn) {
-        const text = purposeBtn.querySelector('span')?.textContent || '';
-        const icon = purposeBtn.querySelector('svg')?.outerHTML || '';
-        chipsContainer.insertAdjacentHTML('beforeend',
-          `<span class="results-modal-chip">${icon}<span>${text}</span></span>`);
-      }
-      
-      const citySelect = document.getElementById('cascadeCity');
-      if (citySelect && citySelect.value) {
-        const selectedOption = citySelect.options[citySelect.selectedIndex];
-        const cityText = selectedOption?.text || '';
-        chipsContainer.insertAdjacentHTML('beforeend',
-          `<span class="results-modal-chip"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg><span>${cityText}</span></span>`);
-      }
-      
-      if (window.lucide) window.lucide.createIcons();
-    }
-
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') {
-        closeResultsModal();
-      }
-    });
-
-    window.addEventListener('load', function() {
-      const showBtn = document.getElementById('cascadeShowBtn');
-      
-      if (showBtn) {
-        showBtn.addEventListener('click', function(e) {
-          setTimeout(() => {
-            const grid = document.getElementById('latestGrid');
-            
-            // ✅ نفحص عدد الكروت الفعلية
-            const hasResults = grid && grid.children.length > 0;
-            
-            if (hasResults) {
-              const resultsSection = document.getElementById('resultsSection');
-              if (resultsSection) resultsSection.style.display = 'none';
-              
-              openResultsModal();
-            } else {
-              // ما فيه نتائج → نعرض الرسالة
-              const resultsSection = document.getElementById('resultsSection');
-              if (resultsSection) resultsSection.style.display = 'none';
-              
-              openResultsModal();
-            }
-          }, 800);
-        }, false);
-      }
     });
   </script>
 </body>

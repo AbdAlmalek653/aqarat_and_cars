@@ -1,6 +1,6 @@
 /* ==========================================
   طبقة البيانات الموحدة
-  النسخة المحسّنة: منع الطلبات المتكررة + كاش ذكي (60 ثانية)
+  النسخة المحسّنة: منع الطلبات المتكررة + كاش ذكي (30 ثانية)
   ========================================== */
 
 const API = (function () {
@@ -44,16 +44,18 @@ const API = (function () {
   }
 
   /* ==========================================
-     ✅ دوال HTTP مع منع تكرار الطلبات (النسخة المحسّنة)
+     ✅ دوال HTTP مع منع تكرار الطلبات
+     ⚡ الكاش قصير جداً (30 ثانية) لتظهر التعديلات بسرعة
      ========================================== */
 
-  // 🗂️ مخازن مؤقتة لمنع الطلبات المتكررة
-  const _pendingGets = {};       // الطلبات الجارية حالياً (Promise)
-  const _memoryCache = {};       // كاش في الذاكرة (يبقى في نفس الجلسة)
-  const MEMORY_CACHE_TTL = 60000; // 60 ثانية
+  const _pendingGets = {};
+  const _memoryCache = {};
 
-  // 🗄️ كاش دائم في sessionStorage (يبقى بعد تحديث الصفحة)
-  const SESSION_CACHE_TTL = 300000; // 5 دقائق
+  // ⚡ تقليل مدة الكاش من 60 ثانية إلى 15 ثانية
+  const MEMORY_CACHE_TTL = 15000;
+
+  // ⚡ تقليل مدة الكاش من 5 دقائق إلى 30 ثانية فقط!
+  const SESSION_CACHE_TTL = 30000;
   const SESSION_CACHE_PREFIX = 'api_cache_';
 
   function getSessionCache(key) {
@@ -77,9 +79,7 @@ const API = (function () {
         data: data,
         time: Date.now()
       }));
-    } catch (e) {
-      // sessionStorage ممتلئ أو محظور
-    }
+    } catch (e) {}
   }
 
   function httpGet(url, options) {
@@ -94,37 +94,33 @@ const API = (function () {
       try { sessionStorage.removeItem(SESSION_CACHE_PREFIX + cacheKey); } catch(e) {}
     }
 
-    // 1️⃣ إذا في نفس الطلب قيد التنفيذ حالياً → رجّع نفس الـ Promise
+    // 1️⃣ منع الطلبات المتكررة المتزامنة
     if (_pendingGets[cacheKey]) {
-      console.log('⚡ [Pending] ' + url);
       return _pendingGets[cacheKey];
     }
 
-    // 2️⃣ إذا في كاش في الذاكرة ولم ينتهِ → رجّعه
-    if (_memoryCache[cacheKey] && (Date.now() - _memoryCache[cacheKey].time) < MEMORY_CACHE_TTL) {
-      console.log('✅ [Memory Cache] ' + url);
+    // 2️⃣ كاش الذاكرة (15 ثانية)
+    if (!forceRefresh && _memoryCache[cacheKey] && (Date.now() - _memoryCache[cacheKey].time) < MEMORY_CACHE_TTL) {
       return Promise.resolve(_memoryCache[cacheKey].data);
     }
 
-    // 3️⃣ إذا في كاش في sessionStorage → رجّعه وحدّث الذاكرة
-    const sessionData = getSessionCache(cacheKey);
-    if (sessionData) {
-      console.log('💾 [Session Cache] ' + url);
-      _memoryCache[cacheKey] = { data: sessionData, time: Date.now() };
-      return Promise.resolve(sessionData);
+    // 3️⃣ كاش sessionStorage (30 ثانية)
+    if (!forceRefresh) {
+      const sessionData = getSessionCache(cacheKey);
+      if (sessionData) {
+        _memoryCache[cacheKey] = { data: sessionData, time: Date.now() };
+        return Promise.resolve(sessionData);
+      }
     }
 
-    // 4️⃣ نفّذ طلب جديد
-    console.log('🌐 [Network] ' + url);
+    // 4️⃣ طلب جديد من السيرفر
     const promise = fetch(fullUrl, {
       credentials: 'include',
       cache: 'no-store'
     })
     .then(function (r) { return r.json(); })
     .then(function (data) {
-      // خزّن في الذاكرة
       _memoryCache[cacheKey] = { data: data, time: Date.now() };
-      // خزّن في sessionStorage
       setSessionCache(cacheKey, data);
       return data;
     })
@@ -136,20 +132,17 @@ const API = (function () {
     return promise;
   }
 
-  // 🧹 تفريغ الكاش (يُستدعى بعد إضافة/تعديل/حذف إعلان)
+  // 🧹 تفريغ الكاش
   function clearApiCache(urlPattern) {
     if (!urlPattern) {
-      // امسح كل الكاش
       Object.keys(_memoryCache).forEach(function(k) { delete _memoryCache[k]; });
       try {
         Object.keys(sessionStorage).forEach(function(k) {
           if (k.indexOf(SESSION_CACHE_PREFIX) === 0) sessionStorage.removeItem(k);
         });
       } catch(e) {}
-      console.log('🧹 API Cache cleared (all)');
       return;
     }
-    // امسح كاش URLs محددة فقط
     Object.keys(_memoryCache).forEach(function(k) {
       if (k.indexOf(urlPattern) !== -1) delete _memoryCache[k];
     });
@@ -160,7 +153,6 @@ const API = (function () {
         }
       });
     } catch(e) {}
-    console.log('🧹 API Cache cleared for: ' + urlPattern);
   }
 
   function httpPost(url, data) {
@@ -171,9 +163,11 @@ const API = (function () {
       cache: 'no-store',
       body: JSON.stringify(data)
     }).then(function (r) {
-      // 🔄 بعد أي POST ناجح، افرغ الكاش المتعلق بالإعلانات
+      // 🔄 بعد أي POST ناجح، افرغ الكاش فوراً
       clearApiCache('/listings.php');
+      clearApiCache('/listing.php');
       clearApiCache('/stats.php');
+      clearApiCache('/my_listings.php');
       return r.json();
     });
   }
@@ -620,7 +614,7 @@ const API = (function () {
       }
     },
     getMode: function () { return MODE; },
-    clearApiCache: clearApiCache, // ✨ جديد: لتفريغ الكاش يدوياً
+    clearApiCache: clearApiCache,
     clearAll: function () {
       Object.keys(KEYS).forEach(function (key) {
         localStorage.removeItem(KEYS[key]);
@@ -642,6 +636,7 @@ document.addEventListener('DOMContentLoaded', function () {
     API.Users.seedAdmins();
   }
 });
+
 /* ==========================================
    🎯 زر تفاصيل الإعلان - إضافة تلقائية
    ========================================== */
@@ -672,7 +667,6 @@ document.addEventListener('DOMContentLoaded', function () {
   function init() {
     scanCards();
 
-    // مراقبة الكروت الجديدة
     const observer = new MutationObserver(function (mutations) {
       mutations.forEach(function (mutation) {
         mutation.addedNodes.forEach(function (node) {
