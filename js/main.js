@@ -109,10 +109,8 @@ function createCard(item, type) {
   if (item.subType === 'chalet') icon = 'tent';
   if (item.subType === 'arabic-house') icon = 'landmark';
 
-  // ✅ استخدام دالة getImageUrl
   const imageUrl = getImageUrl(item);
 
-  // ✅ مع onerror fallback
   const imageContent = imageUrl
     ? `<img src="${imageUrl}"
             alt="${item.title || ''}"
@@ -704,21 +702,20 @@ async function handleCascadeShow() {
 
   const resultsSection = document.getElementById('resultsSection');
   const grid = document.getElementById('latestGrid');
-  
-  // ✅ تأكد من وجود العنصر cascadeEmpty، وإذا لم يكن موجوداً قم بإنشائه
-  let emptyStateEl = document.getElementById('cascadeEmpty');
-  if (!emptyStateEl && resultsSection) {
-    emptyStateEl = document.createElement('div');
-    emptyStateEl.id = 'cascadeEmpty';
-    emptyStateEl.style.display = 'none';
-    resultsSection.appendChild(emptyStateEl);
-  }
 
   if (resultsSection) resultsSection.style.display = 'block';
 
-  grid.style.display = 'grid';
-  if (emptyStateEl) emptyStateEl.style.display = 'none'; // إخفاء الرسالة
+  // ✅✅✅ الحل الجذري: دالة تحذف كل عناصر "لا توجد نتائج" من الصفحة نهائياً
+  const removeAllEmptyStates = () => {
+    if (!resultsSection) return;
+    // احذف أي عنصر عندو كلاس empty-state جوا resultsSection
+    resultsSection.querySelectorAll('.empty-state').forEach(el => el.remove());
+  };
 
+  // امسح أي رسالة قديمة قبل ما نبدأ
+  removeAllEmptyStates();
+
+  grid.style.display = 'grid';
   grid.innerHTML = `
     <div style="grid-column:1/-1;text-align:center;padding:60px 20px;">
       <i data-lucide="loader-2" class="spin" style="width:48px;height:48px;color:var(--primary);margin-bottom:16px;"></i>
@@ -765,20 +762,29 @@ async function handleCascadeShow() {
       }
     }
 
+    // ✅ مرة تانية امسح أي رسالة قديمة قبل عرض النتائج
+    removeAllEmptyStates();
+
     if (listings.length === 0) {
       // ❌ ما في نتائج
       grid.style.display = 'none';
-      if (emptyStateEl) {
-        emptyStateEl.innerHTML = emptyFilterState(); // ✅ الإصلاح المهم (innerHTML)
-        emptyStateEl.style.display = 'flex';
+      grid.innerHTML = '';
+
+      if (resultsSection) {
+        const newEmpty = document.createElement('div');
+        newEmpty.className = 'empty-state';
+        newEmpty.id = 'cascadeEmpty';
+        newEmpty.style.cssText = 'grid-column:1/-1;';
+        newEmpty.innerHTML = emptyFilterState();
+        resultsSection.appendChild(newEmpty);
       }
       if (window.lucide) window.lucide.createIcons();
       return;
     }
 
-    // ✅ في نتائج
+    // ✅ في نتائج: اعرض الكروت فقط
+    grid.style.display = 'grid';
     grid.innerHTML = listings.map(item => createCard(item, item.type)).join('');
-    if (emptyStateEl) emptyStateEl.style.display = 'none'; // تأكيد إضافي
     if (window.lucide) window.lucide.createIcons();
 
   } catch (err) {
