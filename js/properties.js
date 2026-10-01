@@ -165,38 +165,35 @@ function createPropertyCard(item) {
 }
 
 /* ==========================================
-   حالة فاضية
-   ========================================== */
-function emptyState() {
-  return `
-    <div class="empty-state" style="grid-column:1/-1;">
-      <i data-lucide="building-2"></i>
-      <h3>لا توجد عقارات حالياً</h3>
-      <p>كن أول من يضيف إعلان عقار</p>
-      <a href="add-listing.html" class="btn btn-primary">
-        <i data-lucide="plus"></i>
-        <span>أضف إعلان عقار</span>
-      </a>
-    </div>
-  `;
-}
-
-/* ==========================================
    العرض
    ========================================== */
 function renderProperties() {
   const grid = document.getElementById('propertiesGrid');
   const countEl = document.getElementById('resultsCount');
+  const noResultsMsg = document.getElementById('noResultsMessage'); // العنصر الجديد
+  
   if (!grid) return;
 
   if (countEl) countEl.textContent = filteredProperties.length;
 
+  // ❌ في حال ما في نتائج مطابقة
   if (filteredProperties.length === 0) {
-    grid.className = 'properties-grid';
-    grid.innerHTML = emptyState();
+    grid.style.display = 'none'; // إخفاء شبكة العقارات
+    grid.innerHTML = '';
+    
+    if (noResultsMsg) {
+      noResultsMsg.style.display = 'block'; // إظهار رسالة عدم وجود نتائج وزر الواتساب
+      initIcons(); // عشان تظهر أيقونة الواتساب
+    }
+    
     document.getElementById('pagination').innerHTML = '';
-    initIcons();
     return;
+  }
+
+  // ✅ في حال في نتائج مطابقة
+  grid.style.display = ''; // إعادة إظهار الشبكة (بترجع للوضع الافتراضي بالـ CSS)
+  if (noResultsMsg) {
+    noResultsMsg.style.display = 'none'; // إخفاء رسالة عدم وجود نتائج
   }
 
   const totalPages = Math.ceil(filteredProperties.length / ITEMS_PER_PAGE);
