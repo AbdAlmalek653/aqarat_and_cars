@@ -760,8 +760,9 @@ async function handleCascadeShow() {
     if (listings.length === 0) {
       grid.style.display = 'none';
       if (emptyStateEl) {
+        // ✅ الإصلاح: استخدام innerHTML بدل outerHTML للحفاظ على العنصر والـ id
+        emptyStateEl.innerHTML = emptyFilterState();
         emptyStateEl.style.display = 'flex';
-        emptyStateEl.outerHTML = emptyFilterState();
       }
       if (window.lucide) window.lucide.createIcons();
       return;
