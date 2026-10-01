@@ -29,15 +29,7 @@ async function getCachedListings(forceRefresh) {
 }
 
 function getImageUrl(item) {
-  if (!item || !item.images || !Array.isArray(item.images) || item.images.length === 0) return null;
-  const first = item.images[0];
-  if (!first) return null;
-  const apiBase = window.location.pathname.includes('/pages/') ? '../api' : 'api';
-  if (first === 'has_image') return `${apiBase}/listing_image.php?id=${encodeURIComponent(item.id)}`;
-  if (typeof first === 'string' && first.startsWith('data:image/')) return first;
-  if (typeof first === 'string' && (first.startsWith('http://') || first.startsWith('https://'))) return first;
-  if (typeof first === 'string' && (first.startsWith('./') || first.startsWith('/'))) return first;
-  if (typeof first === 'string' && first.length > 0) return `${apiBase}/listing_image.php?id=${encodeURIComponent(item.id)}`;
+  if (window.getListingImageUrl) return window.getListingImageUrl(item, 0);
   return null;
 }
 
@@ -421,10 +413,6 @@ async function handleCascadeShow() {
   }
 }
 
-/* ==========================================
-   تشغيل عند التحميل
-   ✅ التحديث التلقائي: كل 30 ثانية + توقف لما الصفحة بالخلفية
-   ========================================== */
 document.addEventListener('DOMContentLoaded', () => {
   loadFeaturedProperties(false);
   loadFeaturedCars(false);
@@ -438,7 +426,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let isRefreshing = false;
   setInterval(async () => {
     if (isRefreshing) return;
-    if (document.hidden) return; // ← لا يشتغل لما الصفحة في الخلفية
+    if (document.hidden) return;
     isRefreshing = true;
     try {
       await Promise.all([loadFeaturedProperties(true), loadFeaturedCars(true), loadStats(true)]);
@@ -447,5 +435,5 @@ document.addEventListener('DOMContentLoaded', () => {
     } finally {
       isRefreshing = false;
     }
-  }, 30000); // ← 30 ثانية
+  }, 30000);
 });

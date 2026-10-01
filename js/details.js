@@ -154,28 +154,21 @@ function buildSpecsFromDetails(listing) {
 }
 
 /* ==========================================
-   ✅ استخراج نوع العقار/السيارة (جديد)
+   ✅ استخراج نوع العقار/السيارة
    ========================================== */
 function buildTypeText(listing) {
   const d = listing.details || {};
 
-  // ===== للعقارات =====
   if (listing.type === 'property') {
     const propertyTypes = {
-      apartment: 'شقة',
-      villa: 'فيلا',
-      'arabic-house': 'بيت عربي',
-      land: 'أرض',
-      office: 'مكتب',
-      shop: 'محل تجاري',
-      chalet: 'شاليه',
-      building: 'بناء كامل'
+      apartment: 'شقة', villa: 'فيلا', 'arabic-house': 'بيت عربي',
+      land: 'أرض', office: 'مكتب', shop: 'محل تجاري',
+      chalet: 'شاليه', building: 'بناء كامل'
     };
     const type = listing.subType || d.propertyType;
     return propertyTypes[type] || 'عقار';
   }
 
-  // ===== للسيارات =====
   if (listing.type === 'car') {
     const brandNames = {
       toyota: 'تويوتا', hyundai: 'هيونداي', kia: 'كيا',
@@ -194,7 +187,7 @@ function buildTypeText(listing) {
 }
 
 /* ==========================================
-   استخراج الموقع الصحيح (المحافظة + المنطقة)
+   استخراج الموقع الصحيح
    ========================================== */
 function buildLocationText(listing) {
   const cityNames = {
@@ -220,7 +213,6 @@ function buildLocationText(listing) {
 function renderListing(l) {
   currentListing = l;
 
-  // Breadcrumb
   const parent = document.getElementById('breadcrumbParent');
   if (l.type === 'property') {
     parent.textContent = 'العقارات';
@@ -233,7 +225,6 @@ function renderListing(l) {
   document.title = l.title + ' | سوق';
   document.getElementById('adTitle').textContent = l.title;
 
-  // الشارات
   const purposeText = l.purpose === 'sale' ? 'للبيع' : 'للإيجار';
   const purposeClass = l.purpose === 'sale' ? 'sale' : 'rent';
   const typeText = l.type === 'property' ? 'عقار' : 'سيارة';
@@ -248,16 +239,13 @@ function renderListing(l) {
   }
   document.getElementById('infoBadges').innerHTML = badges;
 
-  // السعر
   const priceNum = Number(l.price) || 0;
   document.getElementById('adPrice').innerHTML = l.purpose === 'sale'
     ? `${priceNum.toLocaleString('en-US')} ${l.currency || 'USD'}`
     : `${priceNum} ${l.currency || 'USD'} <small>/ شهرياً</small>`;
 
-  // الموقع
   document.getElementById('adLocation').textContent = buildLocationText(l);
 
-  // المواصفات
   const specs = buildSpecsFromDetails(l);
   const specsContainer = document.getElementById('adSpecs');
 
@@ -275,15 +263,10 @@ function renderListing(l) {
     `).join('');
   }
 
-  // الوصف
   document.getElementById('adDescription').textContent = l.description || '';
-
-  // رقم الإعلان
   document.getElementById('adId').textContent = '#' + l.id;
 
-  // ==========================================
   // ✅ زر واتساب الوسيط - مع النوع والموقع والسعر والرابط
-  // ==========================================
   const listingUrl = window.location.href;
   const locationText = buildLocationText(l);
   const priceText = l.purpose === 'sale'
@@ -305,16 +288,10 @@ ${listingUrl}`;
   document.getElementById('whatsappBtn').href =
     `https://wa.me/${BROKER_PHONE}?text=${encodeURIComponent(msg)}`;
 
-  // زر واتساب البائع (للأدمن فقط)
   setupSellerWhatsapp(l);
-
-  // معرض الصور
   renderGallery(l.images || [], l);
-
-  // المفضلة
   setupFavorite(l.id);
 
-  // إظهار
   document.getElementById('loadingState').style.display = 'none';
   document.getElementById('detailsContent').style.display = 'grid';
   initIcons();
@@ -368,7 +345,7 @@ function setupSellerWhatsapp(listing) {
 }
 
 /* ==========================================
-   ✅ معرض الصور - محسّن (صور منفصلة عبر listing_image.php)
+   ✅ معرض الصور - يستخدم الدالة الموحّدة getListingImageUrl
    ========================================== */
 function renderGallery(imgs, l) {
   const main = document.getElementById('galleryMain');
@@ -385,14 +362,14 @@ function renderGallery(imgs, l) {
     return;
   }
 
-  const apiBase = '../api';
+  // ✅✅✅ استخدام الدالة الموحّدة من api.js
   const imageUrls = imgs.map(function (img, i) {
-    if (typeof img === 'string' && img.indexOf('has_image:') === 0) {
-      const index = img.split(':')[1] || 0;
-      return `${apiBase}/listing_image.php?id=${encodeURIComponent(l.id)}&index=${index}`;
+    if (window.getListingImageUrl) {
+      return window.getListingImageUrl(l, i);
     }
-    return img;
-  });
+    // fallback (احتياطي)
+    return typeof img === 'string' ? img : null;
+  }).filter(Boolean);
 
   currentListing.images = imageUrls;
 
@@ -491,7 +468,6 @@ function setupShare() {
 /* ==========================================
    ✏️ تعديل الإعلان (للأدمن)
    ========================================== */
-
 function openEditModal() {
   if (!currentListing) {
     alert('لم يتم تحميل الإعلان بعد');
@@ -608,7 +584,7 @@ async function saveEdit(e) {
 }
 
 /* ==========================================
-   Toast بسيط (رسالة مؤقتة)
+   Toast
    ========================================== */
 function showToast(message, type = 'success') {
   const toast = document.createElement('div');
@@ -716,4 +692,4 @@ document.addEventListener('DOMContentLoaded', function() {
         sellerBtn.style.display = 'none';
         console.log('👤 مستخدم عادي: تم إخفاء رقم البائع.');
     }
-});
+});ء  

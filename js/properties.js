@@ -10,9 +10,6 @@ let filteredProperties = [];
 
 function initIcons() { if (window.lucide) window.lucide.createIcons(); }
 
-/* ==========================================
-   تحميل العقارات من API
-   ========================================== */
 async function loadProperties() {
   try {
     const listings = await API.Listings.getAll({ type: 'property' });
@@ -25,9 +22,6 @@ async function loadProperties() {
   }
 }
 
-/* ==========================================
-   الفلاتر
-   ========================================== */
 function getFilters() {
   return {
     purpose: document.querySelector('input[name="purpose"]:checked')?.value || '',
@@ -90,38 +84,25 @@ function sortProperties() {
   renderProperties();
 }
 
-/* ==========================================
-   شارات الحالة (متاح / مباع / مؤجر)
-   ========================================== */
 function getStatusBadge(status) {
-  if (status === 'sold') {
-    return `<span class="status-badge sold"><i data-lucide="check-circle"></i>مباع</span>`;
-  }
-  if (status === 'rented') {
-    return `<span class="status-badge rented"><i data-lucide="key-round"></i>مؤجر</span>`;
-  }
+  if (status === 'sold') return `<span class="status-badge sold"><i data-lucide="check-circle"></i>مباع</span>`;
+  if (status === 'rented') return `<span class="status-badge rented"><i data-lucide="key-round"></i>مؤجر</span>`;
   return '';
 }
 
-/* ==========================================
-   إنشاء كارد
-   ========================================== */
 function createPropertyCard(item) {
   const purposeText = item.purpose === 'sale' ? 'للبيع' : 'للإيجار';
   const purposeClass = item.purpose === 'sale' ? 'sale' : 'rent';
 
+  const priceNum = Number(item.price) || 0;
   const priceText = item.purpose === 'sale'
-    ? `${item.price.toLocaleString('en-US')} ${item.currency || 'USD'}`
-    : `${item.price} ${item.currency || 'USD'} <small>/ شهرياً</small>`;
+    ? `${priceNum.toLocaleString('en-US')} ${item.currency || 'USD'}`
+    : `${priceNum} ${item.currency || 'USD'} <small>/ شهرياً</small>`;
 
-  const featuredBadge = item.featured
-    ? `<span class="card-badge featured">⭐ مميز</span>`
-    : '';
-
+  const featuredBadge = item.featured ? `<span class="card-badge featured">⭐ مميز</span>` : '';
   const statusBadge = getStatusBadge(item.status);
   const isUnavailable = item.status === 'sold' || item.status === 'rented';
 
-  // أيقونة حسب النوع
   let icon = 'building-2';
   if (item.subType === 'villa') icon = 'home';
   if (item.subType === 'land') icon = 'trees';
@@ -130,15 +111,13 @@ function createPropertyCard(item) {
   if (item.subType === 'chalet') icon = 'tent';
   if (item.subType === 'arabic-house') icon = 'landmark';
 
-  // ✅ استخدام دالة getListingImageUrl العالمية
+  // ✅✅✅ استخدام الدالة الموحّدة من api.js
   const imageUrl = window.getListingImageUrl
-    ? window.getListingImageUrl(item)
-    : (item.images && item.images[0]);
+    ? window.getListingImageUrl(item, 0)
+    : null;
 
   const imageContent = imageUrl
-    ? `<img src="${imageUrl}"
-            alt="${item.title || ''}"
-            loading="lazy"
+    ? `<img src="${imageUrl}" alt="${item.title || ''}" loading="lazy"
             onerror="this.onerror=null;this.style.display='none';this.parentNode.classList.add('image-failed');this.parentNode.innerHTML='<i data-lucide=\\'${icon}\\'></i>';if(window.lucide)window.lucide.createIcons();">`
     : `<i data-lucide="${icon}"></i>`;
 
@@ -154,47 +133,34 @@ function createPropertyCard(item) {
       </div>
       <div class="card-body">
         <h3 class="card-title">${item.title}</h3>
-        <p class="card-location">
-          <i data-lucide="map-pin"></i>
-          ${location}
-        </p>
+        <p class="card-location"><i data-lucide="map-pin"></i>${location}</p>
         <p class="card-price">${priceText}</p>
       </div>
     </a>
   `;
 }
 
-/* ==========================================
-   العرض
-   ========================================== */
 function renderProperties() {
   const grid = document.getElementById('propertiesGrid');
   const countEl = document.getElementById('resultsCount');
-  const noResultsMsg = document.getElementById('noResultsMessage'); // العنصر الجديد
-  
-  if (!grid) return;
+  const noResultsMsg = document.getElementById('noResultsMessage');
 
+  if (!grid) return;
   if (countEl) countEl.textContent = filteredProperties.length;
 
-  // ❌ في حال ما في نتائج مطابقة
   if (filteredProperties.length === 0) {
-    grid.style.display = 'none'; // إخفاء شبكة العقارات
+    grid.style.display = 'none';
     grid.innerHTML = '';
-    
     if (noResultsMsg) {
-      noResultsMsg.style.display = 'block'; // إظهار رسالة عدم وجود نتائج وزر الواتساب
-      initIcons(); // عشان تظهر أيقونة الواتساب
+      noResultsMsg.style.display = 'block';
+      initIcons();
     }
-    
     document.getElementById('pagination').innerHTML = '';
     return;
   }
 
-  // ✅ في حال في نتائج مطابقة
-  grid.style.display = ''; // إعادة إظهار الشبكة (بترجع للوضع الافتراضي بالـ CSS)
-  if (noResultsMsg) {
-    noResultsMsg.style.display = 'none'; // إخفاء رسالة عدم وجود نتائج
-  }
+  grid.style.display = '';
+  if (noResultsMsg) noResultsMsg.style.display = 'none';
 
   const totalPages = Math.ceil(filteredProperties.length / ITEMS_PER_PAGE);
   const start = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -241,9 +207,6 @@ window.clearAllFilters = function() {
   applyFilters();
 };
 
-/* ==========================================
-   ربط الأحداث
-   ========================================== */
 function setupEvents() {
   document.querySelectorAll('input[name="purpose"], input[name="type"], input[name="rooms"], input[name="furnished"]')
     .forEach(el => el.addEventListener('change', applyFilters));
@@ -284,9 +247,6 @@ function setupEvents() {
   });
 }
 
-/* ==========================================
-   تشغيل
-   ========================================== */
 document.addEventListener('DOMContentLoaded', () => {
   initIcons();
   setupEvents();

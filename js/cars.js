@@ -100,7 +100,7 @@ function createCarCard(item) {
 
   const icon = 'car';
 
-  // ✅ استخدام الدالة الموحّدة
+  // ✅✅✅ استخدام الدالة الموحّدة
   const imageUrl = window.getListingImageUrl
     ? window.getListingImageUrl(item, 0)
     : null;
@@ -147,7 +147,6 @@ function renderCars() {
   const noResultsMsg = document.getElementById('noResultsMessage');
 
   if (!grid) return;
-
   if (countEl) countEl.textContent = filteredCars.length;
 
   if (filteredCars.length === 0) {
