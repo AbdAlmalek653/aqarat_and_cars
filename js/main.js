@@ -704,12 +704,20 @@ async function handleCascadeShow() {
 
   const resultsSection = document.getElementById('resultsSection');
   const grid = document.getElementById('latestGrid');
-  const emptyStateEl = document.getElementById('cascadeEmpty');
+  
+  // ✅ تأكد من وجود العنصر cascadeEmpty، وإذا لم يكن موجوداً قم بإنشائه
+  let emptyStateEl = document.getElementById('cascadeEmpty');
+  if (!emptyStateEl && resultsSection) {
+    emptyStateEl = document.createElement('div');
+    emptyStateEl.id = 'cascadeEmpty';
+    emptyStateEl.style.display = 'none';
+    resultsSection.appendChild(emptyStateEl);
+  }
 
   if (resultsSection) resultsSection.style.display = 'block';
 
   grid.style.display = 'grid';
-  if (emptyStateEl) emptyStateEl.style.display = 'none';
+  if (emptyStateEl) emptyStateEl.style.display = 'none'; // إخفاء الرسالة
 
   grid.innerHTML = `
     <div style="grid-column:1/-1;text-align:center;padding:60px 20px;">
@@ -758,17 +766,19 @@ async function handleCascadeShow() {
     }
 
     if (listings.length === 0) {
+      // ❌ ما في نتائج
       grid.style.display = 'none';
       if (emptyStateEl) {
-        // ✅ الإصلاح: استخدام innerHTML بدل outerHTML للحفاظ على العنصر والـ id
-        emptyStateEl.innerHTML = emptyFilterState();
+        emptyStateEl.innerHTML = emptyFilterState(); // ✅ الإصلاح المهم (innerHTML)
         emptyStateEl.style.display = 'flex';
       }
       if (window.lucide) window.lucide.createIcons();
       return;
     }
 
+    // ✅ في نتائج
     grid.innerHTML = listings.map(item => createCard(item, item.type)).join('');
+    if (emptyStateEl) emptyStateEl.style.display = 'none'; // تأكيد إضافي
     if (window.lucide) window.lucide.createIcons();
 
   } catch (err) {
