@@ -618,41 +618,61 @@ const API = (function () {
 window.API = API;
 
 /* ==========================================
-   🖼️ دالة مساعدة عالمية لبناء رابط الصورة
-   ✅ تستخدمها كل الصفحات (properties, cars, favorites, details...)
+   🖼️ دالة موحّدة عالمية لبناء رابط الصورة
+   ✅ تستخدمها كل الصفحات (properties, cars, favorites, details, search)
+   ✅ تدعم كل الحالات: has_image, has_image:N, base64, http, /, ./ 
    ========================================== */
-window.getListingImageUrl = function (item) {
-  if (!item || !item.images || !Array.isArray(item.images) || item.images.length === 0) {
-    return null;
+window.getListingImageUrl = function (item, index) {
+  if (!item) return null;
+  const idx = (typeof index === 'number') ? index : 0;
+
+  // ✅ مسار مطلق (absolute) - يشتغل من أي صفحة (index.html أو pages/*.html)
+  const apiBase = '/api';
+
+  // استخرج الصورة المطلوبة
+  let first = null;
+  if (item.images && Array.isArray(item.images) && item.images.length > 0) {
+    first = item.images[idx] || item.images[0];
+  } else if (item.image) {
+    first = item.image;
   }
 
-  const first = item.images[0];
-  if (!first) return null;
-
-  const apiBase = window.location.pathname.includes('/pages/') ? '../api' : 'api';
-
-  // حالة 1: has_image → API
-  if (first === 'has_image') {
-    return `${apiBase}/listing_image.php?id=${encodeURIComponent(item.id)}&index=0`;
+  // إذا ما في صورة → أرجع رابط API (يعرض placeholder)
+  if (!first) {
+    if (!item.id) return null;
+    return `${apiBase}/listing_image.php?id=${encodeURIComponent(item.id)}&index=${idx}`;
   }
 
-  // حالة 2: base64
+  // 1. has_image أو has_image:N
+  if (typeof first === 'string' && first.startsWith('has_image')) {
+    const parts = first.split(':');
+    const realIndex = parts[1] !== undefined ? parts[1] : idx;
+    return `${apiBase}/listing_image.php?id=${encodeURIComponent(item.id)}&index=${realIndex}`;
+  }
+
+  // 2. Base64
   if (typeof first === 'string' && first.startsWith('data:image/')) {
     return first;
   }
 
-  // حالة 3: URL كامل
-  if (typeof first === 'string' && (first.startsWith('http://') || first.startsWith('https://'))) {
+  // 3. URL كامل
+  if (typeof first === 'string' && /^https?:\/\//i.test(first)) {
     return first;
   }
 
-  // حالة 4: مسار نسبي
-  if (typeof first === 'string' && (first.startsWith('./') || first.startsWith('/'))) {
+  // 4. مسار مطلق (absolute path)
+  if (typeof first === 'string' && first.startsWith('/')) {
     return first;
   }
 
-  // حالة 5: أي قيمة أخرى → API
-  return `${apiBase}/listing_image.php?id=${encodeURIComponent(item.id)}&index=0`;
+  // 5. مسار نسبي
+  if (typeof first === 'string' && first.startsWith('./')) {
+    return first;
+  }
+
+  // 6. أي قيمة تانية (اسم ملف، رقم، إلخ) → استخدم API
+  if (!item.id) return null;
+  return `${apiBase}/listing_image.php?id=${encodeURIComponent(item.id)}&index=${idx}`;
 };
 
 /* ==========================================
