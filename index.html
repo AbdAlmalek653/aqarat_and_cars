@@ -831,25 +831,6 @@
           </a>
         `;
       }
-
-      // ✅ إعلاناتي
-      html += `
-        <a href="/pages/my-listings.html" class="mobile-menu-item">
-          <i data-lucide="megaphone"></i>
-          <span>إعلاناتي</span>
-          <i data-lucide="chevron-left" class="mobile-menu-item-arrow"></i>
-        </a>
-      `;
-
-      // ✅ المفضلة
-      html += `
-        <a href="/pages/favorites.html" class="mobile-menu-item">
-          <i data-lucide="heart"></i>
-          <span>المفضلة</span>
-          <i data-lucide="chevron-left" class="mobile-menu-item-arrow"></i>
-        </a>
-      `;
-
       // ✅ فاصل
       html += `<div class="mobile-menu-divider"></div>`;
 
@@ -1018,5 +999,101 @@
   console.log('⚡ Instant feedback system ready');
 })();
 </script>
+<script>
+/* ==========================================
+   👤 تحويل "تسجيل الدخول" إلى "حسابي" بعد الدخول
+   - يشتغل على كل الصفحات (bottom-nav)
+   ========================================== */
+(function() {
+  'use strict';
+  console.log('👤 Bottom nav user state loading...');
+
+  function getCurrentUser() {
+    try {
+      if (window.API && API.Users && API.Users.getCurrent) {
+        return API.Users.getCurrent();
+      }
+      const u = localStorage.getItem('user');
+      if (u && u !== 'null' && u !== 'undefined') {
+        return JSON.parse(u);
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function updateBottomNav() {
+    const user = getCurrentUser();
+    const isLoggedIn = !!(user && (user.id || user.email));
+
+    // نبحث عن آخر عنصر في الـ bottom-nav (حسابي/تسجيل الدخول)
+    const accountLink = document.querySelector('.bottom-nav-item[href*="account"], .bottom-nav-item[href*="login"]');
+    
+    if (!accountLink) {
+      console.warn('⚠️ Account link not found in bottom-nav');
+      return;
+    }
+
+    const textSpan = accountLink.querySelector('span');
+    const iconEl = accountLink.querySelector('i, svg');
+
+    if (!textSpan) return;
+
+    if (isLoggedIn) {
+      // ✅ المستخدم مسجل → "حسابي"
+      textSpan.textContent = 'حسابي';
+      accountLink.setAttribute('href', 'pages/account.html');
+      accountLink.classList.add('is-logged-in');
+      console.log('✅ تم التحويل إلى "حسابي"');
+    } else {
+      // ❌ غير مسجل → "تسجيل الدخول"
+      textSpan.textContent = 'تسجيل الدخول';
+      accountLink.setAttribute('href', 'pages/login.html');
+      accountLink.classList.remove('is-logged-in');
+      console.log('✅ تم التحويل إلى "تسجيل الدخول"');
+    }
+
+    // تحديث الأيقونات
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  // تشغيل بعد تحميل الصفحة
+  function run() {
+    // محاولة أولى مباشرة
+    updateBottomNav();
+    
+    // محاولة تانية بعد ما يتحمل API (مهم!)
+    let attempts = 0;
+    const interval = setInterval(function() {
+      attempts++;
+      updateBottomNav();
+      if (attempts >= 10) clearInterval(interval);
+    }, 300);
+
+    // مراقبة تغييرات localStorage (بعد تسجيل دخول/خروج)
+    window.addEventListener('storage', updateBottomNav);
+
+    // راقب تسجيل الدخول/الخروج بنفس الصفحة
+    const checkUserChange = setInterval(function() {
+      const currentUser = localStorage.getItem('user');
+      if (currentUser !== window.__lastUserState) {
+        window.__lastUserState = currentUser;
+        updateBottomNav();
+      }
+    }, 1000);
+
+    // إيقاف المراقبة بعد دقيقة (لتوفير الموارد)
+    setTimeout(() => clearInterval(checkUserChange), 60000);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run);
+  } else {
+    run();
+  }
+
+})();
+</script> 
 </body>
 </html>

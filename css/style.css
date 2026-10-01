@@ -2632,3 +2632,16 @@ html {
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto !important; }
 }
+/* ✅ تمييز "حسابي" لما المستخدم مسجل */
+.bottom-nav-item.is-logged-in {
+  color: #3B82F6 !important;
+}
+
+.bottom-nav-item.is-logged-in svg {
+  color: #3B82F6 !important;
+  filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.5));
+}
+
+.bottom-nav-item.is-logged-in span {
+  font-weight: 800 !important;
+}
