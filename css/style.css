@@ -1094,18 +1094,7 @@ img { display: block; }
     scroll-behavior: auto !important;
   }
 }
-/* ✅ عشان الأزرار تاخد نفس شكل الروابط */
-.browse-option {
-  font-family: 'Cairo', inherit;
-  cursor: pointer;
-  width: 100%;
-  color: inherit;
-}
 
-.browse-option:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 4px;
-}
 /* ==========================================
    نافذة اختيار نوع الإعلان - Browse Modal
    ========================================== */
@@ -1143,7 +1132,7 @@ img { display: block; }
   border: 1px solid rgba(59, 130, 246, 0.2);
   border-radius: 24px;
   padding: 40px 30px 35px;
-  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.7);
   transform: translateY(20px) scale(0.95);
   opacity: 0;
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -1368,11 +1357,6 @@ img { display: block; }
 .browse-option-btn svg {
   width: 16px;
   height: 16px;
-}
-
-.browse-option:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 4px;
 }
 
 @media (max-width: 640px) {
