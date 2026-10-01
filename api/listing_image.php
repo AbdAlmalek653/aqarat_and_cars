@@ -9,7 +9,6 @@ if (!$id) {
     exit;
 }
 
-// ✅ SQLite لا يدعم binding مع OFFSET → نستخدم قيمة مضمّنة
 $offset = max(0, $index);
 
 $stmt = $pdo->prepare(
@@ -29,56 +28,108 @@ if (!$row || empty($row['url'])) {
 $url = $row['url'];
 
 // ==========================================
-// ✨ دالة مساعدة: ترويسات التخزين المؤقت الموحدة
+// ✨ دالة مساعدة: ترويسات التخزين المؤقت
 // ==========================================
-function sendCacheHeaders() {
-    // سنة كاملة = 31536000 ثانية
+function sendCacheHeaders($mime = null) {
+    // Cache لمدة سنة كاملة
     header('Cache-Control: public, max-age=31536000, immutable');
     header('Expires: ' . gmdate('D, d M Y H:i:s', time() + 31536000) . ' GMT');
     header('Vary: Accept-Encoding');
-    header('Vary: User-Agent');
+    if ($mime) {
+        header('Content-Type: ' . $mime);
+    }
 }
 
 // ==========================================
-// 1️⃣ رابط URL خارجي → 302 Redirect مع Cache
+// 🎯 دالة: جلب صورة من URL خارجي وخدمتها مباشرة
 // ==========================================
-if (strpos($url, 'http') === 0 && strpos($url, 'data:') !== 0) {
-    sendCacheHeaders(); // ✅ جديد: يخبر المتصفح بتخزين الـ Redirect
-    header('Location: ' . $url, true, 302);
-    exit;
+function proxyImage($url, $maxWidth = 800) {
+    // التحقق من صحة الرابط
+    if (!filter_var($url, FILTER_VALIDATE_URL)) {
+        return false;
+    }
+    
+    // استخدام cURL لجلب الصورة
+    $ch = curl_init();
+    curl_setopt_array($ch, [
+        CURLOPT_URL => $url,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_MAXREDIRS => 5,
+        CURLOPT_TIMEOUT => 10,
+        CURLOPT_CONNECTTIMEOUT => 5,
+        CURLOPT_SSL_VERIFYPEER => true,
+        CURLOPT_USERAGENT => 'Mozilla/5.0 (compatible; SouqBot/1.0)',
+        CURLOPT_HTTPHEADER => [
+            'Accept: image/webp,image/avif,image/jpeg,image/png,image/*,*/*;q=0.8',
+        ],
+    ]);
+    
+    $data = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+    $error = curl_error($ch);
+    curl_close($ch);
+    
+    if ($httpCode !== 200 || $data === false || empty($data)) {
+        return false;
+    }
+    
+    // التحقق من أن المحتوى صورة فعلاً
+    if ($contentType && strpos($contentType, 'image/') !== 0) {
+        return false;
+    }
+    
+    // تحديد MIME type
+    if (!$contentType || $contentType === 'application/octet-stream') {
+        // كشف نوع الصورة من البيانات
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $contentType = $finfo->buffer($data) ?: 'image/jpeg';
+    }
+    
+    return [
+        'data' => $data,
+        'mime' => $contentType,
+    ];
 }
 
 // ==========================================
-// 2️⃣ صورة Base64
+// 1️⃣ صورة Base64 → خدمة مباشرة
 // ==========================================
 if (strpos($url, 'data:image/') === 0) {
     $parts = explode(',', $url, 2);
     if (count($parts) === 2) {
-        $size = strlen($parts[1]);
-
-        // ✅ إذا الصورة كبيرة (> 100 kB) → استخدم wsrv.nl لضغطها
-        if ($size > 100000) {
-            $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-            $host = $_SERVER['HTTP_HOST'] ?? '';
-            $rawUrl = $protocol . '://' . $host . '/api/listing_image_raw.php?id=' . urlencode($id) . '&index=' . $offset;
-
-            $proxyUrl = 'https://wsrv.nl/?url=' . urlencode($rawUrl) . '&w=500&h=400&fit=cover&q=55&output=jpg&il';
-            sendCacheHeaders(); // ✅ جديد: يخبر المتصفح بتخزين الـ Redirect
-            header('Location: ' . $proxyUrl, true, 302);
-            exit;
-        }
-
-        // صورة صغيرة → أرسلها مباشرة (بدون 302)
         $binary = base64_decode($parts[1]);
         preg_match('/data:([^;]+);/', $parts[0], $m);
         $mime = $m[1] ?? 'image/jpeg';
-
-        sendCacheHeaders(); // ✅ استخدام الدالة الموحدة
-        header('Content-Type: ' . $mime);
+        
+        sendCacheHeaders($mime);
         header('Content-Length: ' . strlen($binary));
         echo $binary;
         exit;
     }
+}
+
+// ==========================================
+// 2️⃣ رابط خارجي → Proxy مباشر (بدون Redirect!)
+// ==========================================
+if (strpos($url, 'http') === 0) {
+    // جرّب جلب الصورة مباشرة
+    $result = proxyImage($url);
+    
+    if ($result !== false) {
+        // ✅ نجح → خدمة الصورة مباشرة
+        sendCacheHeaders($result['mime']);
+        header('Content-Length: ' . strlen($result['data']));
+        echo $result['data'];
+        exit;
+    }
+    
+    // ❌ فشل → fallback: redirect مع cache
+    // (للحالات النادرة: hotlink protection, موقع خارجي محجوب, إلخ)
+    sendCacheHeaders();
+    header('Location: ' . $url, true, 302);
+    exit;
 }
 
 http_response_code(404);

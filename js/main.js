@@ -1,7 +1,7 @@
 /* ==========================================
    الصفحة الرئيسية - سوق
    البيانات كلها من API (قاعدة البيانات)
-   النسخة النهائية: عرض كل الإعلانات + تحديث تلقائي ذكي + صور سريعة
+   النسخة النهائية: عرض كل الإعلانات + تحديث تلقائي فوري
    ========================================== */
 
 /* ===== تهيئة الأيقونات ===== */
@@ -31,18 +31,62 @@ const PURPOSE_NAMES = {
 };
 
 /* ==========================================
-   ✨ جلب الإعلانات دائماً من السيرفر (بدون كاش)
+   ✨ جلب الإعلانات من السيرفر
+   ✅ forceRefresh: true = يتجاوز الكاش (للتحديث التلقائي)
    ========================================== */
-async function getCachedListings() {
+async function getCachedListings(forceRefresh) {
   try {
-    console.log('🔄 جاري جلب أحدث الإعلانات من السيرفر...');
-    const data = await API.Listings.getAll();
+    const options = forceRefresh ? { forceRefresh: true } : {};
+    console.log(forceRefresh ? '🔄 تحديث إجباري من السيرفر...' : '📦 جلب من الكاش...');
+    const data = await API.Listings.getAll(null, options);
     console.log(`✅ تم جلب ${data ? data.length : 0} إعلان`);
     return data || [];
   } catch (error) {
-    console.error('❌ فشل تحميل الإعلانات من الخادم:', error);
+    console.error('❌ فشل تحميل الإعلانات:', error);
     return [];
   }
+}
+
+/* ==========================================
+   🖼️ دالة مساعدة: بناء رابط الصورة
+   ✅ تتعامل مع جميع حالات images
+   ========================================== */
+function getImageUrl(item) {
+  if (!item || !item.images || !Array.isArray(item.images) || item.images.length === 0) {
+    return null;
+  }
+
+  const first = item.images[0];
+  if (!first) return null;
+
+  const apiBase = window.location.pathname.includes('/pages/') ? '../api' : 'api';
+
+  // حالة 1: has_image → API
+  if (first === 'has_image') {
+    return `${apiBase}/listing_image.php?id=${encodeURIComponent(item.id)}`;
+  }
+
+  // حالة 2: base64
+  if (typeof first === 'string' && first.startsWith('data:image/')) {
+    return first;
+  }
+
+  // حالة 3: URL كامل
+  if (typeof first === 'string' && (first.startsWith('http://') || first.startsWith('https://'))) {
+    return first;
+  }
+
+  // حالة 4: مسار نسبي
+  if (typeof first === 'string' && (first.startsWith('./') || first.startsWith('/'))) {
+    return first;
+  }
+
+  // حالة 5: اسم ملف فقط → نستخدم API
+  if (typeof first === 'string' && first.length > 0) {
+    return `${apiBase}/listing_image.php?id=${encodeURIComponent(item.id)}`;
+  }
+
+  return null;
 }
 
 /* ==========================================
@@ -65,14 +109,15 @@ function createCard(item, type) {
   if (item.subType === 'chalet') icon = 'tent';
   if (item.subType === 'arabic-house') icon = 'landmark';
 
-  // ✅ تحميل الصورة من API مباشرة (أسرع بـ 700 مرة من Base64)
-  const apiBase = window.location.pathname.includes('/pages/') ? '../api' : 'api';
-  const firstImage = item.images && item.images.length > 0 && item.images[0] === 'has_image'
-    ? `${apiBase}/listing_image.php?id=${encodeURIComponent(item.id)}`
-    : null;
+  // ✅ استخدام دالة getImageUrl
+  const imageUrl = getImageUrl(item);
 
-  const imageContent = firstImage
-    ? `<img src="${firstImage}" alt="${item.title}" loading="lazy">`
+  // ✅ مع onerror fallback
+  const imageContent = imageUrl
+    ? `<img src="${imageUrl}"
+            alt="${item.title || ''}"
+            loading="lazy"
+            onerror="this.onerror=null;this.style.display='none';this.parentNode.classList.add('image-failed');this.parentNode.innerHTML='<i data-lucide=\\'${icon}\\'></i>';if(window.lucide)window.lucide.createIcons();">`
     : `<i data-lucide="${icon}"></i>`;
 
   const featuredBadge = item.featured
@@ -224,12 +269,28 @@ function emptyState(type) {
 }
 
 /* ==========================================
-   حالة فاضية مخصصة لنتائج الفلتر
+   ✅ حالة فاضية مع زر التواصل مع أبو أيمن
    ========================================== */
 function emptyFilterState() {
   const typeText = TYPE_NAMES[cascadeState.type] || '';
   const purposeText = PURPOSE_NAMES[cascadeState.purpose] || '';
   const cityText = CITY_NAMES[cascadeState.city] || '';
+
+  const timestamp = Date.now();
+  const refNumber = timestamp.toString().slice(-6);
+
+  const waMessage = `مرحباً أبو أيمن، 👋
+
+🔍 أبحث عن إعلان:
+🏠 النوع: ${typeText}
+💰 الغرض: ${purposeText}
+📍 المحافظة: ${cityText}
+
+هل يمكنك مساعدتي في إيجاد إعلان مناسب؟
+
+— رقم المرجع: #${refNumber}`;
+
+  const waUrl = `https://wa.me/963930932794?text=${encodeURIComponent(waMessage)}&t=${timestamp}`;
 
   return `
     <div class="empty-state" style="grid-column:1/-1;">
@@ -245,38 +306,64 @@ function emptyFilterState() {
         لا توجد <span class="gradient-text">نتائج مطابقة</span>
       </h3>
       <p class="empty-subtitle">
-        لا توجد ${typeText} ${purposeText} في ${cityText} حالياً
+        عذراً، لا توجد ${typeText} ${purposeText} في ${cityText} حالياً
       </p>
-      <div class="empty-features">
-        <div class="empty-feature">
-          <i data-lucide="refresh-ccw"></i>
-          <span>جرّب تغيير الفلتر</span>
+
+      <div class="search-summary">
+        <div class="search-summary-item">
+          <i data-lucide="building-2"></i>
+          <span>${typeText}</span>
         </div>
-        <div class="empty-feature">
+        <div class="search-summary-item">
+          <i data-lucide="tag"></i>
+          <span>${purposeText}</span>
+        </div>
+        <div class="search-summary-item">
           <i data-lucide="map-pin"></i>
-          <span>محافظة أخرى</span>
+          <span>${cityText}</span>
         </div>
       </div>
-      <button class="empty-cta-btn" onclick="resetCascadeFilter()" type="button">
+
+      <div class="empty-features">
+        <div class="empty-feature">
+          <i data-lucide="headphones"></i>
+          <span>فريقنا جاهز لمساعدتك</span>
+        </div>
+        <div class="empty-feature">
+          <i data-lucide="search"></i>
+          <span>ابحث لك عن إعلان مناسب</span>
+        </div>
+        <div class="empty-feature">
+          <i data-lucide="clock"></i>
+          <span>رد فوري عبر واتساب</span>
+        </div>
+      </div>
+
+      <a href="${waUrl}" target="_blank" rel="noopener" class="empty-cta-btn empty-cta-whatsapp">
         <span class="empty-cta-icon">
-          <i data-lucide="rotate-ccw"></i>
+          <i data-lucide="message-circle"></i>
         </span>
-        <span>تصفير الفلتر</span>
+        <span>تواصل مع أبو أيمن للبحث عن إعلان</span>
         <i data-lucide="arrow-left" class="empty-cta-arrow"></i>
+      </a>
+
+      <button class="empty-secondary-btn" onclick="resetCascadeFilter()" type="button">
+        <i data-lucide="rotate-ccw"></i>
+        <span>تصفير الفلتر والبدء من جديد</span>
       </button>
     </div>
   `;
 }
 
 /* ==========================================
-   ✅ تحميل كل العقارات (بدون حد)
+   ✅ تحميل العقارات
    ========================================== */
-async function loadFeaturedProperties() {
+async function loadFeaturedProperties(forceRefresh) {
   const container = document.getElementById('featuredProperties');
   if (!container) return;
 
   try {
-    const allListings = await getCachedListings();
+    const allListings = await getCachedListings(forceRefresh);
     const properties = allListings
       .filter(l => l.type === 'property')
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -295,14 +382,14 @@ async function loadFeaturedProperties() {
 }
 
 /* ==========================================
-   ✅ تحميل كل السيارات (بدون حد)
+   ✅ تحميل السيارات
    ========================================== */
-async function loadFeaturedCars() {
+async function loadFeaturedCars(forceRefresh) {
   const container = document.getElementById('featuredCars');
   if (!container) return;
 
   try {
-    const allListings = await getCachedListings();
+    const allListings = await getCachedListings(forceRefresh);
     const cars = allListings
       .filter(l => l.type === 'car')
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -321,19 +408,19 @@ async function loadFeaturedCars() {
 }
 
 /* ==========================================
-   تحميل الإحصائيات الحقيقية (مع نظام احتياطي)
+   تحميل الإحصائيات
    ========================================== */
-async function loadStats() {
+async function loadStats(forceRefresh) {
   try {
-    const stats = await API.Stats.get();
+    const options = forceRefresh ? { forceRefresh: true } : {};
+    const stats = await API.Stats.get(options);
     animateNumber('statProperties', stats.properties || 0);
     animateNumber('statCars', stats.cars || 0);
     animateNumber('statUsers', stats.users || 0);
   } catch (e) {
-    console.warn('⚠️ فشل جلب الإحصائيات من الـ API. جاري المحاولة من الإعلانات...', e);
-
+    console.warn('⚠️ فشل جلب الإحصائيات:', e);
     try {
-      const allListings = await getCachedListings();
+      const allListings = await getCachedListings(forceRefresh);
       if (allListings.length > 0) {
         const propsCount = allListings.filter(l => l.type === 'property').length;
         const carsCount = allListings.filter(l => l.type === 'car').length;
@@ -341,7 +428,7 @@ async function loadStats() {
         animateNumber('statCars', carsCount);
       }
     } catch (fallbackError) {
-      console.error('❌ فشل النظام الاحتياطي أيضاً:', fallbackError);
+      console.error('❌ فشل النظام الاحتياطي:', fallbackError);
     }
   }
 }
@@ -641,7 +728,7 @@ async function handleCascadeShow() {
   }, 100);
 
   try {
-    const allListings = await getCachedListings();
+    const allListings = await getCachedListings(true);
 
     const listings = allListings.filter(l => {
       if (l.type !== cascadeState.type) return false;
@@ -715,12 +802,12 @@ function setupScrollDownBtn() {
 }
 
 /* ==========================================
-   تشغيل عند التحميل + 🔄 تحديث تلقائي ذكي كل 8 ثوانٍ
+   تشغيل عند التحميل + 🔄 تحديث تلقائي فوري
    ========================================== */
 document.addEventListener('DOMContentLoaded', () => {
-  loadFeaturedProperties();
-  loadFeaturedCars();
-  loadStats();
+  loadFeaturedProperties(false);
+  loadFeaturedCars(false);
+  loadStats(false);
   setupSearchTabs();
   setupSearchForm();
   setupWelcomeModal();
@@ -728,17 +815,17 @@ document.addEventListener('DOMContentLoaded', () => {
   setupScrollDownBtn();
   initIcons();
 
-  // ✅ تحديث تلقائي ذكي - يمنع تكرار الطلبات المتزامنة
   let isRefreshing = false;
   setInterval(async () => {
-    if (isRefreshing) return; // امنع التحديث إذا كان هناك واحد قيد التنفيذ
+    if (isRefreshing) return;
     isRefreshing = true;
     try {
       await Promise.all([
-        loadFeaturedProperties(),
-        loadFeaturedCars(),
-        loadStats()
+        loadFeaturedProperties(true),
+        loadFeaturedCars(true),
+        loadStats(true)
       ]);
+      console.log('🔄 [Auto-Refresh] تم تحديث البيانات');
     } finally {
       isRefreshing = false;
     }
