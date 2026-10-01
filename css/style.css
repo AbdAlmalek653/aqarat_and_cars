@@ -1387,3 +1387,75 @@ img { display: block; }
     font-size: 17px;
   }
 }
+/* ==========================================
+   ✅ إصلاح كروت السيارات على الجوال
+   ========================================== */
+@media (max-width: 768px) {
+  /* كروت السيارات في الشبكة */
+  .properties-grid .card,
+  #featuredCars .card,
+  #carsGrid .card {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    flex: none !important;
+  }
+  
+  /* داخل swipe على الصفحة الرئيسية */
+  #featuredCars {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    gap: 10px !important;
+    padding: 10px 12px 16px !important;
+    scroll-snap-type: x mandatory !important;
+  }
+  
+  #featuredCars .card {
+    flex: 0 0 calc((100vw - 50px) / 2.2) !important;
+    min-width: calc((100vw - 50px) / 2.2) !important;
+    max-width: calc((100vw - 50px) / 2.2) !important;
+    scroll-snap-align: start;
+  }
+  
+  /* كروت السيارات في صفحة cars.html */
+  .properties-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+  
+  .properties-grid .card-image {
+    height: 130px !important;
+  }
+  
+  .properties-grid .card-body {
+    padding: 10px !important;
+  }
+  
+  .properties-grid .card-title {
+    font-size: 12.5px !important;
+    line-height: 1.35 !important;
+    margin-bottom: 6px !important;
+  }
+  
+  .properties-grid .card-location {
+    font-size: 10.5px !important;
+    margin-bottom: 8px !important;
+  }
+  
+  .properties-grid .card-price {
+    font-size: 14px !important;
+  }
+  
+  .properties-grid .card-meta {
+    display: none !important;
+  }
+}
+
+@media (max-width: 380px) {
+  #featuredCars .card {
+    flex: 0 0 calc((100vw - 40px) / 2) !important;
+    min-width: calc((100vw - 40px) / 2) !important;
+    max-width: calc((100vw - 40px) / 2) !important;
+  }
+}
