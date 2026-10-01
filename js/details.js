@@ -154,6 +154,46 @@ function buildSpecsFromDetails(listing) {
 }
 
 /* ==========================================
+   ✅ استخراج نوع العقار/السيارة (جديد)
+   ========================================== */
+function buildTypeText(listing) {
+  const d = listing.details || {};
+
+  // ===== للعقارات =====
+  if (listing.type === 'property') {
+    const propertyTypes = {
+      apartment: 'شقة',
+      villa: 'فيلا',
+      'arabic-house': 'بيت عربي',
+      land: 'أرض',
+      office: 'مكتب',
+      shop: 'محل تجاري',
+      chalet: 'شاليه',
+      building: 'بناء كامل'
+    };
+    const type = listing.subType || d.propertyType;
+    return propertyTypes[type] || 'عقار';
+  }
+
+  // ===== للسيارات =====
+  if (listing.type === 'car') {
+    const brandNames = {
+      toyota: 'تويوتا', hyundai: 'هيونداي', kia: 'كيا',
+      mercedes: 'مرسيدس', bmw: 'BMW', nissan: 'نيسان',
+      honda: 'هوندا', chevrolet: 'شيفروليه', ford: 'فورد',
+      mazda: 'مازدا', mitsubishi: 'ميتسوبيشي',
+      volkswagen: 'فولكس فاجن', audi: 'أودي', lexus: 'لكزس', other: 'أخرى'
+    };
+    const brand = d.brandName || brandNames[d.brand] || d.brand || '';
+    const model = d.model || '';
+    const full = [brand, model].filter(Boolean).join(' ');
+    return full || 'سيارة';
+  }
+
+  return '';
+}
+
+/* ==========================================
    استخراج الموقع الصحيح (المحافظة + المنطقة)
    ========================================== */
 function buildLocationText(listing) {
@@ -241,8 +281,27 @@ function renderListing(l) {
   // رقم الإعلان
   document.getElementById('adId').textContent = '#' + l.id;
 
-  // زر واتساب الوسيط
-  const msg = `مرحباً، انا مهتم بـ ${typeText} ورقم الإعلان هو: ${l.id}`;
+  // ==========================================
+  // ✅ زر واتساب الوسيط - مع النوع والموقع والسعر والرابط
+  // ==========================================
+  const listingUrl = window.location.href;
+  const locationText = buildLocationText(l);
+  const priceText = l.purpose === 'sale'
+    ? `${priceNum.toLocaleString('en-US')} ${l.currency || 'USD'}`
+    : `${priceNum} ${l.currency || 'USD'} / شهرياً`;
+
+  const specificType = buildTypeText(l);
+  const typeLabel = l.type === 'property' ? 'نوع العقار' : 'نوع السيارة';
+
+  const msg = 
+`مرحباً، انا مهتم بـ ${typeText} ورقم الإعلان هو: ${l.id}
+🔍 ${typeLabel}: ${specificType}
+📍 الموقع: ${locationText}
+💰 السعر: ${priceText}
+
+🔗 رابط الإعلان:
+${listingUrl}`;
+
   document.getElementById('whatsappBtn').href =
     `https://wa.me/${BROKER_PHONE}?text=${encodeURIComponent(msg)}`;
 
@@ -296,7 +355,7 @@ function setupSellerWhatsapp(listing) {
   }
 
   const typeText = listing.type === 'property' ? 'العقار' : 'السيارة';
-  const message = `مرحباً، تواصل معك فريق سوق بخصوص ${typeText} رقم #${listing.id}\n${listing.title}`;
+  const message = `مرحباً،  معك فريق سوق السيارت &  العقارات للوساطة الإلكترونية  بخصوص ${typeText} رقم #${listing.id}\n${listing.title}`;
 
   btn.href = `https://wa.me/${sellerPhone}?text=${encodeURIComponent(message)}`;
   btn.style.display = 'flex';
@@ -326,19 +385,15 @@ function renderGallery(imgs, l) {
     return;
   }
 
-  // ✅ تحويل كل عنصر إلى رابط لـ listing_image.php
   const apiBase = '../api';
   const imageUrls = imgs.map(function (img, i) {
-    // إذا العنصر من نوع "has_image:N" → استخدم رابط API
     if (typeof img === 'string' && img.indexOf('has_image:') === 0) {
       const index = img.split(':')[1] || 0;
       return `${apiBase}/listing_image.php?id=${encodeURIComponent(l.id)}&index=${index}`;
     }
-    // وإلا (رابط URL عادي أو Base64 قديم) → استخدمه مباشرة
     return img;
   });
 
-  // خزّن الروابط الجديدة لاستخدامها في التنقل
   currentListing.images = imageUrls;
 
   main.innerHTML = `<img src="${imageUrls[0]}" alt="${l.title}" loading="eager">
@@ -437,21 +492,18 @@ function setupShare() {
    ✏️ تعديل الإعلان (للأدمن)
    ========================================== */
 
-// فتح نافذة التعديل
 function openEditModal() {
   if (!currentListing) {
     alert('لم يتم تحميل الإعلان بعد');
     return;
   }
 
-  // التحقق من الصلاحيات
   const isAdmin = window.API && API.Users && API.Users.isAdmin && API.Users.isAdmin();
   if (!isAdmin) {
     alert('هذه الميزة للأدمن فقط');
     return;
   }
 
-  // ملء الحقول بالبيانات الحالية
   document.getElementById('editTitle').value = currentListing.title || '';
   document.getElementById('editPrice').value = currentListing.price || '';
   document.getElementById('editCurrency').value = currentListing.currency || 'USD';
@@ -462,7 +514,6 @@ function openEditModal() {
   document.getElementById('editStatus').value = currentListing.status || 'active';
   document.getElementById('editFeatured').checked = !!currentListing.featured;
 
-  // فتح النافذة
   const modal = document.getElementById('editModal');
   modal.classList.add('show');
   document.body.style.overflow = 'hidden';
@@ -470,7 +521,6 @@ function openEditModal() {
   if (window.lucide) window.lucide.createIcons();
 }
 
-// إغلاق النافذة
 window.closeEditModal = function() {
   const modal = document.getElementById('editModal');
   if (modal) {
@@ -479,7 +529,6 @@ window.closeEditModal = function() {
   }
 };
 
-// حفظ التعديلات
 async function saveEdit(e) {
   e.preventDefault();
   if (!currentListing) return;
@@ -505,10 +554,8 @@ async function saveEdit(e) {
     const result = await API.Listings.update(currentListing.id, updates);
 
     if (result.success) {
-      // تحديث البيانات الحالية
       currentListing = Object.assign({}, currentListing, updates);
 
-      // تحديث العناصر المعروضة مباشرة
       const titleEl = document.getElementById('adTitle');
       if (titleEl) titleEl.textContent = updates.title;
 
@@ -528,7 +575,6 @@ async function saveEdit(e) {
       const locEl = document.getElementById('adLocation');
       if (locEl) locEl.textContent = buildLocationText(currentListing);
 
-      // تحديث الشارات (لو الإعلان صار مميز)
       const purposeText = currentListing.purpose === 'sale' ? 'للبيع' : 'للإيجار';
       const purposeClass = currentListing.purpose === 'sale' ? 'sale' : 'rent';
       const typeText = currentListing.type === 'property' ? 'عقار' : 'سيارة';
@@ -544,10 +590,8 @@ async function saveEdit(e) {
       const badgesEl = document.getElementById('infoBadges');
       if (badgesEl) badgesEl.innerHTML = badges;
 
-      // تحديث زر واتساب البائع (لو تغير الرقم)
       setupSellerWhatsapp(currentListing);
 
-      // إغلاق النافذة + رسالة نجاح
       closeEditModal();
       showToast('✅ تم حفظ التعديلات بنجاح', 'success');
     } else {
@@ -596,7 +640,6 @@ function showToast(message, type = 'success') {
   }, 2500);
 }
 
-// إضافة keyframe للـ toast
 if (!document.getElementById('toast-animation')) {
   const style = document.createElement('style');
   style.id = 'toast-animation';
@@ -621,14 +664,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   initIcons();
   setupShare();
 
-  // ✏️ ربط زر التعديل ونموذج الحفظ
   const editBtn = document.getElementById('adminEditBtn');
   const editForm = document.getElementById('editForm');
 
   if (editBtn) editBtn.addEventListener('click', openEditModal);
   if (editForm) editForm.addEventListener('submit', saveEdit);
 
-  // إغلاق النافذة بمفتاح Escape
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       window.closeEditModal();
@@ -660,25 +701,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 // إخفاء رقم هاتف البائع عن المستخدمين العاديين
 // ==========================================
 document.addEventListener('DOMContentLoaded', function() {
-    // 1. جلب العنصر الخاص بزر واتساب البائع
     const sellerBtn = document.getElementById('sellerWhatsappBtn'); 
     
-    // إذا لم نكن في صفحة التفاصيل، توقف
     if (!sellerBtn) return;
 
-    // 2. جلب بيانات المستخدم الحالي
     const currentUser = API.Users.getCurrent();
     
-    // 3. التحقق: هل المستخدم أدمن أو سوبر أدمن؟
     const isAdmin = currentUser && (currentUser.role === 'admin' || currentUser.role === 'super_admin');
     
-    // 4. الإخفاء أو الإظهار بناءً على الصلاحية
     if (isAdmin) {
-        // إذا كان أدمن، نبقيه ظاهراً
         sellerBtn.style.display = 'flex';
         console.log('🛡️ أدمن: تم إظهار رقم البائع.');
     } else {
-        // إذا كان مستخدم عادي، نخفيه (وهو مخفي أصلاً بالـ HTML)
         sellerBtn.style.display = 'none';
         console.log('👤 مستخدم عادي: تم إخفاء رقم البائع.');
     }

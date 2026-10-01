@@ -1786,4 +1786,195 @@ img { display: block; }
     width: 100%;
     height: 150px;
   }
+}/* ==========================================
+   🔥🔥🔥 إصلاح نهائي - كروت السيارات على الجوال
+   ========================================== */
+
+@media screen and (max-width: 768px) {
+
+  /* ===== 1. الشبكة الرئيسية ===== */
+  .properties-grid,
+  #carsGrid,
+  #propertiesGrid,
+  #latestGrid,
+  .results-main .properties-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+
+  /* ===== 2. الكارد نفسه ===== */
+  .properties-grid > .card,
+  #carsGrid > .card,
+  #carsGrid > a.card,
+  .properties-grid > a.card {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
+  }
+
+  /* ===== 3. صورة الكارد ===== */
+  .properties-grid > .card > .card-image,
+  #carsGrid > .card > .card-image,
+  #carsGrid > a.card > .card-image {
+    width: 100% !important;
+    height: 130px !important;
+    min-height: 130px !important;
+    max-height: 130px !important;
+    flex-shrink: 0 !important;
+    position: relative !important;
+  }
+
+  .properties-grid > .card > .card-image > img,
+  #carsGrid > .card > .card-image > img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+  }
+
+  /* ===== 4. محتوى الكارد ===== */
+  .properties-grid > .card > .card-body,
+  #carsGrid > .card > .card-body {
+    padding: 10px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+  }
+
+  .properties-grid > .card .card-title,
+  #carsGrid > .card .card-title {
+    font-size: 12.5px !important;
+    line-height: 1.35 !important;
+    margin: 0 0 6px 0 !important;
+    font-weight: 700 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    word-break: break-word !important;
+  }
+
+  .properties-grid > .card .card-location,
+  #carsGrid > .card .card-location {
+    font-size: 10.5px !important;
+    margin: 0 0 8px 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+  }
+
+  .properties-grid > .card .card-location svg,
+  #carsGrid > .card .card-location svg {
+    width: 11px !important;
+    height: 11px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .properties-grid > .card .card-price,
+  #carsGrid > .card .card-price {
+    font-size: 14px !important;
+    font-weight: 800 !important;
+    margin-top: auto !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  /* ===== 5. إخفاء الـ meta الزايد ===== */
+  .properties-grid > .card .card-meta,
+  .properties-grid > .card .car-meta,
+  #carsGrid > .card .card-meta,
+  #carsGrid > .card .car-meta,
+  .properties-grid > .card .card-details-btn,
+  #carsGrid > .card .card-details-btn {
+    display: none !important;
+  }
+
+  /* ===== 6. البادجات ===== */
+  .properties-grid > .card .card-badge,
+  #carsGrid > .card .card-badge {
+    font-size: 10px !important;
+    padding: 3px 8px !important;
+    top: 8px !important;
+    right: 8px !important;
+  }
+
+  .properties-grid > .card .card-badge.featured,
+  #carsGrid > .card .card-badge.featured {
+    top: 8px !important;
+    left: 8px !important;
+    right: auto !important;
+  }
+
+  /* ===== 7. الشريط الأفقي في الرئيسية ===== */
+  #featuredCars,
+  #featuredProperties {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    gap: 10px !important;
+    padding: 8px 12px 16px !important;
+    margin: 0 -12px 12px !important;
+    scroll-snap-type: x mandatory !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+  }
+
+  #featuredCars::-webkit-scrollbar,
+  #featuredProperties::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  #featuredCars > .card,
+  #featuredProperties > .card {
+    flex: 0 0 calc((100vw - 60px) / 2.2) !important;
+    min-width: calc((100vw - 60px) / 2.2) !important;
+    max-width: calc((100vw - 60px) / 2.2) !important;
+    width: auto !important;
+    scroll-snap-align: start !important;
+    border-radius: 12px !important;
+    transform: none !important;
+  }
+
+  #featuredCars > .card > .card-image,
+  #featuredProperties > .card > .card-image {
+    height: 110px !important;
+  }
+
+  #featuredCars > .card > .card-body,
+  #featuredProperties > .card > .card-body {
+    padding: 10px !important;
+  }
+}
+
+/* ===== شاشات صغيرة جداً ===== */
+@media screen and (max-width: 380px) {
+  .properties-grid,
+  #carsGrid {
+    grid-template-columns: 1fr !important;
+  }
+
+  #featuredCars > .card,
+  #featuredProperties > .card {
+    flex: 0 0 calc((100vw - 40px) / 1.8) !important;
+    min-width: calc((100vw - 40px) / 1.8) !important;
+    max-width: calc((100vw - 40px) / 1.8) !important;
+  }
 }
