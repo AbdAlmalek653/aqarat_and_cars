@@ -6,12 +6,7 @@
   <title>تسجيل الدخول | سوق</title>
   <meta name="description" content="سجّل دخولك إلى منصة سوق للعقارات والسيارات">
 
-  <!-- ✅ favicon - أيقونة الموقع -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
-
-  
-  
-  
 
   <script src="../js/lucide.min.js"></script>
   <link rel="stylesheet" href="../css/style.css">
@@ -19,16 +14,13 @@
 </head>
 <body class="auth-page">
 
-  <!-- زر العودة -->
   <a href="../index.html" class="auth-back" title="العودة للرئيسية">
     <i data-lucide="arrow-right"></i>
   </a>
 
   <div class="auth-wrap">
 
-    <!-- ===== الجانب المرئي (Brand Side) ===== -->
     <div class="auth-brand">
-
       <div class="auth-brand-content">
         <a href="../index.html" class="logo auth-logo">
           <span class="logo-icon"><i data-lucide="home"></i></span>
@@ -45,30 +37,15 @@
         </p>
 
         <ul class="auth-features">
-          <li>
-            <i data-lucide="check-circle-2"></i>
-            <span>آلاف الإعلانات العقارية والسيارات</span>
-          </li>
-          <li>
-            <i data-lucide="check-circle-2"></i>
-            <span>تواصل مباشر عبر واتساب</span>
-          </li>
-          <li>
-            <i data-lucide="check-circle-2"></i>
-            <span>حفظ الإعلانات في المفضلة</span>
-          </li>
-          <li>
-            <i data-lucide="check-circle-2"></i>
-            <span>أضف إعلانك في دقائق</span>
-          </li>
+          <li><i data-lucide="check-circle-2"></i><span>آلاف الإعلانات العقارية والسيارات</span></li>
+          <li><i data-lucide="check-circle-2"></i><span>تواصل مباشر عبر واتساب</span></li>
+          <li><i data-lucide="check-circle-2"></i><span>حفظ الإعلانات في المفضلة</span></li>
+          <li><i data-lucide="check-circle-2"></i><span>أضف إعلانك في دقائق</span></li>
         </ul>
       </div>
-
     </div>
 
-    <!-- ===== نموذج تسجيل الدخول ===== -->
     <div class="auth-form-side">
-
       <div class="auth-form-wrap">
 
         <div class="auth-form-header">
@@ -79,45 +56,27 @@
           </p>
         </div>
 
-        <!-- تنبيه خطأ -->
         <div class="auth-alert error" id="authError" style="display:none;">
           <i data-lucide="alert-circle"></i>
           <span id="authErrorText"></span>
         </div>
 
-        <!-- نموذج -->
         <form class="auth-form" id="loginForm" novalidate>
 
-          <!-- البريد الإلكتروني -->
           <div class="form-field">
             <label for="email">البريد الإلكتروني</label>
             <div class="field-input">
               <i data-lucide="mail"></i>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                placeholder="example@email.com"
-                autocomplete="email"
-                required
-              >
+              <input type="email" id="email" name="email" placeholder="example@email.com" autocomplete="email" required>
             </div>
             <span class="field-error" id="emailError"></span>
           </div>
 
-          <!-- كلمة المرور -->
           <div class="form-field">
             <label for="password">كلمة المرور</label>
             <div class="field-input">
               <i data-lucide="lock"></i>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                placeholder="••••••••"
-                autocomplete="current-password"
-                required
-              >
+              <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password" required>
               <button type="button" class="toggle-password" id="togglePassword" title="إظهار كلمة المرور">
                 <i data-lucide="eye"></i>
               </button>
@@ -125,18 +84,14 @@
             <span class="field-error" id="passwordError"></span>
           </div>
 
-          <!-- تذكرني + نسيت كلمة المرور -->
           <div class="form-extras">
             <label class="remember-me">
               <input type="checkbox" id="rememberMe">
               <span>تذكرني</span>
             </label>
-            <a href="forgot-password.html" class="forgot-link">
-              نسيت كلمة المرور؟
-            </a>
+            <a href="forgot-password.html" class="forgot-link">نسيت كلمة المرور؟</a>
           </div>
 
-          <!-- زر الدخول -->
           <button type="submit" class="btn btn-primary btn-block" id="loginBtn">
             <i data-lucide="log-in"></i>
             <span>تسجيل الدخول</span>
@@ -144,7 +99,6 @@
 
         </form>
 
-        <!-- ملاحظة -->
         <p class="auth-note">
           بتسجيلك في الموقع، أنت توافق على
           <a href="terms.html">الشروط والأحكام</a>
@@ -153,7 +107,6 @@
         </p>
 
       </div>
-
     </div>
 
   </div>
@@ -168,31 +121,59 @@
       if (window.lucide) window.lucide.createIcons();
     });
   </script>
-  <script>
-  // حفظ redirect من الـ URL عند فتح صفحة تسجيل الدخول
-  document.addEventListener('DOMContentLoaded', function() {
-    const params = new URLSearchParams(window.location.search);
-    const redirect = params.get('redirect');
-    if (redirect) {
-      sessionStorage.setItem('login_redirect', decodeURIComponent(redirect));
-    }
-  });
 
-  // في حالة نجاح تسجيل الدخول
-  window.addEventListener('load', function() {
-    const loginForm = document.getElementById('loginForm');
-    if (loginForm) {
-      loginForm.addEventListener('submit', function() {
+  <script>
+  // ==========================================
+  // ✅ نظام redirect الذكي
+  // ==========================================
+  (function() {
+    'use strict';
+
+    console.log('🔐 Login redirect handler loading...');
+
+    // 1. حفظ redirect عند فتح الصفحة
+    document.addEventListener('DOMContentLoaded', function() {
+      const params = new URLSearchParams(window.location.search);
+      const redirect = params.get('redirect');
+      if (redirect) {
+        const decoded = decodeURIComponent(redirect);
+        sessionStorage.setItem('login_redirect', decoded);
+        console.log('💾 حفظ redirect:', decoded);
+      }
+    });
+
+    // 2. بعد نجاح الدخول → اذهب للـ redirect
+    // نراقب ظهور user في localStorage
+    let lastUserStr = localStorage.getItem('user');
+    const checkInterval = setInterval(function() {
+      const currentUserStr = localStorage.getItem('user');
+      
+      // إذا تغير user وصار موجود (تسجيل دخول ناجح)
+      if (currentUserStr && currentUserStr !== lastUserStr && currentUserStr !== 'null') {
         const redirect = sessionStorage.getItem('login_redirect');
         if (redirect) {
-          setTimeout(() => {
-            sessionStorage.removeItem('login_redirect');
+          sessionStorage.removeItem('login_redirect');
+          console.log('✅ نجح الدخول، الذهاب إلى:', redirect);
+          clearInterval(checkInterval);
+          setTimeout(function() {
             window.location.href = redirect;
-          }, 1500);
+          }, 800);
+        } else {
+          // إذا ما في redirect، روح للرئيسية
+          clearInterval(checkInterval);
         }
-      });
-    }
-  });
-</script>
+      }
+      
+      lastUserStr = currentUserStr;
+    }, 400);
+
+    // 3. إيقاف المراقبة بعد 30 ثانية (احتياطي)
+    setTimeout(function() {
+      clearInterval(checkInterval);
+    }, 30000);
+
+  })();
+  </script>
+
 </body>
 </html>

@@ -456,7 +456,6 @@
     'use strict';
     console.log('🎯 Add-listing guard loading...');
 
-    // فتح النافذة
     function openAddModal() {
       const modal = document.getElementById('addTypeModal');
       if (!modal) {
@@ -469,7 +468,6 @@
       if (window.lucide) window.lucide.createIcons();
     }
 
-    // إغلاق النافذة
     function closeAddModal() {
       const modal = document.getElementById('addTypeModal');
       if (!modal) return;
@@ -478,7 +476,7 @@
       document.body.style.overflow = '';
     }
 
-    // معالجة اختيار النوع
+    // ✅✅✅ الحل الجذري: مسارات مطلقة (absolute paths)
     function handleTypeChoice(type) {
       let currentUser = null;
       try {
@@ -488,28 +486,26 @@
       } catch (e) {}
 
       const isLoggedIn = !!(currentUser && currentUser.id);
-      const isInPages = window.location.pathname.includes('/pages/');
-      const prefix = isInPages ? '' : 'pages/';
-      const addUrl = `${prefix}add-listing.html?type=${type}`;
+
+      // ✅ مسارات مطلقة من جذر الموقع (تشتغل من أي مكان)
+      const addUrl = `/pages/add-listing.html?type=${type}`;
+      const loginUrl = `/pages/login.html?redirect=${encodeURIComponent(addUrl)}`;
 
       console.log('✅ نوع الإعلان:', type, '| مسجل؟', isLoggedIn);
+      console.log('🔗 الرابط النهائي:', isLoggedIn ? addUrl : loginUrl);
 
       if (isLoggedIn) {
         window.location.href = addUrl;
       } else {
-        const loginUrl = `${prefix}login.html?redirect=${encodeURIComponent(addUrl)}`;
         window.location.href = loginUrl;
       }
     }
 
-    // Event Delegation
     document.addEventListener('click', function(e) {
-      // تجاهل الضغطات داخل النافذة نفسها
       if (e.target.closest('#addTypeModal') && !e.target.closest('[data-add-type]') && !e.target.closest('[data-close-add-type]')) {
         return;
       }
 
-      // زر "أضف إعلان" (أي زر بأي مكان)
       const addBtn = e.target.closest(
         'a[href*="add-listing"], .btn-add-listing-mobile, .bottom-nav-item.add-btn, .cta-button[href*="add-listing"]'
       );
@@ -521,14 +517,12 @@
         return false;
       }
 
-      // زر الإغلاق
       if (e.target.closest('[data-close-add-type]')) {
         e.preventDefault();
         closeAddModal();
         return false;
       }
 
-      // اختيار نوع (عقار/سيارة)
       const typeBtn = e.target.closest('[data-add-type]');
       if (typeBtn) {
         e.preventDefault();
@@ -540,7 +534,6 @@
       }
     }, true);
 
-    // إغلاق بـ ESC
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') closeAddModal();
     });
@@ -556,7 +549,6 @@
     console.log('🍔 Mobile menu loading...');
 
     document.addEventListener('click', function(e) {
-      // زر الهامبرغر
       if (e.target.closest('#mobileMenuToggle')) {
         e.preventDefault();
         e.stopPropagation();
@@ -576,7 +568,6 @@
         return false;
       }
 
-      // زر الإغلاق
       if (e.target.closest('#closeMobileMenu')) {
         e.preventDefault();
         e.stopPropagation();
@@ -594,7 +585,6 @@
         return false;
       }
 
-      // الـ overlay
       if (e.target.id === 'mobileMenuOverlay') {
         const menu = document.getElementById('mobileMenu');
         const overlay = document.getElementById('mobileMenuOverlay');
@@ -625,6 +615,132 @@
     console.log('✅ Mobile menu installed');
   })();
   </script>
+  <script>
+/* ==========================================
+   🍔 HAMBURGER MENU - النسخة النهائية المضمونة
+   ========================================== */
+(function() {
+  'use strict';
+  console.log('🍔 Hamburger loading...');
+
+  function initHamburger() {
+    const toggleBtn = document.getElementById('mobileMenuToggle');
+    const menu = document.getElementById('mobileMenu');
+    const overlay = document.getElementById('mobileMenuOverlay');
+    const closeBtn = document.getElementById('closeMobileMenu');
+
+    console.log('🔍 Elements:', {
+      toggleBtn: !!toggleBtn,
+      menu: !!menu,
+      overlay: !!overlay,
+      closeBtn: !!closeBtn
+    });
+
+    if (!toggleBtn || !menu || !overlay) {
+      console.warn('⚠️ Missing elements - retry in 500ms');
+      setTimeout(initHamburger, 500);
+      return;
+    }
+
+    // منع الربط المتكرر
+    if (toggleBtn.dataset.bound === '1') {
+      console.log('✅ Already bound, skipping');
+      return;
+    }
+    toggleBtn.dataset.bound = '1';
+
+    function openMenu() {
+      console.log('✅ فتح القائمة');
+      menu.classList.add('show');
+      menu.style.cssText = 'right:0 !important; display:flex !important;';
+      overlay.classList.add('show');
+      overlay.style.cssText = 'opacity:1 !important; visibility:visible !important; display:block !important;';
+      document.body.style.overflow = 'hidden';
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function closeMenu() {
+      console.log('❌ إغلاق القائمة');
+      menu.classList.remove('show');
+      menu.style.cssText = '';
+      overlay.classList.remove('show');
+      overlay.style.cssText = '';
+      document.body.style.overflow = '';
+    }
+
+    // ✅ 1. ربط مباشر على الزر
+    toggleBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      console.log('🟢 Direct click on hamburger');
+      if (menu.classList.contains('show')) {
+        closeMenu();
+      } else {
+        openMenu();
+      }
+    });
+
+    // ✅ 2. onclick كاحتياطي (أقوى من addEventListener في بعض الحالات)
+    toggleBtn.onclick = function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('🟢 onclick fired');
+      if (menu.classList.contains('show')) {
+        closeMenu();
+      } else {
+        openMenu();
+      }
+      return false;
+    };
+
+    // ✅ 3. زر الإغلاق
+    if (closeBtn) {
+      closeBtn.onclick = function(e) {
+        e.preventDefault();
+        closeMenu();
+        return false;
+      };
+    }
+
+    // ✅ 4. الـ overlay
+    overlay.onclick = function(e) {
+      e.preventDefault();
+      closeMenu();
+      return false;
+    };
+
+    // ✅ 5. Event Delegation (احتياطي ثالث)
+    document.addEventListener('click', function(e) {
+      if (e.target.closest('#mobileMenuToggle')) {
+        e.preventDefault();
+        console.log('🟢 Delegation caught it');
+        if (menu.classList.contains('show')) {
+          closeMenu();
+        } else {
+          openMenu();
+        }
+      }
+    }, true);
+
+    // ✅ 6. ESC
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeMenu();
+    });
+
+    console.log('✅ Hamburger installed successfully');
+  }
+
+  // تشغيل عند الجاهزية + محاولة إضافية بعد التحميل الكامل
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initHamburger);
+  } else {
+    initHamburger();
+  }
+  window.addEventListener('load', initHamburger);
+
+})();
+</script>
 
 </body>
 </html>
