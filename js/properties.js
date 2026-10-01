@@ -130,9 +130,16 @@ function createPropertyCard(item) {
   if (item.subType === 'chalet') icon = 'tent';
   if (item.subType === 'arabic-house') icon = 'landmark';
 
-  const firstImage = item.images && item.images[0];
-  const imageContent = firstImage
-    ? `<img src="${firstImage}" alt="${item.title}" loading="lazy">`
+  // ✅ استخدام دالة getListingImageUrl العالمية
+  const imageUrl = window.getListingImageUrl
+    ? window.getListingImageUrl(item)
+    : (item.images && item.images[0]);
+
+  const imageContent = imageUrl
+    ? `<img src="${imageUrl}"
+            alt="${item.title || ''}"
+            loading="lazy"
+            onerror="this.onerror=null;this.style.display='none';this.parentNode.classList.add('image-failed');this.parentNode.innerHTML='<i data-lucide=\\'${icon}\\'></i>';if(window.lucide)window.lucide.createIcons();">`
     : `<i data-lucide="${icon}"></i>`;
 
   const location = item.area || item.city || '—';
