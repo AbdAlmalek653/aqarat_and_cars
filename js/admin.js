@@ -545,3 +545,196 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }, 5 * 60 * 1000);
 });
+/* ==========================================
+   🔍 البحث برقم الإعلان
+   ========================================== */
+(function() {
+  'use strict';
+
+  function initListingIdSearch() {
+    const searchInput = document.getElementById('listingIdSearch');
+    const searchBtn = document.getElementById('listingIdSearchBtn');
+    const resultBox = document.getElementById('listingSearchResult');
+
+    if (!searchInput || !searchBtn || !resultBox) return;
+
+    // البحث لما يضغط زر
+    searchBtn.addEventListener('click', performSearch);
+
+    // البحث لما يضغط Enter
+    searchInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        performSearch();
+      }
+    });
+
+    // تنظيف الأرقام من أي حروف غريبة
+    searchInput.addEventListener('input', function() {
+      // إزالة المسافات الزائدة
+      this.value = this.value.trim().replace(/\s+/g, '');
+    });
+
+    async function performSearch() {
+      let id = searchInput.value.trim();
+      
+      if (!id) {
+        showError('الرجاء إدخال رقم الإعلان');
+        return;
+      }
+
+      // ✅ دعم صيغتين: L1790521822990109 أو 1790521822990109
+      // إذا ما بدأ بحرف L، نضيفه
+      if (!id.startsWith('L') && !id.startsWith('l')) {
+        id = 'L' + id;
+      }
+      
+      // تحويل l الصغيرة لـ L كبيرة
+      id = id.replace(/^l/i, 'L');
+
+      showLoading();
+      console.log('🔍 البحث برقم:', id);
+
+      try {
+        // نجرب API للحصول على الإعلان
+        const response = await fetch(`../api/listing.php?id=${encodeURIComponent(id)}`);
+        
+        if (!response.ok) {
+          if (response.status === 404) {
+            showNotFound(id);
+            return;
+          }
+          throw new Error('فشل الاتصال بالسيرفر: ' + response.status);
+        }
+
+        const data = await response.json();
+        console.log('📦 نتيجة البحث:', data);
+
+        // دعم أشكال البيانات المختلفة
+        const listing = data.listing || data.data || data;
+        
+        if (!listing || (!listing.id && !listing.title)) {
+          showNotFound(id);
+          return;
+        }
+
+        showResult(listing);
+
+      } catch (err) {
+        console.error('❌ خطأ في البحث:', err);
+        showError('حدث خطأ أثناء البحث. تحقق من اتصالك.');
+      }
+    }
+
+    function showLoading() {
+      resultBox.style.display = 'block';
+      resultBox.className = 'admin-search-result loading';
+      resultBox.innerHTML = `
+        <div style="display:flex;align-items:center;gap:10px;color:#93C5FD;font-weight:700;">
+          <i data-lucide="loader-2" class="spin" style="width:20px;height:20px;"></i>
+          <span>جاري البحث...</span>
+        </div>
+      `;
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function showNotFound(id) {
+      resultBox.style.display = 'block';
+      resultBox.className = 'admin-search-result not-found';
+      resultBox.innerHTML = `
+        <div class="admin-no-result">
+          <i data-lucide="alert-circle"></i>
+          <span>لا يوجد إعلان بالرقم: <code dir="ltr" style="color:#FBBF24;">${id}</code></span>
+        </div>
+      `;
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function showError(msg) {
+      resultBox.style.display = 'block';
+      resultBox.className = 'admin-search-result not-found';
+      resultBox.innerHTML = `
+        <div class="admin-no-result">
+          <i data-lucide="alert-circle"></i>
+          <span>${msg}</span>
+        </div>
+      `;
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function showResult(listing) {
+      resultBox.style.display = 'block';
+      resultBox.className = 'admin-search-result found';
+
+      const id = listing.id || '';
+      const title = listing.title || 'بدون عنوان';
+      const type = listing.type === 'car' ? 'سيارة' : 'عقار';
+      const purpose = listing.purpose === 'sale' ? 'للبيع' : 'للإيجار';
+      const city = listing.city || '';
+      const price = listing.price ? Number(listing.price).toLocaleString('en-US') + ' ' + (listing.currency || 'USD') : '—';
+      
+      // صورة
+      let imageUrl = '';
+      if (listing.images && listing.images.length > 0) {
+        const first = listing.images[0];
+        if (first === 'has_image') {
+          imageUrl = `../api/listing_image.php?id=${encodeURIComponent(id)}`;
+        } else if (typeof first === 'string' && first.startsWith('data:image/')) {
+          imageUrl = first;
+        } else if (typeof first === 'string' && (first.startsWith('http') || first.startsWith('/') || first.startsWith('./'))) {
+          imageUrl = first;
+        } else {
+          imageUrl = `../api/listing_image.php?id=${encodeURIComponent(id)}`;
+        }
+      }
+
+      const imageHTML = imageUrl 
+        ? `<img src="${imageUrl}" alt="${title}" onerror="this.parentNode.innerHTML='<i data-lucide=&quot;image-off&quot;></i>';if(window.lucide)window.lucide.createIcons();">`
+        : `<i data-lucide="image-off"></i>`;
+
+      // رابط التفاصيل
+      const detailsUrl = `../pages/details.html?id=${encodeURIComponent(id)}&type=${listing.type || 'property'}`;
+
+      resultBox.innerHTML = `
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;color:#34D399;font-weight:800;font-size:15px;">
+          <i data-lucide="check-circle" style="width:20px;height:20px;"></i>
+          <span>تم العثور على الإعلان ✅</span>
+        </div>
+        
+        <div class="admin-result-card">
+          <div class="admin-result-image">${imageHTML}</div>
+          <div class="admin-result-info">
+            <h4 class="admin-result-title">${title}</h4>
+            <div class="admin-result-meta">
+              <span><i data-lucide="tag"></i>${type}</span>
+              <span><i data-lucide="badge-dollar-sign"></i>${purpose}</span>
+              ${city ? `<span><i data-lucide="map-pin"></i>${city}</span>` : ''}
+              <span><i data-lucide="wallet"></i>${price}</span>
+            </div>
+            <div class="admin-result-id">ID: ${id}</div>
+          </div>
+        </div>
+        
+        <div class="admin-result-actions">
+          <a href="${detailsUrl}" target="_blank" class="btn-view">
+            <i data-lucide="eye"></i>
+            <span>عرض الإعلان</span>
+          </a>
+          <a href="../pages/add-listing.html?id=${encodeURIComponent(id)}" target="_blank" class="btn-edit">
+            <i data-lucide="pencil"></i>
+            <span>تعديل</span>
+          </a>
+        </div>
+      `;
+      
+      if (window.lucide) window.lucide.createIcons();
+    }
+  }
+
+  // تشغيل عند تحميل الصفحة
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initListingIdSearch);
+  } else {
+    initListingIdSearch();
+  }
+})();

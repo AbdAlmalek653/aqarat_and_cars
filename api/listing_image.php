@@ -2,9 +2,10 @@
 require_once 'config.php';
 // ✅✅✅ الحل: أغلق الـ session فوراً عشان ما يعمل قفل
 session_write_close();
+
 $id = $_GET['id'] ?? '';
 $index = isset($_GET['index']) ? (int)$_GET['index'] : 0;
-$width = isset($_GET['w']) ? (int)$_GET['w'] : 0; // ✅ عرض اختياري (0 = الأصلي)
+$width = isset($_GET['w']) ? (int)$_GET['w'] : 0;
 
 if (!$id) {
     http_response_code(404);
@@ -37,9 +38,25 @@ if (!is_dir($cacheDir)) {
     @mkdir($cacheDir, 0755, true);
 }
 
-// اسم فريد للصورة بناءً على الرابط + العرض
 $cacheKey = md5($url . '_w' . $width);
 $cacheFile = $cacheDir . '/' . $cacheKey . '.webp';
+
+/* ==========================================
+   ✨ دالة: صورة placeholder
+   ========================================== */
+function sendPlaceholder() {
+    $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">'
+         . '<rect fill="#1A2438" width="400" height="300"/>'
+         . '<circle cx="200" cy="120" r="40" fill="none" stroke="#334155" stroke-width="3"/>'
+         . '<path d="M170 120 L200 95 L230 120 M185 120 L200 105 L215 120" stroke="#475569" stroke-width="3" fill="none"/>'
+         . '<text x="200" y="200" fill="#64748B" font-family="Cairo,sans-serif" font-size="16" text-anchor="middle">صورة غير متوفرة</text>'
+         . '</svg>';
+    header('Content-Type: image/svg+xml; charset=utf-8');
+    header('Cache-Control: public, max-age=3600');
+    header('Content-Length: ' . strlen($svg));
+    echo $svg;
+    exit;
+}
 
 // ==========================================
 // ✨ دالة: إرسال ترويسات الكاش
@@ -60,7 +77,6 @@ function sendCacheHeaders($mime = null, $size = null) {
 // ✨ دالة: معالجة وتصغير الصورة
 // ==========================================
 function processImage($data, $mime, $maxWidth = 0) {
-    // إذا كان GD مش متوفر، رجع الصورة الأصلية
     if (!function_exists('imagecreatefromstring')) {
         return ['data' => $data, 'mime' => $mime, 'ext' => 'jpg'];
     }
@@ -73,11 +89,9 @@ function processImage($data, $mime, $maxWidth = 0) {
     $origW = imagesx($img);
     $origH = imagesy($img);
 
-    // حساب الأبعاد الجديدة
     $newW = $origW;
     $newH = $origH;
 
-    // إذا في تصغير مطلوب أو الصورة كبيرة جداً (>1200px)
     $targetWidth = $maxWidth > 0 ? $maxWidth : 0;
     $shouldResize = ($targetWidth > 0 && $origW > $targetWidth) || ($targetWidth === 0 && $origW > 1400);
 
@@ -86,10 +100,8 @@ function processImage($data, $mime, $maxWidth = 0) {
         $newH = (int)($origH * ($newW / $origW));
     }
 
-    // إنشاء صورة جديدة
     $newImg = imagecreatetruecolor($newW, $newH);
 
-    // الحفاظ على الشفافية للصور PNG
     if ($mime === 'image/png' || $mime === 'image/webp') {
         imagealphablending($newImg, false);
         imagesavealpha($newImg, true);
@@ -99,7 +111,6 @@ function processImage($data, $mime, $maxWidth = 0) {
 
     imagecopyresampled($newImg, $img, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
 
-    // ✅ تحويل لـ WebP للحجم الأصغر (إذا مدعوم)
     ob_start();
     if (function_exists('imagewebp')) {
         imagewebp($newImg, null, 80);
@@ -107,7 +118,6 @@ function processImage($data, $mime, $maxWidth = 0) {
         $finalMime = 'image/webp';
         $ext = 'webp';
     } else {
-        // fallback لـ JPEG
         imagejpeg($newImg, null, 82);
         $output = ob_get_clean();
         $finalMime = 'image/jpeg';
@@ -133,10 +143,10 @@ function fetchRemoteImage($url) {
         CURLOPT_URL => $url,
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_MAXREDIRS => 3,
-        CURLOPT_TIMEOUT => 8,
-        CURLOPT_CONNECTTIMEOUT => 4,
-        CURLOPT_SSL_VERIFYPEER => false, // لتفادي مشاكل SSL
+        CURLOPT_MAXREDIRS => 2,
+        CURLOPT_TIMEOUT => 3,              // ✅ تقليل من 8 لـ 3 ثواني
+        CURLOPT_CONNECTTIMEOUT => 2,       // ✅ تقليل من 4 لـ 2 ثواني
+        CURLOPT_SSL_VERIFYPEER => false,
         CURLOPT_USERAGENT => 'Mozilla/5.0 (compatible; SouqBot/1.0)',
         CURLOPT_HTTPHEADER => [
             'Accept: image/webp,image/avif,image/jpeg,image/png,image/*,*/*;q=0.8',
@@ -184,10 +194,7 @@ if (strpos($url, 'data:image/') === 0) {
         preg_match('/data:([^;]+);/', $parts[0], $m);
         $mime = $m[1] ?? 'image/jpeg';
 
-        // معالجة الصورة
         $result = processImage($binary, $mime, $width);
-
-        // حفظ بالكاش المحلي
         @file_put_contents($cacheFile, $result['data']);
 
         sendCacheHeaders($result['mime'], strlen($result['data']));
@@ -203,10 +210,7 @@ if (strpos($url, 'http') === 0) {
     $remote = fetchRemoteImage($url);
 
     if ($remote !== false) {
-        // معالجة الصورة (تصغير + ضغط)
         $result = processImage($remote['data'], $remote['mime'], $width);
-
-        // ✅ حفظ بالكاش المحلي عشان المرة الجاية تكون فورية
         @file_put_contents($cacheFile, $result['data']);
 
         sendCacheHeaders($result['mime'], strlen($result['data']));
@@ -214,10 +218,8 @@ if (strpos($url, 'http') === 0) {
         exit;
     }
 
-    // ❌ فشل الجلب → redirect
-    sendCacheHeaders();
-    header('Location: ' . $url, true, 302);
-    exit;
+    // ✅✅✅ بدل الـ redirect: أرجع placeholder فوراً
+    sendPlaceholder();
 }
 
-http_response_code(404);
+sendPlaceholder();
