@@ -21,9 +21,9 @@
 
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
 
-  <!-- ✅ تحميل الخطوط مسبقاً لتسريع الظهور -->
-  <link rel="preload" href="fonts/cairo-v31-arabic-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="fonts/cairo-v31-arabic-latin-700.woff2" as="font" type="font/woff2" crossorigin>
+  <!-- ✅ Preload للخطوط بمسار مطلق (المُصحّح) -->
+  <link rel="preload" href="/fonts/cairo-v31-arabic-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/cairo-v31-arabic-latin-700.woff2" as="font" type="font/woff2" crossorigin>
 
   <!-- ✅ تأخير تحميل مكتبة الأيقونات (defer) -->
   <script src="js/lucide.min.js" defer></script>
@@ -368,7 +368,7 @@
           <div class="add-type-option-bg"></div>
           <div class="add-type-option-icon"><i data-lucide="building-2"></i></div>
           <h3 class="add-type-option-title">عقار</h3>
-          <p class="add-type-option-desc">شقق، فلل، أراضي، مكاتب ومحلات</p>
+          <p class="add-type-option-desc">شقق، فلل، أراضي، ومحلات</p>
         </button>
         <button type="button" class="add-type-option add-type-car" data-add-type="car">
           <div class="add-type-option-bg"></div>
@@ -387,6 +387,6 @@
   <script src="js/auth-guard.js"></script>
   <script src="js/app-inline.js"></script>
   <script src="js/speed-boost.js"></script>
-  <!-- ✅ تم حذف mobile-menu.js و add-listing-guard.js نهائياً -->
+  <!-- ✅ mobile-menu.js و add-listing-guard.js محذوفان نهائياً -->
 </body>
 </html>
