@@ -70,6 +70,7 @@ CREATE INDEX IF NOT EXISTS idx_listings_location ON listings(location_id);
 CREATE INDEX IF NOT EXISTS idx_listings_price ON listings(price);
 CREATE INDEX IF NOT EXISTS idx_listings_user ON listings(user_id);
 CREATE INDEX IF NOT EXISTS idx_listings_created ON listings(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_listings_status_created ON listings(status, created_at DESC);
 
 CREATE TABLE IF NOT EXISTS listing_images (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
