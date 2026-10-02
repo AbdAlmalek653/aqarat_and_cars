@@ -1,6 +1,6 @@
 /* ==========================================
    نظام الأيقونات المدمج (بديل lucide.min.js)
-   الإصدار: 2.7 (مع database و cookie)
+   الإصدار: 2.8 (يحفظ id + class + style)
    الحجم: ~17KB (مقارنة بـ 68KB في lucide.min.js)
    الاستخدام: <i data-lucide="home"></i>
    ========================================== */
@@ -43,6 +43,7 @@
     'user-round-x': '<path d="M2 21a8 8 0 0 1 11.873-7"/><circle cx="10" cy="8" r="5"/><path d="m17 17 5 5"/><path d="m22 17-5 5"/>',
     'user-round-check': '<path d="M2 21a8 8 0 0 1 13.292-6"/><circle cx="10" cy="8" r="5"/><path d="m16 19 2 2 4-4"/>',
     'user-plus': '<path d="M2 21a8 8 0 0 1 13.292-6"/><circle cx="10" cy="8" r="5"/><path d="M19 16v6"/><path d="M22 19h-6"/>',
+    'user-circle': '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/><path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"/>',
     'log-in': '<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/>',
     'log-out': '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/>',
     lock: '<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
@@ -201,6 +202,7 @@
 
       const originalClasses = el.className || '';
       const originalStyle = el.getAttribute('style') || '';
+      const originalId = el.id || ''; // ✅ حفظ الـ id
 
       const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
@@ -214,6 +216,7 @@
       svg.setAttribute('stroke-linejoin', 'round');
       svg.setAttribute('class', 'lucide-icon ' + originalClasses);
       if (originalStyle) svg.setAttribute('style', originalStyle);
+      if (originalId) svg.setAttribute('id', originalId); // ✅ نسخ الـ id
       svg.innerHTML = svgInner;
 
       el.replaceWith(svg);
