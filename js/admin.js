@@ -1,11 +1,15 @@
 /* ==========================================
-   لوحة التحكم - Admin Dashboard (النسخة النهائية المحسّنة)
-   الإصدار: 2.0 (دعم أحجام الصور + تحسينات أداء)
+   لوحة التحكم - Admin Dashboard (نسخة الصاروخ V3.0)
+   الإصدار: 3.0 (تحسينات أداء جذرية + جلب سريع)
    ========================================== */
 
 let currentAdmin = null;
 let allListings = [];
 let allUsers = [];
+let statsCache = null; // ✅ تخزين الإحصائيات لتجنب إعادة حسابها
+let sortedRecentListings = []; // ✅ تخزين أحدث الإعلانات مرتبة
+const MAX_RENDER_ROWS = 200; // ✅ تحديد حد أقصى للصفوف المعروضة لتجنب تجميد المتصفح
+
 const ADMIN_API_BASE = '../api';
 const listingStatusLabels = {
   active: 'متاح', pending: 'قيد المراجعة', rejected: 'مرفوض',
@@ -22,18 +26,25 @@ function escapeHtml(value) {
 }
 
 /* ==========================================
-   ✅ دالة موحدة لبناء رابط الصورة مع الحجم
-   (تعمل حتى لو لم تكن getListingImageUrl محمّلة)
+   ✅ أداة Debounce لتأخير تنفيذ البحث (تمنع تجميد المتصفح)
    ========================================== */
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
 function buildAdminImageUrl(listing, index = 0, size = 'medium') {
   if (!listing || !listing.id) return null;
-
-  // استخدام الدالة الموحدة إذا كانت متوفرة
   if (window.getListingImageUrl) {
     return window.getListingImageUrl(listing, index, size);
   }
-
-  // Fallback
   return `${ADMIN_API_BASE}/listing_image.php?id=${encodeURIComponent(listing.id)}&index=${index}&size=${size}`;
 }
 
@@ -75,6 +86,7 @@ async function updateAdminListing(id, changes) {
     const index = allListings.findIndex(l => l.id === id);
     if (index > -1) {
       Object.assign(allListings[index], changes);
+      statsCache = null; // ✅ مسح الكاش لتحديث الإحصائيات
     }
     
     renderOverview();
@@ -169,11 +181,14 @@ async function checkAccess() {
 }
 
 /* ==========================================
-   تحميل البيانات
+   تحميل البيانات (محسّن)
    ========================================== */
 async function loadData() {
   try {
     console.log('⏳ جاري جلب البيانات...');
+    const startTime = performance.now();
+
+    // ✅ يمكنك لاحقاً تعديل هذا ليقبل Pagination من السيرفر
     const listingsResult = await adminRequest('admin_listings.php');
     const usersResult = (currentAdmin && currentAdmin.role === 'super_admin') 
         ? await adminRequest('admin_users.php') 
@@ -195,7 +210,12 @@ async function loadData() {
     });
 
     allUsers = rawUsers;
-    console.log(`✅ تم جلب ${allListings.length} إعلان و ${allUsers.length} مستخدم`);
+    
+    // ✅ حساب الإحصائيات وترتيب الأحدث مرة واحدة فقط
+    prepareStatsAndRecent();
+
+    const endTime = performance.now();
+    console.log(`✅ تم جلب ${allListings.length} إعلان و ${allUsers.length} مستخدم في ${(endTime - startTime).toFixed(2)} مللي ثانية`);
 
     renderOverview();
     renderListingsTable();
@@ -208,30 +228,55 @@ async function loadData() {
 }
 
 /* ==========================================
+   ✅ تجهيز الإحصائيات مسبقاً (لتجنب التكرار في كل render)
+   ========================================== */
+function prepareStatsAndRecent() {
+  let propsCount = 0;
+  let carsCount = 0;
+  let totalViews = 0;
+
+  // حساب الإحصائيات في مرور واحد فقط (O(n))
+  allListings.forEach(l => {
+    if (l.type === 'property') propsCount++;
+    else if (l.type === 'car') carsCount++;
+    totalViews += (l.views || 0);
+  });
+
+  statsCache = {
+    totalProps: propsCount,
+    totalCars: carsCount,
+    totalViews: totalViews,
+    totalListings: allListings.length,
+    totalUsers: allUsers.length
+  };
+
+  // ترتيب أحدث 5 إعلانات مرة واحدة فقط
+  sortedRecentListings = [...allListings]
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, 5);
+}
+
+/* ==========================================
    Overview
    ========================================== */
 function renderOverview() {
-  const props = allListings.filter(l => l.type === 'property');
-  const cars = allListings.filter(l => l.type === 'car');
-  const totalViews = allListings.reduce((sum, l) => sum + (l.views || 0), 0);
+  if (!statsCache) prepareStatsAndRecent();
 
   const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
 
-  setEl('statTotalProps', props.length);
-  setEl('statTotalCars', cars.length);
-  setEl('statTotalUsers', allUsers.length);
-  setEl('statTotalViews', totalViews.toLocaleString('en-US'));
-  setEl('badgeListings', allListings.length);
-  setEl('badgeUsers', allUsers.length);
+  setEl('statTotalProps', statsCache.totalProps);
+  setEl('statTotalCars', statsCache.totalCars);
+  setEl('statTotalUsers', statsCache.totalUsers);
+  setEl('statTotalViews', statsCache.totalViews.toLocaleString('en-US'));
+  setEl('badgeListings', statsCache.totalListings);
+  setEl('badgeUsers', statsCache.totalUsers);
 
-  const recent = [...allListings].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
   const recentEl = document.getElementById('recentListings');
-  
   if (recentEl) {
-    if (!recent.length) {
+    if (!sortedRecentListings.length) {
       recentEl.innerHTML = `<div class="admin-empty"><i data-lucide="inbox"></i><p>لا توجد إعلانات</p></div>`;
     } else {
-      recentEl.innerHTML = recent.map(l => {
+      recentEl.innerHTML = sortedRecentListings.map(l => {
         const icon = l.type === 'property' ? 'building-2' : 'car';
         return `<div class="admin-recent-item">
           <div class="admin-recent-icon"><i data-lucide="${icon}"></i></div>
@@ -265,7 +310,7 @@ function renderOverview() {
 }
 
 /* ==========================================
-   إدارة الإعلانات
+   إدارة الإعلانات (محسّنة بحد أقصى للصفوف)
    ========================================== */
 function renderListingsTable() {
   const search = (document.getElementById('searchListings')?.value || '').toLowerCase().trim();
@@ -293,7 +338,11 @@ function renderListingsTable() {
     return;
   }
 
-  tbody.innerHTML = filtered.map(l => {
+  // ✅ تحديد حد أقصى للصفوف المعروضة لتجنب تجميد المتصفح
+  const displayListings = filtered.slice(0, MAX_RENDER_ROWS);
+  const hasMore = filtered.length > MAX_RENDER_ROWS;
+
+  tbody.innerHTML = displayListings.map(l => {
     const typeText = l.type === 'property' ? 'عقار' : 'سيارة';
     const status = l.status || 'active';
     const statusText = listingStatusLabels[status] || status;
@@ -341,6 +390,12 @@ function renderListingsTable() {
     </tr>`;
   }).join('');
 
+  if (hasMore) {
+    tbody.innerHTML += `<tr><td colspan="7" style="text-align:center; padding:15px; color:var(--text-muted); font-size:14px;">
+      ⚠️ يتم عرض أول ${MAX_RENDER_ROWS} إعلان فقط من أصل ${filtered.length} إعلان. استخدم البحث للوصول لإعلانات محددة.
+    </td></tr>`;
+  }
+
   document.querySelectorAll('[data-status-id]').forEach(function (select) {
     select.addEventListener('change', function () {
       updateAdminListing(select.dataset.statusId, { status: select.value });
@@ -362,6 +417,8 @@ window.adminDeleteListing = async function (id) {
   const result = await API.Listings.delete(id);
   if (result.success) {
     allListings = allListings.filter(l => l.id !== id);
+    statsCache = null; // ✅ مسح الكاش
+    prepareStatsAndRecent();
     renderOverview();
     renderListingsTable();
   } else {
@@ -396,7 +453,9 @@ function renderUsersTable() {
     return;
   }
 
-  tbody.innerHTML = filtered.map(u => {
+  const displayUsers = filtered.slice(0, MAX_RENDER_ROWS);
+
+  tbody.innerHTML = displayUsers.map(u => {
     const role = u.role || 'user';
     const roleText = roleLabels[role] || role;
     const createdAt = u.createdAt || u.created_at;
@@ -455,6 +514,8 @@ window.adminDeleteUser = async function (id) {
 
     if (result.success) {
         allUsers = allUsers.filter(u => u.id !== id);
+        statsCache = null;
+        prepareStatsAndRecent();
         renderOverview();
         renderUsersTable();
         alert('✅ تم حذف المستخدم بنجاح');
@@ -512,15 +573,22 @@ function setupTabs() {
   });
 }
 
+/* ==========================================
+   ✅ إعداد الفلاتر مع Debounce (لتسريع البحث)
+   ========================================== */
 function setupFilters() {
+  // استخدام debounce لتأخير التنفيذ 300 مللي ثانية بعد توقف الكتابة
+  const debouncedListingsRender = debounce(renderListingsTable, 300);
+  const debouncedUsersRender = debounce(renderUsersTable, 300);
+
   ['searchListings', 'filterType', 'filterStatus'].forEach(id => {
-    document.getElementById(id)?.addEventListener('input', renderListingsTable);
-    document.getElementById(id)?.addEventListener('change', renderListingsTable);
+    document.getElementById(id)?.addEventListener('input', debouncedListingsRender);
+    document.getElementById(id)?.addEventListener('change', debouncedListingsRender);
   });
 
   ['searchUsers', 'filterRole'].forEach(id => {
-    document.getElementById(id)?.addEventListener('input', renderUsersTable);
-    document.getElementById(id)?.addEventListener('change', renderUsersTable);
+    document.getElementById(id)?.addEventListener('input', debouncedUsersRender);
+    document.getElementById(id)?.addEventListener('change', debouncedUsersRender);
   });
 }
 
@@ -555,7 +623,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 /* ==========================================
-   🔍 البحث برقم الإعلان (محسّن مع 3 أحجام)
+   🔍 البحث برقم الإعلان (محسّن)
    ========================================== */
 (function() {
   'use strict';
@@ -609,8 +677,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const data = await response.json();
-        console.log('📦 نتيجة البحث:', data);
-
         const listing = data.listing || data.data || data;
         
         if (!listing || (!listing.id && !listing.title)) {
@@ -662,9 +728,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (window.lucide) window.lucide.createIcons();
     }
 
-    /* ==========================================
-       ✅ عرض نتيجة البحث مع صورة محسّنة
-       ========================================== */
     function showResult(listing) {
       resultBox.style.display = 'block';
       resultBox.className = 'admin-search-result found';
@@ -677,7 +740,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       const city = listing.city || '';
       const price = listing.price ? Number(listing.price).toLocaleString('en-US') + ' ' + (listing.currency || 'USD') : '—';
       
-      // ✅ استخدام الدالة المحسّنة للصورة
       const imageUrl = buildAdminImageUrl(listing, 0, 'medium');
 
       const imageHTML = imageUrl 

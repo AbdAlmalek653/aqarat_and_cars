@@ -1,5 +1,6 @@
 /* ==========================================
    صفحة إضافة إعلان - منطق ذكي حسب النوع والغرض
+   الإصدار: 3.0 (متوافق مع تصميم Dropzone الجديد)
    ========================================== */
 
 let state = {
@@ -81,60 +82,34 @@ function prepareStep3() {
   const isProperty = state.type === 'property';
   const isRent = state.purpose === 'rent';
 
-  // العنوان
-  document.getElementById('formTitle').textContent =
-    isProperty ? 'أضف إعلان عقار' : 'أضف إعلان سيارة';
+  document.getElementById('formTitle').textContent = isProperty ? 'أضف إعلان عقار' : 'أضف إعلان سيارة';
+  document.getElementById('currentTypeText').textContent = isProperty ? (isRent ? 'عقار للإيجار' : 'عقار للبيع') : (isRent ? 'سيارة للإيجار' : 'سيارة للبيع');
+  document.getElementById('currentTypeIcon').setAttribute('data-lucide', isProperty ? 'building-2' : 'car');
 
-  // الشارة
-  document.getElementById('currentTypeText').textContent =
-    isProperty
-      ? (isRent ? 'عقار للإيجار' : 'عقار للبيع')
-      : (isRent ? 'سيارة للإيجار' : 'سيارة للبيع');
-  document.getElementById('currentTypeIcon').setAttribute('data-lucide',
-    isProperty ? 'building-2' : 'car');
-
-  // إظهار قسم النوع الفرعي للعقار فقط
   document.getElementById('subTypeSection').style.display = isProperty ? 'block' : 'none';
-
-  // إظهار قسم الماركة للسيارة فقط
   document.getElementById('brandSection').style.display = isProperty ? 'none' : 'block';
 
-  // قسم السعر
-  document.getElementById('priceSectionTitle').textContent =
-    isRent ? 'سعر الإيجار' : 'السعر';
-  document.getElementById('priceLabel').textContent =
-    isRent ? 'السعر' : 'السعر';
-  document.getElementById('price').placeholder =
-    isRent ? 'مثال: 500' : 'مثال: 150000';
+  document.getElementById('priceSectionTitle').textContent = isRent ? 'سعر الإيجار' : 'السعر';
+  document.getElementById('priceLabel').textContent = isRent ? 'السعر' : 'السعر';
+  document.getElementById('price').placeholder = isRent ? 'مثال: 500' : 'مثال: 150000';
 
-  // حقول الإيجار
   document.getElementById('rentPeriodField').style.display = isRent ? 'flex' : 'none';
   document.getElementById('depositField').style.display = isRent ? 'flex' : 'none';
-  document.getElementById('minDaysField').style.display =
-    (isRent && !isProperty) ? 'flex' : 'none';
-  document.getElementById('carInsuranceField').style.display =
-    (isRent && !isProperty) ? 'flex' : 'none';
+  document.getElementById('minDaysField').style.display = (isRent && !isProperty) ? 'flex' : 'none';
+  document.getElementById('carInsuranceField').style.display = (isRent && !isProperty) ? 'flex' : 'none';
+  document.getElementById('conditionField').style.display = (!isRent && !isProperty) ? 'flex' : 'none';
+  document.getElementById('kmField').style.display = (!isRent && !isProperty) ? 'flex' : 'none';
 
-  // حقول البيع فقط للسيارة
-  document.getElementById('conditionField').style.display =
-    (!isRent && !isProperty) ? 'flex' : 'none';
-  document.getElementById('kmField').style.display =
-    (!isRent && !isProperty) ? 'flex' : 'none';
-
-  // إخفاء كل أقسام التفاصيل أولاً
   ['residentialSection', 'landSection', 'commercialSection', 'carSection']
     .forEach(id => document.getElementById(id).style.display = 'none');
 
-  // إعادة تعيين النوع الفرعي
   document.querySelectorAll('#subTypeGrid .subtype-card').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('#brandGrid .subtype-card').forEach(b => b.classList.remove('active'));
 
-  // إخفاء حقل الماركة المخصصة
   const otherField = document.getElementById('otherBrandField');
   if (otherField) otherField.style.display = 'none';
 
   if (!isProperty) {
-    // للسيارة: يظهر قسم السيارة فقط
     document.getElementById('carSection').style.display = 'block';
   }
 
@@ -145,7 +120,6 @@ function prepareStep3() {
    النوع الفرعي (للعقار) والماركة (للسيارة)
    ========================================== */
 function setupSubType() {
-  // النوع الفرعي للعقار
   document.querySelectorAll('#subTypeGrid .subtype-card').forEach(card => {
     card.addEventListener('click', () => {
       document.querySelectorAll('#subTypeGrid .subtype-card').forEach(c => c.classList.remove('active'));
@@ -155,14 +129,12 @@ function setupSubType() {
     });
   });
 
-  // الماركة للسيارة
   document.querySelectorAll('#brandGrid .subtype-card').forEach(card => {
     card.addEventListener('click', () => {
       document.querySelectorAll('#brandGrid .subtype-card').forEach(c => c.classList.remove('active'));
       card.classList.add('active');
       state.brand = card.dataset.brand;
 
-      // إظهار/إخفاء حقل الماركة المخصصة
       const otherField = document.getElementById('otherBrandField');
       const otherInput = document.getElementById('otherBrand');
 
@@ -180,7 +152,6 @@ function setupSubType() {
     });
   });
 
-  // إزالة الخطأ عند الكتابة في حقل الماركة المخصصة
   document.getElementById('otherBrand')?.addEventListener('input', (e) => {
     e.target.classList.remove('error');
     const err = document.getElementById('otherBrandError');
@@ -192,12 +163,10 @@ function showPropertyFields() {
   const subType = state.subType;
   const isRent = state.purpose === 'rent';
 
-  // إخفاء الكل
   ['residentialSection', 'landSection', 'commercialSection'].forEach(id => {
     document.getElementById(id).style.display = 'none';
   });
 
-  // تحديد الأقسام الظاهرة
   const residentialTypes = ['apartment', 'villa', 'arabic-house', 'chalet'];
   const landTypes = ['land'];
   const commercialTypes = ['office', 'shop'];
@@ -205,16 +174,10 @@ function showPropertyFields() {
 
   if (residentialTypes.includes(subType)) {
     document.getElementById('residentialSection').style.display = 'block';
-
-    // حقول الفيلا والشاليه فقط
     const hasGardenPool = ['villa', 'chalet'].includes(subType);
     document.getElementById('gardenField').style.display = hasGardenPool ? 'flex' : 'none';
     document.getElementById('poolField').style.display = hasGardenPool ? 'flex' : 'none';
-
-    // الفرش للإيجار فقط
     document.getElementById('furnishedField').style.display = isRent ? 'flex' : 'none';
-
-    // تأكد من تفعيل الغرف
     document.getElementById('rooms').disabled = false;
     document.getElementById('bathrooms').disabled = false;
   }
@@ -228,7 +191,6 @@ function showPropertyFields() {
   }
 
   if (buildingTypes.includes(subType)) {
-    // البناء يشبه السكني لكن بدون غرف/حمامات
     document.getElementById('residentialSection').style.display = 'block';
     document.getElementById('rooms').disabled = true;
     document.getElementById('bathrooms').disabled = true;
@@ -246,16 +208,8 @@ function showPropertyFields() {
 /* ==========================================
    🖼️ ضغط الصور في المتصفح (Client-Side Compression)
    ========================================== */
-/**
- * يضغط الصورة ويُرجع Data URL بحجم أصغر بكثير.
- * @param {File} file - ملف الصورة الأصلي
- * @param {number} maxWidth - أقصى عرض (بكسل)
- * @param {number} quality - جودة الضغط (0-1)
- * @returns {Promise<string>} Data URL مضغوط
- */
 function compressImage(file, maxWidth = 1200, quality = 0.75) {
   return new Promise((resolve, reject) => {
-    // ✅ إذا كان الملف صغيراً جداً (< 200KB)، لا داعي للضغط
     if (file.size < 200 * 1024) {
       const reader = new FileReader();
       reader.onload = e => resolve(e.target.result);
@@ -272,7 +226,6 @@ function compressImage(file, maxWidth = 1200, quality = 0.75) {
         let width = img.width;
         let height = img.height;
 
-        // ✅ تصغير الأبعاد إذا كانت كبيرة
         if (width > maxWidth) {
           height = Math.round((height * maxWidth) / width);
           width = maxWidth;
@@ -282,21 +235,17 @@ function compressImage(file, maxWidth = 1200, quality = 0.75) {
         canvas.height = height;
 
         const ctx = canvas.getContext('2d');
-        // ✅ تفعيل التنعيم لصور أفضل عند التصغير
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = 'high';
         ctx.drawImage(img, 0, 0, width, height);
 
-        // ✅ إرجاع Data URL بصيغة WebP (أخف بكثير من JPEG)
         let dataUrl;
         try {
           dataUrl = canvas.toDataURL('image/webp', quality);
-          // تحقق إذا كان WebP مدعوم (بعض المتصفحات القديمة ترجع PNG)
           if (dataUrl.indexOf('data:image/webp') !== 0) {
             dataUrl = canvas.toDataURL('image/jpeg', quality);
           }
         } catch (err) {
-          // fallback إلى JPEG
           dataUrl = canvas.toDataURL('image/jpeg', quality);
         }
 
@@ -311,33 +260,49 @@ function compressImage(file, maxWidth = 1200, quality = 0.75) {
 }
 
 /* ==========================================
-   رفع الصور (مع ضغط تلقائي)
+   رفع الصور (متوافق مع التصميم الجديد Dropzone)
    ========================================== */
 function setupImageUpload() {
-  const input = document.getElementById('imageInput');
-  const uploadArea = document.getElementById('uploadArea');
+  const dropzone = document.getElementById('uploadArea');
+  const fileInput = document.getElementById('imageInput');
+  const selectBtn = document.getElementById('selectImagesBtn');
   const preview = document.getElementById('imagePreview');
-  if (!input) return;
 
+  if (!dropzone || !fileInput || !preview) return;
+
+  // ✅ 1. فتح نافذة اختيار الملفات عند الضغط على الصندوق أو الزر
+  dropzone.addEventListener('click', (e) => {
+    if (e.target.closest('#selectImagesBtn')) return; // الزر يتعامل مع النقر بنفسه
+    fileInput.click();
+  });
+
+  if (selectBtn) {
+    selectBtn.addEventListener('click', (e) => {
+      e.stopPropagation(); // منع تكرار الحدث
+      fileInput.click();
+    });
+  }
+
+  // ✅ 2. تأثيرات السحب والإفلات
   ['dragenter', 'dragover'].forEach(ev => {
-    uploadArea.addEventListener(ev, e => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+    dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.add('dragover'); });
   });
   ['dragleave', 'drop'].forEach(ev => {
-    uploadArea.addEventListener(ev, e => { e.preventDefault(); uploadArea.classList.remove('dragover'); });
+    dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.remove('dragover'); });
   });
 
-  uploadArea.addEventListener('drop', e => {
+  // ✅ 3. معالجة الملفات
+  dropzone.addEventListener('drop', e => {
     if (isProcessingImages) return;
     const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
     handleFiles(files);
   });
 
-  input.addEventListener('change', () => {
+  fileInput.addEventListener('change', () => {
     if (isProcessingImages) return;
-    handleFiles(Array.from(input.files));
+    handleFiles(Array.from(fileInput.files));
   });
 
-  // ✅ دالة معالجة الملفات - async مع ضغط
   async function handleFiles(files) {
     if (isProcessingImages) {
       showAlert('جاري معالجة الصور، الرجاء الانتظار...');
@@ -350,16 +315,14 @@ function setupImageUpload() {
     }
 
     isProcessingImages = true;
-    input.disabled = true;
+    fileInput.disabled = true;
 
-    // ✅ إظهار مؤشر المعالجة
     showProcessingIndicator(true, files.length);
 
     let processed = 0;
     let failed = 0;
 
     for (const file of files) {
-      // ✅ تحقق من الحجم الأصلي
       if (file.size > 10 * 1024 * 1024) {
         showAlert(`الصورة "${file.name}" أكبر من 10 ميجابايت`);
         failed++;
@@ -367,10 +330,7 @@ function setupImageUpload() {
       }
 
       try {
-        // ✅ ضغط الصورة (هنا يحدث السحر!)
         const compressedDataUrl = await compressImage(file, 1200, 0.75);
-
-        // ✅ حساب نسبة التوفير (للعرض في الكونسول فقط)
         const originalKB = (file.size / 1024).toFixed(0);
         const compressedKB = Math.round((compressedDataUrl.length * 3) / 4 / 1024);
         const savings = Math.round((1 - compressedKB / originalKB) * 100);
@@ -387,7 +347,6 @@ function setupImageUpload() {
         renderPreview();
       } catch (err) {
         console.warn('⚠️ فشل ضغط:', file.name, err);
-        // Fallback: استخدم الصورة الأصلية
         try {
           const fallbackDataUrl = await new Promise((resolve, reject) => {
             const r = new FileReader();
@@ -409,11 +368,10 @@ function setupImageUpload() {
       }
     }
 
-    // ✅ إخفاء مؤشر المعالجة
     showProcessingIndicator(false);
     isProcessingImages = false;
-    input.disabled = false;
-    input.value = '';
+    fileInput.disabled = false;
+    fileInput.value = '';
 
     if (failed > 0) {
       showAlert(`تمت معالجة ${processed} صورة، وفشلت ${failed} صورة`);
@@ -422,7 +380,6 @@ function setupImageUpload() {
     }
   }
 
-  // ✅ مؤشر المعالجة
   function showProcessingIndicator(show, count = 0) {
     let indicator = document.getElementById('imageProcessingIndicator');
     if (show) {
@@ -441,7 +398,7 @@ function setupImageUpload() {
           <i data-lucide="loader-2" class="spin" style="animation: spin 1s linear infinite;"></i>
           <span>جاري ضغط الصور... (0/${count})</span>
         `;
-        uploadArea.parentNode.insertBefore(indicator, uploadArea.nextSibling);
+        dropzone.parentNode.insertBefore(indicator, dropzone.nextSibling);
         initIcons();
       } else {
         const span = indicator.querySelector('span');
@@ -453,25 +410,25 @@ function setupImageUpload() {
     }
   }
 
-  // ✅ عرض الصور المصغرة
+  // ✅ 4. عرض الصور المصغرة (متوافق مع التصميم الجديد)
   function renderPreview() {
     preview.innerHTML = uploadedImages.map(img => `
-      <div class="al-preview-item">
+      <div class="preview-item">
         <img src="${img.data}" alt="${img.name}" loading="lazy">
-        <button type="button" class="remove" data-id="${img.id}" title="حذف">
-          <i data-lucide="x"></i>
+        <button type="button" class="remove-btn" data-id="${img.id}" title="حذف">
+          <i data-lucide="x" style="width:14px;height:14px;"></i>
         </button>
       </div>
     `).join('');
 
-    preview.querySelectorAll('.remove').forEach(btn => {
-      btn.addEventListener('click', () => {
+    preview.querySelectorAll('.remove-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation(); // منع فتح نافذة اختيار الملفات عند الحذف
         uploadedImages = uploadedImages.filter(img => img.id !== btn.dataset.id);
         renderPreview();
       });
     });
 
-    // ✅ إظهار إجمالي الحجم
     const totalSize = uploadedImages.reduce((sum, img) => sum + (img.size || 0), 0);
     let sizeInfo = document.getElementById('imageSizeInfo');
     if (!sizeInfo) {
@@ -506,7 +463,6 @@ function validateForm() {
 
   if (!document.getElementById('city').value) { showFieldError('city', 'الرجاء اختيار المحافظة'); ok = false; }
 
-  // التحقق من رقم الواتساب
   const whatsapp = document.getElementById('whatsapp').value.trim();
   if (!whatsapp) {
     showFieldError('whatsapp', 'الرجاء إدخال رقم الواتساب');
@@ -523,13 +479,11 @@ function validateForm() {
     showFieldError('rentPeriod', 'الرجاء اختيار مدة الإيجار'); ok = false;
   }
 
-  // تحقق للنوع الفرعي (للعقار)
   if (state.type === 'property' && !state.subType) {
     showAlert('الرجاء اختيار نوع العقار');
     ok = false;
   }
 
-  // تحقق للأرض
   if (state.subType === 'land') {
     const landArea = document.getElementById('landArea').value;
     if (!landArea || Number(landArea) <= 0) {
@@ -537,14 +491,12 @@ function validateForm() {
     }
   }
 
-  // تحقق للسيارة
   if (state.type === 'car') {
     if (!state.brand) {
       showAlert('الرجاء اختيار ماركة السيارة');
       ok = false;
     }
 
-    // تحقق من الماركة المخصصة
     if (state.brand === 'other') {
       const otherBrand = document.getElementById('otherBrand').value.trim();
       if (!otherBrand) {
@@ -571,7 +523,6 @@ function validateForm() {
   if (!desc) { showFieldError('description', 'الرجاء إدخال الوصف'); ok = false; }
   else if (desc.length < 30) { showFieldError('description', 'الوصف قصير جداً'); ok = false; }
 
-  // ✅ تحقق من الصور
   if (uploadedImages.length === 0) {
     showAlert('الرجاء إضافة صورة واحدة على الأقل');
     ok = false;
@@ -645,7 +596,6 @@ function setupFormSubmit() {
     e.preventDefault();
     hideAlert();
 
-    // ✅ تحقق إذا كانت هناك صور قيد المعالجة
     if (isProcessingImages) {
       showAlert('جاري معالجة الصور، الرجاء الانتظار حتى الانتهاء...');
       return;
@@ -663,7 +613,6 @@ function setupFormSubmit() {
       return;
     }
 
-    // بناء البيانات
     const data = {
       type: state.type,
       purpose: state.purpose,
@@ -694,10 +643,8 @@ function setupFormSubmit() {
         return;
       }
 
-      // ✅ زيادة العداد المناسب في localStorage
       updateStatsAfterListing(state.type);
 
-      // ✅ علامة لإعادة تحميل بيانات الصفحة الرئيسية عند الرجوع
       try {
         sessionStorage.setItem('souq_reload_home', '1');
       } catch (err) {}
@@ -711,7 +658,6 @@ function setupFormSubmit() {
 function buildDetails() {
   const details = {};
 
-  // للعقار
   if (state.type === 'property') {
     details.subType = state.subType;
 
@@ -720,18 +666,14 @@ function buildDetails() {
       details.deposit = document.getElementById('deposit').value;
     }
 
-    // سكني / بناء
     if (['apartment', 'villa', 'arabic-house', 'chalet', 'building'].includes(state.subType)) {
       details.propertyArea = document.getElementById('propertyArea').value;
       details.rooms = document.getElementById('rooms').value;
       details.bathrooms = document.getElementById('bathrooms').value;
       details.floor = document.getElementById('floor').value;
-
       details.direction = document.getElementById('direction').value;
       details.vacancyType = document.getElementById('vacancyType').value;
-
       details.heating = document.getElementById('heating').value;
-
       details.finishingType = document.getElementById('finishingType').value;
 
       if (state.purpose === 'rent') {
@@ -744,7 +686,6 @@ function buildDetails() {
       }
     }
 
-    // أرض
     if (state.subType === 'land') {
       details.landArea = document.getElementById('landArea').value;
       details.landFrontage = document.getElementById('landFrontage').value;
@@ -757,7 +698,6 @@ function buildDetails() {
       details.landStreet = document.getElementById('landStreet').checked;
     }
 
-    // مكتب / محل
     if (['office', 'shop'].includes(state.subType)) {
       details.commercialArea = document.getElementById('commercialArea').value;
       details.commercialFloor = document.getElementById('commercialFloor').value;
@@ -769,7 +709,6 @@ function buildDetails() {
     }
   }
 
-  // للسيارة
   if (state.type === 'car') {
     if (state.brand === 'other') {
       details.brand = 'other';
@@ -777,15 +716,8 @@ function buildDetails() {
     } else {
       details.brand = state.brand;
       const brandNames = {
-        toyota: 'تويوتا',
-        hyundai: 'هيونداي',
-        kia: 'كيا',
-        mercedes: 'مرسيدس',
-        bmw: 'BMW',
-        nissan: 'نيسان',
-        honda: 'هوندا',
-        chevrolet: 'شيفروليه',
-        ford: 'فورد'
+        toyota: 'تويوتا', hyundai: 'هيونداي', kia: 'كيا', mercedes: 'مرسيدس',
+        bmw: 'BMW', nissan: 'نيسان', honda: 'هوندا', chevrolet: 'شيفروليه', ford: 'فورد'
       };
       details.brandName = brandNames[state.brand] || state.brand;
     }
@@ -815,7 +747,9 @@ function buildDetails() {
 function resetForm() {
   document.getElementById('addListingForm')?.reset();
   uploadedImages = [];
-  document.getElementById('imagePreview').innerHTML = '';
+  const preview = document.getElementById('imagePreview');
+  if (preview) preview.innerHTML = '';
+  
   document.querySelectorAll('.subtype-card').forEach(b => b.classList.remove('active'));
   state.subType = null;
   state.brand = null;
@@ -826,7 +760,6 @@ function resetForm() {
   const otherInput = document.getElementById('otherBrand');
   if (otherInput) otherInput.value = '';
 
-  // ✅ إخفاء معلومات الحجم
   const sizeInfo = document.getElementById('imageSizeInfo');
   if (sizeInfo) sizeInfo.style.display = 'none';
 
