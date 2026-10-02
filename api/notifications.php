@@ -7,12 +7,11 @@
  */
 
 require_once 'config.php';
+require_once 'helpers.php';
 
-if (!isset($_SESSION['user_id'])) {
-    respond(['success' => false, 'error' => 'يجب تسجيل الدخول']);
-}
+// ✅ استخدام requireAuth() من helpers.php
+$userId = requireAuth();
 
-$userId = $_SESSION['user_id'];
 $limit = min(50, max(1, (int)($_GET['limit'] ?? 20)));
 $offset = max(0, (int)($_GET['offset'] ?? 0));
 $countOnly = isset($_GET['count_only']);
