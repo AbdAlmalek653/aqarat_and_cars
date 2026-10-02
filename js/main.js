@@ -1,6 +1,6 @@
 /* ==========================================
    الصفحة الرئيسية - سوق
-   الإصدار: 3.0 (محسّن للأداء الفائق)
+   الإصدار: 3.1 (محسّن + حماية ضد الأخطاء)
    ========================================== */
 
 function initIcons() {
@@ -31,8 +31,16 @@ async function getCachedListings(forceRefresh) {
   _listingsPromise = (async () => {
     try {
       const options = forceRefresh ? { forceRefresh: true } : {};
-      const data = await API.Listings.getAll(null, options);
-      return data || [];
+      const data = await API.Listings.getAll({}, options);
+
+      // ✅ حماية ضد أي شكل غير متوقع من البيانات
+      if (Array.isArray(data)) return data;
+      if (data && Array.isArray(data.listings)) return data.listings;
+      if (data && Array.isArray(data.data)) return data.data;
+      if (data && Array.isArray(data.items)) return data.items;
+
+      console.warn('⚠️ استجابة غير متوقعة من API:', data);
+      return [];
     } catch (error) {
       console.error('❌ فشل تحميل الإعلانات:', error);
       return [];
@@ -61,20 +69,11 @@ function getImageUrls(item, index = 0) {
     thumb,
     medium,
     large,
-    // ✅ srcset لتعريف المتصفح بكل الأحجام المتاحة
     srcset: `${thumb} 300w, ${medium} 800w, ${large} 1600w`,
-    // ✅ sizes تحدد عرض الصورة حسب حجم الشاشة
-    // - جوال: 100% من العرض
-    // - تابلت: 50%
-    // - لابتوب: 33%
-    // - شاشات كبيرة: 25%
     sizes: '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1440px) 33vw, 25vw'
   };
 }
 
-/* ==========================================
-   الاحتفاظ بالدالة القديمة للتوافق
-   ========================================== */
 function getImageUrl(item) {
   if (window.getListingImageUrl) return window.getListingImageUrl(item, 0);
   return getImageUrls(item).medium;
@@ -99,7 +98,6 @@ function createCard(item, type) {
   if (item.subType === 'chalet') icon = 'tent';
   if (item.subType === 'arabic-house') icon = 'landmark';
 
-  // ✅ استخدام الأحجام الثلاثة
   const urls = getImageUrls(item, 0);
   const safeTitle = (item.title || '').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 
@@ -213,9 +211,9 @@ function emptyFilterState() {
 }
 
 /* ==========================================
-   ✅ تحسين 4: استدعاء API واحد + عرض 8 بطاقات فقط
+   ✅ تحسين 4: عرض 8 بطاقات فقط لكل قسم
    ========================================== */
-const MAX_FEATURED_ITEMS = 8; // ✅ 8 عناصر فقط لكل قسم (لتحميل أسرع)
+const MAX_FEATURED_ITEMS = 8;
 
 async function loadAllFeatured(forceRefresh) {
   const propContainer = document.getElementById('featuredProperties');
@@ -226,17 +224,18 @@ async function loadAllFeatured(forceRefresh) {
   try {
     const allListings = await getCachedListings(forceRefresh);
 
-    // ✅ تقييد العدد لتحميل أسرع
+    // ✅ تصفية + ترتيب حسب الأحدث
     const properties = allListings
       .filter(l => l.type === 'property')
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      .slice(0, MAX_FEATURED_ITEMS); // ✅ 8 فقط
+      .slice(0, MAX_FEATURED_ITEMS);
 
     const cars = allListings
       .filter(l => l.type === 'car')
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      .slice(0, MAX_FEATURED_ITEMS); // ✅ 8 فقط
+      .slice(0, MAX_FEATURED_ITEMS);
 
+    // ✅ عرض المحتوى
     if (propContainer) {
       propContainer.innerHTML = properties.length === 0
         ? emptyState('property')
@@ -259,7 +258,7 @@ async function loadAllFeatured(forceRefresh) {
 }
 
 /* ==========================================
-   الاحتفاظ بالدالتين للتوافق مع الكود القديم
+   الاحتفاظ بالدالتين للتوافق
    ========================================== */
 async function loadFeaturedProperties(forceRefresh) {
   const container = document.getElementById('featuredProperties');
@@ -537,12 +536,9 @@ async function handleCascadeShow() {
 }
 
 /* ==========================================
-   ✅ تحسين 5: Auto-refresh ذكي
-   - كل 5 دقائق بدل 30 ثانية
-   - يتوقف عند إخفاء الصفحة
-   - استدعاء واحد بدل 3
+   ✅ Auto-refresh ذكي
    ========================================== */
-const REFRESH_INTERVAL_MS = 5 * 60 * 1000; // 5 دقائق
+const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 let refreshIntervalId = null;
 let isRefreshing = false;
 
