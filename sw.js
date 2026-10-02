@@ -1,15 +1,20 @@
 /* ==========================================
    Service Worker - سوق | عقارات وسيارات
-   الإصدار: 1.0.1 (إصلاح timeout API)
+   الإصدار: 2.0.0 (احترافي)
+   
+   ✅ HTML يُحمّل مباشرة من الشبكة (لا تدخل)
+   ✅ API يُتجاهل تماماً (لا AbortError)
+   ✅ تخزين ذكي للملفات الثابتة فقط
+   ✅ يعمل offline جزئياً
    ========================================== */
 
-const CACHE_VERSION = 'souq-v1.0.1';  // ✅ نسخة محدّثة
+const CACHE_VERSION = 'souq-v2.0.0';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const IMAGE_CACHE = `${CACHE_VERSION}-images`;
 const FONT_CACHE = `${CACHE_VERSION}-fonts`;
 
 /* ==========================================
-   📦 الملفات الأساسية
+   📦 الملفات الأساسية (تُخزّن مسبقاً)
    ========================================== */
 const PRECACHE_URLS = [
   '/',
@@ -24,40 +29,21 @@ const PRECACHE_URLS = [
   '/js/speed-boost.js',
   '/js/lucide.min.js',
   '/fonts/cairo-v31-arabic_latin-regular.woff2',
-  '/fonts/cairo-v31-arabic_latin-700.woff2',
+  '/fonts/cairo-v31-arabic_latin-700.woff2'
 ];
 
 /* ==========================================
-   🚫 صفحات لا يجب تخزينها أبداً (تجاهل SW تماماً)
-   ========================================== */
-const NEVER_CACHE = [
-  '/api/login.php',
-  '/api/register.php',
-  '/api/logout.php',
-  '/api/me.php',
-  '/api/admin_',                    // ← كل ملفات admin_*
-  '/api/admin_stats_charts.php',    // ← إصلاح صريح
-  '/api/add_listing.php',
-  '/api/delete_listing.php',
-  '/api/update_listing.php',
-  '/api/toggle_favorite.php',
-  '/api/seed-admins.php',
-  '/api/notifications',             // احتياط
-  '/api/notifications_',
-];
-
-/* ==========================================
-   ⚡ 1. التثبيت
+   ⚡ 1. التثبيت (Install)
    ========================================== */
 self.addEventListener('install', (event) => {
-  console.log('🔧 [SW] Installing v1.0.1...');
+  console.log('🔧 [SW] Installing v2.0.0...');
   
   event.waitUntil(
     caches.open(STATIC_CACHE)
       .then((cache) => {
         return Promise.allSettled(
           PRECACHE_URLS.map(url => 
-            cache.add(url).catch(err => {
+            cache.add(url).catch(() => {
               console.warn(`⚠️ [SW] Failed to cache: ${url}`);
             })
           )
@@ -71,10 +57,10 @@ self.addEventListener('install', (event) => {
 });
 
 /* ==========================================
-   🔄 2. التنشيط
+   🔄 2. التنشيط (Activate)
    ========================================== */
 self.addEventListener('activate', (event) => {
-  console.log('🚀 [SW] Activating v1.0.1...');
+  console.log('🚀 [SW] Activating v2.0.0...');
   
   event.waitUntil(
     caches.keys()
@@ -98,59 +84,61 @@ self.addEventListener('activate', (event) => {
 });
 
 /* ==========================================
-   🎯 3. الاعتراض
+   🎯 3. الاعتراض (Fetch) - أهم قسم
    ========================================== */
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // تجاهل غير GET
+  // ✅ تجاهل كل الطلبات غير GET
   if (request.method !== 'GET') return;
 
-  // تجاهل الخارجي
+  // ✅ تجاهل الطلبات الخارجية
   if (url.origin !== self.location.origin) return;
 
-  // ✅✅✅ الأولوية القصوى: تجاهل كل طلبات API تماماً
-  // هذا يمنع SW من إلغاء الطلبات الطويلة
+  // ✅✅✅ 1. تجاهل كل طلبات API تماماً
+  // (الحل الأساسي لمشكلة AbortError)
   if (url.pathname.startsWith('/api/')) {
-    console.log('🚫 [SW] Bypassing API:', url.pathname);
-    return; // دع المتصفح يمررها كالعادة (بدون أي تدخل من SW)
+    return; // دع المتصفح يمررها كالعادة
   }
 
-  // (ما يبقى بعد هذا = ملفات ثابتة فقط)
+  // ✅✅✅ 2. تجاهل كل صفحات HTML تماماً
+  // (الحل الأساسي لمشكلة "لا يوجد اتصال")
+  if (url.pathname.endsWith('.html') || url.pathname === '/') {
+    return; // تُحمّل مباشرة من الشبكة
+  }
 
-  // الخطوط
+  // ==========================================
+  // من هنا فصاعداً = ملفات ثابتة فقط
+  // ==========================================
+
+  // ✅ الخطوط → Cache First
   if (url.pathname.match(/\.(woff2?|ttf|otf|eot)$/)) {
     event.respondWith(cacheFirst(request, FONT_CACHE));
     return;
   }
 
-  // الصور
+  // ✅ الصور → Cache First مع حد أقصى
   if (url.pathname.match(/\.(webp|png|jpg|jpeg|gif|svg|ico)$/)) {
-    event.respondWith(cacheFirstWithLimit(request, IMAGE_CACHE, 50));
+    event.respondWith(cacheFirstWithLimit(request, IMAGE_CACHE, 100));
     return;
   }
 
-  // CSS/JS
+  // ✅ CSS/JS → Stale While Revalidate
   if (url.pathname.match(/\.(css|js)$/)) {
     event.respondWith(staleWhileRevalidate(request, STATIC_CACHE));
     return;
   }
 
-  // HTML
-  if (url.pathname.match(/\.(html)$/) || url.pathname === '/') {
-    event.respondWith(networkFirst(request, STATIC_CACHE, 3000));
-    return;
-  }
-
-  // البقية
-  event.respondWith(networkFirst(request, STATIC_CACHE, 5000));
+  // ✅ البقية → Cache First
+  event.respondWith(cacheFirst(request, STATIC_CACHE));
 });
 
 /* ==========================================
-   🎨 استراتيجيات التخزين
+   🎨 استراتيجية: Cache First
+   - ابحث في الكاش، وإذا لم يوجد اجلب من الشبكة
+   - الأفضل للخطوط والصور
    ========================================== */
-
 async function cacheFirst(request, cacheName) {
   const cache = await caches.open(cacheName);
   const cached = await cache.match(request);
@@ -164,10 +152,15 @@ async function cacheFirst(request, cacheName) {
     }
     return response;
   } catch (err) {
+    console.warn('⚠️ [SW] CacheFirst failed:', request.url);
     throw err;
   }
 }
 
+/* ==========================================
+   🎨 استراتيجية: Cache First مع حد أقصى
+   - نفس Cache First لكن مع حذف الأقدم
+   ========================================== */
 async function cacheFirstWithLimit(request, cacheName, maxItems) {
   const cache = await caches.open(cacheName);
   const cached = await cache.match(request);
@@ -178,6 +171,8 @@ async function cacheFirstWithLimit(request, cacheName, maxItems) {
     const response = await fetch(request);
     if (response.ok) {
       await cache.put(request, response.clone());
+      
+      // احذف الأقدم إذا تجاوزنا الحد
       const keys = await cache.keys();
       if (keys.length > maxItems) {
         const toDelete = keys.slice(0, keys.length - maxItems);
@@ -190,36 +185,11 @@ async function cacheFirstWithLimit(request, cacheName, maxItems) {
   }
 }
 
-async function networkFirst(request, cacheName, timeout = 15000) {
-  const cache = await caches.open(cacheName);
-  
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-    
-    const response = await fetch(request, { signal: controller.signal });
-    clearTimeout(timeoutId);
-    
-    if (response.ok) {
-      cache.put(request, response.clone());
-    }
-    return response;
-  } catch (err) {
-    const cached = await cache.match(request);
-    
-    if (cached) return cached;
-    
-    if (request.destination === 'document') {
-      return new Response(
-        `<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>لا يوجد اتصال</title></head><body><h1>لا يوجد اتصال بالإنترنت</h1></body></html>`,
-        { headers: { 'Content-Type': 'text/html; charset=utf-8' } }
-      );
-    }
-    
-    throw err;
-  }
-}
-
+/* ==========================================
+   🎨 استراتيجية: Stale While Revalidate
+   - أعد النسخة المخزّنة فوراً + حدّثها بالخلفية
+   - الأفضل لـ CSS/JS
+   ========================================== */
 async function staleWhileRevalidate(request, cacheName) {
   const cache = await caches.open(cacheName);
   const cached = await cache.match(request);
@@ -236,10 +206,24 @@ async function staleWhileRevalidate(request, cacheName) {
   return cached || fetchPromise;
 }
 
+/* ==========================================
+   📨 استقبال الرسائل
+   ========================================== */
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
+  
+  if (event.data && event.data.type === 'CLEAR_CACHE') {
+    event.waitUntil(
+      caches.keys().then((names) => {
+        return Promise.all(names.map(name => caches.delete(name)));
+      }).then(() => {
+        console.log('🧹 [SW] All caches cleared');
+        event.ports[0]?.postMessage({ success: true });
+      })
+    );
+  }
 });
 
-console.log('✅ [SW] Service Worker v1.0.1 loaded');
+console.log('✅ [SW] Service Worker v2.0.0 loaded');
