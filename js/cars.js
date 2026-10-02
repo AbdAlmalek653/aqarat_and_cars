@@ -1,6 +1,6 @@
 /* ==========================================
    صفحة السيارات - البيانات من API فقط
-   الإصدار: 2.0 (محسّن للأداء + دعم أحجام متعددة)
+   الإصدار: 2.1 (محسّن + خريطة تفاعلية)
    ========================================== */
 
 const ITEMS_PER_PAGE = 9;
@@ -233,15 +233,6 @@ function setupEvents() {
   document.getElementById('clearFilters')?.addEventListener('click', clearAllFilters);
   document.getElementById('sortSelect')?.addEventListener('change', sortCars);
 
-  document.querySelectorAll('.view-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentView = btn.dataset.view;
-      renderCars();
-    });
-  });
-
   const filterToggle = document.getElementById('filterToggle');
   const sidebar = document.getElementById('filtersSidebar');
   const overlay = document.getElementById('sidebarOverlay');
@@ -261,6 +252,79 @@ function setupEvents() {
     overlay.classList.remove('active');
   });
 }
+
+/* ==========================================
+   🗺️ تبديل عرض القائمة / الخريطة
+   ========================================== */
+(function() {
+  'use strict';
+
+  const viewGridBtn = document.getElementById('viewGridBtn');
+  const viewMapBtn = document.getElementById('viewMapBtn');
+  const mapContainer = document.getElementById('mapContainer');
+  const grid = document.getElementById('carsGrid');
+
+  if (!viewGridBtn || !viewMapBtn || !mapContainer || !grid) {
+    console.warn('⚠️ [Map] Missing elements - check HTML');
+    return;
+  }
+
+  let mapInitialized = false;
+
+  function showGrid() {
+    viewGridBtn.classList.add('active');
+    viewMapBtn.classList.remove('active');
+    mapContainer.style.display = 'none';
+    grid.classList.remove('map-hidden');
+    grid.style.display = '';
+  }
+
+  function showMap() {
+    viewGridBtn.classList.remove('active');
+    viewMapBtn.classList.add('active');
+    grid.classList.add('map-hidden');
+    mapContainer.style.display = 'block';
+
+    if (!mapInitialized) {
+      setTimeout(() => {
+        if (!window.MapView) {
+          console.warn('⚠️ [Map] MapView not loaded');
+          return;
+        }
+        window.MapView.init('mapContainer');
+        window.MapView.addMarkers(filteredCars || allCars || []);
+        mapInitialized = true;
+        if (window.lucide) window.lucide.createIcons();
+      }, 100);
+    } else {
+      setTimeout(() => {
+        if (window.MapView) {
+          window.MapView.addMarkers(filteredCars || allCars || []);
+        }
+      }, 100);
+    }
+  }
+
+  viewGridBtn.addEventListener('click', showGrid);
+  viewMapBtn.addEventListener('click', showMap);
+
+  // ✅ تحديث الخريطة عند تطبيق فلاتر جديدة
+  const originalApplyFilters = window.applyFilters;
+  if (typeof originalApplyFilters === 'function') {
+    window.applyFilters = function() {
+      originalApplyFilters.apply(this, arguments);
+      if (mapInitialized && viewMapBtn.classList.contains('active')) {
+        setTimeout(() => {
+          if (window.MapView) {
+            window.MapView.addMarkers(filteredCars || allCars || []);
+          }
+        }, 200);
+      }
+    };
+  }
+
+  console.log('✅ [Map] Toggle controls installed (cars)');
+})();
 
 document.addEventListener('DOMContentLoaded', () => {
   initIcons();

@@ -6,12 +6,20 @@
   <title>سيارات للبيع والإيجار | سوق</title>
   <meta name="description" content="تصفح آلاف السيارات للبيع والإيجار - جديدة ومستعملة بأفضل الأسعار">
 
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚗</text></svg>">
 
   <script src="../js/lucide.min.js"></script>
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/pages.css">
   <link rel="stylesheet" href="../css/speed-boost.css">
+
+  <!-- ✅ Leaflet CSS (خريطة تفاعلية) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin="">
+
+  <!-- ✅ أنماط الخريطة -->
+  <link rel="stylesheet" href="../css/map-view.css">
 </head>
 <body class="has-bottom-nav">
 
@@ -161,12 +169,25 @@
               <option value="price-desc">الأغلى أولاً</option>
               <option value="year-desc">الأحدث سنة</option>
             </select>
-            <div class="view-toggle">
-              <button class="view-btn active" data-view="grid" title="شبكة"><i data-lucide="grid-3x3"></i></button>
-              <button class="view-btn" data-view="list" title="قائمة"><i data-lucide="list"></i></button>
+
+            <!-- ✅ زر تبديل العرض: قائمة / خريطة -->
+            <div class="view-toggle-group">
+              <button type="button" class="view-toggle-btn active" data-view="grid" id="viewGridBtn">
+                <i data-lucide="layout-grid"></i>
+                <span>قائمة</span>
+              </button>
+              <button type="button" class="view-toggle-btn" data-view="map" id="viewMapBtn">
+                <i data-lucide="map"></i>
+                <span>خريطة</span>
+              </button>
             </div>
           </div>
         </div>
+
+        <!-- ✅ حاوية الخريطة (مخفية افتراضياً) -->
+        <div class="map-view-container" id="mapContainer" style="display: none;"></div>
+
+        <!-- الشبكة -->
         <div class="properties-grid" id="carsGrid"></div>
 
         <div id="noResultsMessage" style="display: none; text-align: center; padding: 50px 20px; background: #fff; border-radius: 12px; margin-top: 20px;">
@@ -197,12 +218,22 @@
     <a href="account.html" class="bottom-nav-item"><i data-lucide="user"></i><span>حسابي</span></a>
   </nav>
 
+  <!-- ===================== Scripts ===================== -->
+
+  <!-- ✅ Leaflet JS (خريطة تفاعلية) -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+          crossorigin=""></script>
+  <script src="../js/city-coords.js"></script>
+  <script src="../js/map-view.js"></script>
+
+  <!-- Scripts الأساسية -->
   <script src="../js/api.js"></script>
+  <script src="../js/header-state.js"></script>
   <script src="../js/main.js"></script>
   <script src="../js/cars.js"></script>
   <script src="../js/auth-guard.js"></script>
-  <script src="../js/add-listing-guard.js"></script>
-  <script src="../js/mobile-menu.js"></script>
+  <script src="../js/app-inline.js"></script>
   <script src="../js/speed-boost.js"></script>
   <script src="../js/sw-register.js"></script>
 </body>

@@ -1,24 +1,24 @@
 /* ==========================================
-   صفحة العقارات - البيانات من API فقط
-   الإصدار: 2.0 (محسّن للأداء + دعم أحجام متعددة)
+   صفحة السيارات - البيانات من API فقط
+   الإصدار: 2.1 (محسّن + خريطة تفاعلية)
    ========================================== */
 
 const ITEMS_PER_PAGE = 9;
 let currentPage = 1;
 let currentView = 'grid';
-let allProperties = [];
-let filteredProperties = [];
+let allCars = [];
+let filteredCars = [];
 
 function initIcons() { if (window.lucide) window.lucide.createIcons(); }
 
-async function loadProperties() {
+async function loadCars() {
   try {
-    const listings = await API.Listings.getAll({ type: 'property' });
-    allProperties = listings || [];
+    const listings = await API.Listings.getAll({ type: 'car' });
+    allCars = listings || [];
     applyFilters();
   } catch (e) {
     console.error('خطأ:', e);
-    allProperties = [];
+    allCars = [];
     applyFilters();
   }
 }
@@ -26,63 +26,58 @@ async function loadProperties() {
 function getFilters() {
   return {
     purpose: document.querySelector('input[name="purpose"]:checked')?.value || '',
-    types: Array.from(document.querySelectorAll('input[name="type"]:checked')).map(c => c.value),
+    brands: Array.from(document.querySelectorAll('input[name="brand"]:checked')).map(c => c.value),
     city: document.getElementById('filterCity')?.value || '',
     priceMin: parseInt(document.getElementById('priceMin')?.value) || 0,
     priceMax: parseInt(document.getElementById('priceMax')?.value) || Infinity,
-    rooms: document.querySelector('input[name="rooms"]:checked')?.value || '',
-    areaMin: parseInt(document.getElementById('areaMin')?.value) || 0,
-    areaMax: parseInt(document.getElementById('areaMax')?.value) || Infinity,
-    furnished: Array.from(document.querySelectorAll('input[name="furnished"]:checked')).map(c => c.value)
+    yearMin: parseInt(document.getElementById('yearMin')?.value) || 0,
+    yearMax: parseInt(document.getElementById('yearMax')?.value) || Infinity,
+    condition: document.querySelector('input[name="condition"]:checked')?.value || '',
+    transmission: document.querySelector('input[name="transmission"]:checked')?.value || '',
+    fuels: Array.from(document.querySelectorAll('input[name="fuel"]:checked')).map(c => c.value),
+    kmMax: parseInt(document.getElementById('kmMax')?.value) || Infinity
   };
 }
 
 function applyFilters() {
   const f = getFilters();
 
-  filteredProperties = allProperties.filter(p => {
-    if (f.purpose && p.purpose !== f.purpose) return false;
-    if (f.types.length && !f.types.includes(p.subType)) return false;
-    if (f.city && p.city !== f.city) return false;
-    if (p.price < f.priceMin || p.price > f.priceMax) return false;
+  filteredCars = allCars.filter(c => {
+    if (f.purpose && c.purpose !== f.purpose) return false;
+    if (f.brands.length && !f.brands.includes(c.details?.brand)) return false;
+    if (f.city && c.city !== f.city) return false;
 
-    if (f.rooms) {
-      const r = parseInt(f.rooms);
-      const pRooms = parseInt(p.details?.rooms) || 0;
-      if (r === 5) { if (pRooms < 5) return false; }
-      else if (pRooms !== r) return false;
-    }
+    const price = Number(c.price) || 0;
+    if (price < f.priceMin || price > f.priceMax) return false;
 
-    const pArea = parseInt(p.details?.propertyArea) || parseInt(p.details?.landArea) || 0;
-    if (pArea < f.areaMin || pArea > f.areaMax) return false;
+    const year = Number(c.details?.year) || 0;
+    if (year < f.yearMin || year > f.yearMax) return false;
 
-    if (f.furnished.length) {
-      const pFurnished = p.details?.furnished;
-      if (pFurnished && !f.furnished.includes(pFurnished)) return false;
-    }
+    if (f.condition && c.details?.condition !== f.condition) return false;
+    if (f.transmission && c.details?.transmission !== f.transmission) return false;
+    if (f.fuels.length && !f.fuels.includes(c.details?.fuel)) return false;
+
+    const km = Number(c.details?.km) || 0;
+    if (km > f.kmMax) return false;
 
     return true;
   });
 
   currentPage = 1;
-  sortProperties();
+  sortCars();
 }
 
-function sortProperties() {
+function sortCars() {
   const sort = document.getElementById('sortSelect')?.value || 'newest';
+
   switch (sort) {
-    case 'price-asc': filteredProperties.sort((a, b) => a.price - b.price); break;
-    case 'price-desc': filteredProperties.sort((a, b) => b.price - a.price); break;
-    case 'area-desc':
-      filteredProperties.sort((a, b) => {
-        const aA = parseInt(a.details?.propertyArea) || 0;
-        const bA = parseInt(b.details?.propertyArea) || 0;
-        return bA - aA;
-      });
-      break;
-    default: filteredProperties.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    case 'price-asc': filteredCars.sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0)); break;
+    case 'price-desc': filteredCars.sort((a, b) => (Number(b.price) || 0) - (Number(a.price) || 0)); break;
+    case 'year-desc': filteredCars.sort((a, b) => (Number(b.details?.year) || 0) - (Number(a.details?.year) || 0)); break;
+    default: filteredCars.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   }
-  renderProperties();
+
+  renderCars();
 }
 
 function getStatusBadge(status) {
@@ -91,26 +86,20 @@ function getStatusBadge(status) {
   return '';
 }
 
-function createPropertyCard(item) {
+function createCarCard(item) {
   const purposeText = item.purpose === 'sale' ? 'للبيع' : 'للإيجار';
   const purposeClass = item.purpose === 'sale' ? 'sale' : 'rent';
 
   const priceNum = Number(item.price) || 0;
   const priceText = item.purpose === 'sale'
     ? `${priceNum.toLocaleString('en-US')} ${item.currency || 'USD'}`
-    : `${priceNum} ${item.currency || 'USD'} <small>/ شهرياً</small>`;
+    : `${priceNum} ${item.currency || 'USD'} <small>/ يوم</small>`;
 
   const featuredBadge = item.featured ? `<span class="card-badge featured">⭐ مميز</span>` : '';
   const statusBadge = getStatusBadge(item.status);
   const isUnavailable = item.status === 'sold' || item.status === 'rented';
 
-  let icon = 'building-2';
-  if (item.subType === 'villa') icon = 'home';
-  if (item.subType === 'land') icon = 'trees';
-  if (item.subType === 'office') icon = 'briefcase';
-  if (item.subType === 'shop') icon = 'store';
-  if (item.subType === 'chalet') icon = 'tent';
-  if (item.subType === 'arabic-house') icon = 'landmark';
+  const icon = 'car';
 
   // ✅ استخدام srcset + sizes للأداء الفائق
   const imgData = window.getListingImageSrcset
@@ -129,13 +118,24 @@ function createPropertyCard(item) {
          decoding="async"
          width="800"
          height="600"
-         onerror="this.onerror=null;this.style.display='none';this.parentNode.classList.add('image-failed');this.parentNode.innerHTML='<i data-lucide=\\'${icon}\\'></i>';if(window.lucide)window.lucide.createIcons();">`
+         onerror="this.onerror=null;this.style.display='none';this.parentNode.classList.add('image-failed');this.parentNode.innerHTML='<i data-lucide=\\'car\\'></i>';if(window.lucide)window.lucide.createIcons();">`
     : `<i data-lucide="${icon}"></i>`;
 
   const location = item.area || item.city || '—';
 
+  const d = item.details || {};
+  let meta = '';
+  const chips = [];
+  if (d.brandName || d.brand) chips.push({ icon: 'car', text: d.brandName || d.brand });
+  if (d.year) chips.push({ icon: 'calendar', text: d.year });
+  if (d.km && item.purpose === 'sale') chips.push({ icon: 'gauge', text: `${Number(d.km).toLocaleString('en-US')} كم` });
+
+  if (chips.length) {
+    meta = `<div class="card-meta">${chips.map(c => `<span class="card-meta-chip"><i data-lucide="${c.icon}"></i><span>${c.text}</span></span>`).join('')}</div>`;
+  }
+
   return `
-    <a href="details.html?id=${item.id}&type=property" class="card ${isUnavailable ? 'card-unavailable' : ''}">
+    <a href="details.html?id=${item.id}&type=car" class="card ${isUnavailable ? 'card-unavailable' : ''}">
       <div class="card-image">
         ${imageContent}
         ${featuredBadge}
@@ -145,21 +145,22 @@ function createPropertyCard(item) {
       <div class="card-body">
         <h3 class="card-title">${item.title}</h3>
         <p class="card-location"><i data-lucide="map-pin"></i>${location}</p>
+        ${meta}
         <p class="card-price">${priceText}</p>
       </div>
     </a>
   `;
 }
 
-function renderProperties() {
-  const grid = document.getElementById('propertiesGrid');
+function renderCars() {
+  const grid = document.getElementById('carsGrid');
   const countEl = document.getElementById('resultsCount');
   const noResultsMsg = document.getElementById('noResultsMessage');
 
   if (!grid) return;
-  if (countEl) countEl.textContent = filteredProperties.length;
+  if (countEl) countEl.textContent = filteredCars.length;
 
-  if (filteredProperties.length === 0) {
+  if (filteredCars.length === 0) {
     grid.style.display = 'none';
     grid.innerHTML = '';
     if (noResultsMsg) {
@@ -173,12 +174,12 @@ function renderProperties() {
   grid.style.display = '';
   if (noResultsMsg) noResultsMsg.style.display = 'none';
 
-  const totalPages = Math.ceil(filteredProperties.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(filteredCars.length / ITEMS_PER_PAGE);
   const start = (currentPage - 1) * ITEMS_PER_PAGE;
-  const pageItems = filteredProperties.slice(start, start + ITEMS_PER_PAGE);
+  const pageItems = filteredCars.slice(start, start + ITEMS_PER_PAGE);
 
   grid.className = currentView === 'grid' ? 'properties-grid' : 'properties-list';
-  grid.innerHTML = pageItems.map(createPropertyCard).join('');
+  grid.innerHTML = pageItems.map(createCarCard).join('');
 
   renderPagination(totalPages);
   initIcons();
@@ -204,7 +205,7 @@ function renderPagination(totalPages) {
 
 window.goToPage = function(page) {
   currentPage = page;
-  renderProperties();
+  renderCars();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
@@ -212,31 +213,25 @@ window.clearAllFilters = function() {
   document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
   document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
   document.querySelector('input[name="purpose"][value=""]').checked = true;
-  document.querySelector('input[name="rooms"][value=""]').checked = true;
-  document.getElementById('filterCity').value = '';
-  ['priceMin','priceMax','areaMin','areaMax'].forEach(id => document.getElementById(id).value = '');
+  document.querySelector('input[name="condition"][value=""]').checked = true;
+  document.querySelector('input[name="transmission"][value=""]').checked = true;
+  ['filterCity', 'priceMin', 'priceMax', 'yearMin', 'yearMax', 'kmMax'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
   applyFilters();
 };
 
 function setupEvents() {
-  document.querySelectorAll('input[name="purpose"], input[name="type"], input[name="rooms"], input[name="furnished"]')
+  document.querySelectorAll('input[name="purpose"], input[name="brand"], input[name="condition"], input[name="transmission"], input[name="fuel"]')
     .forEach(el => el.addEventListener('change', applyFilters));
 
-  ['filterCity', 'priceMin', 'priceMax', 'areaMin', 'areaMax'].forEach(id => {
+  ['filterCity', 'priceMin', 'priceMax', 'yearMin', 'yearMax', 'kmMax'].forEach(id => {
     document.getElementById(id)?.addEventListener('input', applyFilters);
   });
 
   document.getElementById('clearFilters')?.addEventListener('click', clearAllFilters);
-  document.getElementById('sortSelect')?.addEventListener('change', sortProperties);
-
-  document.querySelectorAll('.view-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentView = btn.dataset.view;
-      renderProperties();
-    });
-  });
+  document.getElementById('sortSelect')?.addEventListener('change', sortCars);
 
   const filterToggle = document.getElementById('filterToggle');
   const sidebar = document.getElementById('filtersSidebar');
@@ -258,8 +253,81 @@ function setupEvents() {
   });
 }
 
+/* ==========================================
+   🗺️ تبديل عرض القائمة / الخريطة
+   ========================================== */
+(function() {
+  'use strict';
+
+  const viewGridBtn = document.getElementById('viewGridBtn');
+  const viewMapBtn = document.getElementById('viewMapBtn');
+  const mapContainer = document.getElementById('mapContainer');
+  const grid = document.getElementById('carsGrid');
+
+  if (!viewGridBtn || !viewMapBtn || !mapContainer || !grid) {
+    console.warn('⚠️ [Map] Missing elements - check HTML');
+    return;
+  }
+
+  let mapInitialized = false;
+
+  function showGrid() {
+    viewGridBtn.classList.add('active');
+    viewMapBtn.classList.remove('active');
+    mapContainer.style.display = 'none';
+    grid.classList.remove('map-hidden');
+    grid.style.display = '';
+  }
+
+  function showMap() {
+    viewGridBtn.classList.remove('active');
+    viewMapBtn.classList.add('active');
+    grid.classList.add('map-hidden');
+    mapContainer.style.display = 'block';
+
+    if (!mapInitialized) {
+      setTimeout(() => {
+        if (!window.MapView) {
+          console.warn('⚠️ [Map] MapView not loaded');
+          return;
+        }
+        window.MapView.init('mapContainer');
+        window.MapView.addMarkers(filteredCars || allCars || []);
+        mapInitialized = true;
+        if (window.lucide) window.lucide.createIcons();
+      }, 100);
+    } else {
+      setTimeout(() => {
+        if (window.MapView) {
+          window.MapView.addMarkers(filteredCars || allCars || []);
+        }
+      }, 100);
+    }
+  }
+
+  viewGridBtn.addEventListener('click', showGrid);
+  viewMapBtn.addEventListener('click', showMap);
+
+  // ✅ تحديث الخريطة عند تطبيق فلاتر جديدة
+  const originalApplyFilters = window.applyFilters;
+  if (typeof originalApplyFilters === 'function') {
+    window.applyFilters = function() {
+      originalApplyFilters.apply(this, arguments);
+      if (mapInitialized && viewMapBtn.classList.contains('active')) {
+        setTimeout(() => {
+          if (window.MapView) {
+            window.MapView.addMarkers(filteredCars || allCars || []);
+          }
+        }, 200);
+      }
+    };
+  }
+
+  console.log('✅ [Map] Toggle controls installed (cars)');
+})();
+
 document.addEventListener('DOMContentLoaded', () => {
   initIcons();
   setupEvents();
-  loadProperties();
+  loadCars();
 });
