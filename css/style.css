@@ -1,11 +1,9 @@
 /* ==========================================
    ✨ خط Cairo - تحميل محلي (Self-Hosted)
+   ✅ نسخة احترافية: وزنان فقط (400 + 700)
    ========================================== */
 @font-face { font-display: swap; font-family: 'Cairo'; font-style: normal; font-weight: 400; src: url('../fonts/cairo-v31-arabic_latin-regular.woff2') format('woff2'); }
-@font-face { font-display: swap; font-family: 'Cairo'; font-style: normal; font-weight: 500; src: url('../fonts/cairo-v31-arabic_latin-500.woff2') format('woff2'); }
-@font-face { font-display: swap; font-family: 'Cairo'; font-style: normal; font-weight: 600; src: url('../fonts/cairo-v31-arabic_latin-600.woff2') format('woff2'); }
 @font-face { font-display: swap; font-family: 'Cairo'; font-style: normal; font-weight: 700; src: url('../fonts/cairo-v31-arabic_latin-700.woff2') format('woff2'); }
-@font-face { font-display: swap; font-family: 'Cairo'; font-style: normal; font-weight: 800; src: url('../fonts/cairo-v31-arabic_latin-800.woff2') format('woff2'); }
 
 /* ==========================================
    1. المتغيرات
@@ -283,11 +281,9 @@ img { display: block; }
 .card-price { font-size: 18px; font-weight: 800; color: var(--accent); }
 .card-price small { font-size: 12px; font-weight: 500; color: var(--text-muted); }
 
-/* ✅ في حال فشل تحميل الصورة */
 .card-image.image-failed { background: linear-gradient(135deg, var(--bg-secondary), var(--bg-card)); }
 .card-image.image-failed i { width: 60px; height: 60px; color: var(--text-muted); opacity: 0.4; }
 
-/* ✅ زر تفاصيل الإعلان */
 .card-details-btn {
   display: flex;
   align-items: center;
@@ -541,7 +537,6 @@ img { display: block; }
    ========================================== */
 .empty-state { display: flex !important; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 60px 24px; position: relative; overflow: hidden; background: linear-gradient(135deg, rgba(26,36,56,0.5) 0%, rgba(17,24,39,0.8) 100%); border: 1.5px dashed var(--border); border-radius: var(--radius-lg); min-height: 400px; }
 
-/* ✅ إصلاح: إخفاء empty state عند إضافة hidden */
 .empty-state[hidden] { display: none !important; }
 #resultsSection .empty-state[hidden] { display: none !important; }
 
@@ -555,7 +550,6 @@ img { display: block; }
 .empty-cta-icon { width: 30px; height: 30px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 .empty-cta-icon svg { width: 16px; height: 16px; color: white; }
 
-/* ✅ زر واتساب أخضر */
 .empty-cta-whatsapp {
   background: linear-gradient(135deg, #25D366, #128C7E) !important;
   box-shadow: 0 12px 30px rgba(37, 211, 102, 0.4) !important;
@@ -568,7 +562,6 @@ img { display: block; }
   background: rgba(255, 255, 255, 0.25) !important;
 }
 
-/* ✅ زر ثانوي */
 .empty-secondary-btn {
   display: inline-flex;
   align-items: center;
@@ -593,7 +586,6 @@ img { display: block; }
 }
 .empty-secondary-btn svg { width: 16px; height: 16px; }
 
-/* ✅ ملخص البحث */
 .search-summary {
   display: flex;
   flex-wrap: wrap;
@@ -888,7 +880,6 @@ img { display: block; }
 .hero-title::before { content: ''; position: absolute; top: 20%; left: 15%; width: 8px; height: 8px; background: radial-gradient(circle, #F59E0B, transparent 70%); border-radius: 50%; filter: blur(1px); animation: float 6s ease-in-out infinite; pointer-events: none; z-index: -1; }
 .hero-title .gradient-text:hover { animation-play-state: paused; filter: drop-shadow(0 0 20px rgba(245, 158, 11, 1)) drop-shadow(0 0 40px rgba(59, 130, 246, 0.8)); transform: scale(1.08); transition: transform 0.3s ease, filter 0.3s ease; }
 
-/* ✅ Hero Badge */
 .hero-badge { position: relative; overflow: hidden; display: inline-flex; align-items: center; gap: 10px; padding: 8px 20px 8px 24px; border-radius: 50px; font-size: 13.5px; font-weight: 700; letter-spacing: 0.3px; color: #FCD34D; margin-bottom: 24px; isolation: isolate; background: linear-gradient(135deg, rgba(245, 158, 11, 0.18) 0%, rgba(251, 191, 36, 0.08) 50%, rgba(245, 158, 11, 0.15) 100%); border: 1.5px solid transparent; background-clip: padding-box; animation: badgeLuxFloat 3.5s ease-in-out infinite, badgeLuxGlow 3s ease-in-out infinite; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
 @keyframes badgeLuxFloat { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-4px) scale(1.02); } }
 @keyframes badgeLuxGlow { 0%, 100% { box-shadow: 0 0 15px rgba(245, 158, 11, 0.35), 0 0 30px rgba(245, 158, 11, 0.15), inset 0 0 12px rgba(245, 158, 11, 0.1); } 50% { box-shadow: 0 0 25px rgba(245, 158, 11, 0.6), 0 0 50px rgba(245, 158, 11, 0.3), 0 0 80px rgba(59, 130, 246, 0.2), inset 0 0 18px rgba(245, 158, 11, 0.2); } }
@@ -902,7 +893,6 @@ img { display: block; }
 .hero-badge:hover::before { background-size: 100% 100%; animation-duration: 1.5s; }
 .hero-badge:hover svg { animation-duration: 0.8s; filter: drop-shadow(0 0 12px rgba(252, 211, 77, 1)); }
 
-/* ✅ Scroll Strip Animations */
 @media (min-width: 769px) {
   .scroll-strip-text { position: relative; overflow: hidden; animation: float 3s ease-in-out infinite, glowPulse 3s ease-in-out infinite; transition: all 0.4s ease; }
   .scroll-strip-text::before { content: ''; position: absolute; top: 0; left: 0; width: 60px; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), rgba(147, 197, 253, 0.7), transparent); animation: shimmer 3.5s ease-in-out infinite; pointer-events: none; z-index: 2; }
@@ -911,7 +901,6 @@ img { display: block; }
   .scroll-strip:hover .scroll-strip-text { transform: translateY(-4px) scale(1.05); border-color: var(--primary); box-shadow: 0 0 40px rgba(59, 130, 246, 0.7), 0 0 80px rgba(245, 158, 11, 0.4); }
 }
 
-/* ✅ Divider Animations */
 .hero-divider-text { position: relative; background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(147, 197, 253, 0.2) 50%, rgba(245, 158, 11, 0.15) 100%); background-size: 200% 200%; animation: heartbeat 2s ease-in-out infinite, glowPulse 2s ease-in-out infinite, gradientFlow 4s ease-in-out infinite; transition: all 0.3s ease; z-index: 1; }
 .hero-divider-text::before, .hero-divider-text::after { content: ''; position: absolute; inset: 0; border-radius: 50px; border: 2px solid rgba(59, 130, 246, 0.5); animation: ringExpand 2.5s ease-out infinite; pointer-events: none; z-index: -1; }
 .hero-divider-text::after { animation-delay: 1.25s; border-color: rgba(245, 158, 11, 0.5); }
@@ -919,7 +908,6 @@ img { display: block; }
 .hero-divider-line:last-child::before { animation-delay: 0.9s; }
 .hero-divider:hover .hero-divider-text { transform: scale(1.1); box-shadow: 0 0 40px rgba(59, 130, 246, 0.9), 0 0 80px rgba(245, 158, 11, 0.5); color: #F8FAFC; }
 
-/* ✅ Cascade Title Animations */
 .cascade-title-badge { position: relative; overflow: hidden; animation: fadeInUp 0.6s ease-out 0.2s both, float 3s ease-in-out 1s infinite, glowPulse 2.5s ease-in-out 1s infinite; }
 .cascade-title-badge::before { content: ''; position: absolute; top: 0; left: 0; width: 50px; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent); animation: badgeShimmer 3.5s ease-in-out infinite; pointer-events: none; z-index: 2; }
 .cascade-title-badge svg { animation: iconRotate 2.5s ease-in-out infinite; transform-origin: center; }
@@ -928,7 +916,6 @@ img { display: block; }
 .cascade-title-text:hover { transform: scale(1.03); filter: drop-shadow(0 0 30px rgba(59, 130, 246, 1)) drop-shadow(0 0 60px rgba(245, 158, 11, 0.6)); }
 .cascade-title-sub { animation: fadeInUp 1s ease-out 0.6s both; }
 
-/* ✅ Hero Aura */
 .hero-content.has-aura { position: relative; }
 .hero-content.has-aura::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 600px; height: 400px; background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.2) 0%, rgba(245, 158, 11, 0.08) 40%, transparent 70%); border-radius: 50%; animation: auraPulse 4s ease-in-out infinite; pointer-events: none; z-index: -1; filter: blur(40px); }
 
@@ -1032,9 +1019,6 @@ img { display: block; }
   .scroll-strip-arrow { width: 15px !important; height: 15px !important; }
 }
 
-/* ==========================================
-   🔧 إصلاح: عنوان Hero على الجوال
-   ========================================== */
 @media (max-width: 768px) {
   .hero-title { opacity: 1 !important; animation: none !important; filter: none !important; }
   .hero-title .hero-word, .hero-title > * { opacity: 1 !important; animation: none !important; transform: none !important; filter: none !important; }
@@ -1042,9 +1026,6 @@ img { display: block; }
   .hero-title .gradient-text::after { transform: scaleX(1) !important; opacity: 1 !important; }
 }
 
-/* ==========================================
-   🚀 Mobile Performance
-   ========================================== */
 @media (max-width: 768px) {
   .hero-title::after, .hero-title::before,
   .hero-divider-text, .hero-divider-text::before, .hero-divider-text::after,
@@ -1083,9 +1064,6 @@ img { display: block; }
   }
 }
 
-/* ==========================================
-   🎬 Accessibility
-   ========================================== */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -1387,11 +1365,8 @@ img { display: block; }
     font-size: 17px;
   }
 }
-/* ==========================================
-   ✅ إصلاح كروت السيارات على الجوال
-   ========================================== */
+
 @media (max-width: 768px) {
-  /* كروت السيارات في الشبكة */
   .properties-grid .card,
   #featuredCars .card,
   #carsGrid .card {
@@ -1401,7 +1376,6 @@ img { display: block; }
     flex: none !important;
   }
   
-  /* داخل swipe على الصفحة الرئيسية */
   #featuredCars {
     display: flex !important;
     flex-wrap: nowrap !important;
@@ -1418,7 +1392,6 @@ img { display: block; }
     scroll-snap-align: start;
   }
   
-  /* كروت السيارات في صفحة cars.html */
   .properties-grid {
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 10px !important;
@@ -1459,6 +1432,7 @@ img { display: block; }
     max-width: calc((100vw - 40px) / 2) !important;
   }
 }
+
 /* ==========================================
    🔍 صندوق البحث برقم الإعلان
    ========================================== */
@@ -1588,7 +1562,6 @@ img { display: block; }
   height: 18px;
 }
 
-/* نتيجة البحث */
 .admin-search-result {
   margin-top: 20px;
   padding: 20px;
@@ -1596,11 +1569,6 @@ img { display: block; }
   position: relative;
   z-index: 1;
   animation: fadeInUp 0.4s ease;
-}
-
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 .admin-search-result.found {
@@ -1786,13 +1754,10 @@ img { display: block; }
     width: 100%;
     height: 150px;
   }
-}/* ==========================================
-   🔥🔥🔥 إصلاح نهائي - كروت السيارات على الجوال
-   ========================================== */
+}
 
 @media screen and (max-width: 768px) {
 
-  /* ===== 1. الشبكة الرئيسية ===== */
   .properties-grid,
   #carsGrid,
   #propertiesGrid,
@@ -1806,7 +1771,6 @@ img { display: block; }
     width: 100% !important;
   }
 
-  /* ===== 2. الكارد نفسه ===== */
   .properties-grid > .card,
   #carsGrid > .card,
   #carsGrid > a.card,
@@ -1824,7 +1788,6 @@ img { display: block; }
     grid-row: auto !important;
   }
 
-  /* ===== 3. صورة الكارد ===== */
   .properties-grid > .card > .card-image,
   #carsGrid > .card > .card-image,
   #carsGrid > a.card > .card-image {
@@ -1844,7 +1807,6 @@ img { display: block; }
     display: block !important;
   }
 
-  /* ===== 4. محتوى الكارد ===== */
   .properties-grid > .card > .card-body,
   #carsGrid > .card > .card-body {
     padding: 10px !important;
@@ -1896,7 +1858,6 @@ img { display: block; }
     text-overflow: ellipsis !important;
   }
 
-  /* ===== 5. إخفاء الـ meta الزايد ===== */
   .properties-grid > .card .card-meta,
   .properties-grid > .card .car-meta,
   #carsGrid > .card .card-meta,
@@ -1906,7 +1867,6 @@ img { display: block; }
     display: none !important;
   }
 
-  /* ===== 6. البادجات ===== */
   .properties-grid > .card .card-badge,
   #carsGrid > .card .card-badge {
     font-size: 10px !important;
@@ -1922,7 +1882,6 @@ img { display: block; }
     right: auto !important;
   }
 
-  /* ===== 7. الشريط الأفقي في الرئيسية ===== */
   #featuredCars,
   #featuredProperties {
     display: flex !important;
@@ -1964,7 +1923,6 @@ img { display: block; }
   }
 }
 
-/* ===== شاشات صغيرة جداً ===== */
 @media screen and (max-width: 380px) {
   .properties-grid,
   #carsGrid {
@@ -1978,6 +1936,7 @@ img { display: block; }
     max-width: calc((100vw - 40px) / 1.8) !important;
   }
 }
+
 /* ==========================================
    🎯 نافذة اختيار نوع الإعلان
    ========================================== */
@@ -2253,6 +2212,7 @@ img { display: block; }
     font-size: 11.5px;
   }
 }
+
 /* ==========================================
    🍔 ضمانات زر الهامبرغر - إجباري
    ========================================== */
@@ -2277,11 +2237,12 @@ img { display: block; }
     pointer-events: auto !important;
     z-index: 9999 !important;
   }
-}/* ==========================================
+}
+
+/* ==========================================
    🍔 قائمة الجوال - عناصر الملف الشخصي
    ========================================== */
 
-/* بيانات المستخدم */
 .mobile-menu-user {
   display: flex;
   align-items: center;
@@ -2352,7 +2313,6 @@ img { display: block; }
   font-weight: 600;
 }
 
-/* عناصر القائمة */
 .mobile-menu-item {
   position: relative;
   display: flex !important;
@@ -2394,7 +2354,6 @@ img { display: block; }
   flex: 1;
 }
 
-/* سهم الانتقال */
 .mobile-menu-item-arrow {
   width: 16px !important;
   height: 16px !important;
@@ -2402,14 +2361,12 @@ img { display: block; }
   opacity: 0.6;
 }
 
-/* الملف الشخصي */
 .mobile-menu-item-account {
   background: rgba(59, 130, 246, 0.08);
   border-color: rgba(59, 130, 246, 0.2);
   color: #93C5FD;
 }
 
-/* لوحة التحكم - مميزة */
 .mobile-menu-item-admin {
   background: linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(245, 158, 11, 0.08) 100%);
   border-color: rgba(239, 68, 68, 0.3);
@@ -2426,7 +2383,6 @@ img { display: block; }
   color: #fff;
 }
 
-/* شارة الأدمن */
 .mobile-menu-badge {
   display: inline-flex;
   align-items: center;
@@ -2441,7 +2397,6 @@ img { display: block; }
   box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
 }
 
-/* زر تسجيل الخروج */
 .mobile-menu-item-logout {
   background: rgba(239, 68, 68, 0.08);
   border-color: rgba(239, 68, 68, 0.2);
@@ -2459,7 +2414,6 @@ img { display: block; }
   color: #EF4444;
 }
 
-/* زر تسجيل الدخول */
 .mobile-menu-item-login {
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(245, 158, 11, 0.08) 100%);
   border-color: rgba(59, 130, 246, 0.35);
@@ -2471,16 +2425,16 @@ img { display: block; }
   color: #60A5FA;
 }
 
-/* الفاصل */
 .mobile-menu-divider {
   height: 1px;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
   margin: 12px 0;
-}/* ==========================================
+}
+
+/* ==========================================
    ⚡⚡⚡ أزرار سريعة كالرصاصة - Instant Response
    ========================================== */
 
-/* 1️⃣ إزالة تأخير الـ 300ms على الجوال */
 button,
 a,
 .btn,
@@ -2503,7 +2457,6 @@ a,
   -webkit-user-select: none !important;
 }
 
-/* 2️⃣ استجابة فورية عند اللمس/الضغط (بدون أي تأخير) */
 button:active,
 a:active,
 .btn:active,
@@ -2520,14 +2473,12 @@ a:active,
   transition-timing-function: ease-out !important;
 }
 
-/* 3️⃣ تسريع كل التحولات (transitions) */
 *,
 *::before,
 *::after {
   transition-duration: 0.15s !important;
 }
 
-/* استثناءات: العناصر يلي بحاجة تحول أبطأ (مثل فتح النوافذ) */
 .browse-modal,
 .add-type-modal,
 .welcome-modal,
@@ -2539,7 +2490,6 @@ a:active,
   transition-duration: 0.25s !important;
 }
 
-/* 4️⃣ تفعيل GPU acceleration للأزرار */
 button,
 a.btn,
 .btn,
@@ -2558,7 +2508,6 @@ a.btn,
   -webkit-backface-visibility: hidden;
 }
 
-/* 5️⃣ تأثير ضغط فوري - scale فوري بدون تأخير */
 .btn:active,
 .btn-primary:active,
 .btn-login:active,
@@ -2578,7 +2527,6 @@ a.btn,
   transform: scale(0.9) !important;
 }
 
-/* 6️⃣ إزالة كل transition-delay */
 *,
 *::before,
 *::after {
@@ -2586,12 +2534,10 @@ a.btn,
   animation-delay: 0s !important;
 }
 
-/* 7️⃣ ضمان إنه الروابط تفتح فوراً */
 a {
   cursor: pointer;
 }
 
-/* 8️⃣ حقول الإدخال تستجيب فوراً */
 input,
 textarea,
 select {
@@ -2604,7 +2550,6 @@ select:focus {
   transition-duration: 0.05s !important;
 }
 
-/* 9️⃣ إزالة hover على الجوال (يسبب تأخير) */
 @media (hover: none) and (pointer: coarse) {
   *:hover {
     transition-duration: 0s !important;
@@ -2619,7 +2564,6 @@ select:focus {
   }
 }
 
-/* 🔟 تحسين الأداء بشكل عام */
 img {
   image-rendering: -webkit-optimize-contrast;
 }
@@ -2628,11 +2572,10 @@ html {
   scroll-behavior: smooth;
 }
 
-/* إذا الجهاز بطيء، استخدم auto بدل smooth */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto !important; }
 }
-/* ✅ تمييز "حسابي" لما المستخدم مسجل */
+
 .bottom-nav-item.is-logged-in {
   color: #3B82F6 !important;
 }
