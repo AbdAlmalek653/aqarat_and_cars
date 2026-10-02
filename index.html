@@ -6,10 +6,8 @@
   <title>سوق | عقارات وسيارات</title>
   <meta name="description" content="منصة عربية متكاملة لبيع وشراء وإيجار العقارات والسيارات">
 
-  <!-- ✅ لون شريط المتصفح على الجوال -->
   <meta name="theme-color" content="#1A2438">
 
-  <!-- ✅ Open Graph للمشاركة على السوشال ميديا -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="سوق | عقارات وسيارات">
   <meta property="og:description" content="منصة عربية متكاملة لبيع وشراء وإيجار العقارات والسيارات">
@@ -21,10 +19,13 @@
 
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
 
-  <!-- ✅ تأخير تحميل مكتبة الأيقونات (defer) -->
-  <script src="js/lucide.min.js" defer></script>
+  <!-- ✅ Preload للخطوط (تحميل مسبق) -->
+  <link rel="preload" href="fonts/cairo-v31-arabic-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/cairo-v31-arabic-latin-700.woff2" as="font" type="font/woff2" crossorigin>
 
-  <!-- ✅ ملفات CSS -->
+  <!-- ✅ نظام الأيقونات المدمج (بديل lucide.min.js) -->
+  <script src="js/icons.js" defer></script>
+
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/speed-boost.css">
 </head>
@@ -297,7 +298,6 @@
     <a href="pages/account.html" class="bottom-nav-item"><i data-lucide="user"></i><span>تسجيل الدخول</span></a>
   </nav>
 
-  <!-- نافذة الترحيب -->
   <div class="welcome-modal" id="welcomeModal">
     <div class="welcome-modal-overlay" onclick="closeWelcome()"></div>
     <div class="welcome-modal-content">
@@ -320,7 +320,6 @@
     </div>
   </div>
 
-  <!-- ===================== نافذة اختيار نوع الإعلان (تصفح) ===================== -->
   <div class="browse-modal" id="browseModal">
     <div class="browse-modal-overlay" data-close-browse></div>
     <div class="browse-modal-content">
@@ -349,7 +348,6 @@
     </div>
   </div>
 
-  <!-- ===================== نافذة اختيار نوع الإعلان (إضافة) ===================== -->
   <div class="add-type-modal" id="addTypeModal">
     <div class="add-type-overlay" data-close-add-type></div>
     <div class="add-type-content">
@@ -383,8 +381,6 @@
   <script src="js/auth-guard.js"></script>
   <script src="js/app-inline.js"></script>
   <script src="js/speed-boost.js"></script>
-
-  <!-- ✅ Service Worker Registration -->
   <script src="js/sw-register.js"></script>
 </body>
 </html>

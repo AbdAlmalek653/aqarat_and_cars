@@ -7,7 +7,13 @@
 
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
 
-<script src="../js/lucide.min.js"></script>
+<!-- ✅ Preload للخطوط -->
+<link rel="preload" href="../fonts/cairo-v31-arabic-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../fonts/cairo-v31-arabic-latin-700.woff2" as="font" type="font/woff2" crossorigin>
+
+<!-- ✅ نظام الأيقونات المدمج (بديل lucide.min.js) -->
+<script src="../js/icons.js" defer></script>
+
 <link rel="stylesheet" href="../css/style.css">
 <link rel="stylesheet" href="../css/pages.css">
 <link rel="stylesheet" href="../css/add-listing.css">
@@ -474,7 +480,7 @@
       </div>
 
       <!-- ========================================== -->
-      <!-- ✅ قسم رفع الصور الجديد (متناسق ومتجاوب) -->
+      <!-- ✅ قسم رفع الصور (Dropzone) -->
       <!-- ========================================== -->
       <div class="al-section">
         <h3 class="al-section-title"><i data-lucide="image"></i> صور الإعلان</h3>
@@ -616,17 +622,11 @@
 <a href="account.html" class="bottom-nav-item"><i data-lucide="user"></i><span>حسابي</span></a>
 </nav>
 
-<script src="../js/api.js"></script>
-<script src="../js/header-state.js"></script>
-<script src="../js/add-listing.js"></script>
-
-<script>
-  window.addEventListener('load', function() {
-    if (window.lucide) window.lucide.createIcons();
-  });
-</script>
-<script src="../js/mobile-menu.js"></script>
-<script src="../js/speed-boost.js"></script>
-<script src="../js/sw-register.js"></script>
+<script src="../js/api.js" defer></script>
+<script src="../js/header-state.js" defer></script>
+<script src="../js/add-listing.js" defer></script>
+<script src="../js/mobile-menu.js" defer></script>
+<script src="../js/speed-boost.js" defer></script>
+<script src="../js/sw-register.js" defer></script>
 </body>
 </html>

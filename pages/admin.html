@@ -6,24 +6,31 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,viewport-fit=cover">
   <title>لوحة التحكم | سوق</title>
 
-  <!-- ✅ favicon - أيقونة الموقع -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
 
-  <script src="../js/lucide.min.js"></script>
+  <!-- ✅ Preload للخطوط -->
+  <link rel="preload" href="../fonts/cairo-v31-arabic-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../fonts/cairo-v31-arabic-latin-700.woff2" as="font" type="font/woff2" crossorigin>
+
+  <!-- ✅ نظام الأيقونات المدمج (بديل lucide.min.js) -->
+  <script src="../js/icons.js" defer></script>
+
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/pages.css">
   <link rel="stylesheet" href="../css/admin.css">
+  <link rel="stylesheet" href="../css/speed-boost.css">
+  <link rel="stylesheet" href="../css/admin-charts.css">
+
+  <!-- ✅ Chart.js من CDN (مؤجل) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
 
   <!-- ✨ كود الطوارئ: إجبار لوحة التحكم على التوافق مع الجوال ✨ -->
   <style>
     @media (max-width: 768px) {
-      /* 1. لوحة التحكم عمود واحد */
       .admin-dashboard {
         display: block !important;
         padding: 15px 0 !important;
       }
-
-      /* 2. القائمة الجانبية تصبح شريطاً أفقياً */
       .admin-sidebar {
         position: static !important;
         width: 100% !important;
@@ -31,12 +38,9 @@
         padding: 15px !important;
         border-radius: 15px !important;
       }
-
       .admin-user-box {
         display: none !important;
       }
-
-      /* 3. شريط أفقي للأزرار */
       .admin-menu {
         display: flex !important;
         flex-direction: row !important;
@@ -46,86 +50,64 @@
         scrollbar-width: none !important;
       }
       .admin-menu::-webkit-scrollbar { display: none !important; }
-
       .admin-menu-btn {
         flex: 0 0 auto !important;
         padding: 10px 16px !important;
         font-size: 13px !important;
         white-space: nowrap !important;
       }
-
       .admin-menu-btn.danger { display: none !important; }
-
-      /* 4. إحصائيات 2x2 */
       .admin-stats {
         display: grid !important;
         grid-template-columns: 1fr 1fr !important;
         gap: 10px !important;
       }
-
       .admin-stat-card {
         display: flex !important;
         flex-direction: column !important;
         text-align: center !important;
         padding: 15px 10px !important;
       }
-
       .admin-stat-icon {
         margin: 0 auto 8px !important;
       }
-
       .admin-stat-num {
         font-size: 18px !important;
       }
-
-      /* 5. الجداول قابلة للتمرير */
       .admin-table-wrap {
         overflow-x: auto !important;
         -webkit-overflow-scrolling: touch !important;
         margin: 0 -15px !important;
         padding: 0 15px !important;
       }
-
       .admin-table {
         min-width: 700px !important;
       }
-
-      /* 6. الفلاتر بعرض كامل */
       .admin-filters {
         flex-direction: column !important;
         gap: 10px !important;
       }
-
       .admin-search-input, 
       .admin-select {
         width: 100% !important;
         min-width: 0 !important;
       }
-
-      /* 7. الأزرار في الجدول */
       .admin-actions {
         display: flex !important;
         flex-wrap: wrap !important;
         gap: 5px !important;
       }
-
       .admin-icon-btn {
         width: 34px !important;
         height: 34px !important;
       }
     }
-
     @media (max-width: 480px) {
       .admin-stats {
         grid-template-columns: 1fr !important;
       }
     }
   </style>
-  <link rel="stylesheet" href="../css/speed-boost.css">
-  <link rel="stylesheet" href="../css/admin-charts.css">
-
-  <!-- ✅ Chart.js من CDN (مجاني، MIT License) -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
 </head>
 
 <body class="has-bottom-nav">
@@ -523,13 +505,13 @@
   </nav>
 
   <!-- ===================== Scripts ===================== -->
-  <script src="../js/api.js"></script>
-  <script src="../js/header-state.js"></script>
-  <script src="../js/admin.js"></script>
-  <script src="../js/admin-charts.js"></script>
-  <script src="../js/app-inline.js"></script>
-  <script src="../js/speed-boost.js"></script>
-  <script src="../js/sw-register.js"></script>
+  <script src="../js/api.js" defer></script>
+  <script src="../js/header-state.js" defer></script>
+  <script src="../js/admin.js" defer></script>
+  <script src="../js/admin-charts.js" defer></script>
+  <script src="../js/app-inline.js" defer></script>
+  <script src="../js/speed-boost.js" defer></script>
+  <script src="../js/sw-register.js" defer></script>
 </body>
 
 </html>

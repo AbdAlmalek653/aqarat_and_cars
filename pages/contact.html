@@ -7,7 +7,13 @@
 
 <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
 
-<script src="../js/lucide.min.js"></script>
+<!-- ✅ Preload للخطوط -->
+<link rel="preload" href="../fonts/cairo-v31-arabic-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../fonts/cairo-v31-arabic-latin-700.woff2" as="font" type="font/woff2" crossorigin>
+
+<!-- ✅ نظام الأيقونات المدمج (بديل lucide.min.js) -->
+<script src="../js/icons.js" defer></script>
+
 <link rel="stylesheet" href="../css/style.css">
 <link rel="stylesheet" href="../css/pages.css">
 </head>
@@ -46,7 +52,6 @@
 
 <div class="contact-team-grid">
 
-<!-- ✅ تم إضافة class و data-phone لتوليد الرابط ديناميكياً -->
 <a href="#" data-phone="963930932794" class="js-wa-support contact-team-card">
 <div class="contact-team-avatar" style="background: linear-gradient(135deg, #3B82F6, #1E40AF);">
 <i data-lucide="headphones"></i>
@@ -185,7 +190,6 @@
 <h4>فريق الدعم</h4>
 <p class="footer-support-hint">تواصل مباشر عبر واتساب</p>
 
-<!-- ✅ تم إضافة class و data-phone لتوليد الرابط ديناميكياً -->
 <a href="#" data-phone="963930932794" class="js-wa-support support-member">
 <span class="support-avatar" style="background: linear-gradient(135deg, #3B82F6, #1E40AF);"><i data-lucide="headphones"></i></span>
 <span class="support-info">
@@ -247,9 +251,10 @@
 <a href="account.html" class="bottom-nav-item"><i data-lucide="user"></i><span>حسابي</span></a>
 </nav>
 
-<script src="../js/api.js"></script>
-<script src="../js/header-state.js"></script>
-<script src="../js/auth-guard.js"></script>
+<script src="../js/api.js" defer></script>
+<script src="../js/header-state.js" defer></script>
+<script src="../js/auth-guard.js" defer></script>
+
 <script>
 /* ==========================================
    دالة توليد رسالة الدعم الفني (ديناميكية)
@@ -284,17 +289,14 @@ _______________________________________
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. تهيئة الأيقونات
-  if(window.lucide) window.lucide.createIcons();
-
-  // 2. معالجة نموذج الاتصال
-  document.getElementById('contactForm')?.addEventListener('submit',e=>{
+  // 1. معالجة نموذج الاتصال
+  document.getElementById('contactForm')?.addEventListener('submit', e => {
     e.preventDefault();
     alert('تم استلام رسالتك! سنتواصل معك قريباً.');
     e.target.reset();
   });
 
-  // 3. ✅ تحديث روابط الواتساب ديناميكياً باسم المستخدم
+  // 2. ✅ تحديث روابط الواتساب ديناميكياً باسم المستخدم
   const supportLinks = document.querySelectorAll('.js-wa-support');
   const dynamicMsg = getSupportMessage();
 
@@ -308,6 +310,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 </script>
-<script src="../js/sw-register.js"></script>
+<script src="../js/sw-register.js" defer></script>
 </body>
 </html>

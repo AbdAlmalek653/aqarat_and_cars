@@ -5,12 +5,15 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,viewport-fit=cover">
 <title>المفضلة | سوق</title>
 
-<!-- ✅ favicon - أيقونة الموقع -->
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
 
+<!-- ✅ Preload للخطوط -->
+<link rel="preload" href="../fonts/cairo-v31-arabic-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../fonts/cairo-v31-arabic-latin-700.woff2" as="font" type="font/woff2" crossorigin>
 
+<!-- ✅ نظام الأيقونات المدمج (بديل lucide.min.js) -->
+<script src="../js/icons.js" defer></script>
 
-<script src="../js/lucide.min.js"></script>
 <link rel="stylesheet" href="../css/style.css">
 <link rel="stylesheet" href="../css/pages.css">
 <link rel="stylesheet" href="../css/speed-boost.css">
@@ -141,12 +144,12 @@
 <a href="account.html" class="bottom-nav-item"><i data-lucide="user"></i><span>حسابي</span></a>
 </nav>
 
-<script src="../js/api.js"></script>
-<script src="../js/header-state.js"></script>
-<script src="../js/favorites.js"></script>
-<script src="../js/auth-guard.js"></script>
-<script src="../js/mobile-menu.js"></script>
-<script src="../js/speed-boost.js"></script>
-<script src="../js/sw-register.js"></script>
+<script src="../js/api.js" defer></script>
+<script src="../js/header-state.js" defer></script>
+<script src="../js/favorites.js" defer></script>
+<script src="../js/auth-guard.js" defer></script>
+<script src="../js/mobile-menu.js" defer></script>
+<script src="../js/speed-boost.js" defer></script>
+<script src="../js/sw-register.js" defer></script>
 </body>
 </html>

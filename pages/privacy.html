@@ -4,11 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,viewport-fit=cover">
 <title>سياسة الخصوصية | سوق</title>
-<!-- ✅ إضافة الأيقونة (Favicon) -->
 <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
 
+<!-- ✅ Preload للخطوط -->
+<link rel="preload" href="../fonts/cairo-v31-arabic-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../fonts/cairo-v31-arabic-latin-700.woff2" as="font" type="font/woff2" crossorigin>
 
-<script src="../js/lucide.min.js"></script>
+<!-- ✅ نظام الأيقونات المدمج (بديل lucide.min.js) -->
+<script src="../js/icons.js" defer></script>
+
 <link rel="stylesheet" href="../css/style.css">
 <link rel="stylesheet" href="../css/pages.css">
 </head>
@@ -160,7 +164,6 @@
 <span class="support-avatar" style="background: linear-gradient(135deg, #F59E0B, #B45309);"><i data-lucide="megaphone"></i></span>
 <span class="support-info">
 <span class="support-name">أبو إبراهيم</span>
-<!-- ✅ تم حذف جملة "المسؤول التنفيذي والإعلامي" -->
 </span>
 <i data-lucide="message-circle" class="support-wa-icon"></i>
 </a>
@@ -199,10 +202,9 @@
 <a href="account.html" class="bottom-nav-item"><i data-lucide="user"></i><span>حسابي</span></a>
 </nav>
 
-<script src="../js/api.js"></script>
-<script src="../js/header-state.js"></script>
-<script src="../js/auth-guard.js"></script>
-<script>if(window.lucide)window.lucide.createIcons();</script>
-<script src="../js/sw-register.js"></script>
+<script src="../js/api.js" defer></script>
+<script src="../js/header-state.js" defer></script>
+<script src="../js/auth-guard.js" defer></script>
+<script src="../js/sw-register.js" defer></script>
 </body>
 </html>
