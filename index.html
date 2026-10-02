@@ -6,16 +6,29 @@
   <title>سوق | عقارات وسيارات</title>
   <meta name="description" content="منصة عربية متكاملة لبيع وشراء وإيجار العقارات والسيارات">
 
+  <!-- ✅ لون شريط المتصفح على الجوال -->
+  <meta name="theme-color" content="#1A2438">
+
+  <!-- ✅ Open Graph للمشاركة على السوشال ميديا -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="سوق | عقارات وسيارات">
+  <meta property="og:description" content="منصة عربية متكاملة لبيع وشراء وإيجار العقارات والسيارات">
+  <meta property="og:url" content="https://aqaratandcars-v2-production.up.railway.app/">
+  <meta property="og:image" content="https://aqaratandcars-v2-production.up.railway.app/images/og-image.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="سوق | عقارات وسيارات">
+  <meta name="twitter:description" content="منصة عربية متكاملة لبيع وشراء وإيجار العقارات والسيارات">
+
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
-  
-  <!-- ✅ تحسين: تحميل الخطوط مسبقاً لتسريع الظهور -->
+
+  <!-- ✅ تحميل الخطوط مسبقاً لتسريع الظهور -->
   <link rel="preload" href="fonts/cairo-v31-arabic-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/cairo-v31-arabic-latin-700.woff2" as="font" type="font/woff2" crossorigin>
-  
-  <!-- ✅ تحسين: تأخير تحميل مكتبة الأيقونات حتى لا تحجب عرض الصفحة -->
+
+  <!-- ✅ تأخير تحميل مكتبة الأيقونات (defer) -->
   <script src="js/lucide.min.js" defer></script>
-  
-  <!-- ✅ تحسين: إزالة تكرار ملف style.css -->
+
+  <!-- ✅ ملفات CSS -->
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/speed-boost.css">
 </head>
@@ -372,7 +385,8 @@
   <script src="js/header-state.js"></script>
   <script src="js/main.js"></script>
   <script src="js/auth-guard.js"></script>
-  <script src="js/app-inline.js"></script> <!-- ✅ ملف الأكواد المدمجة الجديد -->
+  <script src="js/app-inline.js"></script>
   <script src="js/speed-boost.js"></script>
+  <!-- ✅ تم حذف mobile-menu.js و add-listing-guard.js نهائياً -->
 </body>
 </html>

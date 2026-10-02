@@ -1,5 +1,6 @@
 /* ==========================================
    صفحة العقارات - البيانات من API فقط
+   الإصدار: 2.0 (محسّن للأداء + دعم أحجام متعددة)
    ========================================== */
 
 const ITEMS_PER_PAGE = 9;
@@ -111,14 +112,24 @@ function createPropertyCard(item) {
   if (item.subType === 'chalet') icon = 'tent';
   if (item.subType === 'arabic-house') icon = 'landmark';
 
-  // ✅✅✅ استخدام الدالة الموحّدة من api.js
-  const imageUrl = window.getListingImageUrl
-    ? window.getListingImageUrl(item, 0)
-    : null;
+  // ✅ استخدام srcset + sizes للأداء الفائق
+  const imgData = window.getListingImageSrcset
+    ? window.getListingImageSrcset(item, 0)
+    : { src: null, srcset: '', sizes: '' };
 
-  const imageContent = imageUrl
-    ? `<img src="${imageUrl}" alt="${item.title || ''}" loading="lazy"
-            onerror="this.onerror=null;this.style.display='none';this.parentNode.classList.add('image-failed');this.parentNode.innerHTML='<i data-lucide=\\'${icon}\\'></i>';if(window.lucide)window.lucide.createIcons();">`
+  const safeTitle = (item.title || '').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+
+  const imageContent = imgData.src
+    ? `<img 
+         src="${imgData.src}"
+         ${imgData.srcset ? `srcset="${imgData.srcset}"` : ''}
+         ${imgData.sizes ? `sizes="${imgData.sizes}"` : ''}
+         alt="${safeTitle}"
+         loading="lazy"
+         decoding="async"
+         width="800"
+         height="600"
+         onerror="this.onerror=null;this.style.display='none';this.parentNode.classList.add('image-failed');this.parentNode.innerHTML='<i data-lucide=\\'${icon}\\'></i>';if(window.lucide)window.lucide.createIcons();">`
     : `<i data-lucide="${icon}"></i>`;
 
   const location = item.area || item.city || '—';

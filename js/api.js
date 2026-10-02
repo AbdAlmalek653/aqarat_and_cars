@@ -1,6 +1,6 @@
 /* ==========================================
   طبقة البيانات الموحدة
-  النسخة المحسّنة: منع الطلبات المتكررة + كاش ذكي (30 ثانية)
+  الإصدار: 3.0 (محسّن للأداء الفائق + دعم أحجام متعددة)
   ========================================== */
 
 const API = (function () {
@@ -323,51 +323,10 @@ const API = (function () {
       return u && u.role === 'user';
     },
 
+    // ✅ تمت إزالة seedAdmins (لأسباب أمنية - البيانات الآن في السيرفر فقط)
     seedAdmins: function () {
-      const seeded = localStorage.getItem('souq_admins_seeded');
-      if (seeded === '1') return;
-
-      const users = read(KEYS.USERS, []);
-
-      const admins = [
-        {
-          id: 'ADMIN_SUPER_001',
-          name: 'أبو أيمن',
-          email: 'ahmadkhleef9900@gmail.com',
-          phone: '',
-          password: 'Ahmad112111',
-          role: 'super_admin',
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: 'ADMIN_002',
-          name: 'أبو برهو',
-          email: 'ahmadGh9900@gmail.com',
-          phone: '',
-          password: 'AhmadGh112111',
-          role: 'admin',
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: 'ADMIN_003',
-          name: 'أبو فاروق',
-          email: 'abdmlk9900@gmail.com',
-          phone: '',
-          password: 'Abdmlk112111',
-          role: 'admin',
-          createdAt: new Date().toISOString()
-        }
-      ];
-
-      admins.forEach(function (admin) {
-        if (!users.find(function (u) { return u.email === admin.email; })) {
-          users.push(admin);
-        }
-      });
-
-      write(KEYS.USERS, users);
-      localStorage.setItem('souq_admins_seeded', '1');
-      console.log('✅ تم إنشاء حسابات الأدمن بنجاح');
+      // لا تفعل شيئاً - تم نقل هذه الوظيفة للسيرفر بشكل آمن
+      return;
     }
   };
 
@@ -619,14 +578,16 @@ window.API = API;
 
 /* ==========================================
    🖼️ دالة موحّدة عالمية لبناء رابط الصورة
-   ✅ تستخدمها كل الصفحات (properties, cars, favorites, details, search)
-   ✅ تدعم كل الحالات: has_image, has_image:N, base64, http, /, ./ 
+   ✅ الإصدار 3.0 - تدعم 3 أحجام: thumb / medium / large
+   ✅ تستخدم srcset تلقائياً في كل الصفحات
+   ✅ متوافقة مع الكود القديم 100%
    ========================================== */
-window.getListingImageUrl = function (item, index) {
+window.getListingImageUrl = function (item, index, size) {
   if (!item) return null;
   const idx = (typeof index === 'number') ? index : 0;
+  const sz = size || 'medium'; // ✅ الحجم الافتراضي: medium
 
-  // ✅ مسار مطلق (absolute) - يشتغل من أي صفحة (index.html أو pages/*.html)
+  // ✅ مسار مطلق (absolute) - يشتغل من أي صفحة
   const apiBase = '/api';
 
   // استخرج الصورة المطلوبة
@@ -640,17 +601,17 @@ window.getListingImageUrl = function (item, index) {
   // إذا ما في صورة → أرجع رابط API (يعرض placeholder)
   if (!first) {
     if (!item.id) return null;
-    return `${apiBase}/listing_image.php?id=${encodeURIComponent(item.id)}&index=${idx}`;
+    return `${apiBase}/listing_image.php?id=${encodeURIComponent(item.id)}&index=${idx}&size=${sz}`;
   }
 
   // 1. has_image أو has_image:N
   if (typeof first === 'string' && first.startsWith('has_image')) {
     const parts = first.split(':');
     const realIndex = parts[1] !== undefined ? parts[1] : idx;
-    return `${apiBase}/listing_image.php?id=${encodeURIComponent(item.id)}&index=${realIndex}`;
+    return `${apiBase}/listing_image.php?id=${encodeURIComponent(item.id)}&index=${realIndex}&size=${sz}`;
   }
 
-  // 2. Base64
+  // 2. Base64 (لا يمكن تصغيره من السيرفر → نعيده كما هو)
   if (typeof first === 'string' && first.startsWith('data:image/')) {
     return first;
   }
@@ -670,18 +631,44 @@ window.getListingImageUrl = function (item, index) {
     return first;
   }
 
-  // 6. أي قيمة تانية (اسم ملف، رقم، إلخ) → استخدم API
+  // 6. أي قيمة تانية → استخدم API
   if (!item.id) return null;
-  return `${apiBase}/listing_image.php?id=${encodeURIComponent(item.id)}&index=${idx}`;
+  return `${apiBase}/listing_image.php?id=${encodeURIComponent(item.id)}&index=${idx}&size=${sz}`;
+};
+
+/* ==========================================
+   🎨 دالة مساعدة: توليد srcset كامل لصورة إعلان
+   تُستخدم في البطاقات لعرض الصورة المناسبة حسب حجم الشاشة
+   ========================================== */
+window.getListingImageSrcset = function (item, index) {
+  if (!item || !item.id) return { src: null, srcset: '', sizes: '' };
+
+  const idx = (typeof index === 'number') ? index : 0;
+  const thumb  = window.getListingImageUrl(item, idx, 'thumb');
+  const medium = window.getListingImageUrl(item, idx, 'medium');
+  const large  = window.getListingImageUrl(item, idx, 'large');
+
+  // إذا كانت الصورة base64 أو رابط خارجي، لا يمكن استخدام srcset
+  if (!thumb || thumb.startsWith('data:') || /^https?:\/\//i.test(thumb)) {
+    return {
+      src: medium,
+      srcset: '',
+      sizes: ''
+    };
+  }
+
+  return {
+    src: medium, // الافتراضي
+    srcset: `${thumb} 300w, ${medium} 800w, ${large} 1600w`,
+    sizes: '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1440px) 33vw, 25vw'
+  };
 };
 
 /* ==========================================
    تشغيل تلقائي عند فتح أي صفحة
    ========================================== */
 document.addEventListener('DOMContentLoaded', function () {
-  if (window.API && API.Users && API.Users.seedAdmins) {
-    API.Users.seedAdmins();
-  }
+  // ✅ تمت إزالة استدعاء seedAdmins (البيانات الحساسة نُقلت للسيرفر)
 });
 
 /* ==========================================

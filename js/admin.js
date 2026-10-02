@@ -1,5 +1,6 @@
 /* ==========================================
-   لوحة التحكم - Admin Dashboard (النسخة الكاملة النهائية)
+   لوحة التحكم - Admin Dashboard (النسخة النهائية المحسّنة)
+   الإصدار: 2.0 (دعم أحجام الصور + تحسينات أداء)
    ========================================== */
 
 let currentAdmin = null;
@@ -18,6 +19,22 @@ function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>'"]/g, function (character) {
     return { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;' }[character];
   });
+}
+
+/* ==========================================
+   ✅ دالة موحدة لبناء رابط الصورة مع الحجم
+   (تعمل حتى لو لم تكن getListingImageUrl محمّلة)
+   ========================================== */
+function buildAdminImageUrl(listing, index = 0, size = 'medium') {
+  if (!listing || !listing.id) return null;
+
+  // استخدام الدالة الموحدة إذا كانت متوفرة
+  if (window.getListingImageUrl) {
+    return window.getListingImageUrl(listing, index, size);
+  }
+
+  // Fallback
+  return `${ADMIN_API_BASE}/listing_image.php?id=${encodeURIComponent(listing.id)}&index=${index}&size=${size}`;
 }
 
 async function adminRequest(path, options) {
@@ -45,7 +62,7 @@ async function adminRequest(path, options) {
 }
 
 /* ==========================================
-   الدوال المفقودة (تمت إضافتها لحل المشكلة)
+   الدوال المساعدة للتعديل
    ========================================== */
 
 async function updateAdminListing(id, changes) {
@@ -55,7 +72,6 @@ async function updateAdminListing(id, changes) {
       body: JSON.stringify({ id, ...changes })
     });
     
-    // تحديث البيانات محلياً لتجنب إعادة تحميل الصفحة بالكامل
     const index = allListings.findIndex(l => l.id === id);
     if (index > -1) {
       Object.assign(allListings[index], changes);
@@ -96,7 +112,7 @@ async function updateAdminUser(id, changes) {
 }
 
 /* ==========================================
-   التحقق من الصلاحيات (النسخة المحسّنة)
+   التحقق من الصلاحيات
    ========================================== */
 async function checkAccess() {
   const dashboardEl = document.getElementById('adminDashboard');
@@ -105,7 +121,6 @@ async function checkAccess() {
   if (!dashboardEl || !noAccessEl) return false;
 
   try {
-    // 1️⃣ قراءة سريعة من localStorage (لعرض الواجهة فوراً)
     const localUser = API.Users.getCurrent();
     if (!localUser || !API.Users.isAdmin()) {
       noAccessEl.style.display = 'block';
@@ -114,7 +129,6 @@ async function checkAccess() {
       return false;
     }
 
-    // 2️⃣ عرض الواجهة مؤقتاً (عشان المستخدم ما ينتظر)
     dashboardEl.style.display = 'grid';
     document.getElementById('adminName').textContent = localUser.name || 'أدمن';
     document.getElementById('adminAvatar').textContent = (localUser.name || 'م').charAt(0);
@@ -134,17 +148,14 @@ async function checkAccess() {
       usersTab.style.display = 'none';
     }
 
-    // 3️⃣ ✅ التحقق الحقيقي من الجلسة مع السيرفر
     const serverUser = await API.Users.validateSession();
     
     if (!serverUser) {
-      // الجلسة انتهت فعلاً → توجيه صامت لصفحة الدخول
       console.warn('⚠️ الجلسة منتهية، إعادة التوجيه لتسجيل الدخول...');
       window.location.href = 'login.html';
       return false;
     }
 
-    // 4️⃣ تحديث البيانات من السيرفر (لضمان أن الدور صحيح)
     currentAdmin = serverUser;
     document.getElementById('adminName').textContent = serverUser.name || 'أدمن';
     document.getElementById('adminAvatar').textContent = (serverUser.name || 'م').charAt(0);
@@ -225,8 +236,8 @@ function renderOverview() {
         return `<div class="admin-recent-item">
           <div class="admin-recent-icon"><i data-lucide="${icon}"></i></div>
           <div class="admin-recent-info">
-            <div class="admin-recent-title">${l.title}</div>
-            <div class="admin-recent-sub">${l.city || '—'}</div>
+            <div class="admin-recent-title">${escapeHtml(l.title)}</div>
+            <div class="admin-recent-sub">${escapeHtml(l.city || '—')}</div>
           </div>
         </div>`;
       }).join('');
@@ -243,8 +254,8 @@ function renderOverview() {
         <div class="admin-recent-item">
           <div class="admin-recent-icon"><i data-lucide="user"></i></div>
           <div class="admin-recent-info">
-            <div class="admin-recent-title">${u.name}</div>
-            <div class="admin-recent-sub">${u.email}</div>
+            <div class="admin-recent-title">${escapeHtml(u.name)}</div>
+            <div class="admin-recent-sub">${escapeHtml(u.email)}</div>
           </div>
         </div>`).join('');
     }
@@ -322,7 +333,6 @@ function renderListingsTable() {
           </select>
           <button class="admin-icon-btn ${isFeatured ? 'featured' : ''}" data-feature-id="${listingId}" data-featured="${isFeatured ? '1' : '0'}" title="${isFeatured ? 'إلغاء التمييز' : 'تمييز'}"><i data-lucide="star"></i></button>
           
-          <!-- ✅ زر التعديل (تم إصلاحه ليعمل مباشرة) -->
           <button class="admin-icon-btn" onclick="editAdminListing('${listingId}', '${escapeHtml(l.title)}', '${escapeHtml(l.price)}')" title="تعديل"><i data-lucide="pencil"></i></button>
           
           <button class="admin-icon-btn danger" onclick="adminDeleteListing('${listingId}')" title="حذف"><i data-lucide="trash-2"></i></button>
@@ -526,7 +536,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
   }
 
-  // ✅ await هنا مهمة جداً لأن checkAccess صارت async
   const hasAccess = await checkAccess();
   if (!hasAccess) return;
 
@@ -537,7 +546,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   initIcons();
   console.log('✅ اكتمل تشغيل لوحة التحكم بنجاح');
 
-  // 🔄 فحص الجلسة كل 5 دقائق (توجيه صامت بدون تنبيهات)
   setInterval(async () => {
     const user = await API.Users.validateSession();
     if (!user) {
@@ -545,8 +553,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }, 5 * 60 * 1000);
 });
+
 /* ==========================================
-   🔍 البحث برقم الإعلان
+   🔍 البحث برقم الإعلان (محسّن مع 3 أحجام)
    ========================================== */
 (function() {
   'use strict';
@@ -558,10 +567,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (!searchInput || !searchBtn || !resultBox) return;
 
-    // البحث لما يضغط زر
     searchBtn.addEventListener('click', performSearch);
 
-    // البحث لما يضغط Enter
     searchInput.addEventListener('keydown', function(e) {
       if (e.key === 'Enter') {
         e.preventDefault();
@@ -569,9 +576,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
 
-    // تنظيف الأرقام من أي حروف غريبة
     searchInput.addEventListener('input', function() {
-      // إزالة المسافات الزائدة
       this.value = this.value.trim().replace(/\s+/g, '');
     });
 
@@ -583,20 +588,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
 
-      // ✅ دعم صيغتين: L1790521822990109 أو 1790521822990109
-      // إذا ما بدأ بحرف L، نضيفه
       if (!id.startsWith('L') && !id.startsWith('l')) {
         id = 'L' + id;
       }
       
-      // تحويل l الصغيرة لـ L كبيرة
       id = id.replace(/^l/i, 'L');
 
       showLoading();
       console.log('🔍 البحث برقم:', id);
 
       try {
-        // نجرب API للحصول على الإعلان
         const response = await fetch(`../api/listing.php?id=${encodeURIComponent(id)}`);
         
         if (!response.ok) {
@@ -610,7 +611,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const data = await response.json();
         console.log('📦 نتيجة البحث:', data);
 
-        // دعم أشكال البيانات المختلفة
         const listing = data.listing || data.data || data;
         
         if (!listing || (!listing.id && !listing.title)) {
@@ -662,37 +662,35 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (window.lucide) window.lucide.createIcons();
     }
 
+    /* ==========================================
+       ✅ عرض نتيجة البحث مع صورة محسّنة
+       ========================================== */
     function showResult(listing) {
       resultBox.style.display = 'block';
       resultBox.className = 'admin-search-result found';
 
       const id = listing.id || '';
       const title = listing.title || 'بدون عنوان';
+      const safeTitle = escapeHtml(title);
       const type = listing.type === 'car' ? 'سيارة' : 'عقار';
       const purpose = listing.purpose === 'sale' ? 'للبيع' : 'للإيجار';
       const city = listing.city || '';
       const price = listing.price ? Number(listing.price).toLocaleString('en-US') + ' ' + (listing.currency || 'USD') : '—';
       
-      // صورة
-      let imageUrl = '';
-      if (listing.images && listing.images.length > 0) {
-        const first = listing.images[0];
-        if (first === 'has_image') {
-          imageUrl = `../api/listing_image.php?id=${encodeURIComponent(id)}`;
-        } else if (typeof first === 'string' && first.startsWith('data:image/')) {
-          imageUrl = first;
-        } else if (typeof first === 'string' && (first.startsWith('http') || first.startsWith('/') || first.startsWith('./'))) {
-          imageUrl = first;
-        } else {
-          imageUrl = `../api/listing_image.php?id=${encodeURIComponent(id)}`;
-        }
-      }
+      // ✅ استخدام الدالة المحسّنة للصورة
+      const imageUrl = buildAdminImageUrl(listing, 0, 'medium');
 
       const imageHTML = imageUrl 
-        ? `<img src="${imageUrl}" alt="${title}" onerror="this.parentNode.innerHTML='<i data-lucide=&quot;image-off&quot;></i>';if(window.lucide)window.lucide.createIcons();">`
+        ? `<img 
+             src="${imageUrl}" 
+             alt="${safeTitle}"
+             loading="lazy"
+             decoding="async"
+             width="200"
+             height="200"
+             onerror="this.parentNode.innerHTML='<i data-lucide=&quot;image-off&quot;></i>';if(window.lucide)window.lucide.createIcons();">`
         : `<i data-lucide="image-off"></i>`;
 
-      // رابط التفاصيل
       const detailsUrl = `../pages/details.html?id=${encodeURIComponent(id)}&type=${listing.type || 'property'}`;
 
       resultBox.innerHTML = `
@@ -704,14 +702,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         <div class="admin-result-card">
           <div class="admin-result-image">${imageHTML}</div>
           <div class="admin-result-info">
-            <h4 class="admin-result-title">${title}</h4>
+            <h4 class="admin-result-title">${safeTitle}</h4>
             <div class="admin-result-meta">
               <span><i data-lucide="tag"></i>${type}</span>
               <span><i data-lucide="badge-dollar-sign"></i>${purpose}</span>
-              ${city ? `<span><i data-lucide="map-pin"></i>${city}</span>` : ''}
-              <span><i data-lucide="wallet"></i>${price}</span>
+              ${city ? `<span><i data-lucide="map-pin"></i>${escapeHtml(city)}</span>` : ''}
+              <span><i data-lucide="wallet"></i>${escapeHtml(price)}</span>
             </div>
-            <div class="admin-result-id">ID: ${id}</div>
+            <div class="admin-result-id">ID: ${escapeHtml(id)}</div>
           </div>
         </div>
         
@@ -731,7 +729,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // تشغيل عند تحميل الصفحة
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initListingIdSearch);
   } else {

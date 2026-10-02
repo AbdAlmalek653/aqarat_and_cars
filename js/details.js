@@ -1,5 +1,6 @@
 /* ==========================================
    صفحة تفاصيل الإعلان
+   الإصدار: 2.0 (محسّن للأداء الفائق + أحجام متعددة)
    - المواصفات تظهر للجميع
    - رقم البائع يظهر للأدمن فقط
    - تعديل الإعلان (للأدمن فقط)
@@ -13,8 +14,8 @@ let currentImageIndex = 0;
    بيانات تجريبية (Fallback)
    ========================================== */
 const MOCK_LISTINGS = {
-  '1001': {id:'1001',type:'property',purpose:'sale',title:'شقة فاخرة بتشطيب سوبر ديلوكس في المزة',location:'دمشق - المزة',price:185000,currency:'USD',featured:true,whatsapp:'0930000001',description:'شقة فاخرة بمساحة 180 متر مربع، تتكون من 3 غرف نوم، صالون واسع، مطبخ حديث، 2 حمام.\n\nتشطيب سوبر ديلوكس، طابق ثالث من أصل 5، عمر البناء 3 سنوات، مع مصعد وموقف سيارة خاص.',images:[],specs:[{icon:'building-2',label:'نوع العقار',value:'شقة'},{icon:'square',label:'المساحة',value:'180 م²'},{icon:'bed-double',label:'الغرف',value:'3 غرف'},{icon:'bath',label:'الحمامات',value:'2'},{icon:'layers',label:'الطابق',value:'الثالث'},{icon:'calendar',label:'عمر البناء',value:'3 سنوات'},{icon:'sofa',label:'الفرش',value:'مفروش'},{icon:'flame',label:'التدفئة',value:'مركزية'}]},
-  '1002': {id:'1002',type:'property',purpose:'rent',title:'فيلا مستقلة مع مسبح وحديقة واسعة',location:'دمشق - قدسيا',price:950,currency:'USD',featured:true,whatsapp:'0930000002',description:'فيلا مستقلة بتصميم عصري، مساحة 350 متر مربع موزعة على طابقين، 5 غرف نوم، صالون كبير، مطبخ مجهز، 4 حمامات، حديقة خاصة 200م، مسبح، موقف سيارتين.',images:[],specs:[{icon:'home',label:'نوع العقار',value:'فيلا'},{icon:'square',label:'المساحة',value:'350 م²'},{icon:'bed-double',label:'الغرف',value:'5'},{icon:'bath',label:'الحمامات',value:'4'},{icon:'waves',label:'المسبح',value:'متوفر'},{icon:'trees',label:'الحديقة',value:'200 م²'},{icon:'car',label:'موقف',value:'متوفر'},{icon:'flame',label:'التدفئة',value:'مركزية'}]},
+  '1001': {id:'1001',type:'property',purpose:'sale',title:'شقة فاخرة بتشطيب سوبر ديلوكس في المزة',location:'دمشق - المزة',price:185000,currency:'USD',featured:true,whatsapp:'0930000001',description:'شقة فاخرة بمساحة 180 متر مربع، تتكون من 3 غرف نوم، صالون واسع، مطبخ حديث، 2 حمام.\n\nتشطيب سوبر ديلوكس، طابق ثالث من أصل 5، عمر البناء 3 سنوات، مع مصعد وموقف سيارة خاص.',images:[],specs:[{icon:'building-2',label:'نوع العقار',value:'شقة'},{icon:'square',label:'المساحة',value:'180 م²'},{icon:'bed-double',label:'الغرف',value:'3 غرف'},{icon:'bath',label:'الحمامات',value:'2'},{icon:'layers',label:'الطابق',value:'الثالث'},{icon:'calendar',label:'عمر البناء',value:'3 سنوات'},{icon:'sofa',label:'الفرش',value:'مفروش'},{icon:'flame',label:'التدفئة',value:'مركزي'}]},
+  '1002': {id:'1002',type:'property',purpose:'rent',title:'فيلا مستقلة مع مسبح وحديقة واسعة',location:'دمشق - قدسيا',price:950,currency:'USD',featured:true,whatsapp:'0930000002',description:'فيلا مستقلة بتصميم عصري، مساحة 350 متر مربع موزعة على طابقين، 5 غرف نوم، صالون كبير، مطبخ مجهز، 4 حمامات، حديقة خاصة 200م، مسبح، موقف سيارتين.',images:[],specs:[{icon:'home',label:'نوع العقار',value:'فيلا'},{icon:'square',label:'المساحة',value:'350 م²'},{icon:'bed-double',label:'الغرف',value:'5'},{icon:'bath',label:'الحمامات',value:'4'},{icon:'waves',label:'المسبح',value:'متوفر'},{icon:'trees',label:'الحديقة',value:'200 م²'},{icon:'car',label:'موقف',value:'متوفر'},{icon:'flame',label:'التدفئة',value:'مركزي'}]},
   '1003': {id:'1003',type:'property',purpose:'sale',title:'أرض سكنية 500م على شارعين',location:'ريف دمشق - جرمانا',price:75000,currency:'USD',featured:false,whatsapp:'0930000003',description:'أرض سكنية بمساحة 500 متر مربع، على شارعين (شرقي وغربي)، منظمة ضمن المخطط التنظيمي، جاهزة للبناء مباشرة.',images:[],specs:[{icon:'trees',label:'النوع',value:'أرض'},{icon:'square',label:'المساحة',value:'500 م²'},{icon:'route',label:'الواجهات',value:'شارعين'},{icon:'file-check',label:'الطابو',value:'منظم'}]},
   '1004': {id:'1004',type:'property',purpose:'rent',title:'مكتب تجاري مجهز بالكامل في أبو رمانة',location:'دمشق - أبو رمانة',price:600,currency:'USD',featured:false,whatsapp:'0930000004',description:'مكتب تجاري بمساحة 120 متر مربع في منطقة حيوية، مجهز بالكامل بالأثاث والمعدات المكتبية، مكيفات، حمام، مطبخ صغير.',images:[],specs:[{icon:'briefcase',label:'النوع',value:'مكتب'},{icon:'square',label:'المساحة',value:'120 م²'},{icon:'layers',label:'الطابق',value:'الثاني'},{icon:'snowflake',label:'التكييف',value:'متوفر'},{icon:'sofa',label:'الفرش',value:'مجهز'},{icon:'car',label:'موقف',value:'متوفر'}]},
   '2001': {id:'2001',type:'car',purpose:'sale',title:'تويوتا كامري 2022 - فل كامل',location:'دمشق - المزة',price:28500,currency:'USD',featured:true,whatsapp:'0930000005',description:'تويوتا كامري 2022 فل كامل، ماشية 35,000 كم فقط، بحالة الوكالة، صيانة دورية في الوكالة، بدون حوادث نهائياً.\n\nالمواصفات: فتحة سقف، جلد، شاشة، كاميرا خلفية، حساسات، مثبت سرعة، مقاعد كهربائية.',images:[],specs:[{icon:'car',label:'الماركة',value:'تويوتا'},{icon:'tag',label:'الموديل',value:'كامري'},{icon:'calendar',label:'السنة',value:'2022'},{icon:'gauge',label:'الكيلومترات',value:'35,000 كم'},{icon:'settings-2',label:'ناقل الحركة',value:'أوتوماتيك'},{icon:'fuel',label:'الوقود',value:'بنزين'},{icon:'palette',label:'اللون',value:'أبيض'},{icon:'sparkles',label:'الحالة',value:'مستعمل'}]},
@@ -44,7 +45,7 @@ async function fetchListing(id) {
 }
 
 /* ==========================================
-   تحويل details (Object) إلى specs (Array)
+   ✅ تحويل details (Object) إلى specs (Array)
    ========================================== */
 function buildSpecsFromDetails(listing) {
   if (listing.specs && listing.specs.length > 0) return listing.specs;
@@ -208,10 +209,37 @@ function buildLocationText(listing) {
 }
 
 /* ==========================================
+   ✅ Preload ديناميكي للصورة الرئيسية (LCP)
+   يُستدعى قبل رسم الصورة لتسريع ظهورها
+   ========================================== */
+function preloadMainImage(item) {
+  if (!item || !item.id) return;
+  if (!window.getListingImageUrl) return;
+
+  const mainUrl = window.getListingImageUrl(item, 0, 'large');
+  if (!mainUrl || mainUrl.startsWith('data:')) return;
+
+  // ✅ تجنب التكرار
+  if (document.querySelector('link[data-preload-main]')) return;
+
+  const link = document.createElement('link');
+  link.rel = 'preload';
+  link.as = 'image';
+  link.href = mainUrl;
+  link.setAttribute('data-preload-main', '1');
+  // ✅ fetchpriority عالي للصورة الرئيسية (LCP Element)
+  link.setAttribute('fetchpriority', 'high');
+  document.head.appendChild(link);
+}
+
+/* ==========================================
    عرض الإعلان
    ========================================== */
 function renderListing(l) {
   currentListing = l;
+
+  // ✅ Preload الصورة الرئيسية فوراً
+  preloadMainImage(l);
 
   const parent = document.getElementById('breadcrumbParent');
   if (l.type === 'property') {
@@ -345,7 +373,10 @@ function setupSellerWhatsapp(listing) {
 }
 
 /* ==========================================
-   ✅ معرض الصور - يستخدم الدالة الموحّدة getListingImageUrl
+   ✅ معرض الصور - النسخة المحسّنة (3 أحجام)
+   - الصورة الرئيسية: large (1600px) - جودة عالية
+   - المصغرات: thumb (300px) - حجم صغير
+   - عند التبديل: يستخدم medium كحل وسط
    ========================================== */
 function renderGallery(imgs, l) {
   const main = document.getElementById('galleryMain');
@@ -362,55 +393,91 @@ function renderGallery(imgs, l) {
     return;
   }
 
-  // ✅✅✅ استخدام الدالة الموحّدة من api.js
-  const imageUrls = imgs.map(function (img, i) {
-    if (window.getListingImageUrl) {
-      return window.getListingImageUrl(l, i);
-    }
-    // fallback (احتياطي)
-    return typeof img === 'string' ? img : null;
-  }).filter(Boolean);
+  // ✅ توليد 3 أحجام لكل صورة
+  const getUrl = window.getListingImageUrl;
 
-  currentListing.images = imageUrls;
+  const urls = {
+    thumb:  imgs.map((_, i) => getUrl ? getUrl(l, i, 'thumb')  : null).filter(Boolean),
+    medium: imgs.map((_, i) => getUrl ? getUrl(l, i, 'medium') : null).filter(Boolean),
+    large:  imgs.map((_, i) => getUrl ? getUrl(l, i, 'large')  : null).filter(Boolean)
+  };
 
-  main.innerHTML = `<img src="${imageUrls[0]}" alt="${l.title}" loading="eager">
+  // احتياط: إذا لم تعمل الدالة، استخدم الصور كما هي
+  if (!urls.large.length) {
+    const raw = imgs.map(img => typeof img === 'string' ? img : null).filter(Boolean);
+    urls.large = raw;
+    urls.medium = raw;
+    urls.thumb = raw;
+  }
+
+  // ✅ تخزين كل الروابط للاستخدام في updateGallery
+  currentListing._galleryUrls = urls;
+
+  const safeTitle = (l.title || '').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+
+  // ✅ الصورة الرئيسية: large مع fetchpriority عالي
+  main.innerHTML = `
+    <img 
+      src="${urls.large[0]}" 
+      alt="${safeTitle}" 
+      loading="eager"
+      decoding="async"
+      fetchpriority="high"
+      width="1200"
+      height="800"
+    >
     <div class="gallery-nav prev" onclick="prevImage()"><i data-lucide="chevron-right"></i></div>
     <div class="gallery-nav next" onclick="nextImage()"><i data-lucide="chevron-left"></i></div>
-    <div class="gallery-counter" id="galleryCounter">1 / ${imageUrls.length}</div>`;
+    <div class="gallery-counter" id="galleryCounter">1 / ${urls.large.length}</div>`;
 
-  thumbs.innerHTML = imageUrls.map(function (url, i) {
-    return `<div class="gallery-thumb ${i === 0 ? 'active' : ''}" onclick="goToImage(${i})"><img src="${url}" alt="صورة ${i + 1}" loading="lazy"></div>`;
-  }).join('');
+  // ✅ المصغرات: thumb (حجم صغير جداً ~10KB لكل صورة)
+  thumbs.innerHTML = urls.thumb.map((url, i) => 
+    `<div class="gallery-thumb ${i === 0 ? 'active' : ''}" onclick="goToImage(${i})">
+       <img src="${url}" alt="صورة ${i + 1}" loading="lazy" decoding="async" width="100" height="100">
+     </div>`
+  ).join('');
 
   currentImageIndex = 0;
   initIcons();
 }
 
 window.prevImage = function() {
-  if (!currentListing?.images?.length) return;
-  const t = currentListing.images.length;
+  if (!currentListing?._galleryUrls?.large?.length) return;
+  const t = currentListing._galleryUrls.large.length;
   currentImageIndex = (currentImageIndex - 1 + t) % t;
   updateGallery();
 };
 
 window.nextImage = function() {
-  if (!currentListing?.images?.length) return;
-  const t = currentListing.images.length;
+  if (!currentListing?._galleryUrls?.large?.length) return;
+  const t = currentListing._galleryUrls.large.length;
   currentImageIndex = (currentImageIndex + 1) % t;
   updateGallery();
 };
 
 window.goToImage = function(i) {
-  if (!currentListing?.images?.length) return;
+  if (!currentListing?._galleryUrls?.large?.length) return;
   currentImageIndex = i;
   updateGallery();
 };
 
 function updateGallery() {
-  const imgs = currentListing.images;
+  const urls = currentListing._galleryUrls;
+  if (!urls || !urls.large.length) return;
+
   const main = document.getElementById('galleryMain');
-  main.querySelector('img').src = imgs[currentImageIndex];
-  document.getElementById('galleryCounter').textContent = `${currentImageIndex + 1} / ${imgs.length}`;
+  const imgEl = main.querySelector('img');
+  
+  if (imgEl) {
+    // ✅ استخدم large للعرض الكامل
+    imgEl.src = urls.large[currentImageIndex];
+  }
+
+  const counter = document.getElementById('galleryCounter');
+  if (counter) {
+    counter.textContent = `${currentImageIndex + 1} / ${urls.large.length}`;
+  }
+
   document.querySelectorAll('.gallery-thumb').forEach((t, i) =>
     t.classList.toggle('active', i === currentImageIndex)
   );
@@ -673,23 +740,25 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderListing(l);
 });
 
-// ==========================================
-// إخفاء رقم هاتف البائع عن المستخدمين العاديين
-// ==========================================
+/* ==========================================
+   🔒 إخفاء رقم هاتف البائع عن المستخدمين العاديين
+   ⚠️ ملاحظة أمنية مهمة:
+   هذا الكود يخفي الزر بصرياً فقط. الرقم يبقى في HTML.
+   الحل الآمن: عدم إرسال الرقم من السيرفر إلا للأدمن.
+   ========================================== */
 document.addEventListener('DOMContentLoaded', function() {
-    const sellerBtn = document.getElementById('sellerWhatsappBtn'); 
-    
-    if (!sellerBtn) return;
+  const sellerBtn = document.getElementById('sellerWhatsappBtn');
+  if (!sellerBtn) return;
 
-    const currentUser = API.Users.getCurrent();
-    
-    const isAdmin = currentUser && (currentUser.role === 'admin' || currentUser.role === 'super_admin');
-    
-    if (isAdmin) {
-        sellerBtn.style.display = 'flex';
-        console.log('🛡️ أدمن: تم إظهار رقم البائع.');
-    } else {
-        sellerBtn.style.display = 'none';
-        console.log('👤 مستخدم عادي: تم إخفاء رقم البائع.');
-    }
-});ء  
+  const currentUser = API.Users.getCurrent();
+  const isAdmin = currentUser && (currentUser.role === 'admin' || currentUser.role === 'super_admin');
+
+  if (isAdmin) {
+    sellerBtn.style.display = 'flex';
+  } else {
+    sellerBtn.style.display = 'none';
+    // ✅ أمان إضافي: احذف الرقم من HTML إذا لم يكن أدمن
+    sellerBtn.removeAttribute('href');
+    sellerBtn.innerHTML = '';
+  }
+});

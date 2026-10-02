@@ -1,4 +1,9 @@
 /* ==========================================
+   app-inline.js - النسخة النهائية الكاملة
+   الإصدار: 3.1 (يشمل الهامبرغر + كل الأكواد)
+   ========================================== */
+
+/* ==========================================
    🟢 1. نافذة تصفح الإعلانات (Browse Modal)
    ========================================== */
 (function() {
@@ -138,7 +143,8 @@
 })();
 
 /* ==========================================
-   🍔 3. قائمة الهامبرغر (Mobile Menu) - نسخة موحدة ونظيفة
+   🍔 3. قائمة الهامبرغر (فتح/إغلاق القائمة الجانبية)
+   ✅ النسخة الموحدة الوحيدة - لا تكرار
    ========================================== */
 (function() {
   'use strict';
@@ -149,8 +155,12 @@
     const overlay = document.getElementById('mobileMenuOverlay');
     const closeBtn = document.getElementById('closeMobileMenu');
 
-    if (!toggleBtn || !menu || !overlay) return;
+    if (!toggleBtn || !menu || !overlay) {
+      console.warn('⚠️ Hamburger elements missing');
+      return;
+    }
 
+    // ✅ منع الربط المتكرر
     if (toggleBtn.dataset.bound === '1') return;
     toggleBtn.dataset.bound = '1';
 
@@ -171,24 +181,37 @@
       document.body.style.overflow = '';
     }
 
+    // ✅ زر الهامبرغر
     toggleBtn.addEventListener('click', function(e) {
-      e.preventDefault(); e.stopPropagation();
-      if (menu.classList.contains('show')) closeMenu(); else openMenu();
+      e.preventDefault();
+      e.stopPropagation();
+      if (menu.classList.contains('show')) {
+        closeMenu();
+      } else {
+        openMenu();
+      }
     });
 
+    // ✅ زر الإغلاق
     if (closeBtn) {
       closeBtn.addEventListener('click', function(e) {
-        e.preventDefault(); closeMenu();
+        e.preventDefault();
+        closeMenu();
       });
     }
 
+    // ✅ الـ overlay
     overlay.addEventListener('click', function(e) {
-      e.preventDefault(); closeMenu();
+      e.preventDefault();
+      closeMenu();
     });
 
+    // ✅ ESC للإغلاق
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') closeMenu();
     });
+
+    console.log('✅ Hamburger menu installed');
   }
 
   if (document.readyState === 'loading') {
@@ -200,7 +223,7 @@
 })();
 
 /* ==========================================
-   📱 4. عناصر القائمة الذكية (حسابي / لوحة التحكم)
+   📱 4. محتوى القائمة الذكية (حسابي / لوحة التحكم / خروج)
    ========================================== */
 (function() {
   'use strict';
@@ -305,51 +328,7 @@
 })();
 
 /* ==========================================
-   ⚡ 5. استجابة اللمس الفورية (Instant Feedback)
-   ========================================== */
-(function() {
-  'use strict';
-  const SELECTOR = 'button, a.btn, .btn, .btn-primary, .btn-login, .card, .cascade-btn, .browse-option, .add-type-option, .mobile-menu-item, .bottom-nav-item, .scroll-strip, .link-more';
-
-  function addInstantFeedback(el) {
-    if (el.dataset.instantFeedback === '1') return;
-    el.dataset.instantFeedback = '1';
-
-    el.addEventListener('pointerdown', function(e) {
-      if (e.pointerType === 'touch' && e.isPrimary === false) return;
-      this.style.transitionDuration = '0.05s';
-      this.style.opacity = '0.85';
-      const reset = () => {
-        setTimeout(() => { this.style.opacity = ''; this.style.transitionDuration = ''; }, 80);
-      };
-      el.addEventListener('pointerup', reset, { once: true });
-      el.addEventListener('pointercancel', reset, { once: true });
-      el.addEventListener('pointerleave', reset, { once: true });
-    }, { passive: true });
-  }
-
-  function init() {
-    document.querySelectorAll(SELECTOR).forEach(addInstantFeedback);
-  }
-
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
-  else init();
-
-  const observer = new MutationObserver(function(mutations) {
-    mutations.forEach(function(m) {
-      m.addedNodes.forEach(function(node) {
-        if (node.nodeType === 1) {
-          if (node.matches && node.matches(SELECTOR)) addInstantFeedback(node);
-          if (node.querySelectorAll) node.querySelectorAll(SELECTOR).forEach(addInstantFeedback);
-        }
-      });
-    });
-  });
-  observer.observe(document.body, { childList: true, subtree: true });
-})();
-
-/* ==========================================
-   👤 6. تحويل "تسجيل الدخول" إلى "حسابي" في الشريط السفلي
+   👤 5. تحويل "تسجيل الدخول" إلى "حسابي" في الشريط السفلي
    ========================================== */
 (function() {
   'use strict';

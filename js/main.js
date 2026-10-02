@@ -1,6 +1,6 @@
 /* ==========================================
    الصفحة الرئيسية - سوق
-   الإصدار: 2.0 (محسّن للأداء)
+   الإصدار: 3.0 (محسّن للأداء الفائق)
    ========================================== */
 
 function initIcons() {
@@ -19,12 +19,11 @@ const TYPE_NAMES = { property: 'عقارات', car: 'سيارات' };
 const PURPOSE_NAMES = { sale: 'للبيع', rent: 'للإيجار' };
 
 /* ==========================================
-   ✅ تحسين: منع استدعاءات API المتزامنة
+   ✅ تحسين 1: منع استدعاءات API المتزامنة
    ========================================== */
 let _listingsPromise = null;
 
 async function getCachedListings(forceRefresh) {
-  // ✅ إذا كان هناك طلب قيد التنفيذ، انتظره بدلاً من إطلاق طلب جديد
   if (_listingsPromise && !forceRefresh) {
     return _listingsPromise;
   }
@@ -38,7 +37,6 @@ async function getCachedListings(forceRefresh) {
       console.error('❌ فشل تحميل الإعلانات:', error);
       return [];
     } finally {
-      // ✅ إعادة تعيين بعد فترة قصيرة للسماح بطلبات لاحقة
       setTimeout(() => { _listingsPromise = null; }, 100);
     }
   })();
@@ -46,11 +44,45 @@ async function getCachedListings(forceRefresh) {
   return _listingsPromise;
 }
 
-function getImageUrl(item) {
-  if (window.getListingImageUrl) return window.getListingImageUrl(item, 0);
-  return null;
+/* ==========================================
+   ✅ تحسين 2: دالة موحدة لتوليد روابط الصور بثلاث أحجام
+   ========================================== */
+function getImageUrls(item, index = 0) {
+  if (!item || !item.id) {
+    return { thumb: null, medium: null, large: null, srcset: '', sizes: '' };
+  }
+
+  const base = `/api/listing_image.php?id=${item.id}&index=${index}`;
+  const thumb  = `${base}&size=thumb`;
+  const medium = `${base}&size=medium`;
+  const large  = `${base}&size=large`;
+
+  return {
+    thumb,
+    medium,
+    large,
+    // ✅ srcset لتعريف المتصفح بكل الأحجام المتاحة
+    srcset: `${thumb} 300w, ${medium} 800w, ${large} 1600w`,
+    // ✅ sizes تحدد عرض الصورة حسب حجم الشاشة
+    // - جوال: 100% من العرض
+    // - تابلت: 50%
+    // - لابتوب: 33%
+    // - شاشات كبيرة: 25%
+    sizes: '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1440px) 33vw, 25vw'
+  };
 }
 
+/* ==========================================
+   الاحتفاظ بالدالة القديمة للتوافق
+   ========================================== */
+function getImageUrl(item) {
+  if (window.getListingImageUrl) return window.getListingImageUrl(item, 0);
+  return getImageUrls(item).medium;
+}
+
+/* ==========================================
+   ✅ تحسين 3: createCard مع srcset + decoding async
+   ========================================== */
 function createCard(item, type) {
   const purposeText = item.purpose === 'sale' ? 'للبيع' : 'للإيجار';
   const purposeClass = item.purpose === 'sale' ? 'sale' : 'rent';
@@ -67,9 +99,23 @@ function createCard(item, type) {
   if (item.subType === 'chalet') icon = 'tent';
   if (item.subType === 'arabic-house') icon = 'landmark';
 
-  const imageUrl = getImageUrl(item);
-  const imageContent = imageUrl
-    ? `<img src="${imageUrl}" alt="${item.title || ''}" loading="lazy" onerror="this.onerror=null;this.style.display='none';this.parentNode.classList.add('image-failed');this.parentNode.innerHTML='<i data-lucide=\\'${icon}\\'></i>';if(window.lucide)window.lucide.createIcons();">`
+  // ✅ استخدام الأحجام الثلاثة
+  const urls = getImageUrls(item, 0);
+  const safeTitle = (item.title || '').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+
+  const imageContent = urls.medium
+    ? `<img 
+         src="${urls.medium}"
+         srcset="${urls.srcset}"
+         sizes="${urls.sizes}"
+         alt="${safeTitle}"
+         loading="lazy"
+         decoding="async"
+         fetchpriority="low"
+         width="800" 
+         height="600"
+         onerror="this.onerror=null;this.style.display='none';this.parentNode.classList.add('image-failed');this.parentNode.innerHTML='<i data-lucide=\\'${icon}\\'></i>';if(window.lucide)window.lucide.createIcons();"
+       >`
     : `<i data-lucide="${icon}"></i>`;
 
   const featuredBadge = item.featured ? `<span class="card-badge featured">⭐ مميز</span>` : '';
@@ -167,9 +213,10 @@ function emptyFilterState() {
 }
 
 /* ==========================================
-   ✅ تحسين: استدعاء API واحد لكل الإعلانات المميزة
-   بدلاً من استدعاءين منفصلين (كان يستهلك باندويث مضاعف)
+   ✅ تحسين 4: استدعاء API واحد + عرض 8 بطاقات فقط
    ========================================== */
+const MAX_FEATURED_ITEMS = 8; // ✅ 8 عناصر فقط لكل قسم (لتحميل أسرع)
+
 async function loadAllFeatured(forceRefresh) {
   const propContainer = document.getElementById('featuredProperties');
   const carsContainer = document.getElementById('featuredCars');
@@ -177,17 +224,18 @@ async function loadAllFeatured(forceRefresh) {
   if (!propContainer && !carsContainer) return;
 
   try {
-    // ✅ استدعاء واحد فقط
     const allListings = await getCachedListings(forceRefresh);
 
-    // تقسيم البيانات على القسمين
+    // ✅ تقييد العدد لتحميل أسرع
     const properties = allListings
       .filter(l => l.type === 'property')
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .slice(0, MAX_FEATURED_ITEMS); // ✅ 8 فقط
 
     const cars = allListings
       .filter(l => l.type === 'car')
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .slice(0, MAX_FEATURED_ITEMS); // ✅ 8 فقط
 
     if (propContainer) {
       propContainer.innerHTML = properties.length === 0
@@ -211,8 +259,7 @@ async function loadAllFeatured(forceRefresh) {
 }
 
 /* ==========================================
-   ✅ الاحتفاظ بالدالتين للتوافق مع الكود القديم
-   لكنهما الآن تستخدمان نفس الكاش
+   الاحتفاظ بالدالتين للتوافق مع الكود القديم
    ========================================== */
 async function loadFeaturedProperties(forceRefresh) {
   const container = document.getElementById('featuredProperties');
@@ -221,7 +268,8 @@ async function loadFeaturedProperties(forceRefresh) {
     const allListings = await getCachedListings(forceRefresh);
     const properties = allListings
       .filter(l => l.type === 'property')
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .slice(0, MAX_FEATURED_ITEMS);
     container.innerHTML = properties.length === 0
       ? emptyState('property')
       : properties.map(p => createCard(p, 'property')).join('');
@@ -239,7 +287,8 @@ async function loadFeaturedCars(forceRefresh) {
     const allListings = await getCachedListings(forceRefresh);
     const cars = allListings
       .filter(l => l.type === 'car')
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .slice(0, MAX_FEATURED_ITEMS);
     container.innerHTML = cars.length === 0
       ? emptyState('car')
       : cars.map(c => createCard(c, 'car')).join('');
@@ -446,7 +495,6 @@ async function handleCascadeShow() {
   }, 100);
 
   try {
-    // ✅ تحسين: استخدام الكاش بدل forceRefresh (كان يجلب كل الإعلانات من السيرفر كل مرة)
     const allListings = await getCachedListings(false);
     const listings = allListings.filter(l => l.type === cascadeState.type && l.purpose === cascadeState.purpose && l.city === cascadeState.city);
     listings.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -489,8 +537,8 @@ async function handleCascadeShow() {
 }
 
 /* ==========================================
-   ✅ تحسين: Auto-refresh ذكي
-   - كل 5 دقائق بدل 30 ثانية (توفير 90% من الطلبات)
+   ✅ تحسين 5: Auto-refresh ذكي
+   - كل 5 دقائق بدل 30 ثانية
    - يتوقف عند إخفاء الصفحة
    - استدعاء واحد بدل 3
    ========================================== */
@@ -503,7 +551,6 @@ async function performRefresh() {
   if (document.hidden) return;
   isRefreshing = true;
   try {
-    // ✅ استدعاء واحد بدل 3 منفصلة
     await Promise.all([
       loadAllFeatured(true),
       loadStats(true)
@@ -527,7 +574,6 @@ function stopAutoRefresh() {
   }
 }
 
-// ✅ إيقاف/تشغيل تلقائي حسب حالة الصفحة
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
     stopAutoRefresh();
@@ -537,7 +583,6 @@ document.addEventListener('visibilitychange', () => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-  // ✅ استدعاء واحد موحد بدل استدعاءين منفصلين
   loadAllFeatured(false);
   loadStats(false);
   setupSearchTabs();
@@ -546,6 +591,5 @@ document.addEventListener('DOMContentLoaded', () => {
   setupCascadeFilter();
   initIcons();
 
-  // ✅ تشغيل الـ Auto-refresh الذكي
   startAutoRefresh();
 });
