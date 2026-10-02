@@ -9,13 +9,11 @@
   <!-- ✅ favicon - أيقونة الموقع -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
 
-  
-  
   <script src="../js/lucide.min.js"></script>
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/pages.css">
   <link rel="stylesheet" href="../css/admin.css">
-  
+
   <!-- ✨ كود الطوارئ: إجبار لوحة التحكم على التوافق مع الجوال ✨ -->
   <style>
     @media (max-width: 768px) {
@@ -124,6 +122,10 @@
     }
   </style>
   <link rel="stylesheet" href="../css/speed-boost.css">
+  <link rel="stylesheet" href="../css/admin-charts.css">
+
+  <!-- ✅ Chart.js من CDN (مجاني، MIT License) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
 </head>
 
 <body class="has-bottom-nav">
@@ -196,6 +198,10 @@
             <i data-lucide="alert-triangle"></i>
             <span>البلاغات</span>
             <span class="admin-badge" id="badgeReports">0</span>
+          </button>
+          <button class="admin-menu-btn" data-tab="analytics">
+            <i data-lucide="bar-chart-3"></i>
+            <span>الإحصائيات</span>
           </button>
           <button class="admin-menu-btn danger" id="adminLogoutBtn">
             <i data-lucide="log-out"></i>
@@ -356,32 +362,48 @@
           <div id="reportsContent"></div>
         </section>
 
+        <!-- ========== Tab: Analytics ========== -->
+        <section class="admin-tab" data-tab="analytics">
+          <div class="admin-page-header">
+            <h1>الإحصائيات المتقدمة</h1>
+            <p>تحليل شامل لنشاط المنصة</p>
+          </div>
+
+          <div class="analytics-grid" id="analyticsGrid">
+            <div class="analytics-loading" style="grid-column:1/-1;">
+              <i data-lucide="bar-chart-3"></i>
+              <p>جاري تحضير الإحصائيات... يرجى الانتظار</p>
+            </div>
+          </div>
+        </section>
+
       </main>
     </div>
+
     <!-- ===================== 🔍 البحث برقم الإعلان ===================== -->
-<div class="admin-search-box">
-  <div class="admin-search-header">
-    <i data-lucide="search"></i>
-    <h3>البحث برقم الإعلان</h3>
-  </div>
-  <p class="admin-search-hint">الصق رقم الإعلان (مثل: L1790521822990109) للوصول إليه مباشرة</p>
-  
-  <div class="admin-search-input-wrap">
-    <input 
-      type="text" 
-      id="listingIdSearch" 
-      placeholder="L1790521822990109 أو 1790521822990109" 
-      autocomplete="off"
-      dir="ltr"
-    >
-    <button type="button" id="listingIdSearchBtn" class="admin-search-btn">
-      <i data-lucide="search"></i>
-      <span>بحث</span>
-    </button>
-  </div>
-  
-  <div id="listingSearchResult" class="admin-search-result" style="display:none;"></div>
-</div>
+    <div class="admin-search-box">
+      <div class="admin-search-header">
+        <i data-lucide="search"></i>
+        <h3>البحث برقم الإعلان</h3>
+      </div>
+      <p class="admin-search-hint">الصق رقم الإعلان (مثل: L1790521822990109) للوصول إليه مباشرة</p>
+
+      <div class="admin-search-input-wrap">
+        <input 
+          type="text" 
+          id="listingIdSearch" 
+          placeholder="L1790521822990109 أو 1790521822990109" 
+          autocomplete="off"
+          dir="ltr"
+        >
+        <button type="button" id="listingIdSearchBtn" class="admin-search-btn">
+          <i data-lucide="search"></i>
+          <span>بحث</span>
+        </button>
+      </div>
+
+      <div id="listingSearchResult" class="admin-search-result" style="display:none;"></div>
+    </div>
 
     <!-- ===================== نافذة تعديل الإعلان (للأدمن) ===================== -->
     <div class="edit-modal" id="adminEditModal" style="display:none;">
@@ -500,11 +522,14 @@
     <a href="account.html" class="bottom-nav-item"><i data-lucide="user"></i><span>حسابي</span></a>
   </nav>
 
+  <!-- ===================== Scripts ===================== -->
   <script src="../js/api.js"></script>
   <script src="../js/header-state.js"></script>
   <script src="../js/admin.js"></script>
-  <script src="../js/mobile-menu.js"></script>
+  <script src="../js/admin-charts.js"></script>
+  <script src="../js/app-inline.js"></script>
   <script src="../js/speed-boost.js"></script>
+  <script src="../js/sw-register.js"></script>
 </body>
 
 </html>
