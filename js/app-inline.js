@@ -1,6 +1,6 @@
 /* ==========================================
    app-inline.js - النسخة النهائية الكاملة
-   الإصدار: 3.1 (يشمل الهامبرغر + كل الأكواد)
+   الإصدار: 3.2 (محسّن + حماية ضد الأخطاء)
    ========================================== */
 
 /* ==========================================
@@ -144,7 +144,6 @@
 
 /* ==========================================
    🍔 3. قائمة الهامبرغر (فتح/إغلاق القائمة الجانبية)
-   ✅ النسخة الموحدة الوحيدة - لا تكرار
    ========================================== */
 (function() {
   'use strict';
@@ -160,7 +159,6 @@
       return;
     }
 
-    // ✅ منع الربط المتكرر
     if (toggleBtn.dataset.bound === '1') return;
     toggleBtn.dataset.bound = '1';
 
@@ -181,7 +179,6 @@
       document.body.style.overflow = '';
     }
 
-    // ✅ زر الهامبرغر
     toggleBtn.addEventListener('click', function(e) {
       e.preventDefault();
       e.stopPropagation();
@@ -192,7 +189,6 @@
       }
     });
 
-    // ✅ زر الإغلاق
     if (closeBtn) {
       closeBtn.addEventListener('click', function(e) {
         e.preventDefault();
@@ -200,13 +196,11 @@
       });
     }
 
-    // ✅ الـ overlay
     overlay.addEventListener('click', function(e) {
       e.preventDefault();
       closeMenu();
     });
 
-    // ✅ ESC للإغلاق
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') closeMenu();
     });
