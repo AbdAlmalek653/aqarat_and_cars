@@ -4,11 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,viewport-fit=cover">
 <title>من نحن | سوق</title>
-<!-- ✅ إضافة الأيقونة (Favicon) -->
 <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
 
+<!-- ✅ Preload للخطوط -->
+<link rel="preload" href="../fonts/cairo-v31-arabic-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../fonts/cairo-v31-arabic-latin-700.woff2" as="font" type="font/woff2" crossorigin>
 
-<script src="../js/lucide.min.js"></script>
+<!-- ✅ نظام الأيقونات المدمج (بديل lucide.min.js) -->
+<script src="../js/icons.js" defer></script>
+
 <link rel="stylesheet" href="../css/style.css">
 <link rel="stylesheet" href="../css/pages.css">
 </head>
@@ -63,7 +67,7 @@
 </ul>
 </div>
 
-<!-- ===================== قسم الأرقام (تم تعديله ليكون ديناميكياً) ===================== -->
+<!-- ===================== قسم الأرقام ===================== -->
 <div class="static-card">
 <h2><i data-lucide="users"></i> أرقامنا</h2>
 <div class="account-stats" style="margin:0;">
@@ -71,7 +75,6 @@
   <div class="account-stat">
     <div class="account-stat-icon"><i data-lucide="home"></i></div>
     <div>
-      <!-- تم إضافة id="statProperties" -->
       <div class="account-stat-number" id="statProperties">0</div>
       <div class="account-stat-label">عقار متاح</div>
     </div>
@@ -80,7 +83,6 @@
   <div class="account-stat">
     <div class="account-stat-icon"><i data-lucide="car"></i></div>
     <div>
-      <!-- تم إضافة id="statCars" -->
       <div class="account-stat-number" id="statCars">0</div>
       <div class="account-stat-label">سيارة معروضة</div>
     </div>
@@ -89,7 +91,6 @@
   <div class="account-stat">
     <div class="account-stat-icon"><i data-lucide="users"></i></div>
     <div>
-      <!-- تم إضافة id="statUsers" -->
       <div class="account-stat-number" id="statUsers">0</div>
       <div class="account-stat-label">مستخدم نشط</div>
     </div>
@@ -166,7 +167,6 @@
 </span>
 <span class="support-info">
 <span class="support-name">أبو إبراهيم</span>
-<!-- ✅ تم حذف جملة "المسؤول التنفيذي والإعلامي" -->
 </span>
 <i data-lucide="message-circle" class="support-wa-icon"></i>
 </a>
@@ -205,13 +205,10 @@
 <a href="account.html" class="bottom-nav-item"><i data-lucide="user"></i><span>تسجيل الدخول</span></a>
 </nav>
 
-<script src="../js/api.js"></script>
-<script src="../js/header-state.js"></script>
-<script src="../js/auth-guard.js"></script>
+<script src="../js/api.js" defer></script>
+<script src="../js/header-state.js" defer></script>
+<script src="../js/auth-guard.js" defer></script>
 <script>
-  // تشغيل أيقونات Lucide
-  if(window.lucide) window.lucide.createIcons();
-
   // ==========================================
   // دالة تحديث الإحصائيات ديناميكياً
   // ==========================================
@@ -221,17 +218,10 @@
     const statUsersEl = document.getElementById('statUsers');
     const statCitiesEl = document.getElementById('statCities');
 
-    // إذا لم نكن في صفحة تحتوي على هذه العناصر، توقف
     if (!statPropertiesEl && !statCarsEl && !statUsersEl) return;
 
     try {
       // ⚠️ هنا يتم جلب البيانات من الـ API الحقيقي عند تجهيزه
-      // استبدل هذا الجزء بالكود التالي عندما يكون الـ API جاهزاً:
-      // const response = await fetch('https://api.yourdomain.com/stats');
-      // const data = await response.json();
-      
-      // --- (بيانات تجريبية تعتمد على LocalStorage لمحاكاة الزيادة) ---
-      // هذا الجزء يجعل الأرقام تزيد عندما يضيف المستخدم إعلاناً من المتصفح نفسه
       const propsCount = parseInt(localStorage.getItem('propsCount')) || 6500;
       const carsCount = parseInt(localStorage.getItem('carsCount')) || 3800;
       const usersCount = parseInt(localStorage.getItem('usersCount')) || 25000;
@@ -242,9 +232,7 @@
         users: usersCount,
         cities: 14
       };
-      // -------------------------------------------------------------
 
-      // تحديث الأرقام في الصفحة
       if (statPropertiesEl) statPropertiesEl.textContent = `${data.properties.toLocaleString('en-US')}+`;
       if (statCarsEl) statCarsEl.textContent = `${data.cars.toLocaleString('en-US')}+`;
       if (statUsersEl) statUsersEl.textContent = `${data.users.toLocaleString('en-US')}+`;
@@ -255,9 +243,8 @@
     }
   }
 
-  // تشغيل الدالة عند تحميل الصفحة
   document.addEventListener('DOMContentLoaded', loadAboutStats);
 </script>
-<script src="../js/sw-register.js"></script>
+<script src="../js/sw-register.js" defer></script>
 </body>
 </html>
