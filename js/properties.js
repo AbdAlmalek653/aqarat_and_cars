@@ -1,24 +1,26 @@
 /* ==========================================
-   صفحة السيارات - البيانات من API فقط
-   الإصدار: 2.1 (محسّن + خريطة تفاعلية)
+   صفحة العقارات - البيانات من API فقط
+   الإصدار: 3.0 (محسّن + خريطة تفاعلية + أداء صاروخي)
    ========================================== */
 
 const ITEMS_PER_PAGE = 9;
 let currentPage = 1;
 let currentView = 'grid';
-let allCars = [];
-let filteredCars = [];
+let allProperties = [];
+let filteredProperties = [];
+let mapInitialized = false;
 
 function initIcons() { if (window.lucide) window.lucide.createIcons(); }
 
-async function loadCars() {
+async function loadProperties() {
   try {
-    const listings = await API.Listings.getAll({ type: 'car' });
-    allCars = listings || [];
+    // ✅ تم تغيير car إلى property
+    const listings = await API.Listings.getAll({ type: 'property' });
+    allProperties = listings || [];
     applyFilters();
   } catch (e) {
-    console.error('خطأ:', e);
-    allCars = [];
+    console.error('❌ خطأ في جلب العقارات:', e);
+    allProperties = [];
     applyFilters();
   }
 }
@@ -26,58 +28,69 @@ async function loadCars() {
 function getFilters() {
   return {
     purpose: document.querySelector('input[name="purpose"]:checked')?.value || '',
-    brands: Array.from(document.querySelectorAll('input[name="brand"]:checked')).map(c => c.value),
+    types: Array.from(document.querySelectorAll('input[name="type"]:checked')).map(c => c.value),
     city: document.getElementById('filterCity')?.value || '',
     priceMin: parseInt(document.getElementById('priceMin')?.value) || 0,
     priceMax: parseInt(document.getElementById('priceMax')?.value) || Infinity,
-    yearMin: parseInt(document.getElementById('yearMin')?.value) || 0,
-    yearMax: parseInt(document.getElementById('yearMax')?.value) || Infinity,
-    condition: document.querySelector('input[name="condition"]:checked')?.value || '',
-    transmission: document.querySelector('input[name="transmission"]:checked')?.value || '',
-    fuels: Array.from(document.querySelectorAll('input[name="fuel"]:checked')).map(c => c.value),
-    kmMax: parseInt(document.getElementById('kmMax')?.value) || Infinity
+    rooms: parseInt(document.querySelector('input[name="rooms"]:checked')?.value) || 0,
+    areaMin: parseInt(document.getElementById('areaMin')?.value) || 0,
+    areaMax: parseInt(document.getElementById('areaMax')?.value) || Infinity,
+    furnished: Array.from(document.querySelectorAll('input[name="furnished"]:checked')).map(c => c.value)
   };
 }
 
 function applyFilters() {
   const f = getFilters();
 
-  filteredCars = allCars.filter(c => {
-    if (f.purpose && c.purpose !== f.purpose) return false;
-    if (f.brands.length && !f.brands.includes(c.details?.brand)) return false;
-    if (f.city && c.city !== f.city) return false;
+  filteredProperties = allProperties.filter(p => {
+    if (f.purpose && p.purpose !== f.purpose) return false;
+    
+    // فلترة نوع العقار (شقة، فيلا، الخ)
+    if (f.types.length) {
+      const pType = p.property_type || p.details?.type || p.type;
+      if (!f.types.includes(pType)) return false;
+    }
+    
+    if (f.city && p.city !== f.city) return false;
 
-    const price = Number(c.price) || 0;
+    const price = Number(p.price) || 0;
     if (price < f.priceMin || price > f.priceMax) return false;
 
-    const year = Number(c.details?.year) || 0;
-    if (year < f.yearMin || year > f.yearMax) return false;
+    const rooms = Number(p.details?.rooms) || Number(p.rooms) || 0;
+    if (f.rooms && rooms !== f.rooms) return false;
 
-    if (f.condition && c.details?.condition !== f.condition) return false;
-    if (f.transmission && c.details?.transmission !== f.transmission) return false;
-    if (f.fuels.length && !f.fuels.includes(c.details?.fuel)) return false;
+    const area = Number(p.details?.area) || Number(p.area) || 0;
+    if (area < f.areaMin || area > f.areaMax) return false;
 
-    const km = Number(c.details?.km) || 0;
-    if (km > f.kmMax) return false;
+    if (f.furnished.length) {
+      const isFurnished = p.details?.furnished || p.furnished;
+      if (!f.furnished.includes(isFurnished)) return false;
+    }
 
     return true;
   });
 
   currentPage = 1;
-  sortCars();
+  sortProperties();
 }
 
-function sortCars() {
+function sortProperties() {
   const sort = document.getElementById('sortSelect')?.value || 'newest';
 
   switch (sort) {
-    case 'price-asc': filteredCars.sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0)); break;
-    case 'price-desc': filteredCars.sort((a, b) => (Number(b.price) || 0) - (Number(a.price) || 0)); break;
-    case 'year-desc': filteredCars.sort((a, b) => (Number(b.details?.year) || 0) - (Number(a.details?.year) || 0)); break;
-    default: filteredCars.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    case 'price-asc': filteredProperties.sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0)); break;
+    case 'price-desc': filteredProperties.sort((a, b) => (Number(b.price) || 0) - (Number(a.price) || 0)); break;
+    case 'area-desc': filteredProperties.sort((a, b) => (Number(b.details?.area || b.area) || 0) - (Number(a.details?.area || a.area) || 0)); break;
+    default: filteredProperties.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   }
 
-  renderCars();
+  renderProperties();
+  
+  if (mapInitialized && document.getElementById('viewMapBtn')?.classList.contains('active')) {
+    setTimeout(() => {
+      if (window.MapView) window.MapView.addMarkers(filteredProperties || allProperties || []);
+    }, 100);
+  }
 }
 
 function getStatusBadge(status) {
@@ -86,7 +99,7 @@ function getStatusBadge(status) {
   return '';
 }
 
-function createCarCard(item) {
+function createPropertyCard(item) {
   const purposeText = item.purpose === 'sale' ? 'للبيع' : 'للإيجار';
   const purposeClass = item.purpose === 'sale' ? 'sale' : 'rent';
 
@@ -99,9 +112,9 @@ function createCarCard(item) {
   const statusBadge = getStatusBadge(item.status);
   const isUnavailable = item.status === 'sold' || item.status === 'rented';
 
-  const icon = 'car';
+  // ✅ تم تغيير الأيقونة إلى مبنى
+  const icon = 'building-2';
 
-  // ✅ استخدام srcset + sizes للأداء الفائق
   const imgData = window.getListingImageSrcset
     ? window.getListingImageSrcset(item, 0)
     : { src: null, srcset: '', sizes: '' };
@@ -118,7 +131,7 @@ function createCarCard(item) {
          decoding="async"
          width="800"
          height="600"
-         onerror="this.onerror=null;this.style.display='none';this.parentNode.classList.add('image-failed');this.parentNode.innerHTML='<i data-lucide=\\'car\\'></i>';if(window.lucide)window.lucide.createIcons();">`
+         onerror="this.onerror=null;this.style.display='none';this.parentNode.classList.add('image-failed');this.parentNode.innerHTML='<i data-lucide=\\'${icon}\\'></i>';if(window.lucide)window.lucide.createIcons();">`
     : `<i data-lucide="${icon}"></i>`;
 
   const location = item.area || item.city || '—';
@@ -126,16 +139,17 @@ function createCarCard(item) {
   const d = item.details || {};
   let meta = '';
   const chips = [];
-  if (d.brandName || d.brand) chips.push({ icon: 'car', text: d.brandName || d.brand });
-  if (d.year) chips.push({ icon: 'calendar', text: d.year });
-  if (d.km && item.purpose === 'sale') chips.push({ icon: 'gauge', text: `${Number(d.km).toLocaleString('en-US')} كم` });
+  if (d.rooms || item.rooms) chips.push({ icon: 'bed-double', text: `${d.rooms || item.rooms} غرف` });
+  if (d.area || item.area) chips.push({ icon: 'square', text: `${d.area || item.area} م²` });
+  if (d.type || item.property_type) chips.push({ icon: 'building-2', text: d.type || item.property_type });
 
   if (chips.length) {
     meta = `<div class="card-meta">${chips.map(c => `<span class="card-meta-chip"><i data-lucide="${c.icon}"></i><span>${c.text}</span></span>`).join('')}</div>`;
   }
 
+  // ✅ تم تغيير type=car إلى type=property
   return `
-    <a href="details.html?id=${item.id}&type=car" class="card ${isUnavailable ? 'card-unavailable' : ''}">
+    <a href="details.html?id=${item.id}&type=property" class="card ${isUnavailable ? 'card-unavailable' : ''}">
       <div class="card-image">
         ${imageContent}
         ${featuredBadge}
@@ -152,15 +166,16 @@ function createCarCard(item) {
   `;
 }
 
-function renderCars() {
-  const grid = document.getElementById('carsGrid');
+function renderProperties() {
+  // ✅ تم تغيير carsGrid إلى propertiesGrid
+  const grid = document.getElementById('propertiesGrid');
   const countEl = document.getElementById('resultsCount');
   const noResultsMsg = document.getElementById('noResultsMessage');
 
   if (!grid) return;
-  if (countEl) countEl.textContent = filteredCars.length;
+  if (countEl) countEl.textContent = filteredProperties.length;
 
-  if (filteredCars.length === 0) {
+  if (filteredProperties.length === 0) {
     grid.style.display = 'none';
     grid.innerHTML = '';
     if (noResultsMsg) {
@@ -174,12 +189,12 @@ function renderCars() {
   grid.style.display = '';
   if (noResultsMsg) noResultsMsg.style.display = 'none';
 
-  const totalPages = Math.ceil(filteredCars.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(filteredProperties.length / ITEMS_PER_PAGE);
   const start = (currentPage - 1) * ITEMS_PER_PAGE;
-  const pageItems = filteredCars.slice(start, start + ITEMS_PER_PAGE);
+  const pageItems = filteredProperties.slice(start, start + ITEMS_PER_PAGE);
 
   grid.className = currentView === 'grid' ? 'properties-grid' : 'properties-list';
-  grid.innerHTML = pageItems.map(createCarCard).join('');
+  grid.innerHTML = pageItems.map(createPropertyCard).join('');
 
   renderPagination(totalPages);
   initIcons();
@@ -205,17 +220,20 @@ function renderPagination(totalPages) {
 
 window.goToPage = function(page) {
   currentPage = page;
-  renderCars();
+  renderProperties();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
 window.clearAllFilters = function() {
   document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
   document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
-  document.querySelector('input[name="purpose"][value=""]').checked = true;
-  document.querySelector('input[name="condition"][value=""]').checked = true;
-  document.querySelector('input[name="transmission"][value=""]').checked = true;
-  ['filterCity', 'priceMin', 'priceMax', 'yearMin', 'yearMax', 'kmMax'].forEach(id => {
+  
+  const purposeAll = document.querySelector('input[name="purpose"][value=""]');
+  if (purposeAll) purposeAll.checked = true;
+  const roomsAll = document.querySelector('input[name="rooms"][value=""]');
+  if (roomsAll) roomsAll.checked = true;
+  
+  ['filterCity', 'priceMin', 'priceMax', 'areaMin', 'areaMax'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
@@ -223,15 +241,15 @@ window.clearAllFilters = function() {
 };
 
 function setupEvents() {
-  document.querySelectorAll('input[name="purpose"], input[name="brand"], input[name="condition"], input[name="transmission"], input[name="fuel"]')
+  document.querySelectorAll('input[name="purpose"], input[name="type"], input[name="rooms"], input[name="furnished"]')
     .forEach(el => el.addEventListener('change', applyFilters));
 
-  ['filterCity', 'priceMin', 'priceMax', 'yearMin', 'yearMax', 'kmMax'].forEach(id => {
+  ['filterCity', 'priceMin', 'priceMax', 'areaMin', 'areaMax'].forEach(id => {
     document.getElementById(id)?.addEventListener('input', applyFilters);
   });
 
   document.getElementById('clearFilters')?.addEventListener('click', clearAllFilters);
-  document.getElementById('sortSelect')?.addEventListener('change', sortCars);
+  document.getElementById('sortSelect')?.addEventListener('change', sortProperties);
 
   const filterToggle = document.getElementById('filterToggle');
   const sidebar = document.getElementById('filtersSidebar');
@@ -254,32 +272,26 @@ function setupEvents() {
 }
 
 /* ==========================================
-   🗺️ تبديل عرض القائمة / الخريطة
+   🗺️ تبديل عرض القائمة / الخريطة (محسّن)
    ========================================== */
-(function() {
-  'use strict';
-
+function setupMapToggle() {
   const viewGridBtn = document.getElementById('viewGridBtn');
   const viewMapBtn = document.getElementById('viewMapBtn');
   const mapContainer = document.getElementById('mapContainer');
-  const grid = document.getElementById('carsGrid');
+  // ✅ تم تغيير carsGrid إلى propertiesGrid
+  const grid = document.getElementById('propertiesGrid');
 
-  if (!viewGridBtn || !viewMapBtn || !mapContainer || !grid) {
-    console.warn('⚠️ [Map] Missing elements - check HTML');
-    return;
-  }
+  if (!viewGridBtn || !viewMapBtn || !mapContainer || !grid) return;
 
-  let mapInitialized = false;
-
-  function showGrid() {
+  viewGridBtn.addEventListener('click', () => {
     viewGridBtn.classList.add('active');
     viewMapBtn.classList.remove('active');
     mapContainer.style.display = 'none';
     grid.classList.remove('map-hidden');
     grid.style.display = '';
-  }
+  });
 
-  function showMap() {
+  viewMapBtn.addEventListener('click', () => {
     viewGridBtn.classList.remove('active');
     viewMapBtn.classList.add('active');
     grid.classList.add('map-hidden');
@@ -287,47 +299,23 @@ function setupEvents() {
 
     if (!mapInitialized) {
       setTimeout(() => {
-        if (!window.MapView) {
-          console.warn('⚠️ [Map] MapView not loaded');
-          return;
-        }
+        if (!window.MapView) return;
         window.MapView.init('mapContainer');
-        window.MapView.addMarkers(filteredCars || allCars || []);
+        window.MapView.addMarkers(filteredProperties || allProperties || []);
         mapInitialized = true;
-        if (window.lucide) window.lucide.createIcons();
+        initIcons();
       }, 100);
     } else {
       setTimeout(() => {
-        if (window.MapView) {
-          window.MapView.addMarkers(filteredCars || allCars || []);
-        }
+        if (window.MapView) window.MapView.addMarkers(filteredProperties || allProperties || []);
       }, 100);
     }
-  }
-
-  viewGridBtn.addEventListener('click', showGrid);
-  viewMapBtn.addEventListener('click', showMap);
-
-  // ✅ تحديث الخريطة عند تطبيق فلاتر جديدة
-  const originalApplyFilters = window.applyFilters;
-  if (typeof originalApplyFilters === 'function') {
-    window.applyFilters = function() {
-      originalApplyFilters.apply(this, arguments);
-      if (mapInitialized && viewMapBtn.classList.contains('active')) {
-        setTimeout(() => {
-          if (window.MapView) {
-            window.MapView.addMarkers(filteredCars || allCars || []);
-          }
-        }, 200);
-      }
-    };
-  }
-
-  console.log('✅ [Map] Toggle controls installed (cars)');
-})();
+  });
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   initIcons();
   setupEvents();
-  loadCars();
+  setupMapToggle();
+  loadProperties();
 });
