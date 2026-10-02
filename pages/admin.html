@@ -5,15 +5,130 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,viewport-fit=cover">
   <title>لوحة التحكم | سوق</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- ✅ favicon - أيقونة الموقع -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
+
+  <script src="../js/lucide.min.js"></script>
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/pages.css">
   <link rel="stylesheet" href="../css/admin.css">
+
+  <!-- ✨ كود الطوارئ: إجبار لوحة التحكم على التوافق مع الجوال ✨ -->
+  <style>
+    @media (max-width: 768px) {
+      /* 1. لوحة التحكم عمود واحد */
+      .admin-dashboard {
+        display: block !important;
+        padding: 15px 0 !important;
+      }
+
+      /* 2. القائمة الجانبية تصبح شريطاً أفقياً */
+      .admin-sidebar {
+        position: static !important;
+        width: 100% !important;
+        margin-bottom: 20px !important;
+        padding: 15px !important;
+        border-radius: 15px !important;
+      }
+
+      .admin-user-box {
+        display: none !important;
+      }
+
+      /* 3. شريط أفقي للأزرار */
+      .admin-menu {
+        display: flex !important;
+        flex-direction: row !important;
+        overflow-x: auto !important;
+        gap: 8px !important;
+        padding-bottom: 8px !important;
+        scrollbar-width: none !important;
+      }
+      .admin-menu::-webkit-scrollbar { display: none !important; }
+
+      .admin-menu-btn {
+        flex: 0 0 auto !important;
+        padding: 10px 16px !important;
+        font-size: 13px !important;
+        white-space: nowrap !important;
+      }
+
+      .admin-menu-btn.danger { display: none !important; }
+
+      /* 4. إحصائيات 2x2 */
+      .admin-stats {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 10px !important;
+      }
+
+      .admin-stat-card {
+        display: flex !important;
+        flex-direction: column !important;
+        text-align: center !important;
+        padding: 15px 10px !important;
+      }
+
+      .admin-stat-icon {
+        margin: 0 auto 8px !important;
+      }
+
+      .admin-stat-num {
+        font-size: 18px !important;
+      }
+
+      /* 5. الجداول قابلة للتمرير */
+      .admin-table-wrap {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        margin: 0 -15px !important;
+        padding: 0 15px !important;
+      }
+
+      .admin-table {
+        min-width: 700px !important;
+      }
+
+      /* 6. الفلاتر بعرض كامل */
+      .admin-filters {
+        flex-direction: column !important;
+        gap: 10px !important;
+      }
+
+      .admin-search-input, 
+      .admin-select {
+        width: 100% !important;
+        min-width: 0 !important;
+      }
+
+      /* 7. الأزرار في الجدول */
+      .admin-actions {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 5px !important;
+      }
+
+      .admin-icon-btn {
+        width: 34px !important;
+        height: 34px !important;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .admin-stats {
+        grid-template-columns: 1fr !important;
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="../css/speed-boost.css">
+  <link rel="stylesheet" href="../css/admin-charts.css">
+
+  <!-- ✅ Chart.js من CDN (مجاني، MIT License) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
 </head>
 
-<body>
+<body class="has-bottom-nav">
 
   <header class="header">
     <div class="container header-inner">
@@ -83,6 +198,10 @@
             <i data-lucide="alert-triangle"></i>
             <span>البلاغات</span>
             <span class="admin-badge" id="badgeReports">0</span>
+          </button>
+          <button class="admin-menu-btn" data-tab="analytics">
+            <i data-lucide="bar-chart-3"></i>
+            <span>الإحصائيات</span>
           </button>
           <button class="admin-menu-btn danger" id="adminLogoutBtn">
             <i data-lucide="log-out"></i>
@@ -243,7 +362,152 @@
           <div id="reportsContent"></div>
         </section>
 
+        <!-- ========== Tab: Analytics ========== -->
+        <section class="admin-tab" data-tab="analytics">
+          <div class="admin-page-header">
+            <h1>الإحصائيات المتقدمة</h1>
+            <p>تحليل شامل لنشاط المنصة</p>
+          </div>
+
+          <div class="analytics-grid" id="analyticsGrid">
+            <div class="analytics-loading" style="grid-column:1/-1;">
+              <i data-lucide="bar-chart-3"></i>
+              <p>جاري تحضير الإحصائيات... يرجى الانتظار</p>
+            </div>
+          </div>
+        </section>
+
       </main>
+    </div>
+
+    <!-- ===================== 🔍 البحث برقم الإعلان ===================== -->
+    <div class="admin-search-box">
+      <div class="admin-search-header">
+        <i data-lucide="search"></i>
+        <h3>البحث برقم الإعلان</h3>
+      </div>
+      <p class="admin-search-hint">الصق رقم الإعلان (مثل: L1790521822990109) للوصول إليه مباشرة</p>
+
+      <div class="admin-search-input-wrap">
+        <input 
+          type="text" 
+          id="listingIdSearch" 
+          placeholder="L1790521822990109 أو 1790521822990109" 
+          autocomplete="off"
+          dir="ltr"
+        >
+        <button type="button" id="listingIdSearchBtn" class="admin-search-btn">
+          <i data-lucide="search"></i>
+          <span>بحث</span>
+        </button>
+      </div>
+
+      <div id="listingSearchResult" class="admin-search-result" style="display:none;"></div>
+    </div>
+
+    <!-- ===================== نافذة تعديل الإعلان (للأدمن) ===================== -->
+    <div class="edit-modal" id="adminEditModal" style="display:none;">
+      <div class="edit-modal-overlay" onclick="closeAdminEditModal()"></div>
+      <div class="edit-modal-content">
+        <button class="edit-modal-close" onclick="closeAdminEditModal()" type="button">
+          <i data-lucide="x"></i>
+        </button>
+
+        <div class="edit-modal-header">
+          <i data-lucide="pencil"></i>
+          <h2>تعديل الإعلان</h2>
+        </div>
+
+        <form id="adminEditForm" class="edit-form">
+          <input type="hidden" id="adminEditId">
+
+          <div class="edit-field">
+            <label for="adminEditTitle">عنوان الإعلان</label>
+            <input type="text" id="adminEditTitle" required>
+          </div>
+
+          <div class="edit-row">
+            <div class="edit-field">
+              <label for="adminEditPrice">السعر</label>
+              <input type="number" id="adminEditPrice" required>
+            </div>
+            <div class="edit-field">
+              <label for="adminEditCurrency">العملة</label>
+              <select id="adminEditCurrency">
+                <option value="USD">دولار أمريكي</option>
+                <option value="SYP">ليرة سورية</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="edit-row">
+            <div class="edit-field">
+              <label for="adminEditCity">المحافظة</label>
+              <select id="adminEditCity">
+                <option value="damascus">دمشق</option>
+                <option value="rif-dimashq">ريف دمشق</option>
+                <option value="aleppo">حلب</option>
+                <option value="homs">حمص</option>
+                <option value="hama">حماة</option>
+                <option value="latakia">اللاذقية</option>
+                <option value="tartus">طرطوس</option>
+                <option value="daraa">درعا</option>
+                <option value="sweida">السويداء</option>
+                <option value="quneitra">القنيطرة</option>
+                <option value="deir-ezzor">دير الزور</option>
+                <option value="raqqa">الرقة</option>
+                <option value="hasakah">الحسكة</option>
+                <option value="idlib">إدلب</option>
+              </select>
+            </div>
+            <div class="edit-field">
+              <label for="adminEditArea">المنطقة</label>
+              <input type="text" id="adminEditArea">
+            </div>
+          </div>
+
+          <div class="edit-field">
+            <label for="adminEditDescription">الوصف</label>
+            <textarea id="adminEditDescription" rows="4"></textarea>
+          </div>
+
+          <div class="edit-row">
+            <div class="edit-field">
+              <label for="adminEditWhatsapp">رقم الواتساب</label>
+              <input type="tel" id="adminEditWhatsapp">
+            </div>
+            <div class="edit-field">
+              <label for="adminEditStatus">الحالة</label>
+              <select id="adminEditStatus">
+                <option value="active">متاح</option>
+                <option value="pending">قيد المراجعة</option>
+                <option value="sold">مباع</option>
+                <option value="rented">مؤجر</option>
+                <option value="rejected">مرفوض</option>
+                <option value="expired">منتهي</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="edit-field edit-checkbox">
+            <label class="edit-toggle">
+              <input type="checkbox" id="adminEditFeatured">
+              <span>⭐ إعلان مميز</span>
+            </label>
+          </div>
+
+          <div class="edit-actions">
+            <button type="button" class="btn btn-outline" onclick="closeAdminEditModal()">
+              <i data-lucide="x"></i>
+              <span>إلغاء</span>
+            </button>
+            <button type="submit" class="btn btn-primary" id="adminEditSaveBtn">
+              <i data-lucide="save"></i>
+              <span>حفظ التعديلات</span>
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
 
   </div>
@@ -258,9 +522,14 @@
     <a href="account.html" class="bottom-nav-item"><i data-lucide="user"></i><span>حسابي</span></a>
   </nav>
 
+  <!-- ===================== Scripts ===================== -->
   <script src="../js/api.js"></script>
   <script src="../js/header-state.js"></script>
   <script src="../js/admin.js"></script>
+  <script src="../js/admin-charts.js"></script>
+  <script src="../js/app-inline.js"></script>
+  <script src="../js/speed-boost.js"></script>
+  <script src="../js/sw-register.js"></script>
 </body>
 
 </html>

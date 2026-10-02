@@ -1,5 +1,6 @@
 /* ==========================================
   طبقة البيانات الموحدة
+  الإصدار: 3.0 (محسّن للأداء الفائق + دعم أحجام متعددة)
   ========================================== */
 
 const API = (function () {
@@ -42,8 +43,106 @@ const API = (function () {
     return prefix + Date.now() + Math.floor(Math.random() * 1000);
   }
 
-  function httpGet(url) {
-    return fetch(API_BASE + url, { credentials: 'include' }).then(function (r) { return r.json(); });
+  /* ==========================================
+     ✅ دوال HTTP مع منع تكرار الطلبات
+     ========================================== */
+
+  const _pendingGets = {};
+  const _memoryCache = {};
+
+  const MEMORY_CACHE_TTL = 15000;
+  const SESSION_CACHE_TTL = 30000;
+  const SESSION_CACHE_PREFIX = 'api_cache_';
+
+  function getSessionCache(key) {
+    try {
+      const raw = sessionStorage.getItem(SESSION_CACHE_PREFIX + key);
+      if (!raw) return null;
+      const entry = JSON.parse(raw);
+      if (Date.now() - entry.time < SESSION_CACHE_TTL) {
+        return entry.data;
+      }
+      sessionStorage.removeItem(SESSION_CACHE_PREFIX + key);
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function setSessionCache(key, data) {
+    try {
+      sessionStorage.setItem(SESSION_CACHE_PREFIX + key, JSON.stringify({
+        data: data,
+        time: Date.now()
+      }));
+    } catch (e) {}
+  }
+
+  function httpGet(url, options) {
+    options = options || {};
+    const forceRefresh = options.forceRefresh || false;
+    const fullUrl = API_BASE + url;
+    const cacheKey = fullUrl;
+
+    if (forceRefresh) {
+      delete _memoryCache[cacheKey];
+      try { sessionStorage.removeItem(SESSION_CACHE_PREFIX + cacheKey); } catch(e) {}
+    }
+
+    if (_pendingGets[cacheKey]) {
+      return _pendingGets[cacheKey];
+    }
+
+    if (!forceRefresh && _memoryCache[cacheKey] && (Date.now() - _memoryCache[cacheKey].time) < MEMORY_CACHE_TTL) {
+      return Promise.resolve(_memoryCache[cacheKey].data);
+    }
+
+    if (!forceRefresh) {
+      const sessionData = getSessionCache(cacheKey);
+      if (sessionData) {
+        _memoryCache[cacheKey] = { data: sessionData, time: Date.now() };
+        return Promise.resolve(sessionData);
+      }
+    }
+
+    const promise = fetch(fullUrl, {
+      credentials: 'include',
+      cache: 'no-store'
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      _memoryCache[cacheKey] = { data: data, time: Date.now() };
+      setSessionCache(cacheKey, data);
+      return data;
+    })
+    .finally(function () {
+      delete _pendingGets[cacheKey];
+    });
+
+    _pendingGets[cacheKey] = promise;
+    return promise;
+  }
+
+  function clearApiCache(urlPattern) {
+    if (!urlPattern) {
+      Object.keys(_memoryCache).forEach(function(k) { delete _memoryCache[k]; });
+      try {
+        Object.keys(sessionStorage).forEach(function(k) {
+          if (k.indexOf(SESSION_CACHE_PREFIX) === 0) sessionStorage.removeItem(k);
+        });
+      } catch(e) {}
+      return;
+    }
+    Object.keys(_memoryCache).forEach(function(k) {
+      if (k.indexOf(urlPattern) !== -1) delete _memoryCache[k];
+    });
+    try {
+      Object.keys(sessionStorage).forEach(function(k) {
+        if (k.indexOf(SESSION_CACHE_PREFIX) === 0 && k.indexOf(urlPattern) !== -1) {
+          sessionStorage.removeItem(k);
+        }
+      });
+    } catch(e) {}
   }
 
   function httpPost(url, data) {
@@ -51,8 +150,15 @@ const API = (function () {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
+      cache: 'no-store',
       body: JSON.stringify(data)
-    }).then(function (r) { return r.json(); });
+    }).then(function (r) {
+      clearApiCache('/listings.php');
+      clearApiCache('/listing.php');
+      clearApiCache('/stats.php');
+      clearApiCache('/my_listings.php');
+      return r.json();
+    });
   }
 
   function normalizeListing(listing) {
@@ -118,58 +224,57 @@ const API = (function () {
     },
 
     login: function(email, password) {
-  if (MODE === 'server') {
-    return httpPost('/login.php', {
-      email: email,
-      password: password
-    } ).then(function(result) {
-      if (result.success && result.user) {
-        write(KEYS.CURRENT_USER, result.user);
+      if (MODE === 'server') {
+        return httpPost('/login.php', {
+          email: email,
+          password: password
+        }).then(function(result) {
+          if (result.success && result.user) {
+            write(KEYS.CURRENT_USER, result.user);
+          }
+          return result;
+        });
       }
 
-      return result;
-    });
-  }
+      const user = read(KEYS.USERS, []).find(function(u) {
+        return u.email === email;
+      });
 
-  const user = read(KEYS.USERS, []).find(function(u) {
-    return u.email === email;
-  });
+      if (!user) {
+        return Promise.resolve({
+          success: false,
+          error: 'لا يوجد حساب بهذا البريد'
+        });
+      }
 
-  if (!user) {
-    return Promise.resolve({
-      success: false,
-      error: 'لا يوجد حساب بهذا البريد'
-    });
-  }
+      if (user.password !== password) {
+        return Promise.resolve({
+          success: false,
+          error: 'كلمة المرور غير صحيحة'
+        });
+      }
 
-  if (user.password !== password) {
-    return Promise.resolve({
-      success: false,
-      error: 'كلمة المرور غير صحيحة'
-    });
-  }
+      const sessionUser = {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role || 'user'
+      };
 
-  const sessionUser = {
-    id: user.id,
-    name: user.name,
-    email: user.email,
-    phone: user.phone,
-    role: user.role || 'user'
-  };
+      write(KEYS.CURRENT_USER, sessionUser);
 
-  write(KEYS.CURRENT_USER, sessionUser);
-
-  return Promise.resolve({
-    success: true,
-    user: sessionUser
-  });
-}
-,
+      return Promise.resolve({
+        success: true,
+        user: sessionUser
+      });
+    },
 
     logout: function () {
       if (MODE === 'server') {
         return httpPost('/logout.php', {}).then(function (result) {
           localStorage.removeItem(KEYS.CURRENT_USER);
+          clearApiCache('/me.php');
           return result;
         });
       }
@@ -218,58 +323,17 @@ const API = (function () {
       return u && u.role === 'user';
     },
 
+    // ✅ تمت إزالة seedAdmins (لأسباب أمنية - البيانات الآن في السيرفر فقط)
     seedAdmins: function () {
-      const seeded = localStorage.getItem('souq_admins_seeded');
-      if (seeded === '1') return;
-
-      const users = read(KEYS.USERS, []);
-
-      const admins = [
-        {
-          id: 'ADMIN_SUPER_001',
-          name: 'أبو أيمن',
-          email: 'ahmadkhleef9900@gmail.com',
-          phone: '',
-          password: 'Ahmad112111',
-          role: 'super_admin',
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: 'ADMIN_002',
-          name: 'أبو برهو',
-          email: 'ahmadGh9900@gmail.com',
-          phone: '',
-          password: 'AhmadGh112111',
-          role: 'admin',
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: 'ADMIN_003',
-          name: 'أبو فاروق',
-          email: 'abdmlk9900@gmail.com',
-          phone: '',
-          password: 'Abdmlk112111',
-          role: 'admin',
-          createdAt: new Date().toISOString()
-        }
-      ];
-
-      admins.forEach(function (admin) {
-        if (!users.find(function (u) { return u.email === admin.email; })) {
-          users.push(admin);
-        }
-      });
-
-      write(KEYS.USERS, users);
-      localStorage.setItem('souq_admins_seeded', '1');
-      console.log('✅ تم إنشاء حسابات الأدمن بنجاح');
+      // لا تفعل شيئاً - تم نقل هذه الوظيفة للسيرفر بشكل آمن
+      return;
     }
   };
 
   const Stats = {
-    get: function () {
+    get: function (options) {
       if (MODE === 'server') {
-        return httpGet('/stats.php').then(function (result) {
+        return httpGet('/stats.php', options).then(function (result) {
           return result.stats || {};
         });
       }
@@ -286,47 +350,47 @@ const API = (function () {
      الإعلانات
      ========================================== */
   const Listings = {
-    getAll: function (filters) {
+    getAll: function (filters, options) {
       if (MODE === 'server') {
         const q = filters ? new URLSearchParams(filters).toString() : '';
-        return httpGet('/listings.php' + (q ? '?' + q : '')).then(function (result) {
+        return httpGet('/listings.php' + (q ? '?' + q : ''), options).then(function (result) {
           return (result.listings || []).map(normalizeListing);
         });
       }
       return Promise.resolve(read(KEYS.LISTINGS, []));
     },
 
-    getById: function (id) {
+    getById: function (id, options) {
       if (MODE === 'server') {
-        return httpGet('/listing.php?id=' + encodeURIComponent(id)).then(function (result) {
+        return httpGet('/listing.php?id=' + encodeURIComponent(id), options).then(function (result) {
           return normalizeListing(result.listing);
         });
       }
       return Promise.resolve(read(KEYS.LISTINGS, []).find(function (l) { return l.id === id; }));
     },
 
-    getByType: function (type) {
+    getByType: function (type, options) {
       if (MODE === 'server') {
-        return httpGet('/listings.php?type=' + encodeURIComponent(type)).then(function (result) {
+        return httpGet('/listings.php?type=' + encodeURIComponent(type), options).then(function (result) {
           return (result.listings || []).map(normalizeListing);
         });
       }
       return Promise.resolve(read(KEYS.LISTINGS, []).filter(function (l) { return l.type === type; }));
     },
 
-    getByUser: function (userId) {
+    getByUser: function (userId, options) {
       if (MODE === 'server') {
-        return httpGet('/my_listings.php').then(function (result) {
+        return httpGet('/my_listings.php', options).then(function (result) {
           return (result.listings || []).map(normalizeListing);
         });
       }
       return Promise.resolve(read(KEYS.LISTINGS, []).filter(function (l) { return l.userId === userId; }));
     },
 
-    getFeatured: function (type, limit) {
+    getFeatured: function (type, limit, options) {
       limit = limit || 4;
       if (MODE === 'server') {
-        return httpGet('/listings.php?type=' + encodeURIComponent(type) + '&featured=1&limit=' + limit)
+        return httpGet('/listings.php?type=' + encodeURIComponent(type) + '&featured=1&limit=' + limit, options)
           .then(function (result) { return (result.listings || []).map(normalizeListing); });
       }
       return Promise.resolve(read(KEYS.LISTINGS, [])
@@ -334,10 +398,10 @@ const API = (function () {
         .slice(0, limit));
     },
 
-    getLatest: function (type, limit) {
+    getLatest: function (type, limit, options) {
       limit = limit || 4;
       if (MODE === 'server') {
-        return httpGet('/listings.php?type=' + encodeURIComponent(type) + '&limit=' + limit)
+        return httpGet('/listings.php?type=' + encodeURIComponent(type) + '&limit=' + limit, options)
           .then(function (result) { return (result.listings || []).map(normalizeListing); });
       }
       return Promise.resolve(read(KEYS.LISTINGS, [])
@@ -498,11 +562,13 @@ const API = (function () {
       }
     },
     getMode: function () { return MODE; },
+    clearApiCache: clearApiCache,
     clearAll: function () {
       Object.keys(KEYS).forEach(function (key) {
         localStorage.removeItem(KEYS[key]);
       });
       localStorage.removeItem('souq_admins_seeded');
+      clearApiCache();
     }
   };
 
@@ -511,10 +577,149 @@ const API = (function () {
 window.API = API;
 
 /* ==========================================
+   🖼️ دالة موحّدة عالمية لبناء رابط الصورة
+   ✅ الإصدار 3.0 - تدعم 3 أحجام: thumb / medium / large
+   ✅ تستخدم srcset تلقائياً في كل الصفحات
+   ✅ متوافقة مع الكود القديم 100%
+   ========================================== */
+window.getListingImageUrl = function (item, index, size) {
+  if (!item) return null;
+  const idx = (typeof index === 'number') ? index : 0;
+  const sz = size || 'medium'; // ✅ الحجم الافتراضي: medium
+
+  // ✅ مسار مطلق (absolute) - يشتغل من أي صفحة
+  const apiBase = '/api';
+
+  // استخرج الصورة المطلوبة
+  let first = null;
+  if (item.images && Array.isArray(item.images) && item.images.length > 0) {
+    first = item.images[idx] || item.images[0];
+  } else if (item.image) {
+    first = item.image;
+  }
+
+  // إذا ما في صورة → أرجع رابط API (يعرض placeholder)
+  if (!first) {
+    if (!item.id) return null;
+    return `${apiBase}/listing_image.php?id=${encodeURIComponent(item.id)}&index=${idx}&size=${sz}`;
+  }
+
+  // 1. has_image أو has_image:N
+  if (typeof first === 'string' && first.startsWith('has_image')) {
+    const parts = first.split(':');
+    const realIndex = parts[1] !== undefined ? parts[1] : idx;
+    return `${apiBase}/listing_image.php?id=${encodeURIComponent(item.id)}&index=${realIndex}&size=${sz}`;
+  }
+
+  // 2. Base64 (لا يمكن تصغيره من السيرفر → نعيده كما هو)
+  if (typeof first === 'string' && first.startsWith('data:image/')) {
+    return first;
+  }
+
+  // 3. URL كامل
+  if (typeof first === 'string' && /^https?:\/\//i.test(first)) {
+    return first;
+  }
+
+  // 4. مسار مطلق (absolute path)
+  if (typeof first === 'string' && first.startsWith('/')) {
+    return first;
+  }
+
+  // 5. مسار نسبي
+  if (typeof first === 'string' && first.startsWith('./')) {
+    return first;
+  }
+
+  // 6. أي قيمة تانية → استخدم API
+  if (!item.id) return null;
+  return `${apiBase}/listing_image.php?id=${encodeURIComponent(item.id)}&index=${idx}&size=${sz}`;
+};
+
+/* ==========================================
+   🎨 دالة مساعدة: توليد srcset كامل لصورة إعلان
+   تُستخدم في البطاقات لعرض الصورة المناسبة حسب حجم الشاشة
+   ========================================== */
+window.getListingImageSrcset = function (item, index) {
+  if (!item || !item.id) return { src: null, srcset: '', sizes: '' };
+
+  const idx = (typeof index === 'number') ? index : 0;
+  const thumb  = window.getListingImageUrl(item, idx, 'thumb');
+  const medium = window.getListingImageUrl(item, idx, 'medium');
+  const large  = window.getListingImageUrl(item, idx, 'large');
+
+  // إذا كانت الصورة base64 أو رابط خارجي، لا يمكن استخدام srcset
+  if (!thumb || thumb.startsWith('data:') || /^https?:\/\//i.test(thumb)) {
+    return {
+      src: medium,
+      srcset: '',
+      sizes: ''
+    };
+  }
+
+  return {
+    src: medium, // الافتراضي
+    srcset: `${thumb} 300w, ${medium} 800w, ${large} 1600w`,
+    sizes: '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1440px) 33vw, 25vw'
+  };
+};
+
+/* ==========================================
    تشغيل تلقائي عند فتح أي صفحة
    ========================================== */
 document.addEventListener('DOMContentLoaded', function () {
-  if (window.API && API.Users && API.Users.seedAdmins) {
-    API.Users.seedAdmins();
-  }
+  // ✅ تمت إزالة استدعاء seedAdmins (البيانات الحساسة نُقلت للسيرفر)
 });
+
+/* ==========================================
+   🎯 زر تفاصيل الإعلان - إضافة تلقائية
+   ========================================== */
+(function () {
+  'use strict';
+
+  function addDetailsButton(card) {
+    if (!card || card.querySelector('.card-details-btn')) return;
+
+    const cardBody = card.querySelector('.card-body');
+    if (!cardBody) return;
+
+    const btn = document.createElement('span');
+    btn.className = 'card-details-btn';
+    btn.setAttribute('aria-label', 'تفاصيل الإعلان');
+    btn.innerHTML = '<span>تفاصيل الإعلان</span><i data-lucide="arrow-left"></i>';
+    cardBody.appendChild(btn);
+
+    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+      window.lucide.createIcons();
+    }
+  }
+
+  function scanCards() {
+    document.querySelectorAll('.card').forEach(addDetailsButton);
+  }
+
+  function init() {
+    scanCards();
+
+    const observer = new MutationObserver(function (mutations) {
+      mutations.forEach(function (mutation) {
+        mutation.addedNodes.forEach(function (node) {
+          if (node.nodeType !== 1) return;
+          if (node.classList && node.classList.contains('card')) {
+            addDetailsButton(node);
+          } else if (node.querySelectorAll) {
+            node.querySelectorAll('.card').forEach(addDetailsButton);
+          }
+        });
+      });
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();

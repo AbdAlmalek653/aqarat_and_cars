@@ -4,9 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>لوحة السوبر أدمن | سوق</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/lucide@latest"></script>
+<!-- ✅ إضافة الأيقونة (Favicon) -->
+<link rel="icon" type="image/x-icon" href="../images/favicon.ico">
+
+
+<script src="../js/lucide.min.js"></script>
 <link rel="stylesheet" href="../css/style.css">
 <link rel="stylesheet" href="../css/admin.css">
 </head>
@@ -21,20 +23,94 @@
 <main class="admin-shell">
   <div id="accessDenied" class="admin-message" hidden><i data-lucide="shield-alert"></i><h2>غير مصرح بالدخول</h2><p>هذه الصفحة مخصصة للسوبر أدمن فقط.</p><a href="login.html" class="btn btn-primary">تسجيل الدخول</a></div>
   <div id="dashboardContent" hidden>
-    <div class="welcome-row"><div><p class="eyebrow">صلاحيات كاملة</p><h1 id="welcomeName">لوحة السوبر أدمن</h1><p class="muted">إدارة الإعلانات والمستخدمين وصلاحيات الحسابات.</p></div><button class="btn btn-primary" id="refreshBtn"><i data-lucide="refresh-cw"></i> تحديث البيانات</button></div>
-    <section class="stats-grid" id="statsGrid"></section>
-    <section class="admin-card">
-      <div class="card-heading"><div><h2>إدارة جميع الإعلانات</h2><p class="muted">مراجعة الإعلانات وتغيير حالتها.</p></div><select id="statusFilter" class="admin-select"><option value="">كل الإعلانات</option><option value="pending">قيد المراجعة</option><option value="active">نشطة</option><option value="rejected">مرفوضة</option><option value="sold">مباعة</option><option value="rented">مؤجرة</option></select></div>
-      <div class="table-wrap"><table><thead><tr><th>الإعلان</th><th>المالك</th><th>النوع</th><th>السعر</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody id="listingsTable"><tr><td colspan="6" class="empty-cell">جاري التحميل...</td></tr></tbody></table></div>
+    <div class="welcome-row">
+      <div>
+        <p class="eyebrow">صلاحيات كاملة</p>
+        <h1 id="welcomeName">لوحة السوبر أدمن</h1>
+        <p class="muted">إدارة الإعلانات والمستخدمين وصلاحيات الحسابات.</p>
+      </div>
+      <button class="btn btn-primary" id="refreshBtn"><i data-lucide="refresh-cw"></i> تحديث البيانات</button>
+    </div>
+
+    <!-- ✅ تم إصلاح قسم الإحصائيات هنا -->
+    <section class="stats-grid" id="statsGrid">
+      <div class="admin-stat-card">
+        <div class="admin-stat-icon blue"><i data-lucide="building-2"></i></div>
+        <div class="admin-stat-info">
+          <div class="admin-stat-num" id="statTotalProps">0</div>
+          <div class="admin-stat-lbl">إجمالي العقارات</div>
+        </div>
+      </div>
+      <div class="admin-stat-card">
+        <div class="admin-stat-icon green"><i data-lucide="car"></i></div>
+        <div class="admin-stat-info">
+          <div class="admin-stat-num" id="statTotalCars">0</div>
+          <div class="admin-stat-lbl">إجمالي السيارات</div>
+        </div>
+      </div>
+      <div class="admin-stat-card">
+        <div class="admin-stat-icon orange"><i data-lucide="users"></i></div>
+        <div class="admin-stat-info">
+          <div class="admin-stat-num" id="statTotalUsers">0</div>
+          <div class="admin-stat-lbl">إجمالي المستخدمين</div>
+        </div>
+      </div>
+      <div class="admin-stat-card">
+        <div class="admin-stat-icon purple"><i data-lucide="eye"></i></div>
+        <div class="admin-stat-info">
+          <div class="admin-stat-num" id="statTotalViews">0</div>
+          <div class="admin-stat-lbl">إجمالي المشاهدات</div>
+        </div>
+      </div>
     </section>
+    <!-- ✅ نهاية قسم الإحصائيات -->
+
+    <section class="admin-card">
+      <div class="card-heading">
+        <div>
+          <h2>إدارة جميع الإعلانات</h2>
+          <p class="muted">مراجعة الإعلانات وتغيير حالتها.</p>
+        </div>
+        <select id="statusFilter" class="admin-select">
+          <option value="">كل الإعلانات</option>
+          <option value="pending">قيد المراجعة</option>
+          <option value="active">نشطة</option>
+          <option value="rejected">مرفوضة</option>
+          <option value="sold">مباعة</option>
+          <option value="rented">مؤجرة</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>الإعلان</th><th>المالك</th><th>النوع</th><th>السعر</th><th>الحالة</th><th>إجراءات</th></tr>
+          </thead>
+          <tbody id="listingsTable"><tr><td colspan="6" class="empty-cell">جاري التحميل...</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
     <section class="admin-card super-only">
-      <div class="card-heading"><div><h2>إدارة المستخدمين</h2><p class="muted">تعديل الأدوار وتفعيل أو تعطيل الحسابات.</p></div></div>
-      <div class="table-wrap"><table><thead><tr><th>المستخدم</th><th>البريد</th><th>الدور</th><th>الإعلانات</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody id="usersTable"><tr><td colspan="6" class="empty-cell">جاري التحميل...</td></tr></tbody></table></div>
+      <div class="card-heading">
+        <div>
+          <h2>إدارة المستخدمين</h2>
+          <p class="muted">تعديل الأدوار وتفعيل أو تعطيل الحسابات.</p>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>المستخدم</th><th>البريد</th><th>الدور</th><th>الإعلانات</th><th>الحالة</th><th>إجراء</th></tr>
+          </thead>
+          <tbody id="usersTable"><tr><td colspan="6" class="empty-cell">جاري التحميل...</td></tr></tbody>
+        </table>
+      </div>
     </section>
   </div>
 </main>
 <div id="toast" class="admin-toast" role="status"></div>
 <script src="../js/api.js"></script>
 <script src="../js/admin.js"></script>
+<script src="../js/sw-register.js"></script>
 </body>
 </html>

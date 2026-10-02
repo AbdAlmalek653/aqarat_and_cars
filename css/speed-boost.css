@@ -1,0 +1,379 @@
+/* ==========================================
+   ⚡⚡⚡⚡⚡ SPEED BOOST ULTIMATE
+   أعلى معايير السرعة والاستجابة
+   ========================================== */
+
+/* ==========================================
+   1. إزالة تأخير 300ms على كل الأجهزة اللمسية
+   ========================================== */
+* {
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-touch-callout: none !important;
+}
+
+/* ==========================================
+   2. كل التحولات سريعة جداً (0.08s)
+   ========================================== */
+*,
+*::before,
+*::after {
+  transition-duration: 0.08s !important;
+  transition-delay: 0s !important;
+  animation-delay: 0s !important;
+}
+
+/* ==========================================
+   3. استثناءات - النوافذ المنبثقة (أبطأ قليلاً)
+   ========================================== */
+.browse-modal,
+.add-type-modal,
+.welcome-modal,
+.browse-modal-content,
+.add-type-content,
+.welcome-modal-content,
+.mobile-menu,
+.mobile-menu-overlay,
+.welcome-modal-overlay,
+.browse-modal-overlay,
+.add-type-overlay {
+  transition-duration: 0.2s !important;
+}
+
+/* ==========================================
+   4. تفعيل GPU على كل الأزرار
+   ========================================== */
+button,
+a,
+.btn,
+.btn-primary,
+.btn-icon,
+.btn-login,
+.btn-add-listing-mobile,
+.card,
+.cascade-btn,
+.browse-option,
+.add-type-option,
+.mobile-menu-item,
+.bottom-nav-item,
+.scroll-strip,
+.link-more,
+.tab,
+.view-btn,
+.page-btn,
+.filter-option,
+.filter-toggle-btn,
+.sort-select,
+.browse-modal-close,
+.add-type-close,
+.welcome-close,
+.mobile-menu-toggle,
+.mobile-menu-close {
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  perspective: 1000px;
+  -webkit-perspective: 1000px;
+  will-change: transform, opacity;
+  pointer-events: auto !important;
+  -webkit-appearance: none !important;
+}
+
+/* ==========================================
+   5. تفاعل فوري عند الضغط (0ms)
+   ========================================== */
+button:active,
+a:active,
+.btn:active,
+.btn-primary:active,
+.btn-icon:active,
+.btn-login:active,
+.btn-add-listing-mobile:active,
+.cascade-btn:active,
+.browse-option:active,
+.add-type-option:active,
+.mobile-menu-item:active,
+.bottom-nav-item:active,
+.scroll-strip:active,
+.link-more:active,
+.tab:active,
+.view-btn:active,
+.page-btn:active,
+.filter-toggle-btn:active,
+.mobile-menu-toggle:active,
+.mobile-menu-close:active,
+.browse-modal-close:active,
+.add-type-close:active,
+.welcome-close:active {
+  transition-duration: 0.02s !important;
+  transition-timing-function: ease-out !important;
+}
+
+/* ==========================================
+   6. الأيقونات والسفن (SVG/Icons) - استجابة فورية
+   ========================================== */
+button svg,
+button i,
+a svg,
+a i,
+.btn svg,
+.btn i {
+  pointer-events: none !important;
+  transition: transform 0.03s ease-out !important;
+}
+
+button:active svg,
+button:active i,
+.btn:active svg,
+.btn:active i,
+.mobile-menu-toggle:active svg {
+  transform: scale(0.88) !important;
+}
+
+/* ==========================================
+   7. إزالة الـ hover الثقيل على الجوال
+   ========================================== */
+@media (hover: none) and (pointer: coarse) {
+  .card:hover,
+  .btn:hover,
+  .btn-primary:hover,
+  .btn-login:hover,
+  .cascade-btn:hover,
+  .browse-option:hover,
+  .add-type-option:hover,
+  .mobile-menu-item:hover,
+  .link-more:hover,
+  .nav a:hover {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+}
+
+/* ==========================================
+   8. تفعيل كامل عند اللمس (بدون تأخير)
+   ========================================== */
+.cascade-btn,
+.browse-option,
+.add-type-option,
+.mobile-menu-item,
+.btn,
+.btn-primary,
+.bottom-nav-item {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
+}
+
+/* ==========================================
+   9. العناصر التفاعلية في الهيدر (أسرع استجابة)
+   ========================================== */
+.header button,
+.header a,
+.header .logo,
+.header .nav a,
+.header .btn-icon,
+.header .btn-login,
+.header .btn {
+  transition: all 0.08s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  will-change: transform, opacity, background-color;
+}
+
+/* ==========================================
+   10. إلغاء backdrop-filter على الجوال (بطيء جداً)
+   ========================================== */
+@media (max-width: 768px) {
+  .header,
+  .cascade-filter-hero,
+  .mobile-menu,
+  .mobile-menu-overlay,
+  .browse-modal-overlay,
+  .add-type-overlay,
+  .welcome-modal-overlay,
+  .card-badge,
+  .scroll-strip-text {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* خلفية بديلة بسيطة */
+  .header { background: rgba(11, 17, 32, 0.98) !important; }
+  .cascade-filter-hero { background: var(--bg-card) !important; }
+  .mobile-menu-overlay,
+  .browse-modal-overlay,
+  .add-type-overlay,
+  .welcome-modal-overlay { background: rgba(0, 0, 0, 0.85) !important; }
+}
+
+/* ==========================================
+   11. الصور والأيقونات الكبيرة - رندر سريع
+   ========================================== */
+img {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: optimizeSpeed;
+}
+
+/* ==========================================
+   12. الحقول (input/select/textarea) - استجابة فورية
+   ========================================== */
+input,
+select,
+textarea {
+  transition: border-color 0.05s ease, box-shadow 0.05s ease !important;
+  -webkit-appearance: none;
+  outline: none !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  transition-duration: 0.03s !important;
+}
+
+/* ==========================================
+   13. الفلاتر - تفاعل فوري
+   ========================================== */
+.filter-option input[type="checkbox"],
+.filter-option input[type="radio"] {
+  transition: all 0.03s ease !important;
+  cursor: pointer;
+}
+
+.filter-option {
+  cursor: pointer;
+  transition: all 0.05s ease !important;
+}
+
+.filter-option:active {
+  transform: scale(0.98) !important;
+}
+
+/* ==========================================
+   14. بطاقات الإعلانات - استجابة فورية عند اللمس
+   ========================================== */
+.card {
+  transition: transform 0.08s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.08s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.08s ease !important;
+}
+
+.card:active {
+  transform: scale(0.98) !important;
+  transition-duration: 0.03s !important;
+}
+
+/* ==========================================
+   15. الـ bottom-nav - الأسرع
+   ========================================== */
+.bottom-nav-item {
+  transition: all 0.05s ease-out !important;
+}
+
+.bottom-nav-item:active {
+  transform: scale(0.92) !important;
+  transition-duration: 0.02s !important;
+}
+
+.bottom-nav-item:active svg {
+  transform: scale(0.85) !important;
+  transition-duration: 0.02s !important;
+}
+
+.add-icon {
+  transition: transform 0.1s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+.bottom-nav-item.add-btn:active .add-icon {
+  transform: scale(0.85) !important;
+  transition-duration: 0.03s !important;
+}
+
+/* ==========================================
+   16. cascade-btn (اختيار نوع البحث)
+   ========================================== */
+.cascade-btn {
+  transition: all 0.08s ease-out !important;
+}
+
+.cascade-btn:active {
+  transform: scale(0.95) !important;
+  transition-duration: 0.02s !important;
+}
+
+.cascade-btn.selected {
+  transition: all 0.15s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+/* ==========================================
+   17. منع كل animations البطيئة على الجوال
+   ========================================== */
+@media (max-width: 768px) {
+  .scroll-strip-text,
+  .hero-badge,
+  .cascade-title-badge,
+  .cascade-title-text,
+  .cascade-title-sub,
+  .hero-divider-text,
+  .stat-icon,
+  .stat-number,
+  .welcome-feature svg,
+  .btn-block-full svg {
+    animation: none !important;
+  }
+}
+
+/* ==========================================
+   18. Reduce motion - للأجهزة البطيئة جداً
+   ========================================== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================
+   19. ممنوع backface flash
+   ========================================== */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeSpeed;
+}
+
+/* ==========================================
+   20. منع الـ "flash" عند التحميل
+   ========================================== */
+body {
+  -webkit-tap-highlight-color: rgba(59, 130, 246, 0.15) !important;
+}
+
+/* ==========================================
+   21. أيقونة الفأرة
+   ========================================== */
+button:not(:disabled),
+a,
+[role="button"],
+.cascade-btn:not(:disabled),
+.browse-option,
+.add-type-option,
+.filter-option,
+.view-btn,
+.page-btn:not(:disabled) {
+  cursor: pointer;
+}
+
+/* ==========================================
+   22. سكرول سلس للأجهزة القوية فقط
+   ========================================== */
+@media (min-width: 769px) {
+  html { scroll-behavior: smooth; }
+}

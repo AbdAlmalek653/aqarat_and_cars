@@ -6,39 +6,45 @@
   <title>سوق | عقارات وسيارات</title>
   <meta name="description" content="منصة عربية متكاملة لبيع وشراء وإيجار العقارات والسيارات">
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- ✅ لون شريط المتصفح على الجوال -->
+  <meta name="theme-color" content="#1A2438">
 
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- ✅ Open Graph للمشاركة على السوشال ميديا -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="سوق | عقارات وسيارات">
+  <meta property="og:description" content="منصة عربية متكاملة لبيع وشراء وإيجار العقارات والسيارات">
+  <meta property="og:url" content="https://aqaratandcars-v2-production.up.railway.app/">
+  <meta property="og:image" content="https://aqaratandcars-v2-production.up.railway.app/images/og-image.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="سوق | عقارات وسيارات">
+  <meta name="twitter:description" content="منصة عربية متكاملة لبيع وشراء وإيجار العقارات والسيارات">
 
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
+
+  <!-- ✅ تأخير تحميل مكتبة الأيقونات (defer) -->
+  <script src="js/lucide.min.js" defer></script>
+
+  <!-- ✅ ملفات CSS -->
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/speed-boost.css">
 </head>
-<body>
+<body class="has-bottom-nav">
 
   <!-- ===================== الهيدر ===================== -->
   <header class="header">
     <div class="container header-inner">
-
       <a href="index.html" class="logo">
-        <span class="logo-icon">
-          <i data-lucide="home"></i>
-        </span>
+        <span class="logo-icon"><i data-lucide="home"></i></span>
         <span class="logo-text">سوق</span>
       </a>
-
-      <nav class="nav">
+      <nav class="nav desktop-only">
         <a href="index.html" class="active">الرئيسية</a>
         <a href="pages/properties.html">عقارات</a>
         <a href="pages/cars.html">سيارات</a>
         <a href="pages/about.html">من نحن</a>
         <a href="pages/contact.html">اتصل بنا</a>
       </nav>
-
-      <div class="header-actions">
-        <button class="btn-icon" title="البحث">
-          <i data-lucide="search"></i>
-        </button>
+      <div class="header-actions desktop-only" id="desktopActions">
         <a href="pages/login.html" class="btn-login">
           <i data-lucide="log-in"></i>
           <span>تسجيل الدخول</span>
@@ -48,515 +54,337 @@
           <span>أضف إعلان</span>
         </a>
       </div>
-
+      <div class="mobile-header-actions mobile-only">
+        <a href="pages/add-listing.html" class="btn-add-listing-mobile">
+          <i data-lucide="plus-circle"></i>
+          <span>أضف إعلان</span>
+        </a>
+        <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button">
+          <i data-lucide="menu"></i>
+        </button>
+      </div>
     </div>
   </header>
+
+  <!-- قائمة الجوال -->
+  <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-header">
+      <h3 class="mobile-menu-title"><i data-lucide="layout-grid"></i><span>القائمة الرئيسية</span></h3>
+      <button class="mobile-menu-close" id="closeMobileMenu" type="button"><i data-lucide="x"></i></button>
+    </div>
+    <div class="mobile-menu-body"><div id="mobileAuthContainer"></div></div>
+  </div>
 
   <!-- ===================== Hero ===================== -->
   <section class="hero">
     <div class="container">
-      <div class="hero-content">
-        <span class="hero-badge">
+      <div class="hero-content has-aura">
+        <span class="hero-badge animated">
           <i data-lucide="sparkles"></i>
           منصة العقارات &amp; السيارات للوساطة الإلكترونية
         </span>
-        <h1 class="hero-title">
-          ابحث عن <span class="gradient-text">عقارك</span> أو <span class="gradient-text">سيارتك</span> المثالية
+
+        <h1 class="hero-title animated">
+          <span class="hero-word">ابحث</span>
+          <span class="hero-word">عن</span>
+          <span class="hero-word gradient-text">عقارك</span>
+          <span class="hero-word">أو</span>
+          <span class="hero-word gradient-text">سيارتك</span>
+          <span class="hero-word">المثالية</span>
         </h1>
-<p class="hero-subtitle">
-  <span class="hero-subtitle-deco">◆</span>
-  <span class="hero-subtitle-text">
-    منصة عربية موثوقة لبيع وشراء وإيجار العقارات والسيارات بأسعار تنافسية
-  </span>
-  <span class="hero-subtitle-deco">◆</span>
-</p>
+
+        <button type="button" class="scroll-strip" id="browseBtn" aria-label="تصفح الإعلانات">
+          <div class="scroll-strip-bg">
+            <span class="scroll-strip-dot"></span>
+            <span class="scroll-strip-dot"></span>
+            <span class="scroll-strip-dot"></span>
+            <span class="scroll-strip-dot"></span>
+            <span class="scroll-strip-dot"></span>
+            <span class="scroll-strip-wave"></span>
+            <span class="scroll-strip-wave wave-2"></span>
+          </div>
+          <div class="scroll-strip-content">
+            <span class="scroll-strip-line"></span>
+            <div class="scroll-strip-text animated">
+              <i data-lucide="sparkles" class="scroll-strip-icon-left"></i>
+              <span>إضغط هنا لتصفح كافة الإعلانات</span>
+              <i data-lucide="chevron-down" class="scroll-strip-arrow"></i>
+            </div>
+            <span class="scroll-strip-line"></span>
+          </div>
+        </button>
+
+        <div class="hero-divider">
+          <span class="hero-divider-line"></span>
+          <span class="hero-divider-text animated">أو</span>
+          <span class="hero-divider-line"></span>
+        </div>
       </div>
 
-      <div class="search-box">
-        <div class="search-tabs">
-          <button class="tab active" data-type="property">
-            <i data-lucide="building-2"></i>
-            عقارات
-          </button>
-          <button class="tab" data-type="car">
-            <i data-lucide="car"></i>
-            سيارات
-          </button>
+      <div class="cascade-filter cascade-filter-hero" id="cascadeFilter">
+        <div class="cascade-title animated">
+          <div class="cascade-title-line"></div>
+          <div class="cascade-title-content">
+            <span class="cascade-title-badge animated"><i data-lucide="compass"></i><span>رحلة البحث</span></span>
+            <h3 class="cascade-title-text animated">ابدأ رحلة البحث الآن</h3>
+            <p class="cascade-title-sub animated">اختر النوع، الغرض، والمحافظة للحصول على نتائج دقيقة</p>
+          </div>
+          <div class="cascade-title-line"></div>
         </div>
 
-        <form class="search-form" id="searchForm">
-          <div class="form-group">
-            <i data-lucide="map-pin"></i>
-            <input type="text" placeholder="المدينة أو المنطقة..." id="searchLocation">
+        <div class="cascade-step" data-step="1">
+          <div class="cascade-step-title"><span class="cascade-step-num">1</span><span>اختر النوع</span></div>
+          <div class="cascade-options">
+            <button class="cascade-btn" data-type="property"><i data-lucide="building-2"></i><span>عقارات</span></button>
+            <button class="cascade-btn" data-type="car"><i data-lucide="car"></i><span>سيارات</span></button>
           </div>
+        </div>
 
-          <div class="form-group">
-            <i data-lucide="tag"></i>
-            <select id="searchPurpose">
-              <option value="">الغرض</option>
-              <option value="sale">بيع</option>
-              <option value="rent">إيجار</option>
-            </select>
+        <div class="cascade-step locked" data-step="2">
+          <div class="cascade-step-title"><span class="cascade-step-num">2</span><span>اختر الغرض</span></div>
+          <div class="cascade-options">
+            <button class="cascade-btn" data-purpose="sale" disabled><i data-lucide="tag"></i><span>للبيع</span></button>
+            <button class="cascade-btn" data-purpose="rent" disabled><i data-lucide="key-round"></i><span>للإيجار</span></button>
           </div>
+        </div>
 
-          <button type="submit" class="btn btn-primary btn-lg">
-            <i data-lucide="search"></i>
-            <span>ابحث الآن</span>
-          </button>
-        </form>
+        <div class="cascade-step locked" data-step="3">
+          <div class="cascade-step-title"><span class="cascade-step-num">3</span><span>اختر المحافظة</span></div>
+          <div class="cascade-city-wrap">
+            <div class="cascade-city-select">
+              <i data-lucide="map-pin"></i>
+              <select id="cascadeCity" disabled>
+                <option value="">— اختر المحافظة —</option>
+                <option value="damascus">دمشق</option>
+                <option value="rif-dimashq">ريف دمشق</option>
+                <option value="aleppo">حلب</option>
+                <option value="homs">حمص</option>
+                <option value="hama">حماة</option>
+                <option value="latakia">اللاذقية</option>
+                <option value="tartus">طرطوس</option>
+                <option value="daraa">درعا</option>
+                <option value="sweida">السويداء</option>
+                <option value="quneitra">القنيطرة</option>
+                <option value="deir-ezzor">دير الزور</option>
+                <option value="raqqa">الرقة</option>
+                <option value="hasakah">الحسكة</option>
+                <option value="idlib">إدلب</option>
+              </select>
+              <i data-lucide="chevron-down" class="cascade-city-arrow"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="cascade-step locked" data-step="4">
+          <div class="cascade-step-title"><span class="cascade-step-num">4</span><span>شاهد النتائج</span></div>
+          <button class="cascade-show-btn" id="cascadeShowBtn" disabled><i data-lucide="search"></i><span>عرض الإعلانات</span></button>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- ===================== إحصائيات ===================== -->
-  <section class="stats-section">
+  <section class="section results-section" id="resultsSection" style="display:none;">
+    <div class="container">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title"><i data-lucide="search-check"></i><span>نتائج البحث</span></h2>
+          <p class="section-subtitle">الإعلانات المطابقة لاختياراتك</p>
+        </div>
+      </div>
+      <div class="grid grid-4" id="latestGrid"></div>
+    </div>
+  </section>
+
+  <section class="stats-section" id="stats-section">
     <div class="container">
       <div class="stats-grid">
-        <div class="stat-item">
-          <div class="stat-icon"><i data-lucide="home"></i></div>
-          <div>
-            <h3 class="stat-number" id="statProperties">0</h3>
-            <p class="stat-label">عقار متاح</p>
-          </div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-icon"><i data-lucide="car"></i></div>
-          <div>
-            <h3 class="stat-number" id="statCars">0</h3>
-            <p class="stat-label">سيارة معروضة</p>
-          </div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-icon"><i data-lucide="users"></i></div>
-          <div>
-            <h3 class="stat-number" id="statUsers">0</h3>
-            <p class="stat-label">مستخدم نشط</p>
-          </div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-icon"><i data-lucide="map-pinned"></i></div>
-          <div>
-            <h3 class="stat-number" id="statCities">14</h3>
-            <p class="stat-label">محافظة</p>
-          </div>
-        </div>
+        <div class="stat-item"><div class="stat-icon"><i data-lucide="home"></i></div><div><h3 class="stat-number" id="statProperties">0</h3><p class="stat-label">عقار متاح</p></div></div>
+        <div class="stat-item"><div class="stat-icon"><i data-lucide="car"></i></div><div><h3 class="stat-number" id="statCars">0</h3><p class="stat-label">سيارة معروضة</p></div></div>
+        <div class="stat-item"><div class="stat-icon"><i data-lucide="users"></i></div><div><h3 class="stat-number" id="statUsers">0</h3><p class="stat-label">مستخدم نشط</p></div></div>
+        <div class="stat-item"><div class="stat-icon"><i data-lucide="map-pinned"></i></div><div><h3 class="stat-number" id="statCities">14</h3><p class="stat-label">محافظة</p></div></div>
       </div>
     </div>
   </section>
 
-  <!-- ===================== ✨ الفلتر المتدرج (أحدث الإعلانات) ===================== -->
-  <section class="section" id="latestSection">
-    <div class="container">
-
-      <div class="section-header">
-        <div>
-          <h2 class="section-title">
-            <i data-lucide="sparkles"></i>
-            <span>تصفح الإعلانات</span>
-          </h2>
-          <p class="section-subtitle">اختر ما يناسبك وشاهد الإعلانات فوراً</p>
-        </div>
-      </div>
-
-      <!-- صندوق الفلتر المتدرج -->
-      <div class="cascade-filter" id="cascadeFilter">
-
-        <!-- الخطوة 1: النوع -->
-        <div class="cascade-step" data-step="1">
-          <div class="cascade-step-title">
-            <span class="cascade-step-num">1</span>
-            <span>اختر النوع</span>
-          </div>
-          <div class="cascade-options">
-            <button class="cascade-btn" data-type="property">
-              <i data-lucide="building-2"></i>
-              <span>عقارات</span>
-            </button>
-            <button class="cascade-btn" data-type="car">
-              <i data-lucide="car"></i>
-              <span>سيارات</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- الخطوة 2: الغرض -->
-        <div class="cascade-step locked" data-step="2">
-          <div class="cascade-step-title">
-            <span class="cascade-step-num">2</span>
-            <span>اختر الغرض</span>
-          </div>
-          <div class="cascade-options">
-            <button class="cascade-btn" data-purpose="sale" disabled>
-              <i data-lucide="tag"></i>
-              <span>للبيع</span>
-            </button>
-            <button class="cascade-btn" data-purpose="rent" disabled>
-              <i data-lucide="key-round"></i>
-              <span>للإيجار</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- الخطوة 3: عرض النتائج -->
-        <div class="cascade-step locked" data-step="3">
-          <div class="cascade-step-title">
-            <span class="cascade-step-num">3</span>
-            <span>شاهد النتائج</span>
-          </div>
-          <button class="cascade-show-btn" id="cascadeShowBtn" disabled>
-            <i data-lucide="search"></i>
-            <span>عرض الإعلانات</span>
-          </button>
-        </div>
-
-      </div>
-
-      <!-- شبكة الإعلانات -->
-      <div class="grid grid-4" id="latestGrid" style="display:none;"></div>
-
-      <!-- حالة فارغة -->
-      <div id="cascadeEmpty" style="display:none;" class="empty-state">
-        <div class="empty-icon-wrap">
-          <div class="empty-icon"><i data-lucide="inbox"></i></div>
-          <div class="empty-icon-ring"></div>
-          <div class="empty-icon-ring ring-2"></div>
-        </div>
-        <h3 class="empty-title">لا توجد إعلانات مطابقة</h3>
-        <p class="empty-subtitle">جرّب تغيير الفلتر أو تصفح كل الإعلانات</p>
-        <a href="pages/search.html" class="empty-cta-btn">
-          <span class="empty-cta-icon"><i data-lucide="search"></i></span>
-          تصفح كل الإعلانات
-        </a>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ===================== عقارات مميزة ===================== -->
-  <section class="section">
+  <section class="section" id="propertiesSection">
     <div class="container">
       <div class="section-header">
-        <div>
-          <h2 class="section-title">
-            <i data-lucide="building-2"></i>
-            عقارات مميزة
-          </h2>
-          <p class="section-subtitle">أحدث العقارات المعروضة للبيع والإيجار</p>
-        </div>
-        <a href="pages/properties.html" class="link-more">
-          عرض الكل
-          <i data-lucide="arrow-left"></i>
-        </a>
+        <div><h2 class="section-title"><i data-lucide="building-2"></i>عقارات مميزة</h2><p class="section-subtitle">أحدث العقارات المعروضة للبيع والإيجار</p></div>
+        <a href="pages/properties.html" class="link-more">عرض الكل <i data-lucide="arrow-left"></i></a>
       </div>
-
       <div class="grid grid-4" id="featuredProperties"></div>
     </div>
   </section>
 
-  <!-- ===================== سيارات مميزة ===================== -->
-  <section class="section">
+  <section class="section" id="carsSection">
     <div class="container">
       <div class="section-header">
-        <div>
-          <h2 class="section-title">
-            <i data-lucide="car"></i>
-            سيارات مميزة
-          </h2>
-          <p class="section-subtitle">أحدث السيارات المعروضة للبيع والإيجار</p>
-        </div>
-        <a href="pages/cars.html" class="link-more">
-          عرض الكل
-          <i data-lucide="arrow-left"></i>
-        </a>
+        <div><h2 class="section-title"><i data-lucide="car"></i>سيارات مميزة</h2><p class="section-subtitle">أحدث السيارات المعروضة للبيع والإيجار</p></div>
+        <a href="pages/cars.html" class="link-more">عرض الكل <i data-lucide="arrow-left"></i></a>
       </div>
-
       <div class="grid grid-4" id="featuredCars"></div>
     </div>
   </section>
 
-  <!-- ===================== قسم دعوة لإضافة إعلان ===================== -->
   <section class="cta-section">
     <div class="container">
       <div class="cta-card">
         <div class="cta-bg"></div>
-
-        <div class="cta-icon">
-          <i data-lucide="megaphone"></i>
-        </div>
-
-        <h2 class="cta-title">
-          عندك شي <span class="gradient-text">للبيع</span> أو <span class="gradient-text">للإيجار</span>؟
-        </h2>
-
-        <p class="cta-text">
-          انشر إعلانك مجاناً في دقائق، وتواصل مع آلاف المشترين والمستأجرين في جميع المحافظات
-        </p>
-
+        <div class="cta-icon"><i data-lucide="megaphone"></i></div>
+        <h2 class="cta-title">عندك شي <span class="gradient-text">للبيع</span> أو <span class="gradient-text">للإيجار</span>؟</h2>
+        <p class="cta-text">انشر إعلانك مجاناً في دقائق، وتواصل مع آلاف المشترين والمستأجرين في جميع المحافظات</p>
         <div class="cta-features">
-          <div class="cta-feature">
-            <i data-lucide="check-circle-2"></i>
-            <span>نشر مجاني</span>
-          </div>
-          <div class="cta-feature">
-            <i data-lucide="check-circle-2"></i>
-            <span>عمولة عند البيع فقط</span>
-          </div>
-          <div class="cta-feature">
-            <i data-lucide="check-circle-2"></i>
-            <span>تواصل مباشر</span>
-          </div>
+          <div class="cta-feature"><i data-lucide="check-circle-2"></i><span>نشر مجاني</span></div>
+          <div class="cta-feature"><i data-lucide="check-circle-2"></i><span>عمولة عند البيع فقط</span></div>
+          <div class="cta-feature"><i data-lucide="check-circle-2"></i><span>تواصل مباشر</span></div>
         </div>
-
-        <a href="pages/add-listing.html" class="cta-button">
-          <i data-lucide="plus-circle"></i>
-          <span>أضف إعلانك مجاناً</span>
-          <i data-lucide="arrow-left" class="cta-arrow"></i>
-        </a>
-
-        <p class="cta-note">
-          <i data-lucide="clock"></i>
-          يستغرق أقل من دقيقتين
-        </p>
+        <a href="pages/add-listing.html" class="cta-button"><i data-lucide="plus-circle"></i><span>أضف إعلانك مجاناً</span><i data-lucide="arrow-left" class="cta-arrow"></i></a>
+        <p class="cta-note"><i data-lucide="clock"></i>يستغرق أقل من دقيقتين</p>
       </div>
     </div>
   </section>
 
-  <!-- ===================== لماذا تختار سوق؟ ===================== -->
   <section class="why-section">
     <div class="container">
       <div class="why-header">
-        <span class="why-badge">
-          <i data-lucide="award"></i>
-          لماذا سوق؟
-        </span>
-        <h2 class="why-title">
-          مميزات تجعلنا <span class="gradient-text">الخيار الأول</span> لك
-        </h2>
-        <p class="why-subtitle">
-          نبني تجربة موثوقة وسهلة لكل من يبحث عن عقار أو سيارة في سوريا
-        </p>
+        <span class="why-badge"><i data-lucide="award"></i>لماذا سوق؟</span>
+        <h2 class="why-title">مميزات تجعلنا <span class="gradient-text">الخيار الأول</span> لك</h2>
+        <p class="why-subtitle">نبني تجربة موثوقة وسهلة لكل من يبحث عن عقار أو سيارة في سوريا</p>
       </div>
-
       <div class="why-grid">
-
-        <div class="why-card">
-          <div class="why-icon blue">
-            <i data-lucide="shield-check"></i>
-          </div>
-          <h3>وساطة موثوقة</h3>
-          <p>نضمن لك تعاملات آمنة عبر فريق مختص يراجع كل إعلان قبل نشره</p>
-        </div>
-
-        <div class="why-card">
-          <div class="why-icon green">
-            <i data-lucide="zap"></i>
-          </div>
-          <h3>سرعة في النشر</h3>
-          <p>أضف إعلانك في أقل من دقيقتين، وسيظهر مباشرة لآلاف المستخدمين</p>
-        </div>
-
-        <div class="why-card">
-          <div class="why-icon orange">
-            <i data-lucide="map-pin"></i>
-          </div>
-          <h3>تغطية 14 محافظة</h3>
-          <p>نغطي جميع المحافظات السورية، من دمشق إلى الحسكة</p>
-        </div>
-
-        <div class="why-card">
-          <div class="why-icon purple">
-            <i data-lucide="message-circle"></i>
-          </div>
-          <h3>تواصل مباشر وسريع</h3>
-        </div>
-
-        <div class="why-card">
-          <div class="why-icon cyan">
-            <i data-lucide="badge-check"></i>
-          </div>
-          <h3>بدون رسوم خفية</h3>
-          <p>نشر مجاني تماماً، والعمولة فقط عند إتمام البيع</p>
-        </div>
-
-        <div class="why-card">
-          <div class="why-icon pink">
-            <i data-lucide="headphones"></i>
-          </div>
-          <h3>دعم فوري</h3>
-          <p>فريق دعم جاهز لمساعدتك في أي وقت خلال أيام الأسبوع</p>
-        </div>
-
+        <div class="why-card"><div class="why-icon blue"><i data-lucide="shield-check"></i></div><h3>وساطة موثوقة</h3><p>نضمن لك تعاملات آمنة عبر فريق مختص يراجع كل إعلان قبل نشره</p></div>
+        <div class="why-card"><div class="why-icon green"><i data-lucide="zap"></i></div><h3>سرعة في النشر</h3><p>أضف إعلانك في أقل من دقيقتين، وسيظهر مباشرة لآلاف المستخدمين</p></div>
+        <div class="why-card"><div class="why-icon orange"><i data-lucide="map-pin"></i></div><h3>تغطية 14 محافظة</h3><p>نغطي جميع المحافظات السورية، من دمشق إلى الحسكة</p></div>
+        <div class="why-card"><div class="why-icon purple"><i data-lucide="message-circle"></i></div><h3>تواصل مباشر وسريع</h3></div>
+        <div class="why-card"><div class="why-icon cyan"><i data-lucide="badge-check"></i></div><h3>بدون رسوم خفية</h3><p>نشر مجاني تماماً، والعمولة فقط عند إتمام البيع</p></div>
+        <div class="why-card"><div class="why-icon pink"><i data-lucide="headphones"></i></div><h3>دعم فوري</h3><p>فريق دعم جاهز لمساعدتك في أي وقت خلال أيام الأسبوع</p></div>
       </div>
     </div>
   </section>
 
-  <!-- ===================== الفوتر ===================== -->
   <footer class="footer">
     <div class="container">
       <div class="footer-grid">
-
         <div class="footer-col">
-          <a href="index.html" class="logo">
-            <span class="logo-icon"><i data-lucide="home"></i></span>
-            <span class="logo-text">سوق</span>
-          </a>
-          <p class="footer-desc">
-            منصة عربية متكاملة لبيع وشراء وإيجار العقارات والسيارات بكل سهولة وموثوقية.
-          </p>
+          <a href="index.html" class="logo"><span class="logo-icon"><i data-lucide="home"></i></span><span class="logo-text">سوق</span></a>
+          <p class="footer-desc">منصة عربية متكاملة لبيع وشراء وإيجار العقارات والسيارات بكل سهولة وموثوقية.</p>
         </div>
-
-        <div class="footer-col">
-          <h4>روابط سريعة</h4>
-          <a href="pages/properties.html">عقارات</a>
-          <a href="pages/cars.html">سيارات</a>
-          <a href="pages/about.html">من نحن</a>
-          <a href="pages/contact.html">اتصل بنا</a>
-        </div>
-
-        <div class="footer-col">
-          <h4>الحساب</h4>
-          <a href="pages/login.html">تسجيل الدخول</a>
-          <a href="pages/register.html">إنشاء حساب</a>
-          <a href="pages/add-listing.html">أضف إعلان</a>
-          <a href="pages/favorites.html">المفضلة</a>
-        </div>
-
+        <div class="footer-col"><h4>روابط سريعة</h4><a href="pages/properties.html">عقارات</a><a href="pages/cars.html">سيارات</a><a href="pages/about.html">من نحن</a><a href="pages/contact.html">اتصل بنا</a></div>
+        <div class="footer-col"><h4>الحساب</h4><a href="pages/login.html">تسجيل الدخول</a><a href="pages/register.html">إنشاء حساب</a><a href="pages/add-listing.html">أضف إعلان</a><a href="pages/favorites.html">المفضلة</a></div>
         <div class="footer-col footer-support">
           <h4>فريق الدعم</h4>
           <p class="footer-support-hint">تواصل مباشر عبر واتساب</p>
-
-          <a href="https://wa.me/963930932794?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C%20%D8%A3%D8%AA%D9%88%D8%A7%D8%B5%D9%84%20%D9%85%D8%B9%20%D9%81%D8%B1%D9%8A%D9%82%20%D8%A7%D9%84%D8%AF%D8%B9%D9%85%20%D8%A7%D9%84%D9%81%D9%86%D9%8A%20-%20%D8%A3%D8%A8%D9%88%20%D8%A3%D9%8A%D9%85%D9%86" target="_blank" rel="noopener" class="support-member">
-            <span class="support-avatar" style="background: linear-gradient(135deg, #3B82F6, #1E40AF);">
-              <i data-lucide="headset"></i>
-            </span>
-            <span class="support-info">
-              <span class="support-name">أبو أيمن</span>
-              <span class="support-role">المدير الفني</span>
-            </span>
-            <i data-lucide="message-circle" class="support-wa-icon"></i>
-          </a>
-
-          <a href="https://wa.me/905379954829?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C%20%D8%A3%D8%AA%D9%88%D8%A7%D8%B5%D9%84%20%D9%85%D8%B9%20%D9%81%D8%B1%D9%8A%D9%82%20%D8%A7%D9%84%D8%AF%D8%B9%D9%85%20%D8%A7%D9%84%D8%AA%D9%82%D9%86%D9%8A%20-%20%D8%A3%D8%A8%D9%88%20%D9%81%D8%A7%D8%B1%D9%88%D9%82" target="_blank" rel="noopener" class="support-member">
-            <span class="support-avatar" style="background: linear-gradient(135deg, #10B981, #047857);">
-              <i data-lucide="cpu"></i>
-            </span>
-            <span class="support-info">
-              <span class="support-name">أبو فاروق</span>
-              <span class="support-role">المدير التقني</span>
-            </span>
-            <i data-lucide="message-circle" class="support-wa-icon"></i>
-          </a>
-
-          <a href="https://wa.me/963993009985?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C%20%D8%A3%D8%AA%D9%88%D8%A7%D8%B5%D9%84%20%D9%85%D8%B9%20%D8%A7%D9%84%D9%85%D8%B3%D8%A4%D9%88%D9%84%20%D8%A7%D9%84%D8%AA%D9%86%D9%81%D9%8A%D8%B0%D9%8A%20-%20%D8%A3%D8%A8%D9%88%20%D8%A5%D8%A8%D8%B1%D8%A7%D9%87%D9%8A%D9%85" target="_blank" rel="noopener" class="support-member">
-            <span class="support-avatar" style="background: linear-gradient(135deg, #F59E0B, #B45309);">
-              <i data-lucide="megaphone"></i>
-            </span>
-            <span class="support-info">
-              <span class="support-name">أبو إبراهيم</span>
-              <span class="support-role">المسؤول التنفيذي والإعلامي</span>
-            </span>
-            <i data-lucide="message-circle" class="support-wa-icon"></i>
-          </a>
-
+          <a href="https://wa.me/963930932794?text=..." target="_blank" rel="noopener" class="support-member"><span class="support-avatar" style="background: linear-gradient(135deg, #3B82F6, #1E40AF);"><i data-lucide="headphones"></i></span><span class="support-info"><span class="support-name">أبو أيمن</span><span class="support-role">المدير الفني</span></span><i data-lucide="message-circle" class="support-wa-icon"></i></a>
+          <a href="https://wa.me/905379954829?text=..." target="_blank" rel="noopener" class="support-member"><span class="support-avatar" style="background: linear-gradient(135deg, #10B981, #047857);"><i data-lucide="cpu"></i></span><span class="support-info"><span class="support-name">أبو فاروق</span><span class="support-role">المدير التقني</span></span><i data-lucide="message-circle" class="support-wa-icon"></i></a>
+          <a href="https://wa.me/963993009985?text=..." target="_blank" rel="noopener" class="support-member"><span class="support-avatar" style="background: linear-gradient(135deg, #F59E0B, #B45309);"><i data-lucide="megaphone"></i></span><span class="support-info"><span class="support-name">أبو إبراهيم</span><span class="support-role"></span></span><i data-lucide="message-circle" class="support-wa-icon"></i></a>
           <div class="social" style="margin-top:18px;">
-            <a href="https://www.facebook.com/share/19bQUfW9mc/" target="_blank" rel="noopener" class="social-icon" title="فيسبوك">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-              </svg>
-            </a>
-            <a href="https://www.instagram.com/mnstalqarat?stkn=Y2R2cTNvbW9rbjhx" target="_blank" rel="noopener" class="social-icon" title="إنستغرام">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
-                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
-              </svg>
-            </a>
-            <a href="mailto:mnstaqarat@gmail.com" class="social-icon" title="البريد الإلكتروني">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <rect x="2" y="4" width="20" height="16" rx="2"/>
-                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
-              </svg>
-            </a>
+            <a href="https://www.facebook.com/profile.php?id=61594605524709&mibextid=ZbWKwL" target="_blank" rel="noopener" class="social-icon" title="فيسبوك"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
+            <a href="https://www.instagram.com/aqaratandcars?stkn=MTZyYzFzOTVpa280dQ==" target="_blank" rel="noopener" class="social-icon" title="إنستغرام"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>
+            <a href="mailto:aqaratandcars@gmail.com" class="social-icon" title="البريد الإلكتروني"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></a>
           </div>
         </div>
-
       </div>
-
-      <div class="footer-bottom">
-        <p>© 2026 سوق. جميع الحقوق محفوظة.</p>
-      </div>
+      <div class="footer-bottom"><p>© 2026 سوق. جميع الحقوق محفوظة.</p></div>
     </div>
   </footer>
 
-  <!-- ===================== Bottom Navigation ===================== -->
   <nav class="bottom-nav">
-    <a href="index.html" class="bottom-nav-item active">
-      <i data-lucide="home"></i>
-      <span>الرئيسية</span>
-    </a>
-    <a href="pages/search.html" class="bottom-nav-item">
-      <i data-lucide="search"></i>
-      <span>البحث</span>
-    </a>
-    <a href="pages/add-listing.html" class="bottom-nav-item add-btn">
-      <div class="add-icon"><i data-lucide="plus"></i></div>
-      <span>أضف</span>
-    </a>
-    <a href="pages/favorites.html" class="bottom-nav-item">
-      <i data-lucide="heart"></i>
-      <span>المفضلة</span>
-    </a>
-    <a href="pages/account.html" class="bottom-nav-item">
-      <i data-lucide="user"></i>
-      <span>حسابي</span>
-    </a>
+    <a href="index.html" class="bottom-nav-item active"><i data-lucide="home"></i><span>الرئيسية</span></a>
+    <a href="pages/search.html" class="bottom-nav-item"><i data-lucide="search"></i><span>البحث</span></a>
+    <a href="pages/add-listing.html" class="bottom-nav-item add-btn"><div class="add-icon"><i data-lucide="plus"></i></div><span>أضف</span></a>
+    <a href="pages/favorites.html" class="bottom-nav-item"><i data-lucide="heart"></i><span>المفضلة</span></a>
+    <a href="pages/account.html" class="bottom-nav-item"><i data-lucide="user"></i><span>تسجيل الدخول</span></a>
   </nav>
 
-  <!-- ===================== نافذة الترحيب ===================== -->
+  <!-- نافذة الترحيب -->
   <div class="welcome-modal" id="welcomeModal">
     <div class="welcome-modal-overlay" onclick="closeWelcome()"></div>
     <div class="welcome-modal-content">
-      <button class="welcome-close" onclick="closeWelcome()">
-        <i data-lucide="x"></i>
-      </button>
-
+      <button class="welcome-close" onclick="closeWelcome()"><i data-lucide="x"></i></button>
       <div class="welcome-modal-icon">
-        <i data-lucide="sparkles"></i>
+        <div class="welcome-logo-duo">
+          <span class="logo-duo-item logo-duo-house"><i data-lucide="home"></i></span>
+          <span class="logo-duo-plus"><i data-lucide="plus"></i></span>
+          <span class="logo-duo-item logo-duo-car"><i data-lucide="car"></i></span>
+        </div>
       </div>
-
-      <h2 class="welcome-modal-title">
-        أهلاً وسهلاً بك في <span class="gradient-text">سوق</span>
-      </h2>
-
-      <p class="welcome-modal-text">
-        أهلا بكم في منصة العقارات &amp; السيارات للوساطة الإلكترونية، نقدم لكم تجربة مثالية لبيع وشراء أي عقار أو سيارة إلكترونياً
-      </p>
-
+      <h2 class="welcome-modal-title">أهلاً وسهلاً بك في <span class="gradient-text">سوق</span></h2>
+      <p class="welcome-modal-text">أهلا بكم في منصة العقارات &amp; السيارات للوساطة الإلكترونية، نقدم لكم تجربة مثالية لبيع وشراء أي عقار أو سيارة إلكترونياً</p>
       <div class="welcome-modal-features">
-        <div class="welcome-feature">
-          <i data-lucide="building-2"></i>
-          <span>عقارات للبيع والإيجار</span>
-        </div>
-        <div class="welcome-feature">
-          <i data-lucide="car"></i>
-          <span>سيارات بأسعار تنافسية</span>
-        </div>
-        <div class="welcome-feature">
-          <i data-lucide="shield-check"></i>
-          <span>وساطة إلكترونية آمنة</span>
-        </div>
+        <div class="welcome-feature"><i data-lucide="building-2"></i><span>عقارات للبيع والإيجار</span></div>
+        <div class="welcome-feature"><i data-lucide="car"></i><span>سيارات بأسعار تنافسية</span></div>
+        <div class="welcome-feature"><i data-lucide="shield-check"></i><span>وساطة إلكترونية آمنة</span></div>
       </div>
-
-      <button class="btn btn-primary btn-block-full" onclick="closeWelcome()">
-        <i data-lucide="arrow-left"></i>
-        <span>ابدأ التصفح الآن</span>
-      </button>
+      <button class="btn btn-primary btn-block-full" onclick="closeWelcome()"><i data-lucide="arrow-left"></i><span>ابدأ التصفح الآن</span></button>
     </div>
   </div>
 
+  <!-- ===================== نافذة اختيار نوع الإعلان (تصفح) ===================== -->
+  <div class="browse-modal" id="browseModal">
+    <div class="browse-modal-overlay" data-close-browse></div>
+    <div class="browse-modal-content">
+      <button class="browse-modal-close" data-close-browse><i data-lucide="x"></i></button>
+      <div class="browse-modal-header">
+        <div class="browse-modal-icon"><i data-lucide="sparkles"></i></div>
+        <h2 class="browse-modal-title">اختر الإعلانات التي تريد عرضها</h2>
+        <p class="browse-modal-subtitle">حدد نوع الإعلان الذي يهمك للانتقال إلى القسم المناسب</p>
+      </div>
+      <div class="browse-modal-options">
+        <button type="button" class="browse-option browse-option-property" data-scroll-to="propertiesSection">
+          <div class="browse-option-bg"></div>
+          <div class="browse-option-icon"><i data-lucide="building-2"></i></div>
+          <h3 class="browse-option-title">عقارات</h3>
+          <p class="browse-option-desc">شقق، فلل، أراضي، مكاتب ومحلات تجارية</p>
+          <span class="browse-option-btn"><span>تصفح العقارات</span><i data-lucide="arrow-down"></i></span>
+        </button>
+        <button type="button" class="browse-option browse-option-car" data-scroll-to="carsSection">
+          <div class="browse-option-bg"></div>
+          <div class="browse-option-icon"><i data-lucide="car"></i></div>
+          <h3 class="browse-option-title">سيارات</h3>
+          <p class="browse-option-desc">سيارات جديدة ومستعملة للبيع والإيجار</p>
+          <span class="browse-option-btn"><span>تصفح السيارات</span><i data-lucide="arrow-down"></i></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== نافذة اختيار نوع الإعلان (إضافة) ===================== -->
+  <div class="add-type-modal" id="addTypeModal">
+    <div class="add-type-overlay" data-close-add-type></div>
+    <div class="add-type-content">
+      <button class="add-type-close" data-close-add-type type="button"><i data-lucide="x"></i></button>
+      <div class="add-type-header">
+        <div class="add-type-icon"><i data-lucide="plus-circle"></i></div>
+        <h2 class="add-type-title">ما نوع الإعلان الذي تريد إضافته؟</h2>
+        <p class="add-type-subtitle">اختر النوع للبدء في إضافة إعلانك</p>
+      </div>
+      <div class="add-type-options">
+        <button type="button" class="add-type-option add-type-property" data-add-type="property">
+          <div class="add-type-option-bg"></div>
+          <div class="add-type-option-icon"><i data-lucide="building-2"></i></div>
+          <h3 class="add-type-option-title">عقار</h3>
+          <p class="add-type-option-desc">شقق، فلل، أراضي، ومحلات</p>
+        </button>
+        <button type="button" class="add-type-option add-type-car" data-add-type="car">
+          <div class="add-type-option-bg"></div>
+          <div class="add-type-option-icon"><i data-lucide="car"></i></div>
+          <h3 class="add-type-option-title">سيارة</h3>
+          <p class="add-type-option-desc">جديدة ومستعملة، للبيع والإيجار</p>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== Scripts ===================== -->
   <script src="js/api.js"></script>
   <script src="js/header-state.js"></script>
   <script src="js/main.js"></script>
   <script src="js/auth-guard.js"></script>
+  <script src="js/app-inline.js"></script>
+  <script src="js/speed-boost.js"></script>
+
+  <!-- ✅ Service Worker Registration -->
+  <script src="js/sw-register.js"></script>
 </body>
 </html>

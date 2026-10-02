@@ -1,5 +1,6 @@
 /* ==========================================
-   لوحة التحكم - Admin Dashboard
+   لوحة التحكم - Admin Dashboard (النسخة النهائية المحسّنة)
+   الإصدار: 2.0 (دعم أحجام الصور + تحسينات أداء)
    ========================================== */
 
 let currentAdmin = null;
@@ -7,12 +8,8 @@ let allListings = [];
 let allUsers = [];
 const ADMIN_API_BASE = '../api';
 const listingStatusLabels = {
-  active: 'متاح',
-  pending: 'قيد المراجعة',
-  rejected: 'مرفوض',
-  sold: 'مباع',
-  rented: 'مؤجر',
-  expired: 'منتهي'
+  active: 'متاح', pending: 'قيد المراجعة', rejected: 'مرفوض',
+  sold: 'مباع', rented: 'مؤجر', expired: 'منتهي'
 };
 const roleLabels = { user: 'مستخدم', agent: 'وكيل', admin: 'أدمن', super_admin: 'أدمن عام' };
 
@@ -24,27 +21,49 @@ function escapeHtml(value) {
   });
 }
 
-async function adminRequest(path, options) {
-  const response = await fetch(`${ADMIN_API_BASE}/${path}`, {
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-    ...options
-  });
-  let result;
-  try {
-    result = await response.json();
-  } catch (_) {
-    throw new Error('استجابة غير صالحة من الخادم');
+/* ==========================================
+   ✅ دالة موحدة لبناء رابط الصورة مع الحجم
+   (تعمل حتى لو لم تكن getListingImageUrl محمّلة)
+   ========================================== */
+function buildAdminImageUrl(listing, index = 0, size = 'medium') {
+  if (!listing || !listing.id) return null;
+
+  // استخدام الدالة الموحدة إذا كانت متوفرة
+  if (window.getListingImageUrl) {
+    return window.getListingImageUrl(listing, index, size);
   }
-  if (!response.ok || result.success === false) {
-    throw new Error(result.error || 'حدث خطأ في الخادم');
-  }
-  return result;
+
+  // Fallback
+  return `${ADMIN_API_BASE}/listing_image.php?id=${encodeURIComponent(listing.id)}&index=${index}&size=${size}`;
 }
 
-function showAdminMessage(message) {
-  alert(message);
+async function adminRequest(path, options) {
+  try {
+    const response = await fetch(`${ADMIN_API_BASE}/${path}`, {
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      ...options
+    });
+    
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      throw new Error(`الخادم أرجع استجابة غير صالحة (${response.status}). تأكد من وجود ملف ${path}`);
+    }
+
+    const result = await response.json();
+    if (!response.ok || result.success === false) {
+      throw new Error(result.error || `خطأ في الخادم (${response.status})`);
+    }
+    return result;
+  } catch (error) {
+    console.error(`❌ فشل الطلب ${path}:`, error);
+    throw error;
+  }
 }
+
+/* ==========================================
+   الدوال المساعدة للتعديل
+   ========================================== */
 
 async function updateAdminListing(id, changes) {
   try {
@@ -52,20 +71,32 @@ async function updateAdminListing(id, changes) {
       method: 'POST',
       body: JSON.stringify({ id, ...changes })
     });
-    showAdminMessage('تم حفظ تعديل الإعلان');
-    await loadData();
+    
+    const index = allListings.findIndex(l => l.id === id);
+    if (index > -1) {
+      Object.assign(allListings[index], changes);
+    }
+    
+    renderOverview();
+    renderListingsTable();
+    alert('✅ تم حفظ التعديل بنجاح');
   } catch (error) {
-    showAdminMessage(error.message);
+    alert('❌ فشل التعديل: ' + error.message);
   }
 }
 
-async function editAdminListing(id, currentTitle, currentPrice) {
-  const title = prompt('عنوان الإعلان:', currentTitle || '');
-  if (title === null) return;
-  const price = prompt('السعر:', currentPrice || '0');
-  if (price === null) return;
-  await updateAdminListing(id, { title: title.trim(), price: price.trim() });
-}
+window.editAdminListing = async function(id, currentTitle, currentPrice) {
+  const newTitle = prompt('عنوان الإعلان:', currentTitle || '');
+  if (newTitle === null) return;
+  
+  const newPrice = prompt('السعر:', currentPrice || '0');
+  if (newPrice === null) return;
+
+  await updateAdminListing(id, { 
+    title: newTitle.trim(), 
+    price: newPrice.trim() 
+  });
+};
 
 async function updateAdminUser(id, changes) {
   try {
@@ -73,45 +104,68 @@ async function updateAdminUser(id, changes) {
       method: 'POST',
       body: JSON.stringify({ id, ...changes })
     });
-    showAdminMessage('تم حفظ تعديل المستخدم');
+    alert('✅ تم حفظ تعديل المستخدم');
     await loadData();
   } catch (error) {
-    showAdminMessage(error.message);
+    alert(error.message);
   }
 }
 
 /* ==========================================
    التحقق من الصلاحيات
    ========================================== */
-function checkAccess() {
-  const user = API.Users.getCurrent();
+async function checkAccess() {
+  const dashboardEl = document.getElementById('adminDashboard');
+  const noAccessEl = document.getElementById('noAccess');
+  
+  if (!dashboardEl || !noAccessEl) return false;
 
-  if (!user || !API.Users.isAdmin()) {
-    document.getElementById('noAccess').style.display = 'block';
-    document.getElementById('adminDashboard').style.display = 'none';
-    initIcons();
+  try {
+    const localUser = API.Users.getCurrent();
+    if (!localUser || !API.Users.isAdmin()) {
+      noAccessEl.style.display = 'block';
+      dashboardEl.style.display = 'none';
+      initIcons();
+      return false;
+    }
+
+    dashboardEl.style.display = 'grid';
+    document.getElementById('adminName').textContent = localUser.name || 'أدمن';
+    document.getElementById('adminAvatar').textContent = (localUser.name || 'م').charAt(0);
+
+    const roleEl = document.getElementById('adminRole');
+    if (roleEl) {
+      if (localUser.role === 'super_admin') {
+        roleEl.textContent = 'أدمن عام';
+        roleEl.classList.add('super');
+      } else {
+        roleEl.textContent = 'أدمن';
+      }
+    }
+
+    const usersTab = document.getElementById('usersTabBtn');
+    if (localUser.role !== 'super_admin' && usersTab) {
+      usersTab.style.display = 'none';
+    }
+
+    const serverUser = await API.Users.validateSession();
+    
+    if (!serverUser) {
+      console.warn('⚠️ الجلسة منتهية، إعادة التوجيه لتسجيل الدخول...');
+      window.location.href = 'login.html';
+      return false;
+    }
+
+    currentAdmin = serverUser;
+    document.getElementById('adminName').textContent = serverUser.name || 'أدمن';
+    document.getElementById('adminAvatar').textContent = (serverUser.name || 'م').charAt(0);
+
+    return true;
+
+  } catch (e) {
+    console.error('❌ خطأ في دالة checkAccess:', e);
     return false;
   }
-
-  currentAdmin = user;
-  document.getElementById('adminDashboard').style.display = 'grid';
-  document.getElementById('adminName').textContent = user.name;
-  document.getElementById('adminAvatar').textContent = (user.name || 'م').charAt(0);
-
-  const roleEl = document.getElementById('adminRole');
-  if (user.role === 'super_admin') {
-    roleEl.textContent = 'أدمن عام';
-    roleEl.classList.add('super');
-  } else {
-    roleEl.textContent = 'أدمن';
-  }
-
-  // إذا مو super_admin، اخفِ تبويب المستخدمين
-  if (user.role !== 'super_admin') {
-    document.getElementById('usersTabBtn').style.display = 'none';
-  }
-
-  return true;
 }
 
 /* ==========================================
@@ -119,26 +173,29 @@ function checkAccess() {
    ========================================== */
 async function loadData() {
   try {
-    const [listings, users] = await Promise.all([
-      adminRequest('admin_listings.php').then(function (result) {
-        return (result.listings || []).map(function (listing) {
-          return Object.assign({}, listing, {
-            userId: listing.userId || listing.user_id,
-            city: listing.city || listing.city_name,
-            createdAt: listing.createdAt || listing.created_at,
-            featured: listing.featured !== undefined
-              ? listing.featured
-              : Boolean(listing.is_featured)
-          });
-        });
-      }),
-      currentAdmin.role === 'super_admin'
-        ? adminRequest('admin_users.php').then(function (result) { return result.users || []; })
-        : Promise.resolve([])
-    ]);
+    console.log('⏳ جاري جلب البيانات...');
+    const listingsResult = await adminRequest('admin_listings.php');
+    const usersResult = (currentAdmin && currentAdmin.role === 'super_admin') 
+        ? await adminRequest('admin_users.php') 
+        : { success: true };
 
-    allListings = listings || [];
-    allUsers = users || [];
+    let rawListings = listingsResult.listings || listingsResult.data || listingsResult.items || [];
+    if (!Array.isArray(rawListings)) rawListings = [];
+
+    let rawUsers = usersResult.users || usersResult.data || usersResult.items || [];
+    if (!Array.isArray(rawUsers)) rawUsers = [];
+
+    allListings = rawListings.map(function (listing) {
+      return Object.assign({}, listing, {
+        userId: listing.userId || listing.user_id,
+        city: listing.city || listing.city_name,
+        createdAt: listing.createdAt || listing.created_at,
+        featured: listing.featured !== undefined ? listing.featured : Boolean(listing.is_featured)
+      });
+    });
+
+    allUsers = rawUsers;
+    console.log(`✅ تم جلب ${allListings.length} إعلان و ${allUsers.length} مستخدم`);
 
     renderOverview();
     renderListingsTable();
@@ -146,7 +203,7 @@ async function loadData() {
     renderReports();
 
   } catch (e) {
-    console.error('خطأ في تحميل البيانات:', e);
+    console.error('❌ خطأ أثناء تحميل البيانات:', e);
   }
 }
 
@@ -158,43 +215,38 @@ function renderOverview() {
   const cars = allListings.filter(l => l.type === 'car');
   const totalViews = allListings.reduce((sum, l) => sum + (l.views || 0), 0);
 
-  document.getElementById('statTotalProps').textContent = props.length;
-  document.getElementById('statTotalCars').textContent = cars.length;
-  document.getElementById('statTotalUsers').textContent = allUsers.length;
-  document.getElementById('statTotalViews').textContent = totalViews.toLocaleString('en-US');
+  const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
 
-  document.getElementById('badgeListings').textContent = allListings.length;
-  document.getElementById('badgeUsers').textContent = allUsers.length;
+  setEl('statTotalProps', props.length);
+  setEl('statTotalCars', cars.length);
+  setEl('statTotalUsers', allUsers.length);
+  setEl('statTotalViews', totalViews.toLocaleString('en-US'));
+  setEl('badgeListings', allListings.length);
+  setEl('badgeUsers', allUsers.length);
 
-  // أحدث الإعلانات
-  const recent = [...allListings]
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    .slice(0, 5);
-
+  const recent = [...allListings].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
   const recentEl = document.getElementById('recentListings');
-  if (!recent.length) {
-    recentEl.innerHTML = `<div class="admin-empty"><i data-lucide="inbox"></i><p>لا توجد إعلانات</p></div>`;
-  } else {
-    recentEl.innerHTML = recent.map(l => {
-      const icon = l.type === 'property' ? 'building-2' : 'car';
-      const typeText = l.type === 'property' ? 'عقار' : 'سيارة';
-      return `<div class="admin-recent-item">
-        <div class="admin-recent-icon"><i data-lucide="${icon}"></i></div>
-        <div class="admin-recent-info">
-          <div class="admin-recent-title">${l.title}</div>
-          <div class="admin-recent-sub">${typeText} · ${l.city || '—'}</div>
-        </div>
-      </div>`;
-    }).join('');
+  
+  if (recentEl) {
+    if (!recent.length) {
+      recentEl.innerHTML = `<div class="admin-empty"><i data-lucide="inbox"></i><p>لا توجد إعلانات</p></div>`;
+    } else {
+      recentEl.innerHTML = recent.map(l => {
+        const icon = l.type === 'property' ? 'building-2' : 'car';
+        return `<div class="admin-recent-item">
+          <div class="admin-recent-icon"><i data-lucide="${icon}"></i></div>
+          <div class="admin-recent-info">
+            <div class="admin-recent-title">${escapeHtml(l.title)}</div>
+            <div class="admin-recent-sub">${escapeHtml(l.city || '—')}</div>
+          </div>
+        </div>`;
+      }).join('');
+    }
   }
 
-  // أحدث المستخدمين
   const recentUsersEl = document.getElementById('recentUsers');
-  if (currentAdmin.role === 'super_admin') {
-    const recentU = [...allUsers]
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      .slice(0, 5);
-
+  if (recentUsersEl && currentAdmin && currentAdmin.role === 'super_admin') {
+    const recentU = [...allUsers].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
     if (!recentU.length) {
       recentUsersEl.innerHTML = `<div class="admin-empty"><i data-lucide="users"></i><p>لا يوجد مستخدمون</p></div>`;
     } else {
@@ -202,14 +254,11 @@ function renderOverview() {
         <div class="admin-recent-item">
           <div class="admin-recent-icon"><i data-lucide="user"></i></div>
           <div class="admin-recent-info">
-            <div class="admin-recent-title">${u.name}</div>
-            <div class="admin-recent-sub">${u.email}</div>
+            <div class="admin-recent-title">${escapeHtml(u.name)}</div>
+            <div class="admin-recent-sub">${escapeHtml(u.email)}</div>
           </div>
-        </div>
-      `).join('');
+        </div>`).join('');
     }
-  } else {
-    recentUsersEl.innerHTML = `<div class="admin-empty"><i data-lucide="lock"></i><p>متاح للأدمن العام فقط</p></div>`;
   }
 
   initIcons();
@@ -236,6 +285,8 @@ function renderListingsTable() {
   }
 
   const tbody = document.getElementById('listingsTable');
+  if (!tbody) return;
+
   if (!filtered.length) {
     tbody.innerHTML = `<tr><td colspan="7"><div class="admin-empty"><i data-lucide="inbox"></i><p>لا توجد إعلانات مطابقة</p></div></td></tr>`;
     initIcons();
@@ -272,8 +323,7 @@ function renderListingsTable() {
       <td>
         ${waClean
         ? `<a href="https://wa.me/${waClean}" target="_blank" class="admin-icon-btn wa" title="واتساب البائع"><i data-lucide="message-circle"></i></a>`
-        : `<span style="color:var(--text-muted);font-size:12px;">—</span>`
-      }
+        : `<span style="color:var(--text-muted);font-size:12px;">—</span>`}
       </td>
       <td>
         <div class="admin-actions">
@@ -282,7 +332,9 @@ function renderListingsTable() {
             ${Object.entries(listingStatusLabels).map(([value, label]) => `<option value="${value}" ${status === value ? 'selected' : ''}>${label}</option>`).join('')}
           </select>
           <button class="admin-icon-btn ${isFeatured ? 'featured' : ''}" data-feature-id="${listingId}" data-featured="${isFeatured ? '1' : '0'}" title="${isFeatured ? 'إلغاء التمييز' : 'تمييز'}"><i data-lucide="star"></i></button>
-          <button class="admin-icon-btn" data-edit-id="${listingId}" data-edit-title="${escapeHtml(l.title)}" data-edit-price="${escapeHtml(l.price)}" title="تعديل"><i data-lucide="pencil"></i></button>
+          
+          <button class="admin-icon-btn" onclick="editAdminListing('${listingId}', '${escapeHtml(l.title)}', '${escapeHtml(l.price)}')" title="تعديل"><i data-lucide="pencil"></i></button>
+          
           <button class="admin-icon-btn danger" onclick="adminDeleteListing('${listingId}')" title="حذف"><i data-lucide="trash-2"></i></button>
         </div>
       </td>
@@ -297,11 +349,6 @@ function renderListingsTable() {
   document.querySelectorAll('[data-feature-id]').forEach(function (button) {
     button.addEventListener('click', function () {
       updateAdminListing(button.dataset.featureId, { featured: button.dataset.featured !== '1' });
-    });
-  });
-  document.querySelectorAll('[data-edit-id]').forEach(function (button) {
-    button.addEventListener('click', function () {
-      editAdminListing(button.dataset.editId, button.dataset.editTitle, button.dataset.editPrice);
     });
   });
 
@@ -326,7 +373,7 @@ window.adminDeleteListing = async function (id) {
    إدارة المستخدمين
    ========================================== */
 function renderUsersTable() {
-  if (currentAdmin.role !== 'super_admin') return;
+  if (!currentAdmin || currentAdmin.role !== 'super_admin') return;
 
   const search = (document.getElementById('searchUsers')?.value || '').toLowerCase().trim();
   const roleFilter = document.getElementById('filterRole')?.value || '';
@@ -341,6 +388,8 @@ function renderUsersTable() {
   }
 
   const tbody = document.getElementById('usersTable');
+  if (!tbody) return;
+
   if (!filtered.length) {
     tbody.innerHTML = `<tr><td colspan="6"><div class="admin-empty"><i data-lucide="users"></i><p>لا يوجد مستخدمون مطابقون</p></div></td></tr>`;
     initIcons();
@@ -369,6 +418,8 @@ function renderUsersTable() {
               ${Object.entries(roleLabels).map(([value, label]) => `<option value="${value}" ${role === value ? 'selected' : ''}>${label}</option>`).join('')}
             </select>
             <button class="admin-icon-btn" data-active-id="${userId}" data-active="${isActive ? '1' : '0'}" title="${isActive ? 'تعطيل' : 'تفعيل'}"><i data-lucide="${isActive ? 'user-round-x' : 'user-round-check'}"></i></button>
+            
+            <button class="admin-icon-btn danger" onclick="adminDeleteUser('${userId}')" title="حذف الحساب"><i data-lucide="trash-2"></i></button>
           ` : `<span style="color:var(--text-muted);font-size:11px;">أنت</span>`}
         </div>
       </td>
@@ -389,43 +440,31 @@ function renderUsersTable() {
   initIcons();
 }
 
-window.adminChangeRole = async function (id) {
-  const user = allUsers.find(u => u.id === id);
-  if (!user) return;
-
-  const newRole = prompt(
-    `تغيير دور "${user.name}"\n\nأدخل: user (مستخدم) أو admin (أدمن)`,
-    user.role || 'user'
-  );
-
-  if (!newRole || !['user', 'admin'].includes(newRole)) return;
-
-  user.role = newRole;
-  const users = JSON.parse(localStorage.getItem('souq_users') || '[]');
-  const idx = users.findIndex(u => u.id === id);
-  if (idx > -1) {
-    users[idx].role = newRole;
-    localStorage.setItem('souq_users', JSON.stringify(users));
-  }
-  renderUsersTable();
-  alert('✅ تم تحديث الدور');
-};
-
 window.adminDeleteUser = async function (id) {
   const user = allUsers.find(u => u.id === id);
   if (!user) return;
 
   if (!confirm(`⚠️ هل أنت متأكد من حذف المستخدم "${user.name}"؟`)) return;
-  if (!confirm('🔴 سيتم حذف الحساب نهائياً.')) return;
+  if (!confirm('🔴 سيتم حذف الحساب نهائياً ولا يمكن استرجاعه.')) return;
 
-  const users = JSON.parse(localStorage.getItem('souq_users') || '[]');
-  const filtered = users.filter(u => u.id !== id);
-  localStorage.setItem('souq_users', JSON.stringify(filtered));
+  try {
+    const result = await adminRequest('admin_delete_user.php', {
+        method: 'POST',
+        body: JSON.stringify({ id })
+    });
 
-  allUsers = filtered;
-  renderOverview();
-  renderUsersTable();
-  alert('✅ تم حذف المستخدم');
+    if (result.success) {
+        allUsers = allUsers.filter(u => u.id !== id);
+        renderOverview();
+        renderUsersTable();
+        alert('✅ تم حذف المستخدم بنجاح');
+    } else {
+        alert(result.error || 'فشل حذف المستخدم');
+    }
+  } catch (error) {
+    console.error('❌ خطأ أثناء حذف المستخدم:', error);
+    alert('حدث خطأ في الخادم أثناء محاولة الحذف. تأكد من وجود ملف admin_delete_user.php');
+  }
 };
 
 /* ==========================================
@@ -434,7 +473,6 @@ window.adminDeleteUser = async function (id) {
 function renderReports() {
   const el = document.getElementById('reportsContent');
   if (!el) return;
-
   el.innerHTML = `
     <div class="admin-panel-card">
       <div class="admin-empty">
@@ -490,13 +528,210 @@ function setupFilters() {
    تشغيل
    ========================================== */
 document.addEventListener('DOMContentLoaded', async () => {
+  console.log('🚀 بدء تشغيل لوحة التحكم...');
   initIcons();
 
-  if (!checkAccess()) return;
+  if (typeof API === 'undefined') {
+      console.error('❌ خطأ قاتل: ملف api.js لم يتم تحميله بشكل صحيح!');
+      return;
+  }
+
+  const hasAccess = await checkAccess();
+  if (!hasAccess) return;
 
   setupTabs();
   setupFilters();
   await loadData();
 
   initIcons();
+  console.log('✅ اكتمل تشغيل لوحة التحكم بنجاح');
+
+  setInterval(async () => {
+    const user = await API.Users.validateSession();
+    if (!user) {
+      window.location.href = 'login.html';
+    }
+  }, 5 * 60 * 1000);
 });
+
+/* ==========================================
+   🔍 البحث برقم الإعلان (محسّن مع 3 أحجام)
+   ========================================== */
+(function() {
+  'use strict';
+
+  function initListingIdSearch() {
+    const searchInput = document.getElementById('listingIdSearch');
+    const searchBtn = document.getElementById('listingIdSearchBtn');
+    const resultBox = document.getElementById('listingSearchResult');
+
+    if (!searchInput || !searchBtn || !resultBox) return;
+
+    searchBtn.addEventListener('click', performSearch);
+
+    searchInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        performSearch();
+      }
+    });
+
+    searchInput.addEventListener('input', function() {
+      this.value = this.value.trim().replace(/\s+/g, '');
+    });
+
+    async function performSearch() {
+      let id = searchInput.value.trim();
+      
+      if (!id) {
+        showError('الرجاء إدخال رقم الإعلان');
+        return;
+      }
+
+      if (!id.startsWith('L') && !id.startsWith('l')) {
+        id = 'L' + id;
+      }
+      
+      id = id.replace(/^l/i, 'L');
+
+      showLoading();
+      console.log('🔍 البحث برقم:', id);
+
+      try {
+        const response = await fetch(`../api/listing.php?id=${encodeURIComponent(id)}`);
+        
+        if (!response.ok) {
+          if (response.status === 404) {
+            showNotFound(id);
+            return;
+          }
+          throw new Error('فشل الاتصال بالسيرفر: ' + response.status);
+        }
+
+        const data = await response.json();
+        console.log('📦 نتيجة البحث:', data);
+
+        const listing = data.listing || data.data || data;
+        
+        if (!listing || (!listing.id && !listing.title)) {
+          showNotFound(id);
+          return;
+        }
+
+        showResult(listing);
+
+      } catch (err) {
+        console.error('❌ خطأ في البحث:', err);
+        showError('حدث خطأ أثناء البحث. تحقق من اتصالك.');
+      }
+    }
+
+    function showLoading() {
+      resultBox.style.display = 'block';
+      resultBox.className = 'admin-search-result loading';
+      resultBox.innerHTML = `
+        <div style="display:flex;align-items:center;gap:10px;color:#93C5FD;font-weight:700;">
+          <i data-lucide="loader-2" class="spin" style="width:20px;height:20px;"></i>
+          <span>جاري البحث...</span>
+        </div>
+      `;
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function showNotFound(id) {
+      resultBox.style.display = 'block';
+      resultBox.className = 'admin-search-result not-found';
+      resultBox.innerHTML = `
+        <div class="admin-no-result">
+          <i data-lucide="alert-circle"></i>
+          <span>لا يوجد إعلان بالرقم: <code dir="ltr" style="color:#FBBF24;">${id}</code></span>
+        </div>
+      `;
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function showError(msg) {
+      resultBox.style.display = 'block';
+      resultBox.className = 'admin-search-result not-found';
+      resultBox.innerHTML = `
+        <div class="admin-no-result">
+          <i data-lucide="alert-circle"></i>
+          <span>${msg}</span>
+        </div>
+      `;
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    /* ==========================================
+       ✅ عرض نتيجة البحث مع صورة محسّنة
+       ========================================== */
+    function showResult(listing) {
+      resultBox.style.display = 'block';
+      resultBox.className = 'admin-search-result found';
+
+      const id = listing.id || '';
+      const title = listing.title || 'بدون عنوان';
+      const safeTitle = escapeHtml(title);
+      const type = listing.type === 'car' ? 'سيارة' : 'عقار';
+      const purpose = listing.purpose === 'sale' ? 'للبيع' : 'للإيجار';
+      const city = listing.city || '';
+      const price = listing.price ? Number(listing.price).toLocaleString('en-US') + ' ' + (listing.currency || 'USD') : '—';
+      
+      // ✅ استخدام الدالة المحسّنة للصورة
+      const imageUrl = buildAdminImageUrl(listing, 0, 'medium');
+
+      const imageHTML = imageUrl 
+        ? `<img 
+             src="${imageUrl}" 
+             alt="${safeTitle}"
+             loading="lazy"
+             decoding="async"
+             width="200"
+             height="200"
+             onerror="this.parentNode.innerHTML='<i data-lucide=&quot;image-off&quot;></i>';if(window.lucide)window.lucide.createIcons();">`
+        : `<i data-lucide="image-off"></i>`;
+
+      const detailsUrl = `../pages/details.html?id=${encodeURIComponent(id)}&type=${listing.type || 'property'}`;
+
+      resultBox.innerHTML = `
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;color:#34D399;font-weight:800;font-size:15px;">
+          <i data-lucide="check-circle" style="width:20px;height:20px;"></i>
+          <span>تم العثور على الإعلان ✅</span>
+        </div>
+        
+        <div class="admin-result-card">
+          <div class="admin-result-image">${imageHTML}</div>
+          <div class="admin-result-info">
+            <h4 class="admin-result-title">${safeTitle}</h4>
+            <div class="admin-result-meta">
+              <span><i data-lucide="tag"></i>${type}</span>
+              <span><i data-lucide="badge-dollar-sign"></i>${purpose}</span>
+              ${city ? `<span><i data-lucide="map-pin"></i>${escapeHtml(city)}</span>` : ''}
+              <span><i data-lucide="wallet"></i>${escapeHtml(price)}</span>
+            </div>
+            <div class="admin-result-id">ID: ${escapeHtml(id)}</div>
+          </div>
+        </div>
+        
+        <div class="admin-result-actions">
+          <a href="${detailsUrl}" target="_blank" class="btn-view">
+            <i data-lucide="eye"></i>
+            <span>عرض الإعلان</span>
+          </a>
+          <a href="../pages/add-listing.html?id=${encodeURIComponent(id)}" target="_blank" class="btn-edit">
+            <i data-lucide="pencil"></i>
+            <span>تعديل</span>
+          </a>
+        </div>
+      `;
+      
+      if (window.lucide) window.lucide.createIcons();
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initListingIdSearch);
+  } else {
+    initListingIdSearch();
+  }
+})();
