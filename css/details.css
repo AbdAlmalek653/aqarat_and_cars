@@ -38,8 +38,8 @@
   cursor: zoom-in;
 }
 
-.gallery-main > i,
-.gallery-main > svg {
+.gallery-main>i,
+.gallery-main>svg {
   width: 80px;
   height: 80px;
   color: var(--text-muted);
@@ -49,8 +49,7 @@
 .gallery-main img {
   width: 100%;
   height: 100%;
-  /* ✅ تعديل 1: cover أفضل لعرض الصور بحجم كامل */
-  object-fit: cover;
+  object-fit: contain;
   background: #0a0e1a;
   display: block;
   transition: transform 0.3s ease;
@@ -84,9 +83,18 @@
   transform: translateY(-50%) scale(1.1);
 }
 
-.gallery-nav.prev { right: 16px; }
-.gallery-nav.next { left: 16px; }
-.gallery-nav svg { width: 22px; height: 22px; }
+.gallery-nav.prev {
+  right: 16px;
+}
+
+.gallery-nav.next {
+  left: 16px;
+}
+
+.gallery-nav svg {
+  width: 22px;
+  height: 22px;
+}
 
 .gallery-counter {
   position: absolute;
@@ -112,8 +120,14 @@
   scrollbar-width: thin;
 }
 
-.gallery-thumbs::-webkit-scrollbar { height: 6px; }
-.gallery-thumbs::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 3px; }
+.gallery-thumbs::-webkit-scrollbar {
+  height: 6px;
+}
+
+.gallery-thumbs::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 3px;
+}
 
 .gallery-thumb {
   flex: 0 0 80px;
@@ -130,7 +144,11 @@
   justify-content: center;
 }
 
-.gallery-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.gallery-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
 .gallery-thumb.active {
   border-color: var(--primary);
@@ -172,10 +190,25 @@
   color: var(--text-secondary);
 }
 
-.info-badge.sale { background: linear-gradient(135deg, #10B981, #059669); color: #fff; }
-.info-badge.rent { background: linear-gradient(135deg, #3B82F6, #1D4ED8); color: #fff; }
-.info-badge.featured { background: linear-gradient(135deg, #F59E0B, #B45309); color: #fff; }
-.info-badge svg { width: 14px; height: 14px; }
+.info-badge.sale {
+  background: linear-gradient(135deg, #10B981, #059669);
+  color: #fff;
+}
+
+.info-badge.rent {
+  background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+  color: #fff;
+}
+
+.info-badge.featured {
+  background: linear-gradient(135deg, #F59E0B, #B45309);
+  color: #fff;
+}
+
+.info-badge svg {
+  width: 14px;
+  height: 14px;
+}
 
 .info-title {
   font-size: 26px;
@@ -196,7 +229,11 @@
   letter-spacing: -0.5px;
 }
 
-.info-price small { font-size: 16px; font-weight: 500; color: var(--text-secondary); }
+.info-price small {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
 
 .info-location {
   display: flex;
@@ -209,7 +246,12 @@
   border-bottom: 1px dashed var(--border);
 }
 
-.info-location svg { width: 18px; height: 18px; color: var(--primary); flex-shrink: 0; }
+.info-location svg {
+  width: 18px;
+  height: 18px;
+  color: var(--primary);
+  flex-shrink: 0;
+}
 
 .section-heading {
   display: flex;
@@ -251,7 +293,10 @@
   transition: all 0.25s ease;
 }
 
-.spec-item:hover { border-color: var(--primary); transform: translateY(-2px); }
+.spec-item:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
 
 .spec-icon {
   width: 44px;
@@ -264,10 +309,23 @@
   flex-shrink: 0;
 }
 
-.spec-icon svg { width: 20px; height: 20px; color: var(--primary); }
+.spec-icon svg {
+  width: 20px;
+  height: 20px;
+  color: var(--primary);
+}
 
-.spec-content { flex: 1; min-width: 0; }
-.spec-label { font-size: 12px; color: var(--text-muted); margin-bottom: 3px; font-weight: 600; }
+.spec-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.spec-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 3px;
+  font-weight: 600;
+}
 
 .spec-value {
   font-size: 14.5px;
@@ -315,7 +373,11 @@
   color: var(--text-secondary);
 }
 
-.ad-id svg { width: 16px; height: 16px; color: var(--primary); }
+.ad-id svg {
+  width: 16px;
+  height: 16px;
+  color: var(--primary);
+}
 
 .ad-id strong {
   color: #FBBF24;
@@ -354,9 +416,23 @@
   box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35);
 }
 
-.seller-details { flex: 1; min-width: 0; }
-.seller-name { font-size: 16px; font-weight: 800; color: var(--text-primary); margin-bottom: 4px; }
-.seller-role { font-size: 12.5px; color: var(--text-muted); font-weight: 600; }
+.seller-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.seller-name {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.seller-role {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
 
 .seller-actions {
   display: flex;
@@ -387,7 +463,10 @@
   box-shadow: 0 8px 22px rgba(37, 211, 102, 0.35);
 }
 
-.btn-whatsapp:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(37, 211, 102, 0.5); }
+.btn-whatsapp:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(37, 211, 102, 0.5);
+}
 
 .btn-seller-whatsapp {
   background: linear-gradient(135deg, #F59E0B, #B45309);
@@ -395,12 +474,22 @@
   box-shadow: 0 8px 22px rgba(245, 158, 11, 0.35);
 }
 
-.btn-seller-whatsapp:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(245, 158, 11, 0.5); }
+.btn-seller-whatsapp:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(245, 158, 11, 0.5);
+}
 
 .btn-whatsapp svg,
-.btn-seller-whatsapp svg { width: 20px; height: 20px; }
+.btn-seller-whatsapp svg {
+  width: 20px;
+  height: 20px;
+}
 
-.action-row { display: flex; gap: 10px; margin-top: 4px; }
+.action-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
 
 .btn-icon-text {
   flex: 1;
@@ -432,7 +521,10 @@
   color: var(--danger);
 }
 
-.btn-icon-text svg { width: 16px; height: 16px; }
+.btn-icon-text svg {
+  width: 16px;
+  height: 16px;
+}
 
 .safety-note {
   display: flex;
@@ -477,7 +569,11 @@
   border-bottom: 1px dashed rgba(239, 68, 68, 0.3);
 }
 
-.admin-panel-header svg { width: 20px; height: 20px; color: var(--danger); }
+.admin-panel-header svg {
+  width: 20px;
+  height: 20px;
+  color: var(--danger);
+}
 
 .admin-status-display {
   display: flex;
@@ -491,8 +587,15 @@
   font-size: 13px;
 }
 
-.admin-label { color: var(--text-muted); font-weight: 600; }
-.admin-current-status { font-weight: 800; color: var(--accent); }
+.admin-label {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.admin-current-status {
+  font-weight: 800;
+  color: var(--accent);
+}
 
 .admin-actions {
   display: grid;
@@ -518,11 +621,28 @@
   transition: all 0.25s ease;
 }
 
-.admin-status-btn svg { width: 18px; height: 18px; }
+.admin-status-btn svg {
+  width: 18px;
+  height: 18px;
+}
 
-.admin-status-btn.active-btn:hover { background: rgba(16, 185, 129, 0.15); border-color: #10B981; color: #34D399; }
-.admin-status-btn.sold-btn:hover { background: rgba(239, 68, 68, 0.15); border-color: #EF4444; color: #FCA5A5; }
-.admin-status-btn.rented-btn:hover { background: rgba(59, 130, 246, 0.15); border-color: #3B82F6; color: #93C5FD; }
+.admin-status-btn.active-btn:hover {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: #10B981;
+  color: #34D399;
+}
+
+.admin-status-btn.sold-btn:hover {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: #EF4444;
+  color: #FCA5A5;
+}
+
+.admin-status-btn.rented-btn:hover {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: #3B82F6;
+  color: #93C5FD;
+}
 
 .admin-edit-btn,
 .admin-delete-btn {
@@ -548,7 +668,10 @@
   box-shadow: 0 6px 16px rgba(245, 158, 11, 0.35);
 }
 
-.admin-edit-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(245, 158, 11, 0.5); }
+.admin-edit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(245, 158, 11, 0.5);
+}
 
 .admin-delete-btn {
   background: linear-gradient(135deg, #EF4444, #DC2626);
@@ -556,10 +679,16 @@
   box-shadow: 0 6px 16px rgba(239, 68, 68, 0.35);
 }
 
-.admin-delete-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(239, 68, 68, 0.5); }
+.admin-delete-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(239, 68, 68, 0.5);
+}
 
 .admin-edit-btn svg,
-.admin-delete-btn svg { width: 16px; height: 16px; }
+.admin-delete-btn svg {
+  width: 16px;
+  height: 16px;
+}
 
 /* ==========================================
    8️⃣ نافذة التعديل
@@ -574,7 +703,9 @@
   padding: 20px;
 }
 
-.edit-modal.show { display: flex; }
+.edit-modal.show {
+  display: flex;
+}
 
 .edit-modal-overlay {
   position: absolute;
@@ -639,13 +770,30 @@
   border-radius: 8px;
 }
 
-.edit-modal-header h2 { font-size: 20px; font-weight: 800; color: var(--text-primary); margin: 0; }
+.edit-modal-header h2 {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+}
 
-.edit-form { display: flex; flex-direction: column; gap: 16px; }
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
 
-.edit-field { display: flex; flex-direction: column; gap: 6px; }
+.edit-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
 
-.edit-field label { font-size: 13.5px; font-weight: 700; color: var(--text-secondary); }
+.edit-field label {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
 
 .edit-field input,
 .edit-field select,
@@ -669,10 +817,20 @@
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
 
-.edit-field textarea { resize: vertical; min-height: 90px; }
+.edit-field textarea {
+  resize: vertical;
+  min-height: 90px;
+}
 
-.edit-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.edit-checkbox { padding: 10px 0; }
+.edit-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.edit-checkbox {
+  padding: 10px 0;
+}
 
 .edit-toggle {
   display: flex;
@@ -691,7 +849,11 @@
   cursor: pointer;
 }
 
-.edit-actions { display: flex; gap: 12px; padding-top: 8px; }
+.edit-actions {
+  display: flex;
+  gap: 12px;
+  padding-top: 8px;
+}
 
 .edit-actions button {
   flex: 1;
@@ -725,12 +887,30 @@
 }
 
 @keyframes toastSlideDown {
-  from { opacity: 0; transform: translate(-50%, -20px); }
-  to { opacity: 1; transform: translate(-50%, 0); }
+  from {
+    opacity: 0;
+    transform: translate(-50%, -20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
 }
 
-.spin { animation: spin 1s linear infinite; }
-@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 /* ==========================================================
    📱📱📱 الجوال (768px وأقل)
@@ -756,12 +936,27 @@
     cursor: default;
   }
 
-  .gallery-main img { object-fit: cover !important; }
+  .gallery-main img {
+    object-fit: cover !important;
+  }
 
-  .gallery-nav { width: 38px !important; height: 38px !important; }
-  .gallery-nav svg { width: 18px !important; height: 18px !important; }
-  .gallery-nav.prev { right: 10px !important; }
-  .gallery-nav.next { left: 10px !important; }
+  .gallery-nav {
+    width: 38px !important;
+    height: 38px !important;
+  }
+
+  .gallery-nav svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .gallery-nav.prev {
+    right: 10px !important;
+  }
+
+  .gallery-nav.next {
+    left: 10px !important;
+  }
 
   .gallery-counter {
     font-size: 11px !important;
@@ -784,66 +979,221 @@
     scroll-snap-align: start;
   }
 
-  .info-card { padding: 16px 14px !important; border-radius: 14px !important; margin-bottom: 12px !important; }
+  .info-card {
+    padding: 16px 14px !important;
+    border-radius: 14px !important;
+    margin-bottom: 12px !important;
+  }
 
-  .info-badges { gap: 6px !important; margin-bottom: 12px !important; }
-  .info-badge { padding: 5px 12px !important; font-size: 12px !important; }
-  .info-badge svg { width: 13px !important; height: 13px !important; }
+  .info-badges {
+    gap: 6px !important;
+    margin-bottom: 12px !important;
+  }
 
-  .info-title { font-size: 19px !important; line-height: 1.35 !important; margin: 8px 0 12px 0 !important; }
+  .info-badge {
+    padding: 5px 12px !important;
+    font-size: 12px !important;
+  }
 
-  .info-price { font-size: 28px !important; margin: 10px 0 !important; }
-  .info-price small { font-size: 14px !important; }
+  .info-badge svg {
+    width: 13px !important;
+    height: 13px !important;
+  }
 
-  .info-location { font-size: 13.5px !important; padding: 10px 0 !important; margin-bottom: 12px !important; }
-  .info-location svg { width: 16px !important; height: 16px !important; }
+  .info-title {
+    font-size: 19px !important;
+    line-height: 1.35 !important;
+    margin: 8px 0 12px 0 !important;
+  }
 
-  .section-heading { font-size: 16px !important; margin: 16px 0 12px 0 !important; }
-  .section-heading svg { width: 20px !important; height: 20px !important; }
+  .info-price {
+    font-size: 28px !important;
+    margin: 10px 0 !important;
+  }
 
-  .specs-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; }
+  .info-price small {
+    font-size: 14px !important;
+  }
 
-  .spec-item { padding: 10px !important; gap: 8px !important; border-radius: 10px !important; }
-  .spec-icon { width: 36px !important; height: 36px !important; border-radius: 9px !important; }
-  .spec-icon svg { width: 16px !important; height: 16px !important; }
-  .spec-label { font-size: 10.5px !important; margin-bottom: 2px !important; }
-  .spec-value { font-size: 13px !important; }
+  .info-location {
+    font-size: 13.5px !important;
+    padding: 10px 0 !important;
+    margin-bottom: 12px !important;
+  }
 
-  .description-text { font-size: 14px !important; line-height: 1.8 !important; }
+  .info-location svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
 
-  .details-sidebar { position: static !important; width: 100% !important; gap: 12px !important; }
+  .section-heading {
+    font-size: 16px !important;
+    margin: 16px 0 12px 0 !important;
+  }
 
-  .ad-id { padding: 10px 14px !important; font-size: 12px !important; border-radius: 10px !important; }
-  .ad-id svg { width: 14px !important; height: 14px !important; }
+  .section-heading svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
 
-  .seller-card { padding: 16px 14px !important; border-radius: 14px !important; }
-  .seller-info { padding-bottom: 12px !important; margin-bottom: 12px !important; gap: 12px !important; }
-  .seller-avatar { width: 46px !important; height: 46px !important; font-size: 18px !important; }
-  .seller-name { font-size: 15px !important; }
-  .seller-role { font-size: 12px !important; }
+  .specs-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .spec-item {
+    padding: 10px !important;
+    gap: 8px !important;
+    border-radius: 10px !important;
+  }
+
+  .spec-icon {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 9px !important;
+  }
+
+  .spec-icon svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
+
+  .spec-label {
+    font-size: 10.5px !important;
+    margin-bottom: 2px !important;
+  }
+
+  .spec-value {
+    font-size: 13px !important;
+  }
+
+  .description-text {
+    font-size: 14px !important;
+    line-height: 1.8 !important;
+  }
+
+  .details-sidebar {
+    position: static !important;
+    width: 100% !important;
+    gap: 12px !important;
+  }
+
+  .ad-id {
+    padding: 10px 14px !important;
+    font-size: 12px !important;
+    border-radius: 10px !important;
+  }
+
+  .ad-id svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+
+  .seller-card {
+    padding: 16px 14px !important;
+    border-radius: 14px !important;
+  }
+
+  .seller-info {
+    padding-bottom: 12px !important;
+    margin-bottom: 12px !important;
+    gap: 12px !important;
+  }
+
+  .seller-avatar {
+    width: 46px !important;
+    height: 46px !important;
+    font-size: 18px !important;
+  }
+
+  .seller-name {
+    font-size: 15px !important;
+  }
+
+  .seller-role {
+    font-size: 12px !important;
+  }
 
   .btn-whatsapp,
-  .btn-seller-whatsapp { padding: 13px 18px !important; font-size: 14px !important; border-radius: 11px !important; }
+  .btn-seller-whatsapp {
+    padding: 13px 18px !important;
+    font-size: 14px !important;
+    border-radius: 11px !important;
+  }
+
   .btn-whatsapp svg,
-  .btn-seller-whatsapp svg { width: 18px !important; height: 18px !important; }
+  .btn-seller-whatsapp svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
 
-  .action-row { gap: 8px !important; }
-  .btn-icon-text { padding: 11px 12px !important; font-size: 12.5px !important; }
-  .btn-icon-text svg { width: 15px !important; height: 15px !important; }
+  .action-row {
+    gap: 8px !important;
+  }
 
-  .safety-note { font-size: 11.5px !important; padding: 10px 12px !important; }
-  .safety-note svg { width: 16px !important; height: 16px !important; }
+  .btn-icon-text {
+    padding: 11px 12px !important;
+    font-size: 12.5px !important;
+  }
 
-  .admin-panel { padding: 14px !important; border-radius: 14px !important; }
-  .admin-panel-header { font-size: 14px !important; padding-bottom: 10px !important; margin-bottom: 12px !important; }
-  .admin-status-display { font-size: 12.5px !important; padding: 9px 11px !important; }
-  .admin-actions { gap: 6px !important; }
-  .admin-status-btn { padding: 10px 6px !important; font-size: 11px !important; border-radius: 9px !important; }
-  .admin-status-btn svg { width: 16px !important; height: 16px !important; }
+  .btn-icon-text svg {
+    width: 15px !important;
+    height: 15px !important;
+  }
+
+  .safety-note {
+    font-size: 11.5px !important;
+    padding: 10px 12px !important;
+  }
+
+  .safety-note svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
+
+  .admin-panel {
+    padding: 14px !important;
+    border-radius: 14px !important;
+  }
+
+  .admin-panel-header {
+    font-size: 14px !important;
+    padding-bottom: 10px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .admin-status-display {
+    font-size: 12.5px !important;
+    padding: 9px 11px !important;
+  }
+
+  .admin-actions {
+    gap: 6px !important;
+  }
+
+  .admin-status-btn {
+    padding: 10px 6px !important;
+    font-size: 11px !important;
+    border-radius: 9px !important;
+  }
+
+  .admin-status-btn svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
+
   .admin-edit-btn,
-  .admin-delete-btn { padding: 11px 14px !important; font-size: 13px !important; border-radius: 10px !important; }
+  .admin-delete-btn {
+    padding: 11px 14px !important;
+    font-size: 13px !important;
+    border-radius: 10px !important;
+  }
 
-  .edit-modal { padding: 0 !important; align-items: flex-end !important; }
+  .edit-modal {
+    padding: 0 !important;
+    align-items: flex-end !important;
+  }
+
   .edit-modal-content {
     max-width: 100% !important;
     width: 100% !important;
@@ -851,14 +1201,36 @@
     border-radius: 20px 20px 0 0 !important;
     padding: 24px 16px 16px !important;
   }
-  .edit-modal-header { padding-bottom: 12px !important; margin-bottom: 16px !important; }
-  .edit-modal-header h2 { font-size: 17px !important; }
-  .edit-form { gap: 12px !important; }
-  .edit-field label { font-size: 13px !important; }
+
+  .edit-modal-header {
+    padding-bottom: 12px !important;
+    margin-bottom: 16px !important;
+  }
+
+  .edit-modal-header h2 {
+    font-size: 17px !important;
+  }
+
+  .edit-form {
+    gap: 12px !important;
+  }
+
+  .edit-field label {
+    font-size: 13px !important;
+  }
+
   .edit-field input,
   .edit-field select,
-  .edit-field textarea { padding: 11px 13px !important; font-size: 14px !important; border-radius: 10px !important; }
-  .edit-row { grid-template-columns: 1fr !important; gap: 12px !important; }
+  .edit-field textarea {
+    padding: 11px 13px !important;
+    font-size: 14px !important;
+    border-radius: 10px !important;
+  }
+
+  .edit-row {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
 
   .edit-actions {
     position: sticky !important;
@@ -870,28 +1242,61 @@
     padding-right: 16px !important;
     border-top: 1px solid var(--border) !important;
   }
-  .edit-actions button { padding: 12px !important; font-size: 14px !important; }
+
+  .edit-actions button {
+    padding: 12px !important;
+    font-size: 14px !important;
+  }
 }
 
 /* ==========================================================
    📱 جوال صغير جداً (375px وأقل)
    ========================================================== */
 @media (max-width: 375px) {
-  .gallery-main { max-height: 240px !important; }
-  .info-title { font-size: 17px !important; }
-  .info-price { font-size: 24px !important; }
-  .specs-grid { grid-template-columns: 1fr !important; }
-  .gallery-thumb { flex: 0 0 56px !important; width: 56px !important; height: 56px !important; }
-  .seller-avatar { width: 42px !important; height: 42px !important; font-size: 16px !important; }
+  .gallery-main {
+    max-height: 240px !important;
+  }
+
+  .info-title {
+    font-size: 17px !important;
+  }
+
+  .info-price {
+    font-size: 24px !important;
+  }
+
+  .specs-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .gallery-thumb {
+    flex: 0 0 56px !important;
+    width: 56px !important;
+    height: 56px !important;
+  }
+
+  .seller-avatar {
+    width: 42px !important;
+    height: 42px !important;
+    font-size: 16px !important;
+  }
+
   .btn-whatsapp,
-  .btn-seller-whatsapp { font-size: 13px !important; padding: 12px 16px !important; }
+  .btn-seller-whatsapp {
+    font-size: 13px !important;
+    padding: 12px 16px !important;
+  }
 }
 
 /* ==========================================================
    📱 تابلت (769px - 1023px)
    ========================================================== */
 @media (min-width: 769px) and (max-width: 1023px) {
-  .details-layout { grid-template-columns: 1fr !important; gap: 20px; }
+  .details-layout {
+    grid-template-columns: 1fr !important;
+    gap: 20px;
+  }
+
   .details-sidebar {
     position: static !important;
     max-width: 100% !important;
@@ -900,21 +1305,80 @@
     grid-template-columns: 1fr 1fr;
     gap: 16px;
   }
-  .gallery-main { aspect-ratio: 16 / 10; max-height: 480px; }
-  .specs-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+
+  .gallery-main {
+    aspect-ratio: 16 / 10;
+    max-height: 480px;
+  }
+
+  .specs-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
 }
 
 /* ==========================================================
    💻 لابتوب وسطح مكتب (1024px+)
    ========================================================== */
 @media (min-width: 1024px) {
-  .details-layout { grid-template-columns: 1fr 380px; gap: 24px; }
-  .specs-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .details-layout {
+    grid-template-columns: 1fr 380px;
+    gap: 24px;
+  }
+
+  .specs-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 /* ==========================================================
    🖥️ شاشات كبيرة (1440px+)
    ========================================================== */
 @media (min-width: 1440px) {
-  .details-layout { grid-template-columns: 1fr 420px; gap: 32px; }
+  .details-layout {
+    grid-template-columns: 1fr 420px;
+    gap: 32px;
+  }
+}
+
+/* تثبيت العرض النهائي للصور والمواصفات بعد قواعد الجوال القديمة */
+.gallery-main img {
+  object-fit: contain !important;
+}
+
+.gallery-main {
+  background: #0a0e1a;
+}
+
+.specs-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+@media (max-width: 480px) {
+  .gallery-main {
+    aspect-ratio: 4 / 3 !important;
+    max-height: 300px !important;
+  }
+
+  .specs-grid {
+    gap: 8px !important;
+  }
+
+  .spec-item {
+    min-width: 0;
+    padding: 9px !important;
+    gap: 7px !important;
+  }
+
+  .spec-icon {
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  .spec-content {
+    min-width: 0;
+  }
+
+  .spec-value {
+    font-size: 12px !important;
+  }
 }

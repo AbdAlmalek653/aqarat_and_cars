@@ -69,6 +69,44 @@
       @media (max-width: 480px) {
         .properties-grid > *, .cars-grid > *, .favorites-grid > *, .grid.grid-4 > * { flex: 0 0 85% !important; width: 85% !important; }
       }
+      @media (max-width: 768px) {
+        #carsGrid {
+          display: grid !important;
+          grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+          gap: 10px !important;
+          padding: 0 !important;
+          margin: 0 !important;
+          overflow: visible !important;
+        }
+        #carsGrid > .card {
+          display: flex !important;
+          flex-direction: column !important;
+          width: 100% !important;
+          min-width: 0 !important;
+          max-width: none !important;
+          min-height: 0 !important;
+          border-radius: 12px !important;
+        }
+        #carsGrid > .card > .card-image {
+          width: 100% !important;
+          height: 140px !important;
+          min-height: 140px !important;
+          max-height: 140px !important;
+        }
+        #carsGrid > .card > .card-body {
+          padding: 10px !important;
+          min-width: 0 !important;
+        }
+        #carsGrid > .card .card-title {
+          font-size: 12.5px !important;
+          line-height: 1.4 !important;
+        }
+        #carsGrid > .card .card-price { font-size: 14px !important; }
+      }
+      @media (max-width: 380px) {
+        #carsGrid > .card > .card-image { height: 120px !important; min-height: 120px !important; max-height: 120px !important; }
+        #carsGrid { gap: 8px !important; }
+      }
     `;
     document.head.appendChild(s);
   }
