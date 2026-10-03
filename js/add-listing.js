@@ -1,6 +1,6 @@
 /* ==========================================
    صفحة إضافة إعلان - منطق ذكي حسب النوع والغرض
-   الإصدار: 3.0 (متوافق مع تصميم Dropzone الجديد)
+   الإصدار: 3.1 (تم حذف حقل المنطقة/الحي)
    ========================================== */
 
 let state = {
@@ -12,7 +12,7 @@ let state = {
 };
 
 let uploadedImages = [];
-let isProcessingImages = false; // ✅ منع رفع صور أثناء المعالجة
+let isProcessingImages = false;
 
 function initIcons() { if (window.lucide) window.lucide.createIcons(); }
 
@@ -206,7 +206,7 @@ function showPropertyFields() {
 }
 
 /* ==========================================
-   🖼️ ضغط الصور في المتصفح (Client-Side Compression)
+   🖼️ ضغط الصور في المتصفح
    ========================================== */
 function compressImage(file, maxWidth = 1200, quality = 0.75) {
   return new Promise((resolve, reject) => {
@@ -260,7 +260,7 @@ function compressImage(file, maxWidth = 1200, quality = 0.75) {
 }
 
 /* ==========================================
-   رفع الصور (متوافق مع التصميم الجديد Dropzone)
+   رفع الصور
    ========================================== */
 function setupImageUpload() {
   const dropzone = document.getElementById('uploadArea');
@@ -270,20 +270,18 @@ function setupImageUpload() {
 
   if (!dropzone || !fileInput || !preview) return;
 
-  // ✅ 1. فتح نافذة اختيار الملفات عند الضغط على الصندوق أو الزر
   dropzone.addEventListener('click', (e) => {
-    if (e.target.closest('#selectImagesBtn')) return; // الزر يتعامل مع النقر بنفسه
+    if (e.target.closest('#selectImagesBtn')) return;
     fileInput.click();
   });
 
   if (selectBtn) {
     selectBtn.addEventListener('click', (e) => {
-      e.stopPropagation(); // منع تكرار الحدث
+      e.stopPropagation();
       fileInput.click();
     });
   }
 
-  // ✅ 2. تأثيرات السحب والإفلات
   ['dragenter', 'dragover'].forEach(ev => {
     dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.add('dragover'); });
   });
@@ -291,7 +289,6 @@ function setupImageUpload() {
     dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.remove('dragover'); });
   });
 
-  // ✅ 3. معالجة الملفات
   dropzone.addEventListener('drop', e => {
     if (isProcessingImages) return;
     const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
@@ -410,7 +407,6 @@ function setupImageUpload() {
     }
   }
 
-  // ✅ 4. عرض الصور المصغرة (متوافق مع التصميم الجديد)
   function renderPreview() {
     preview.innerHTML = uploadedImages.map(img => `
       <div class="preview-item">
@@ -423,7 +419,7 @@ function setupImageUpload() {
 
     preview.querySelectorAll('.remove-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
-        e.stopPropagation(); // منع فتح نافذة اختيار الملفات عند الحذف
+        e.stopPropagation();
         uploadedImages = uploadedImages.filter(img => img.id !== btn.dataset.id);
         renderPreview();
       });
@@ -613,13 +609,14 @@ function setupFormSubmit() {
       return;
     }
 
+    // ✅ تم حذف حقل "area" (المنطقة/الحي)
     const data = {
       type: state.type,
       purpose: state.purpose,
       subType: state.subType,
       title: document.getElementById('title').value.trim(),
       city: document.getElementById('city').value,
-      area: document.getElementById('area').value.trim(),
+      area: '',  // ← المنطقة فارغة دائماً (الحقل محذوف)
       whatsapp: document.getElementById('whatsapp').value.trim(),
       price: document.getElementById('price').value,
       currency: document.getElementById('currency').value,
@@ -767,7 +764,7 @@ function resetForm() {
 }
 
 /* ==========================================
-   ✅ قراءة النوع من الرابط (Preselect Type)
+   ✅ قراءة النوع من الرابط
    ========================================== */
 function checkPreselectedType() {
   const urlParams = new URLSearchParams(window.location.search);

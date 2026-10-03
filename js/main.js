@@ -1,6 +1,6 @@
 /* ==========================================
    الصفحة الرئيسية - سوق
-   الإصدار: 3.1 (محسّن + حماية ضد الأخطاء)
+   الإصدار: 4.0 (فلترة مصححة + حماية ضد الأخطاء)
    ========================================== */
 
 function initIcons() {
@@ -17,6 +17,38 @@ const CITY_NAMES = {
 
 const TYPE_NAMES = { property: 'عقارات', car: 'سيارات' };
 const PURPOSE_NAMES = { sale: 'للبيع', rent: 'للإيجار' };
+
+/* ==========================================
+   ✅ دوال مساعدة: توحيد اسم المحافظة والمقارنة
+   ========================================== */
+
+/**
+ * استخراج كل المفاتيح المحتملة للمحافظة من الإعلان
+ */
+function normalizeCityKey(listing) {
+  if (!listing) return [];
+  const keys = [];
+  if (listing.city_slug) keys.push(String(listing.city_slug).toLowerCase().trim());
+  if (listing.city_name) keys.push(String(listing.city_name).toLowerCase().trim());
+  if (listing.city) keys.push(String(listing.city).toLowerCase().trim());
+  return keys.filter(Boolean);
+}
+
+/**
+ * التحقق من تطابق المحافظة مع الفلتر (يدعم العربية والإنجليزية)
+ */
+function cityMatches(listing, targetSlug) {
+  if (!targetSlug) return true;
+  const target = String(targetSlug).toLowerCase().trim();
+  const targetName = String(CITY_NAMES[target] || '').toLowerCase().trim();
+  
+  const listingKeys = normalizeCityKey(listing);
+  
+  return listingKeys.some(key => 
+    key === target || 
+    (targetName && key === targetName)
+  );
+}
 
 /* ==========================================
    ✅ تحسين 1: منع استدعاءات API المتزامنة
@@ -53,7 +85,7 @@ async function getCachedListings(forceRefresh) {
 }
 
 /* ==========================================
-   ✅ تحسين 2: دالة موحدة لتوليد روابط الصور بثلاث أحجام
+   ✅ تحسين 2: دالة موحدة لتوليد روابط الصور
    ========================================== */
 function getImageUrls(item, index = 0) {
   if (!item || !item.id) {
@@ -80,7 +112,7 @@ function getImageUrl(item) {
 }
 
 /* ==========================================
-   ✅ تحسين 3: createCard مع srcset + decoding async
+   ✅ تحسين 3: createCard مع srcset + المدينة المصححة
    ========================================== */
 function createCard(item, type) {
   const purposeText = item.purpose === 'sale' ? 'للبيع' : 'للإيجار';
@@ -118,8 +150,11 @@ function createCard(item, type) {
 
   const featuredBadge = item.featured ? `<span class="card-badge featured">⭐ مميز</span>` : '';
 
+  // ✅ إصلاح: استخدام city_slug و city_name و city بالترتيب الصحيح
   let locationText = '';
-  if (item.city) locationText = CITY_NAMES[item.city] || item.city;
+  const cityKey = item.city_slug || item.city;
+  const cityName = item.city_name || (cityKey ? CITY_NAMES[cityKey] : '');
+  if (cityName) locationText = cityName;
   if (item.area) locationText = locationText ? `${locationText} - ${item.area}` : item.area;
   if (!locationText) locationText = item.location || '—';
 
@@ -224,7 +259,6 @@ async function loadAllFeatured(forceRefresh) {
   try {
     const allListings = await getCachedListings(forceRefresh);
 
-    // ✅ تصفية + ترتيب حسب الأحدث
     const properties = allListings
       .filter(l => l.type === 'property')
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
@@ -235,7 +269,6 @@ async function loadAllFeatured(forceRefresh) {
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       .slice(0, MAX_FEATURED_ITEMS);
 
-    // ✅ عرض المحتوى
     if (propContainer) {
       propContainer.innerHTML = properties.length === 0
         ? emptyState('property')
@@ -257,9 +290,6 @@ async function loadAllFeatured(forceRefresh) {
   }
 }
 
-/* ==========================================
-   الاحتفاظ بالدالتين للتوافق
-   ========================================== */
 async function loadFeaturedProperties(forceRefresh) {
   const container = document.getElementById('featuredProperties');
   if (!container) return;
@@ -473,20 +503,34 @@ function setupCascadeFilter() {
   if (showBtn) showBtn.addEventListener('click', handleCascadeShow);
 }
 
+/* ==========================================
+   🎯 الفلترة النهائية الشاملة (مصححة)
+   ========================================== */
 async function handleCascadeShow() {
-  if (!cascadeState.type || !cascadeState.purpose || !cascadeState.city) return;
+  if (!cascadeState.type || !cascadeState.purpose || !cascadeState.city) {
+    console.warn('⚠️ الفلتر غير مكتمل');
+    return;
+  }
+
   const resultsSection = document.getElementById('resultsSection');
   const grid = document.getElementById('latestGrid');
-  if (resultsSection) resultsSection.style.display = 'block';
+  
+  if (!resultsSection || !grid) return;
 
-  const removeAllEmptyStates = () => {
-    if (!resultsSection) return;
-    resultsSection.querySelectorAll('.empty-state').forEach(el => el.remove());
-  };
-  removeAllEmptyStates();
+  // عرض قسم النتائج
+  resultsSection.style.display = 'block';
 
+  // إزالة رسائل "لا توجد نتائج" القديمة
+  resultsSection.querySelectorAll('.empty-state').forEach(el => el.remove());
+
+  // عرض مؤشر التحميل
   grid.style.display = 'grid';
-  grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px 20px;"><i data-lucide="loader-2" class="spin" style="width:48px;height:48px;color:var(--primary);margin-bottom:16px;"></i><p style="color:var(--text-secondary);">جاري تحميل الإعلانات...</p></div>`;
+  grid.innerHTML = `
+    <div style="grid-column:1/-1;text-align:center;padding:60px 20px;">
+      <i data-lucide="loader-2" class="spin" style="width:48px;height:48px;color:var(--primary);margin-bottom:16px;"></i>
+      <p style="color:var(--text-secondary);">جاري تحميل الإعلانات...</p>
+    </div>`;
+  
   if (window.lucide) window.lucide.createIcons();
 
   setTimeout(() => {
@@ -495,12 +539,26 @@ async function handleCascadeShow() {
 
   try {
     const allListings = await getCachedListings(false);
-    const listings = allListings.filter(l => l.type === cascadeState.type && l.purpose === cascadeState.purpose && l.city === cascadeState.city);
+
+    // ✅ الفلترة المحسّنة باستخدام cityMatches
+    const listings = allListings.filter(l => {
+      // 1. النوع (سيارة/عقار)
+      if (cascadeState.type && l.type !== cascadeState.type) return false;
+      
+      // 2. الغرض (بيع/إيجار)
+      if (cascadeState.purpose && l.purpose !== cascadeState.purpose) return false;
+      
+      // 3. المحافظة (بالدالة المساعدة)
+      if (cascadeState.city && !cityMatches(l, cascadeState.city)) return false;
+      
+      return true;
+    });
+
     listings.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     const typeText = TYPE_NAMES[cascadeState.type] || '';
     const purposeText = PURPOSE_NAMES[cascadeState.purpose] || '';
-    const cityText = CITY_NAMES[cascadeState.city] || '';
+    const cityText = CITY_NAMES[cascadeState.city] || cascadeState.city;
 
     if (resultsSection) {
       const resultsTitleEl = resultsSection.querySelector('.section-title span');
@@ -509,8 +567,7 @@ async function handleCascadeShow() {
       if (resultsSubtitleEl) resultsSubtitleEl.textContent = `${typeText} ${purposeText} في ${cityText}`;
     }
 
-    removeAllEmptyStates();
-
+    // ✅ إذا لا توجد نتائج
     if (listings.length === 0) {
       grid.style.display = 'none';
       grid.innerHTML = '';
@@ -526,11 +583,18 @@ async function handleCascadeShow() {
       return;
     }
 
+    // ✅ عرض النتائج
     grid.style.display = 'grid';
     grid.innerHTML = listings.map(item => createCard(item, item.type)).join('');
     if (window.lucide) window.lucide.createIcons();
+
   } catch (err) {
-    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--danger);"><i data-lucide="alert-circle" style="width:48px;height:48px;margin-bottom:16px;"></i><p>حدث خطأ أثناء تحميل الإعلانات.</p></div>`;
+    console.error('❌ خطأ في البحث:', err);
+    grid.innerHTML = `
+      <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--danger);">
+        <i data-lucide="alert-circle" style="width:48px;height:48px;margin-bottom:16px;"></i>
+        <p>حدث خطأ أثناء تحميل الإعلانات.</p>
+      </div>`;
     if (window.lucide) window.lucide.createIcons();
   }
 }
