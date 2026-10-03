@@ -1,6 +1,6 @@
 /* ==========================================
    صفحة تفاصيل الإعلان
-   الإصدار: 3.1 (صور بحجم large + cache busting)
+   الإصدار: 3.2 (كل الحقول بالعربية - عقارات وسيارات)
    ========================================== */
 
 const BROKER_PHONE = '963930932794';
@@ -36,7 +36,7 @@ async function fetchListing(id) {
 }
 
 /* ==========================================
-   بناء المواصفات من التفاصيل
+   بناء المواصفات من التفاصيل - كل الحقول بالعربية
    ========================================== */
 function buildSpecsFromDetails(listing) {
   if (listing.specs && listing.specs.length > 0) return listing.specs;
@@ -47,39 +47,260 @@ function buildSpecsFromDetails(listing) {
 
   const sensitiveKeys = ['whatsapp', 'phone', 'mobile', 'email', '_whatsapp', '_phone', '_mobile'];
 
+  // ==========================================
+  // ✅ قاموس العقارات - شامل كل الحقول
+  // ==========================================
   const propertyMap = {
-    propertyType: { icon: 'building-2', label: 'نوع العقار', translate: { apartment: 'شقة', villa: 'فيلا', 'arabic-house': 'بيت عربي', land: 'أرض', office: 'مكتب', shop: 'محل تجاري', chalet: 'شاليه', building: 'بناء كامل' }},
+    propertyType: {
+      icon: 'building-2', label: 'نوع العقار',
+      translate: { apartment: 'شقة', villa: 'فيلا', 'arabic-house': 'بيت عربي', land: 'أرض', office: 'مكتب', shop: 'محل تجاري', chalet: 'شاليه', building: 'بناء كامل' }
+    },
+    subType: {
+      icon: 'layers', label: 'نوع العقار',
+      translate: { apartment: 'شقة', villa: 'فيلا', 'arabic-house': 'بيت عربي', land: 'أرض', office: 'مكتب', shop: 'محل تجاري', chalet: 'شاليه', building: 'بناء كامل' }
+    },
+    subtype: {
+      icon: 'layers', label: 'نوع العقار',
+      translate: { apartment: 'شقة', villa: 'فيلا', 'arabic-house': 'بيت عربي', land: 'أرض', office: 'مكتب', shop: 'محل تجاري', chalet: 'شاليه', building: 'بناء كامل' }
+    },
+    'sub-type': {
+      icon: 'layers', label: 'نوع العقار',
+      translate: { apartment: 'شقة', villa: 'فيلا', 'arabic-house': 'بيت عربي', land: 'أرض', office: 'مكتب', shop: 'محل تجاري', chalet: 'شاليه', building: 'بناء كامل' }
+    },
+
     area: { icon: 'square', label: 'المساحة', suffix: ' م²' },
     propertyArea: { icon: 'square', label: 'المساحة', suffix: ' م²' },
-    rooms: { icon: 'bed-double', label: 'الغرف' },
-    bathrooms: { icon: 'bath', label: 'الحمامات' },
+    property_area: { icon: 'square', label: 'المساحة', suffix: ' م²' },
+
+    rooms: { icon: 'bed-double', label: 'عدد الغرف' },
+    bedrooms: { icon: 'bed-double', label: 'غرف النوم' },
+    bathrooms: { icon: 'bath', label: 'عدد الحمامات' },
+    baths: { icon: 'bath', label: 'عدد الحمامات' },
+
     floor: { icon: 'layers', label: 'الطابق' },
     totalFloors: { icon: 'building', label: 'إجمالي الطوابق' },
+    total_floors: { icon: 'building', label: 'إجمالي الطوابق' },
+    floors: { icon: 'building', label: 'عدد الطوابق' },
+
     age: { icon: 'calendar', label: 'عمر البناء', suffix: ' سنة' },
-    furnished: { icon: 'sofa', label: 'الفرش', translate: { furnished: 'مفروش', 'semi-furnished': 'نصف مفروش', unfurnished: 'غير مفروش' }},
-    heating: { icon: 'flame', label: 'التدفئة', translate: { central: 'مركزي', split: 'مكيفات', kerosene: 'كاز', electric: 'كهرباء', none: 'بدون' }},
-    garden: { icon: 'trees', label: 'الحديقة', translate: { yes: 'متوفر', no: 'غير متوفر' }},
-    pool: { icon: 'waves', label: 'المسبح', translate: { yes: 'متوفر', no: 'غير متوفر' }},
+    buildingAge: { icon: 'calendar', label: 'عمر البناء', suffix: ' سنة' },
+    building_age: { icon: 'calendar', label: 'عمر البناء', suffix: ' سنة' },
+
+    // ✅ الاتجاه
+    direction: {
+      icon: 'compass', label: 'الاتجاه',
+      translate: {
+        'شمالي': 'شمالي', 'جنوبي': 'جنوبي', 'شرقي': 'شرقي', 'غربي': 'غربي',
+        'شمالي شرقي': 'شمالي شرقي', 'شمالي غربي': 'شمالي غربي',
+        'جنوبي شرقي': 'جنوبي شرقي', 'جنوبي غربي': 'جنوبي غربي',
+        north: 'شمالي', south: 'جنوبي', east: 'شرقي', west: 'غربي',
+        'north-east': 'شمالي شرقي', 'north-west': 'شمالي غربي',
+        'south-east': 'جنوبي شرقي', 'south-west': 'جنوبي غربي',
+        ne: 'شمالي شرقي', nw: 'شمالي غربي', se: 'جنوبي شرقي', sw: 'جنوبي غربي'
+      }
+    },
+    facing: {
+      icon: 'compass', label: 'الاتجاه',
+      translate: {
+        'شمالي': 'شمالي', 'جنوبي': 'جنوبي', 'شرقي': 'شرقي', 'غربي': 'غربي',
+        north: 'شمالي', south: 'جنوبي', east: 'شرقي', west: 'غربي'
+      }
+    },
+
+    // ✅ نوع الفراغة
+    vacancyType: {
+      icon: 'file-check', label: 'نوع الفراغة',
+      translate: {
+        'عقد تنازل': 'عقد تنازل', 'طابو أخضر': 'طابو أخضر', 'عن طريق محكمة': 'عن طريق محكمة',
+        contract: 'عقد تنازل', 'green-tabu': 'طابو أخضر', court: 'عن طريق محكمة'
+      }
+    },
+    vacancy_type: {
+      icon: 'file-check', label: 'نوع الفراغة',
+      translate: {
+        'عقد تنازل': 'عقد تنازل', 'طابو أخضر': 'طابو أخضر', 'عن طريق محكمة': 'عن طريق محكمة'
+      }
+    },
+
+    // ✅ نوع الإكساء
+    finishingType: {
+      icon: 'sparkles', label: 'نوع الإكساء',
+      translate: {
+        'عادي': 'عادي', 'متوسط': 'متوسط', 'جيد': 'جيد', 'سوبر ديلوكس': 'سوبر ديلوكس',
+        normal: 'عادي', medium: 'متوسط', good: 'جيد', 'super-deluxe': 'سوبر ديلوكس', deluxe: 'سوبر ديلوكس'
+      }
+    },
+    finishing_type: {
+      icon: 'sparkles', label: 'نوع الإكساء',
+      translate: {
+        'عادي': 'عادي', 'متوسط': 'متوسط', 'جيد': 'جيد', 'سوبر ديلوكس': 'سوبر ديلوكس'
+      }
+    },
+
+    furnished: {
+      icon: 'sofa', label: 'الفرش',
+      translate: { furnished: 'مفروش', 'semi-furnished': 'نصف مفروش', unfurnished: 'غير مفروش' }
+    },
+    heating: {
+      icon: 'flame', label: 'التدفئة',
+      translate: { central: 'مركزي', split: 'مكيفات', kerosene: 'كاز', electric: 'كهرباء', none: 'بدون' }
+    },
+    garden: {
+      icon: 'trees', label: 'الحديقة',
+      translate: { yes: 'متوفر', no: 'غير متوفر', true: 'متوفر', false: 'غير متوفر' }
+    },
+    pool: {
+      icon: 'waves', label: 'المسبح',
+      translate: { yes: 'متوفر', no: 'غير متوفر', true: 'متوفر', false: 'غير متوفر' }
+    },
+
     landArea: { icon: 'square', label: 'مساحة الأرض', suffix: ' م²' },
+    land_area: { icon: 'square', label: 'مساحة الأرض', suffix: ' م²' },
     landFrontage: { icon: 'route', label: 'عرض الواجهة', suffix: ' م' },
+    land_frontage: { icon: 'route', label: 'عرض الواجهة', suffix: ' م' },
     landDepth: { icon: 'move-horizontal', label: 'العمق', suffix: ' م' },
-    landZoning: { icon: 'map', label: 'التنظيم', translate: { residential: 'سكني', commercial: 'تجاري', industrial: 'صناعي', agricultural: 'زراعي', mixed: 'مختلط' }},
-    landTabu: { icon: 'file-check', label: 'الطابو', translate: { green: 'أخضر', blue: 'أزرق', organized: 'منظم', unorganized: 'غير منظم' }}
+    land_depth: { icon: 'move-horizontal', label: 'العمق', suffix: ' م' },
+    landZoning: {
+      icon: 'map', label: 'التنظيم',
+      translate: { residential: 'سكني', commercial: 'تجاري', industrial: 'صناعي', agricultural: 'زراعي', mixed: 'مختلط' }
+    },
+    land_zoning: {
+      icon: 'map', label: 'التنظيم',
+      translate: { residential: 'سكني', commercial: 'تجاري', industrial: 'صناعي', agricultural: 'زراعي', mixed: 'مختلط' }
+    },
+    landTabu: {
+      icon: 'file-check', label: 'الطابو',
+      translate: { green: 'أخضر', blue: 'أزرق', organized: 'منظم', unorganized: 'غير منظم' }
+    }
   };
 
+  // ==========================================
+  // ✅ قاموس السيارات - شامل كل الحقول
+  // ==========================================
   const carMap = {
-    brand: { icon: 'car', label: 'الماركة', translate: { toyota: 'تويوتا', hyundai: 'هيونداي', kia: 'كيا', mercedes: 'مرسيدس', bmw: 'BMW', nissan: 'نيسان', honda: 'هوندا', chevrolet: 'شيفروليه', ford: 'فورد', mazda: 'مازدا', mitsubishi: 'ميتسوبيشي', volkswagen: 'فولكس فاجن', audi: 'أودي', lexus: 'لكزس', other: 'أخرى' }},
+    brand: {
+      icon: 'car', label: 'الماركة',
+      translate: {
+        toyota: 'تويوتا', hyundai: 'هيونداي', kia: 'كيا', mercedes: 'مرسيدس',
+        bmw: 'BMW', nissan: 'نيسان', honda: 'هوندا', chevrolet: 'شيفروليه',
+        ford: 'فورد', mazda: 'مازدا', mitsubishi: 'ميتسوبيشي',
+        volkswagen: 'فولكس فاجن', audi: 'أودي', lexus: 'لكزس',
+        renault: 'رينو', peugeot: 'بيجو', fiat: 'فيات', seat: 'سيات',
+        skoda: 'سكودا', opel: 'أوبل', jeep: 'جيب', landrover: 'لاند روفر',
+        'land-rover': 'لاند روفر', porsche: 'بورش', ferrari: 'فيراري',
+        tesla: 'تسلا', volvo: 'فولفو', subaru: 'سوبارو',
+        infiniti: 'إنفينيتي', cadillac: 'كاديلاك', gmc: 'جي إم سي',
+        dodge: 'دودج', chrysler: 'كرايسلر', suzuki: 'سوزوكي',
+        'mercedes-benz': 'مرسيدس', other: 'أخرى'
+      }
+    },
     brandName: { skip: true },
+    brand_name: { skip: true },
+
     model: { icon: 'tag', label: 'الموديل' },
-    year: { icon: 'calendar', label: 'السنة' },
+
+    year: { icon: 'calendar', label: 'سنة الصنع' },
+
     km: { icon: 'gauge', label: 'الكيلومترات', suffix: ' كم' },
-    condition: { icon: 'sparkles', label: 'الحالة', translate: { new: 'جديد', used: 'مستعمل' }},
-    transmission: { icon: 'settings-2', label: 'ناقل الحركة', translate: { automatic: 'أوتوماتيك', manual: 'عادي' }},
-    fuel: { icon: 'fuel', label: 'الوقود', translate: { petrol: 'بنزين', diesel: 'ديزل', electric: 'كهرباء', hybrid: 'هايبرد' }},
-    color: { icon: 'palette', label: 'اللون' },
-    bodyType: { icon: 'car', label: 'نوع الجسم', translate: { sedan: 'سيدان', suv: 'SUV', hatchback: 'هاتشباك', pickup: 'بيك أب', coupe: 'كوبيه', van: 'فان' }},
-    carInsurance: { icon: 'shield-check', label: 'التأمين', translate: { yes: 'مؤمنة', no: 'غير مؤمنة' }},
-    minDays: { icon: 'calendar-clock', label: 'أقل مدة إيجار', suffix: ' يوم' }
+    mileage: { icon: 'gauge', label: 'الكيلومترات', suffix: ' كم' },
+
+    condition: {
+      icon: 'sparkles', label: 'الحالة',
+      translate: { 
+        new: 'جديد', used: 'مستعمل', 'like-new': 'كالجديد',
+        excellent: 'ممتازة', good: 'جيدة', fair: 'مقبولة'
+      }
+    },
+
+    transmission: {
+      icon: 'settings-2', label: 'ناقل الحركة',
+      translate: { 
+        automatic: 'أوتوماتيك', manual: 'عادي', auto: 'أوتوماتيك',
+        cvt: 'CVT', 'dual-clutch': 'دبل كلتش'
+      }
+    },
+    gear: {
+      icon: 'settings-2', label: 'ناقل الحركة',
+      translate: { automatic: 'أوتوماتيك', manual: 'عادي' }
+    },
+
+    fuel: {
+      icon: 'fuel', label: 'الوقود',
+      translate: { 
+        petrol: 'بنزين', diesel: 'ديزل', electric: 'كهرباء',
+        hybrid: 'هايبرد', gasoline: 'بنزين', cng: 'غاز طبيعي'
+      }
+    },
+
+    color: {
+      icon: 'palette', label: 'اللون',
+      translate: {
+        white: 'أبيض', black: 'أسود', silver: 'فضي', gray: 'رمادي', grey: 'رمادي',
+        red: 'أحمر', blue: 'أزرق', green: 'أخضر', yellow: 'أصفر',
+        brown: 'بني', beige: 'بيج', gold: 'ذهبي', orange: 'برتقالي',
+        'أبيض': 'أبيض', 'أسود': 'أسود', 'فضي': 'فضي', 'رمادي': 'رمادي'
+      }
+    },
+
+    bodyType: {
+      icon: 'car', label: 'نوع الجسم',
+      translate: { 
+        sedan: 'سيدان', suv: 'SUV', hatchback: 'هاتشباك',
+        pickup: 'بيك أب', coupe: 'كوبيه', van: 'فان',
+        convertible: 'كشف', wagon: 'ستيشن', crossover: 'كروس أوفر'
+      }
+    },
+    body_type: {
+      icon: 'car', label: 'نوع الجسم',
+      translate: { 
+        sedan: 'سيدان', suv: 'SUV', hatchback: 'هاتشباك',
+        pickup: 'بيك أب', coupe: 'كوبيه', van: 'فان'
+      }
+    },
+
+    carInsurance: {
+      icon: 'shield-check', label: 'التأمين',
+      translate: { yes: 'مؤمنة', no: 'غير مؤمنة', true: 'مؤمنة', false: 'غير مؤمنة' }
+    },
+    insurance: {
+      icon: 'shield-check', label: 'التأمين',
+      translate: { yes: 'مؤمنة', no: 'غير مؤمنة', true: 'مؤمنة', false: 'غير مؤمنة' }
+    },
+
+    minDays: { icon: 'calendar-clock', label: 'أقل مدة إيجار', suffix: ' يوم' },
+    min_days: { icon: 'calendar-clock', label: 'أقل مدة إيجار', suffix: ' يوم' }
+  };
+
+  // ==========================================
+  // ✅ قاموس عام (لأي حقل غير معروف)
+  // ==========================================
+  const globalFieldTranslations = {
+    subtype: 'النوع الفرعي', sub_type: 'النوع الفرعي', 'sub-type': 'النوع الفرعي',
+    propertytype: 'نوع العقار', property_type: 'نوع العقار', 'property-type': 'نوع العقار',
+    direction: 'الاتجاه', facing: 'الاتجاه',
+    vacancytype: 'نوع الفراغة', vacancy_type: 'نوع الفراغة',
+    finishingtype: 'نوع الإكساء', finishing_type: 'نوع الإكساء',
+
+    totalfloors: 'إجمالي الطوابق', total_floors: 'إجمالي الطوابق',
+    floors: 'عدد الطوابق', floor: 'الطابق',
+    rooms: 'عدد الغرف', bedrooms: 'غرف النوم',
+    bathrooms: 'عدد الحمامات', baths: 'عدد الحمامات',
+    area: 'المساحة', propertyarea: 'المساحة', property_area: 'المساحة',
+    landarea: 'مساحة الأرض', land_area: 'مساحة الأرض',
+    age: 'عمر البناء', buildingage: 'عمر البناء', building_age: 'عمر البناء',
+    furnished: 'الفرش', heating: 'التدفئة', cooling: 'التبريد',
+    garden: 'الحديقة', pool: 'المسبح', parking: 'موقف سيارة',
+    elevator: 'مصعد', balcony: 'شرفة', terrace: 'تراس',
+    address: 'العنوان', location: 'الموقع', city: 'المحافظة',
+    area_name: 'المنطقة', district: 'الحي', neighborhood: 'الحي',
+
+    brand: 'الماركة', brandname: 'الماركة', brand_name: 'الماركة',
+    model: 'الموديل', year: 'السنة', km: 'الكيلومترات', mileage: 'المسافة المقطوعة',
+    color: 'اللون', bodytype: 'نوع الجسم', body_type: 'نوع الجسم',
+    fuel: 'الوقود', transmission: 'ناقل الحركة', gear: 'ناقل الحركة',
+    condition: 'الحالة', carinsurance: 'التأمين', insurance: 'التأمين',
+    mindays: 'أقل مدة إيجار', min_days: 'أقل مدة إيجار',
+    wifi: 'واي فاي', ac: 'تكييف', kitchen: 'مطبخ'
   };
 
   const map = isProperty ? propertyMap : carMap;
@@ -96,11 +317,15 @@ function buildSpecsFromDetails(listing) {
 
     let meta = map[key];
 
+    // البحث في القاموس العام
     if (!meta) {
-      meta = {
-        icon: 'info',
-        label: key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
-      };
+      const lowerKey = key.toLowerCase();
+      const label = globalFieldTranslations[lowerKey] || globalFieldTranslations[key];
+      if (label) {
+        meta = { icon: 'info', label: label };
+      } else {
+        return; // ← لا نعرض الحقول غير المترجمة
+      }
     }
 
     if (meta.skip) return;
@@ -228,7 +453,6 @@ function renderListing(l) {
   document.getElementById('adDescription').textContent = l.description || '';
   document.getElementById('adId').textContent = '#' + l.id;
 
-  // زر واتساب الوسيط
   const listingUrl = window.location.href;
   const locationText = buildLocationText(l);
   const priceText = l.purpose === 'sale' ? `${priceNum.toLocaleString('en-US')} ${l.currency || 'USD'}` : `${priceNum} ${l.currency || 'USD'} / شهرياً`;
@@ -291,7 +515,7 @@ function setupSellerWhatsapp(listing) {
 }
 
 /* ==========================================
-   معرض الصور - ✅ معدل للإصدار 3.1 (large دائماً)
+   معرض الصور
    ========================================== */
 function renderGallery(imgs, l) {
   const main = document.getElementById('galleryMain');
@@ -310,10 +534,8 @@ function renderGallery(imgs, l) {
 
   const getUrl = window.getListingImageUrl;
 
-  // ✅ الحل: نستخدم large للصور الرئيسية والمصغرات
   const largeUrls = imgs.map((_, i) => getUrl ? getUrl(l, i, 'large') : null).filter(Boolean);
 
-  // Fallback للصور القديمة (base64 أو روابط مباشرة)
   if (!largeUrls.length) {
     const raw = imgs.map(img => typeof img === 'string' ? img : null).filter(Boolean);
     largeUrls.push(...raw);
