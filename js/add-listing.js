@@ -1,808 +1,535 @@
 /* ==========================================
-   صفحة إضافة إعلان - منطق ذكي حسب النوع والغرض
-   الإصدار: 3.1 (تم حذف حقل المنطقة/الحي)
+   صفحة إضافة إعلان - النسخة النهائية
+   الإصدار: 4.0 (بدون ضغط للصور - جودة عالية)
    ========================================== */
 
-let state = {
-  type: null,        // 'property' | 'car'
-  purpose: null,     // 'sale' | 'rent'
-  subType: null,     // apartment, villa, land, office, shop, chalet, building, arabic-house
-  brand: null,       // toyota, hyundai, ..., 'other'
-  customBrand: ''    // اسم الماركة اللي يكتبه المستخدم عند اختيار "أخرى"
-};
+(function() {
+  'use strict';
 
-let uploadedImages = [];
-let isProcessingImages = false;
+  let currentStep = 1;
+  let listingType = null;      // property | car
+  let listingPurpose = null;   // sale | rent
+  let subType = null;
+  let brand = null;
+  let selectedImages = [];
+  const MAX_IMAGES = 10;
+  const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15 MB للصورة الواحدة
 
-function initIcons() { if (window.lucide) window.lucide.createIcons(); }
+  /* ==========================================
+     التنقل بين الخطوات
+     ========================================== */
+  function goToStep(step) {
+    document.querySelectorAll('.al-step').forEach(el => el.style.display = 'none');
+    const target = document.getElementById('step' + step);
+    if (target) target.style.display = 'block';
 
-/* ==========================================
-   التنقل بين الخطوات
-   ========================================== */
-function showStep(n) {
-  ['step1','step2','step3','step4'].forEach((id, i) => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = (i + 1 === n) ? 'block' : 'none';
-  });
-  updateStepsIndicator(n);
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function updateStepsIndicator(active) {
-  document.querySelectorAll('.al-step-dot').forEach(dot => {
-    const n = Number(dot.dataset.step);
-    dot.classList.toggle('active', n === active);
-    dot.classList.toggle('done', n < active);
-  });
-}
-
-/* ==========================================
-   الخطوة 1: النوع
-   ========================================== */
-function setupStep1() {
-  document.querySelectorAll('#step1 .type-choice-card').forEach(card => {
-    card.addEventListener('click', () => {
-      state.type = card.dataset.value;
-      document.getElementById('purposeTypeName').textContent =
-        state.type === 'property' ? 'العقار' : 'السيارة';
-      showStep(2);
+    document.querySelectorAll('.al-step-dot').forEach(dot => {
+      const s = parseInt(dot.dataset.step, 10);
+      dot.classList.remove('active', 'done');
+      if (s < step) dot.classList.add('done');
+      if (s === step) dot.classList.add('active');
     });
-  });
-}
 
-/* ==========================================
-   الخطوة 2: الغرض
-   ========================================== */
-function setupStep2() {
-  document.querySelectorAll('#step2 .type-choice-card').forEach(card => {
-    card.addEventListener('click', () => {
-      state.purpose = card.dataset.value;
-      prepareStep3();
-      showStep(3);
-    });
-  });
-
-  document.getElementById('backToStep1')?.addEventListener('click', () => {
-    state.type = null;
-    showStep(1);
-  });
-
-  document.getElementById('backToStep2')?.addEventListener('click', () => {
-    if (confirm('هل تريد الرجوع؟ سيتم مسح البيانات المدخلة.')) {
-      resetForm();
-      showStep(2);
-    }
-  });
-}
-
-/* ==========================================
-   الخطوة 3: تجهيز النموذج
-   ========================================== */
-function prepareStep3() {
-  const isProperty = state.type === 'property';
-  const isRent = state.purpose === 'rent';
-
-  document.getElementById('formTitle').textContent = isProperty ? 'أضف إعلان عقار' : 'أضف إعلان سيارة';
-  document.getElementById('currentTypeText').textContent = isProperty ? (isRent ? 'عقار للإيجار' : 'عقار للبيع') : (isRent ? 'سيارة للإيجار' : 'سيارة للبيع');
-  document.getElementById('currentTypeIcon').setAttribute('data-lucide', isProperty ? 'building-2' : 'car');
-
-  document.getElementById('subTypeSection').style.display = isProperty ? 'block' : 'none';
-  document.getElementById('brandSection').style.display = isProperty ? 'none' : 'block';
-
-  document.getElementById('priceSectionTitle').textContent = isRent ? 'سعر الإيجار' : 'السعر';
-  document.getElementById('priceLabel').textContent = isRent ? 'السعر' : 'السعر';
-  document.getElementById('price').placeholder = isRent ? 'مثال: 500' : 'مثال: 150000';
-
-  document.getElementById('rentPeriodField').style.display = isRent ? 'flex' : 'none';
-  document.getElementById('depositField').style.display = isRent ? 'flex' : 'none';
-  document.getElementById('minDaysField').style.display = (isRent && !isProperty) ? 'flex' : 'none';
-  document.getElementById('carInsuranceField').style.display = (isRent && !isProperty) ? 'flex' : 'none';
-  document.getElementById('conditionField').style.display = (!isRent && !isProperty) ? 'flex' : 'none';
-  document.getElementById('kmField').style.display = (!isRent && !isProperty) ? 'flex' : 'none';
-
-  ['residentialSection', 'landSection', 'commercialSection', 'carSection']
-    .forEach(id => document.getElementById(id).style.display = 'none');
-
-  document.querySelectorAll('#subTypeGrid .subtype-card').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('#brandGrid .subtype-card').forEach(b => b.classList.remove('active'));
-
-  const otherField = document.getElementById('otherBrandField');
-  if (otherField) otherField.style.display = 'none';
-
-  if (!isProperty) {
-    document.getElementById('carSection').style.display = 'block';
+    currentStep = step;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (window.lucide) window.lucide.createIcons();
   }
 
-  initIcons();
-}
+  /* ==========================================
+     الخطوة 1: اختيار النوع
+     ========================================== */
+  document.querySelectorAll('#step1 .type-choice-card[data-value]').forEach(card => {
+    card.addEventListener('click', () => {
+      const value = card.dataset.value;
+      if (value === 'property' || value === 'car') {
+        listingType = value;
+        const nameEl = document.getElementById('purposeTypeName');
+        if (nameEl) nameEl.textContent = value === 'property' ? 'العقار' : 'السيارة';
+        goToStep(2);
+      }
+    });
+  });
 
-/* ==========================================
-   النوع الفرعي (للعقار) والماركة (للسيارة)
-   ========================================== */
-function setupSubType() {
+  /* ==========================================
+     الخطوة 2: الغرض
+     ========================================== */
+  document.querySelectorAll('#step2 .type-choice-card[data-value]').forEach(card => {
+    card.addEventListener('click', () => {
+      const value = card.dataset.value;
+      if (value === 'sale' || value === 'rent') {
+        listingPurpose = value;
+        prepareForm();
+        goToStep(3);
+      }
+    });
+  });
+
+  document.getElementById('backToStep1')?.addEventListener('click', () => goToStep(1));
+  document.getElementById('backToStep2')?.addEventListener('click', () => goToStep(2));
+
+  /* ==========================================
+     تحضير النموذج حسب النوع
+     ========================================== */
+  function prepareForm() {
+    const isProperty = listingType === 'property';
+    const isRent = listingPurpose === 'rent';
+
+    document.getElementById('formTitle').textContent = isProperty ? 'أضف إعلان عقار' : 'أضف إعلان سيارة';
+    document.getElementById('formSubtitle').textContent = isRent ? 'للإيجار' : 'للبيع';
+
+    const typeIcon = document.getElementById('currentTypeIcon');
+    const typeText = document.getElementById('currentTypeText');
+    if (typeIcon) typeIcon.setAttribute('data-lucide', isProperty ? 'building-2' : 'car');
+    if (typeText) typeText.textContent = isProperty ? 'عقار' : 'سيارة';
+
+    document.getElementById('subTypeSection').style.display = isProperty ? 'block' : 'none';
+    document.getElementById('brandSection').style.display = isProperty ? 'none' : 'block';
+    document.getElementById('residentialSection').style.display = isProperty ? 'block' : 'none';
+    document.getElementById('landSection').style.display = 'none';
+    document.getElementById('commercialSection').style.display = 'none';
+    document.getElementById('carSection').style.display = isProperty ? 'none' : 'block';
+
+    if (isRent) {
+      document.getElementById('rentPeriodField').style.display = 'block';
+      document.getElementById('depositField').style.display = 'block';
+      document.getElementById('furnishedField').style.display = 'block';
+    } else {
+      document.getElementById('rentPeriodField').style.display = 'none';
+      document.getElementById('depositField').style.display = 'none';
+    }
+
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  /* ==========================================
+     اختيار النوع الفرعي (عقارات)
+     ========================================== */
   document.querySelectorAll('#subTypeGrid .subtype-card').forEach(card => {
     card.addEventListener('click', () => {
       document.querySelectorAll('#subTypeGrid .subtype-card').forEach(c => c.classList.remove('active'));
       card.classList.add('active');
-      state.subType = card.dataset.subtype;
-      showPropertyFields();
+      subType = card.dataset.subtype;
+
+      const residentialSection = document.getElementById('residentialSection');
+      const landSection = document.getElementById('landSection');
+      const commercialSection = document.getElementById('commercialSection');
+
+      residentialSection.style.display = 'none';
+      landSection.style.display = 'none';
+      commercialSection.style.display = 'none';
+
+      if (subType === 'land') {
+        landSection.style.display = 'block';
+      } else if (subType === 'office' || subType === 'shop') {
+        commercialSection.style.display = 'block';
+      } else {
+        residentialSection.style.display = 'block';
+      }
+
+      if (subType === 'chalet' || subType === 'villa') {
+        document.getElementById('gardenField').style.display = 'block';
+        document.getElementById('poolField').style.display = 'block';
+      } else {
+        document.getElementById('gardenField').style.display = 'none';
+        document.getElementById('poolField').style.display = 'none';
+      }
+
+      if (window.lucide) window.lucide.createIcons();
     });
   });
 
+  /* ==========================================
+     اختيار الماركة (سيارات)
+     ========================================== */
   document.querySelectorAll('#brandGrid .subtype-card').forEach(card => {
     card.addEventListener('click', () => {
       document.querySelectorAll('#brandGrid .subtype-card').forEach(c => c.classList.remove('active'));
       card.classList.add('active');
-      state.brand = card.dataset.brand;
+      brand = card.dataset.brand;
 
       const otherField = document.getElementById('otherBrandField');
-      const otherInput = document.getElementById('otherBrand');
-
-      if (card.dataset.brand === 'other') {
-        otherField.style.display = 'flex';
-        setTimeout(() => otherInput.focus(), 100);
-      } else {
-        otherField.style.display = 'none';
-        otherInput.value = '';
-        otherInput.classList.remove('error');
-        const err = document.getElementById('otherBrandError');
-        if (err) err.classList.remove('show');
+      if (otherField) {
+        otherField.style.display = brand === 'other' ? 'block' : 'none';
       }
-      initIcons();
     });
   });
 
-  document.getElementById('otherBrand')?.addEventListener('input', (e) => {
-    e.target.classList.remove('error');
-    const err = document.getElementById('otherBrandError');
-    if (err) err.classList.remove('show');
-  });
-}
+  /* ==========================================
+     ✅ رفع الصور - بحجمها الكامل بدون أي ضغط
+     ========================================== */
+  const uploadArea = document.getElementById('uploadArea');
+  const imageInput = document.getElementById('imageInput');
+  const imagePreview = document.getElementById('imagePreview');
 
-function showPropertyFields() {
-  const subType = state.subType;
-  const isRent = state.purpose === 'rent';
-
-  ['residentialSection', 'landSection', 'commercialSection'].forEach(id => {
-    document.getElementById(id).style.display = 'none';
+  document.getElementById('selectImagesBtn')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    imageInput.click();
   });
 
-  const residentialTypes = ['apartment', 'villa', 'arabic-house', 'chalet'];
-  const landTypes = ['land'];
-  const commercialTypes = ['office', 'shop'];
-  const buildingTypes = ['building'];
-
-  if (residentialTypes.includes(subType)) {
-    document.getElementById('residentialSection').style.display = 'block';
-    const hasGardenPool = ['villa', 'chalet'].includes(subType);
-    document.getElementById('gardenField').style.display = hasGardenPool ? 'flex' : 'none';
-    document.getElementById('poolField').style.display = hasGardenPool ? 'flex' : 'none';
-    document.getElementById('furnishedField').style.display = isRent ? 'flex' : 'none';
-    document.getElementById('rooms').disabled = false;
-    document.getElementById('bathrooms').disabled = false;
-  }
-
-  if (landTypes.includes(subType)) {
-    document.getElementById('landSection').style.display = 'block';
-  }
-
-  if (commercialTypes.includes(subType)) {
-    document.getElementById('commercialSection').style.display = 'block';
-  }
-
-  if (buildingTypes.includes(subType)) {
-    document.getElementById('residentialSection').style.display = 'block';
-    document.getElementById('rooms').disabled = true;
-    document.getElementById('bathrooms').disabled = true;
-    document.getElementById('gardenField').style.display = 'none';
-    document.getElementById('poolField').style.display = 'none';
-    document.getElementById('furnishedField').style.display = 'none';
-  } else {
-    document.getElementById('rooms').disabled = false;
-    document.getElementById('bathrooms').disabled = false;
-  }
-
-  initIcons();
-}
-
-/* ==========================================
-   🖼️ ضغط الصور في المتصفح
-   ========================================== */
-function compressImage(file, maxWidth = 1200, quality = 0.75) {
-  return new Promise((resolve, reject) => {
-    if (file.size < 200 * 1024) {
-      const reader = new FileReader();
-      reader.onload = e => resolve(e.target.result);
-      reader.onerror = () => reject(new Error('فشل قراءة الملف'));
-      reader.readAsDataURL(file);
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        let width = img.width;
-        let height = img.height;
-
-        if (width > maxWidth) {
-          height = Math.round((height * maxWidth) / width);
-          width = maxWidth;
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-
-        const ctx = canvas.getContext('2d');
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
-        ctx.drawImage(img, 0, 0, width, height);
-
-        let dataUrl;
-        try {
-          dataUrl = canvas.toDataURL('image/webp', quality);
-          if (dataUrl.indexOf('data:image/webp') !== 0) {
-            dataUrl = canvas.toDataURL('image/jpeg', quality);
-          }
-        } catch (err) {
-          dataUrl = canvas.toDataURL('image/jpeg', quality);
-        }
-
-        resolve(dataUrl);
-      };
-      img.onerror = () => reject(new Error('فشل تحميل الصورة'));
-      img.src = e.target.result;
-    };
-    reader.onerror = () => reject(new Error('فشل قراءة الملف'));
-    reader.readAsDataURL(file);
-  });
-}
-
-/* ==========================================
-   رفع الصور
-   ========================================== */
-function setupImageUpload() {
-  const dropzone = document.getElementById('uploadArea');
-  const fileInput = document.getElementById('imageInput');
-  const selectBtn = document.getElementById('selectImagesBtn');
-  const preview = document.getElementById('imagePreview');
-
-  if (!dropzone || !fileInput || !preview) return;
-
-  dropzone.addEventListener('click', (e) => {
+  uploadArea?.addEventListener('click', (e) => {
     if (e.target.closest('#selectImagesBtn')) return;
-    fileInput.click();
+    imageInput.click();
   });
 
-  if (selectBtn) {
-    selectBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      fileInput.click();
-    });
-  }
-
-  ['dragenter', 'dragover'].forEach(ev => {
-    dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.add('dragover'); });
-  });
-  ['dragleave', 'drop'].forEach(ev => {
-    dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.remove('dragover'); });
+  uploadArea?.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadArea.classList.add('dragover');
   });
 
-  dropzone.addEventListener('drop', e => {
-    if (isProcessingImages) return;
+  uploadArea?.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+
+  uploadArea?.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.classList.remove('dragover');
     const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
     handleFiles(files);
   });
 
-  fileInput.addEventListener('change', () => {
-    if (isProcessingImages) return;
-    handleFiles(Array.from(fileInput.files));
+  imageInput?.addEventListener('change', (e) => {
+    const files = Array.from(e.target.files);
+    handleFiles(files);
+    imageInput.value = '';
   });
 
+  /* ==========================================
+     ✅ معالجة الملفات - قراءة كاملة بدون ضغط
+     ========================================== */
   async function handleFiles(files) {
-    if (isProcessingImages) {
-      showAlert('جاري معالجة الصور، الرجاء الانتظار...');
+    const remaining = MAX_IMAGES - selectedImages.length;
+    if (remaining <= 0) {
+      showAlert('⚠️ الحد الأقصى ' + MAX_IMAGES + ' صور', 'error');
       return;
     }
 
-    if (uploadedImages.length + files.length > 10) {
-      showAlert('يمكنك اختيار حتى 10 صور فقط');
-      return;
-    }
+    for (const file of files.slice(0, remaining)) {
+      if (!file.type.startsWith('image/')) continue;
 
-    isProcessingImages = true;
-    fileInput.disabled = true;
-
-    showProcessingIndicator(true, files.length);
-
-    let processed = 0;
-    let failed = 0;
-
-    for (const file of files) {
-      if (file.size > 10 * 1024 * 1024) {
-        showAlert(`الصورة "${file.name}" أكبر من 10 ميجابايت`);
-        failed++;
+      if (file.size > MAX_FILE_SIZE) {
+        showAlert('⚠️ الصورة ' + file.name + ' كبيرة جداً (الحد 15MB)', 'error');
         continue;
       }
 
       try {
-        const compressedDataUrl = await compressImage(file, 1200, 0.75);
-        const originalKB = (file.size / 1024).toFixed(0);
-        const compressedKB = Math.round((compressedDataUrl.length * 3) / 4 / 1024);
-        const savings = Math.round((1 - compressedKB / originalKB) * 100);
-        console.log(`✅ ${file.name}: ${originalKB}KB → ~${compressedKB}KB (توفير ${savings}%)`);
-
-        uploadedImages.push({
-          id: 'img_' + Date.now() + Math.random(),
-          data: compressedDataUrl,
-          name: file.name,
-          size: compressedKB
-        });
-
-        processed++;
-        renderPreview();
+        // ✅ نقرأ الصورة بحجمها الأصلي كامل - بدون ضغط
+        const dataUrl = await readFileAsDataURL(file);
+        selectedImages.push(dataUrl);
       } catch (err) {
-        console.warn('⚠️ فشل ضغط:', file.name, err);
-        try {
-          const fallbackDataUrl = await new Promise((resolve, reject) => {
-            const r = new FileReader();
-            r.onload = e => resolve(e.target.result);
-            r.onerror = () => reject(new Error('فشل القراءة'));
-            r.readAsDataURL(file);
-          });
-          uploadedImages.push({
-            id: 'img_' + Date.now() + Math.random(),
-            data: fallbackDataUrl,
-            name: file.name,
-            size: Math.round(file.size / 1024)
-          });
-          processed++;
-          renderPreview();
-        } catch (fallbackErr) {
-          failed++;
-        }
+        console.error('خطأ في قراءة الصورة:', err);
+        showAlert('⚠️ فشل في قراءة الصورة ' + file.name, 'error');
       }
     }
 
-    showProcessingIndicator(false);
-    isProcessingImages = false;
-    fileInput.disabled = false;
-    fileInput.value = '';
-
-    if (failed > 0) {
-      showAlert(`تمت معالجة ${processed} صورة، وفشلت ${failed} صورة`);
-    } else if (processed > 0) {
-      console.log(`✅ تمت معالجة ${processed} صورة بنجاح`);
-    }
+    renderPreview();
+    if (window.lucide) window.lucide.createIcons();
   }
 
-  function showProcessingIndicator(show, count = 0) {
-    let indicator = document.getElementById('imageProcessingIndicator');
-    if (show) {
-      if (!indicator) {
-        indicator = document.createElement('div');
-        indicator.id = 'imageProcessingIndicator';
-        indicator.style.cssText = `
-          display: flex; align-items: center; justify-content: center; gap: 10px;
-          padding: 12px; margin-top: 10px;
-          background: rgba(59, 130, 246, 0.1);
-          border: 1px dashed rgba(59, 130, 246, 0.5);
-          border-radius: 12px;
-          color: #3B82F6; font-size: 14px; font-weight: 600;
-        `;
-        indicator.innerHTML = `
-          <i data-lucide="loader-2" class="spin" style="animation: spin 1s linear infinite;"></i>
-          <span>جاري ضغط الصور... (0/${count})</span>
-        `;
-        dropzone.parentNode.insertBefore(indicator, dropzone.nextSibling);
-        initIcons();
-      } else {
-        const span = indicator.querySelector('span');
-        if (span) span.textContent = `جاري ضغط الصور... (0/${count})`;
-        indicator.style.display = 'flex';
-      }
-    } else if (indicator) {
-      indicator.style.display = 'none';
-    }
+  /**
+   * ✅ قراءة الصورة كاملة بدون أي ضغط أو تصغير
+   */
+  function readFileAsDataURL(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
   }
 
+  /* ==========================================
+     عرض معاينة الصور
+     ========================================== */
   function renderPreview() {
-    preview.innerHTML = uploadedImages.map(img => `
-      <div class="preview-item">
-        <img src="${img.data}" alt="${img.name}" loading="lazy">
-        <button type="button" class="remove-btn" data-id="${img.id}" title="حذف">
-          <i data-lucide="x" style="width:14px;height:14px;"></i>
+    if (!imagePreview) return;
+
+    imagePreview.innerHTML = selectedImages.map((img, i) => `
+      <div class="al-preview-item">
+        <img src="${img}" alt="صورة ${i + 1}" loading="lazy">
+        <button type="button" class="remove" onclick="window.__removeImage(${i})" aria-label="حذف">
+          <i data-lucide="x"></i>
         </button>
+        <span class="al-preview-num">${i + 1}</span>
       </div>
     `).join('');
 
-    preview.querySelectorAll('.remove-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        uploadedImages = uploadedImages.filter(img => img.id !== btn.dataset.id);
-        renderPreview();
-      });
-    });
-
-    const totalSize = uploadedImages.reduce((sum, img) => sum + (img.size || 0), 0);
-    let sizeInfo = document.getElementById('imageSizeInfo');
-    if (!sizeInfo) {
-      sizeInfo = document.createElement('div');
-      sizeInfo.id = 'imageSizeInfo';
-      sizeInfo.style.cssText = 'margin-top: 8px; font-size: 13px; color: #64748B; text-align: center;';
-      preview.parentNode.insertBefore(sizeInfo, preview.nextSibling);
-    }
-    if (uploadedImages.length > 0) {
-      sizeInfo.textContent = `📦 ${uploadedImages.length} صورة | الحجم الإجمالي: ${totalSize}KB`;
-      sizeInfo.style.display = 'block';
-    } else {
-      sizeInfo.style.display = 'none';
-    }
-
-    initIcons();
-  }
-}
-
-/* ==========================================
-   التحقق
-   ========================================== */
-function validateForm() {
-  let ok = true;
-  document.querySelectorAll('.error-msg').forEach(e => e.classList.remove('show'));
-  document.querySelectorAll('.al-field input, .al-field select, .al-field textarea')
-    .forEach(el => el.classList.remove('error'));
-
-  const title = document.getElementById('title').value.trim();
-  if (!title) { showFieldError('title', 'الرجاء إدخال عنوان الإعلان'); ok = false; }
-  else if (title.length < 10) { showFieldError('title', 'العنوان قصير جداً'); ok = false; }
-
-  if (!document.getElementById('city').value) { showFieldError('city', 'الرجاء اختيار المحافظة'); ok = false; }
-
-  const whatsapp = document.getElementById('whatsapp').value.trim();
-  if (!whatsapp) {
-    showFieldError('whatsapp', 'الرجاء إدخال رقم الواتساب');
-    ok = false;
-  } else if (!/^[0-9+\s-]{8,15}$/.test(whatsapp)) {
-    showFieldError('whatsapp', 'رقم الواتساب غير صحيح (أرقام فقط)');
-    ok = false;
+    if (window.lucide) window.lucide.createIcons();
   }
 
-  const price = document.getElementById('price').value;
-  if (!price || Number(price) <= 0) { showFieldError('price', 'الرجاء إدخال سعر صحيح'); ok = false; }
+  window.__removeImage = function(i) {
+    selectedImages.splice(i, 1);
+    renderPreview();
+  };
 
-  if (state.purpose === 'rent' && !document.getElementById('rentPeriod').value) {
-    showFieldError('rentPeriod', 'الرجاء اختيار مدة الإيجار'); ok = false;
-  }
-
-  if (state.type === 'property' && !state.subType) {
-    showAlert('الرجاء اختيار نوع العقار');
-    ok = false;
-  }
-
-  if (state.subType === 'land') {
-    const landArea = document.getElementById('landArea').value;
-    if (!landArea || Number(landArea) <= 0) {
-      showFieldError('landArea', 'الرجاء إدخال مساحة الأرض'); ok = false;
-    }
-  }
-
-  if (state.type === 'car') {
-    if (!state.brand) {
-      showAlert('الرجاء اختيار ماركة السيارة');
-      ok = false;
-    }
-
-    if (state.brand === 'other') {
-      const otherBrand = document.getElementById('otherBrand').value.trim();
-      if (!otherBrand) {
-        showFieldError('otherBrand', 'الرجاء كتابة اسم الماركة');
-        ok = false;
-      } else if (otherBrand.length < 2) {
-        showFieldError('otherBrand', 'اسم الماركة قصير جداً');
-        ok = false;
-      }
-    }
-
-    if (!document.getElementById('model').value.trim()) {
-      showFieldError('model', 'الرجاء إدخال الموديل'); ok = false;
-    }
-    if (!document.getElementById('year').value) {
-      showFieldError('year', 'الرجاء إدخال سنة الصنع'); ok = false;
-    }
-    if (state.purpose === 'sale' && !document.getElementById('condition').value) {
-      showFieldError('condition', 'الرجاء اختيار الحالة'); ok = false;
-    }
-  }
-
-  const desc = document.getElementById('description').value.trim();
-  if (!desc) { showFieldError('description', 'الرجاء إدخال الوصف'); ok = false; }
-  else if (desc.length < 30) { showFieldError('description', 'الوصف قصير جداً'); ok = false; }
-
-  if (uploadedImages.length === 0) {
-    showAlert('الرجاء إضافة صورة واحدة على الأقل');
-    ok = false;
-  }
-
-  return ok;
-}
-
-function showFieldError(fieldId, message) {
-  const errorEl = document.getElementById(fieldId + 'Error');
-  const input = document.getElementById(fieldId);
-  if (errorEl) { errorEl.textContent = message; errorEl.classList.add('show'); }
-  if (input) input.classList.add('error');
-}
-
-/* ==========================================
-   التنبيهات
-   ========================================== */
-function showAlert(message, type = 'error') {
-  const alert = document.getElementById('alAlert');
-  const text = document.getElementById('alAlertText');
-  if (!alert || !text) return;
-  text.textContent = message;
-  alert.className = 'al-alert ' + type;
-  alert.style.display = 'flex';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function hideAlert() {
-  const alert = document.getElementById('alAlert');
-  if (alert) alert.style.display = 'none';
-}
-
-/* ==========================================
-   تحديث الإحصائيات بعد الإضافة
-   ========================================== */
-function updateStatsAfterListing(type) {
-  const DEFAULT_PROPS = 6500;
-  const DEFAULT_CARS = 3800;
-
-  try {
-    if (type === 'property') {
-      let current = parseInt(localStorage.getItem('propsCount')) || DEFAULT_PROPS;
-      localStorage.setItem('propsCount', current + 1);
-    } else if (type === 'car') {
-      let current = parseInt(localStorage.getItem('carsCount')) || DEFAULT_CARS;
-      localStorage.setItem('carsCount', current + 1);
-    }
-  } catch (e) {
-    console.warn('لم يتم تحديث الإحصائيات:', e);
-  }
-}
-
-/* ==========================================
-   إرسال النموذج
-   ========================================== */
-function setupFormSubmit() {
-  const form = document.getElementById('addListingForm');
-  const submitBtn = document.getElementById('submitBtn');
-  if (!form) return;
-
-  form.querySelectorAll('input, select, textarea').forEach(el => {
-    el.addEventListener('input', () => {
-      el.classList.remove('error');
-      const err = document.getElementById(el.id + 'Error');
-      if (err) err.classList.remove('show');
-    });
-  });
-
-  form.addEventListener('submit', async e => {
+  /* ==========================================
+     إرسال النموذج
+     ========================================== */
+  document.getElementById('addListingForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    hideAlert();
+    if (!validate()) return;
 
-    if (isProcessingImages) {
-      showAlert('جاري معالجة الصور، الرجاء الانتظار حتى الانتهاء...');
-      return;
-    }
-
-    const sessionUser = await API.Users.validateSession();
-    if (!sessionUser) {
-      showAlert('يجب تسجيل الدخول أولاً.');
-      setTimeout(() => { window.location.href = 'login.html'; }, 1500);
-      return;
-    }
-
-    if (!validateForm()) {
-      showAlert('الرجاء تصحيح الأخطاء في النموذج');
-      return;
-    }
-
-    // ✅ تم حذف حقل "area" (المنطقة/الحي)
-    const data = {
-      type: state.type,
-      purpose: state.purpose,
-      subType: state.subType,
-      title: document.getElementById('title').value.trim(),
-      city: document.getElementById('city').value,
-      area: '',  // ← المنطقة فارغة دائماً (الحقل محذوف)
-      whatsapp: document.getElementById('whatsapp').value.trim(),
-      price: document.getElementById('price').value,
-      currency: document.getElementById('currency').value,
-      negotiable: document.getElementById('negotiable').value,
-      description: document.getElementById('description').value.trim(),
-      images: uploadedImages.map(img => img.data),
-      details: buildDetails()
-    };
-
+    const submitBtn = document.getElementById('submitBtn');
+    const originalHTML = submitBtn.innerHTML;
     submitBtn.disabled = true;
-    submitBtn.innerHTML = `<i data-lucide="loader-2" class="spin"></i><span>جاري النشر...</span>`;
-    initIcons();
+    submitBtn.innerHTML = '<i data-lucide="loader-2" class="spin"></i><span>جاري النشر...</span>';
+    if (window.lucide) window.lucide.createIcons();
 
-    setTimeout(async () => {
-      const result = await API.Listings.create(data);
-      if (!result.success) {
-        showAlert(result.error || 'حدث خطأ أثناء النشر');
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = `<i data-lucide="send"></i><span>نشر الإعلان</span>`;
-        initIcons();
-        return;
+    try {
+      const currentUser = API.Users.getCurrent();
+      const userPhone = currentUser ? (currentUser.phone || '') : '';
+      const whatsappInput = document.getElementById('whatsapp');
+      const whatsapp = whatsappInput ? whatsappInput.value.trim() : userPhone;
+
+      // جمع كل التفاصيل
+      const details = {};
+
+      // ✅ الحقول الديناميكية - تُجمع تلقائياً
+      const fieldIds = [
+        'propertyArea', 'rooms', 'bathrooms', 'floor', 'direction',
+        'vacancyType', 'heating', 'finishingType', 'furnished', 'garden', 'pool',
+        'landArea', 'landFrontage', 'landDepth', 'landZoning', 'landTabu',
+        'commercialArea', 'commercialFloor', 'commercialAge',
+        'model', 'year', 'condition', 'km', 'transmission', 'fuel',
+        'color', 'bodyType', 'carInsurance', 'minDays'
+      ];
+
+      fieldIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el && el.value && el.value.trim() !== '') {
+          details[id] = el.value.trim();
+        }
+      });
+
+      // نوع العقار
+      if (listingType === 'property' && subType) {
+        details.propertyType = subType;
+        details.subType = subType;
       }
 
-      updateStatsAfterListing(state.type);
-
-      try {
-        sessionStorage.setItem('souq_reload_home', '1');
-      } catch (err) {}
-
-      showStep(4);
-      initIcons();
-    }, 700);
-  });
-}
-
-function buildDetails() {
-  const details = {};
-
-  if (state.type === 'property') {
-    details.subType = state.subType;
-
-    if (state.purpose === 'rent') {
-      details.rentPeriod = document.getElementById('rentPeriod').value;
-      details.deposit = document.getElementById('deposit').value;
-    }
-
-    if (['apartment', 'villa', 'arabic-house', 'chalet', 'building'].includes(state.subType)) {
-      details.propertyArea = document.getElementById('propertyArea').value;
-      details.rooms = document.getElementById('rooms').value;
-      details.bathrooms = document.getElementById('bathrooms').value;
-      details.floor = document.getElementById('floor').value;
-      details.direction = document.getElementById('direction').value;
-      details.vacancyType = document.getElementById('vacancyType').value;
-      details.heating = document.getElementById('heating').value;
-      details.finishingType = document.getElementById('finishingType').value;
-
-      if (state.purpose === 'rent') {
-        details.furnished = document.getElementById('furnished').value;
+      // ماركة السيارة
+      if (listingType === 'car') {
+        if (brand === 'other') {
+          const otherBrand = document.getElementById('otherBrand');
+          if (otherBrand && otherBrand.value.trim()) {
+            details.brandName = otherBrand.value.trim();
+            details.brand = 'other';
+          }
+        } else if (brand) {
+          details.brand = brand;
+        }
       }
 
-      if (['villa', 'chalet'].includes(state.subType)) {
-        details.garden = document.getElementById('garden').value;
-        details.pool = document.getElementById('pool').value;
-      }
-    }
+      // المرافق (checkboxes)
+      const checkboxes = [
+        'landWater', 'landElectric', 'landSewage', 'landStreet',
+        'commElectric', 'commWater', 'commAC', 'commParking'
+      ];
 
-    if (state.subType === 'land') {
-      details.landArea = document.getElementById('landArea').value;
-      details.landFrontage = document.getElementById('landFrontage').value;
-      details.landDepth = document.getElementById('landDepth').value;
-      details.landZoning = document.getElementById('landZoning').value;
-      details.landTabu = document.getElementById('landTabu').value;
-      details.landWater = document.getElementById('landWater').checked;
-      details.landElectric = document.getElementById('landElectric').checked;
-      details.landSewage = document.getElementById('landSewage').checked;
-      details.landStreet = document.getElementById('landStreet').checked;
-    }
+      checkboxes.forEach(id => {
+        const el = document.getElementById(id);
+        if (el && el.checked) details[id] = true;
+      });
 
-    if (['office', 'shop'].includes(state.subType)) {
-      details.commercialArea = document.getElementById('commercialArea').value;
-      details.commercialFloor = document.getElementById('commercialFloor').value;
-      details.commercialAge = document.getElementById('commercialAge').value;
-      details.commElectric = document.getElementById('commElectric').checked;
-      details.commWater = document.getElementById('commWater').checked;
-      details.commAC = document.getElementById('commAC').checked;
-      details.commParking = document.getElementById('commParking').checked;
-    }
-  }
+      // ✅ حفظ رقم واتساب للأدمن
+      details._whatsapp = whatsapp;
 
-  if (state.type === 'car') {
-    if (state.brand === 'other') {
-      details.brand = 'other';
-      details.brandName = document.getElementById('otherBrand').value.trim();
-    } else {
-      details.brand = state.brand;
-      const brandNames = {
-        toyota: 'تويوتا', hyundai: 'هيونداي', kia: 'كيا', mercedes: 'مرسيدس',
-        bmw: 'BMW', nissan: 'نيسان', honda: 'هوندا', chevrolet: 'شيفروليه', ford: 'فورد'
+      // بيانات الإعلان النهائية
+      const data = {
+        type: listingType,
+        purpose: listingPurpose,
+        subType: subType,
+        title: document.getElementById('title').value.trim(),
+        city: document.getElementById('city').value,
+        area: '',
+        address: '',
+        whatsapp: whatsapp,
+        price: Number(document.getElementById('price').value) || 0,
+        currency: document.getElementById('currency').value,
+        negotiable: document.getElementById('negotiable')?.value || '',
+        description: document.getElementById('description').value.trim(),
+        images: selectedImages,  // ✅ الصور بالجودة العالية
+        details: details
       };
-      details.brandName = brandNames[state.brand] || state.brand;
+
+      // إضافة بيانات الإيجار
+      if (listingPurpose === 'rent') {
+        const rentPeriod = document.getElementById('rentPeriod');
+        const deposit = document.getElementById('deposit');
+        if (rentPeriod && rentPeriod.value) details.rentPeriod = rentPeriod.value;
+        if (deposit && deposit.value) details.deposit = deposit.value;
+      }
+
+      console.log('📤 إرسال الإعلان، عدد الصور:', selectedImages.length);
+      console.log('📤 الحجم الإجمالي:', JSON.stringify(data).length, 'حرف');
+
+      const result = await API.Listings.create(data);
+
+      if (result.success) {
+        goToStep(4);
+      } else {
+        showAlert('❌ فشل النشر: ' + (result.error || 'خطأ غير معروف'), 'error');
+      }
+    } catch (err) {
+      console.error('❌ خطأ في النشر:', err);
+      showAlert('❌ حدث خطأ أثناء النشر. حاول مرة أخرى.', 'error');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalHTML;
+      if (window.lucide) window.lucide.createIcons();
+    }
+  });
+
+  /* ==========================================
+     التحقق من صحة البيانات
+     ========================================== */
+  function validate() {
+    clearErrors();
+    let valid = true;
+    let firstErrorField = null;
+
+    const title = document.getElementById('title').value.trim();
+    if (!title || title.length < 5) {
+      showFieldError('title', 'العنوان يجب أن يكون 5 أحرف على الأقل');
+      if (!firstErrorField) firstErrorField = 'title';
+      valid = false;
     }
 
-    details.model = document.getElementById('model').value;
-    details.year = document.getElementById('year').value;
-    details.transmission = document.getElementById('transmission').value;
-    details.fuel = document.getElementById('fuel').value;
-    details.color = document.getElementById('color').value;
-    details.bodyType = document.getElementById('bodyType').value;
+    const city = document.getElementById('city').value;
+    if (!city) {
+      showFieldError('city', 'اختر المحافظة');
+      if (!firstErrorField) firstErrorField = 'city';
+      valid = false;
+    }
 
-    if (state.purpose === 'sale') {
-      details.condition = document.getElementById('condition').value;
-      details.km = document.getElementById('km').value;
-    } else {
-      details.carInsurance = document.getElementById('carInsurance').value;
-      details.minDays = document.getElementById('minDays').value;
+    const whatsapp = document.getElementById('whatsapp').value.trim();
+    if (!whatsapp || whatsapp.length < 8) {
+      showFieldError('whatsapp', 'أدخل رقم واتساب صحيح');
+      if (!firstErrorField) firstErrorField = 'whatsapp';
+      valid = false;
+    }
+
+    const price = document.getElementById('price').value;
+    if (!price || Number(price) <= 0) {
+      showFieldError('price', 'أدخل سعراً صحيحاً');
+      if (!firstErrorField) firstErrorField = 'price';
+      valid = false;
+    }
+
+    const desc = document.getElementById('description').value.trim();
+    if (!desc || desc.length < 30) {
+      showFieldError('description', 'الوصف يجب أن يكون 30 حرفاً على الأقل');
+      if (!firstErrorField) firstErrorField = 'description';
+      valid = false;
+    }
+
+    // نوع فرعي (عقارات)
+    if (listingType === 'property' && !subType) {
+      showAlert('⚠️ الرجاء اختيار نوع العقار', 'error');
+      valid = false;
+    }
+
+    // ماركة (سيارات)
+    if (listingType === 'car' && !brand) {
+      showAlert('⚠️ الرجاء اختيار ماركة السيارة', 'error');
+      valid = false;
+    }
+
+    // صورة واحدة على الأقل
+    if (selectedImages.length === 0) {
+      showAlert('⚠️ الرجاء إضافة صورة واحدة على الأقل', 'error');
+      valid = false;
+    }
+
+    if (!valid) {
+      if (firstErrorField) {
+        const el = document.getElementById(firstErrorField);
+        el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el?.focus();
+      } else {
+        showAlert('⚠️ الرجاء تصحيح الأخطاء قبل المتابعة', 'error');
+      }
+    }
+
+    return valid;
+  }
+
+  function showFieldError(fieldId, message) {
+    const field = document.getElementById(fieldId);
+    const errorEl = document.getElementById(fieldId + 'Error');
+    if (field) field.classList.add('error');
+    if (errorEl) {
+      errorEl.textContent = message;
+      errorEl.classList.add('show');
     }
   }
 
-  return details;
-}
-
-/* ==========================================
-   إعادة تعيين
-   ========================================== */
-function resetForm() {
-  document.getElementById('addListingForm')?.reset();
-  uploadedImages = [];
-  const preview = document.getElementById('imagePreview');
-  if (preview) preview.innerHTML = '';
-  
-  document.querySelectorAll('.subtype-card').forEach(b => b.classList.remove('active'));
-  state.subType = null;
-  state.brand = null;
-  state.customBrand = '';
-
-  const otherField = document.getElementById('otherBrandField');
-  if (otherField) otherField.style.display = 'none';
-  const otherInput = document.getElementById('otherBrand');
-  if (otherInput) otherInput.value = '';
-
-  const sizeInfo = document.getElementById('imageSizeInfo');
-  if (sizeInfo) sizeInfo.style.display = 'none';
-
-  hideAlert();
-}
-
-/* ==========================================
-   ✅ قراءة النوع من الرابط
-   ========================================== */
-function checkPreselectedType() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const preselectType = urlParams.get('type');
-
-  if (preselectType === 'property' || preselectType === 'car') {
-    state.type = preselectType;
-
-    const purposeNameEl = document.getElementById('purposeTypeName');
-    if (purposeNameEl) {
-      purposeNameEl.textContent = preselectType === 'property' ? 'العقار' : 'السيارة';
-    }
-
-    showStep(2);
+  function clearErrors() {
+    document.querySelectorAll('.al-field .error').forEach(el => el.classList.remove('error'));
+    document.querySelectorAll('.error-msg.show').forEach(el => el.classList.remove('show'));
+    const alertEl = document.getElementById('alAlert');
+    if (alertEl) alertEl.style.display = 'none';
   }
-}
 
-/* ==========================================
-   تشغيل
-   ========================================== */
-document.addEventListener('DOMContentLoaded', () => {
-  initIcons();
-  setupStep1();
-  setupStep2();
-  setupSubType();
-  setupImageUpload();
-  setupFormSubmit();
+  /* ==========================================
+     التنبيهات
+     ========================================== */
+  function showAlert(message, type = 'error') {
+    const alertEl = document.getElementById('alAlert');
+    const alertText = document.getElementById('alAlertText');
+    if (!alertEl || !alertText) return;
+    alertText.textContent = message;
+    alertEl.className = 'al-alert ' + type;
+    alertEl.style.display = 'flex';
+    if (window.lucide) window.lucide.createIcons();
+  }
 
+  /* ==========================================
+     أزرار الإلغاء / إضافة آخر
+     ========================================== */
   document.getElementById('cancelBtn')?.addEventListener('click', () => {
-    if (confirm('هل تريد إلغاء الإعلان؟')) window.location.href = '../index.html';
+    if (confirm('هل تريد إلغاء الإعلان؟ سيتم فقدان جميع البيانات المدخلة.')) {
+      window.location.href = '../index.html';
+    }
   });
 
   document.getElementById('addAnotherBtn')?.addEventListener('click', () => {
-    resetForm();
-    state.type = null;
-    state.purpose = null;
-    showStep(1);
+    // إعادة تعيين كل شيء
+    selectedImages = [];
+    listingType = null;
+    listingPurpose = null;
+    subType = null;
+    brand = null;
+
+    document.getElementById('addListingForm')?.reset();
+    if (imagePreview) imagePreview.innerHTML = '';
+
+    // إخفاء كل الأقسام
+    ['subTypeSection', 'brandSection', 'residentialSection',
+     'landSection', 'commercialSection', 'carSection',
+     'gardenField', 'poolField', 'rentPeriodField',
+     'depositField', 'furnishedField'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+
+    document.querySelectorAll('.subtype-card').forEach(c => c.classList.remove('active'));
+    goToStep(1);
   });
 
-  checkPreselectedType();
-});
+  /* ==========================================
+     إزالة خطأ الحقل عند الكتابة
+     ========================================== */
+  document.querySelectorAll('.al-field input, .al-field select, .al-field textarea').forEach(el => {
+    el.addEventListener('input', () => {
+      el.classList.remove('error');
+      const errorEl = document.getElementById(el.id + 'Error');
+      if (errorEl) errorEl.classList.remove('show');
+    });
+  });
+
+  /* ==========================================
+     التشغيل
+     ========================================== */
+  document.addEventListener('DOMContentLoaded', () => {
+    if (window.lucide) window.lucide.createIcons();
+  });
+
+})();
