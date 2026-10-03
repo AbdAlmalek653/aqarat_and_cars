@@ -2797,3 +2797,43 @@ html {
     height: 10px;
   }
 }
+/* ==========================================
+   ✅ شارات "قابل للتفاوض" في صفحة التفاصيل
+   ========================================== */
+
+.info-badge.negotiable-yes {
+  background: linear-gradient(135deg, #10B981, #059669);
+  color: white;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.info-badge.negotiable-no {
+  background: linear-gradient(135deg, #64748B, #475569);
+  color: white;
+  box-shadow: 0 4px 12px rgba(100, 116, 139, 0.3);
+}
+
+.info-badge.negotiable-yes svg,
+.info-badge.negotiable-no svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* تلوين عنصر المواصفات */
+.spec-item.highlight-yes {
+  border-color: rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.spec-item.highlight-yes .spec-icon svg {
+  color: #10B981;
+}
+
+.spec-item.highlight-no {
+  border-color: rgba(148, 163, 184, 0.3);
+  background: rgba(148, 163, 184, 0.05);
+}
+
+.spec-item.highlight-no .spec-icon svg {
+  color: #94A3B8;
+}

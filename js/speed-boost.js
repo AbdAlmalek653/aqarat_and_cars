@@ -212,3 +212,16 @@
   console.log('✅ Speed Boost ULTIMATE ready');
 
 })();
+/* ==========================================
+   ✅ تحميل brand.js تلقائياً
+   ========================================== */
+(function() {
+  if (window.__brandLoaded) return;
+  window.__brandLoaded = true;
+  
+  const script = document.createElement('script');
+  const isInPages = window.location.pathname.includes('/pages/');
+  script.src = isInPages ? '../js/brand.js' : 'js/brand.js';
+  script.defer = true;
+  document.head.appendChild(script);
+})();

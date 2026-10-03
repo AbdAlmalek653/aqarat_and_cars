@@ -1,6 +1,6 @@
 /* ==========================================
    الصفحة الرئيسية - سوق
-   الإصدار: 5.0 (فلترة مصححة + بدون cache)
+   الإصدار: 6.0 (negotiable badges + city fix)
    ========================================== */
 
 function initIcons() {
@@ -38,8 +38,25 @@ function cityMatches(listing, targetSlug) {
   return listingKeys.some(key => key === target || (targetName && key === targetName));
 }
 
+/* ✅ دالة موحدة لتحليل "قابل للتفاوض" */
+function getNegotiableStatus(listing) {
+  if (!listing) return null;
+  const d = listing.details || {};
+  const value = String(listing.negotiable || d.negotiable || '').trim().toLowerCase();
+  
+  if (value === 'قابل' || value === 'قابل للتفاوض' || value === 'negotiable' || 
+      value === 'yes' || value === 'true' || value === '1') {
+    return 'yes';
+  }
+  if (value === 'غير قابل' || value === 'غير قابل للتفاوض' || value === 'no' || 
+      value === 'false' || value === '0') {
+    return 'no';
+  }
+  return null;
+}
+
 /* ==========================================
-   ✅ دالة جلب الإعلانات - بدون cache نهائياً
+   ✅ دالة جلب الإعلانات
    ========================================== */
 async function getCachedListings(forceRefresh) {
   try {
@@ -86,6 +103,9 @@ function getImageUrl(item) {
   return getImageUrls(item).medium;
 }
 
+/* ==========================================
+   ✅ createCard (مع شارات التفاوض)
+   ========================================== */
 function createCard(item, type) {
   const purposeText = item.purpose === 'sale' ? 'للبيع' : 'للإيجار';
   const purposeClass = item.purpose === 'sale' ? 'sale' : 'rent';
@@ -122,29 +142,21 @@ function createCard(item, type) {
 
   const featuredBadge = item.featured ? `<span class="card-badge featured">⭐ مميز</span>` : '';
 
-  // ✅ الحل النهائي للمحافظة - يدعم كل الأشكال
+  // ✅ المحافظة
   let locationText = '—';
   const citySlug = item.city_slug || item.city || '';
   const cityNameFromAPI = item.city_name || item.cityName || '';
   
-  // 1. جرّب الاسم من الـ API أولاً
   if (cityNameFromAPI && cityNameFromAPI.trim()) {
     locationText = cityNameFromAPI.trim();
-  }
-  // 2. جرّب ترجمة الـ slug
-  else if (citySlug && CITY_NAMES[citySlug]) {
+  } else if (citySlug && CITY_NAMES[citySlug]) {
     locationText = CITY_NAMES[citySlug];
-  }
-  // 3. لو الـ slug عربي، استخدمه كما هو
-  else if (citySlug && /[\u0600-\u06FF]/.test(citySlug)) {
+  } else if (citySlug && /[\u0600-\u06FF]/.test(citySlug)) {
     locationText = citySlug;
-  }
-  // 4. جرّب حقل location القديم
-  else if (item.location && item.location.trim()) {
+  } else if (item.location && item.location.trim()) {
     locationText = item.location.trim();
   }
   
-  // ✅ أضف المنطقة لو موجودة
   if (item.area && item.area.trim()) {
     locationText = locationText === '—' ? item.area : `${locationText} - ${item.area}`;
   }
@@ -179,18 +191,15 @@ function createCard(item, type) {
     ? `<div class="card-meta">${chips.map(c => `<span class="card-meta-chip"><i data-lucide="${c.icon}"></i><span>${c.text}</span></span>`).join('')}</div>`
     : '';
 
-  // ✅ شارة "قابل للتفاوض"
-  const negotiableValue = String(item.negotiable || d.negotiable || '').toLowerCase().trim();
-  const isNegotiable = 
-    negotiableValue === 'قابل' || 
-    negotiableValue === 'قابل للتفاوض' || 
-    negotiableValue === 'negotiable' || 
-    negotiableValue === 'yes' ||
-    negotiableValue === 'true';
+  // ✅ شارة "قابل للتفاوض" - تظهر في كل الحالات
+  const negotiableStatus = getNegotiableStatus(item);
+  let negotiableBadge = '';
   
-  const negotiableBadge = isNegotiable 
-    ? `<span class="card-negotiable"><i data-lucide="handshake"></i>قابل للتفاوض</span>` 
-    : '';
+  if (negotiableStatus === 'yes') {
+    negotiableBadge = `<span class="card-negotiable yes"><i data-lucide="handshake"></i>قابل للتفاوض</span>`;
+  } else if (negotiableStatus === 'no') {
+    negotiableBadge = `<span class="card-negotiable no"><i data-lucide="x-circle"></i>غير قابل للتفاوض</span>`;
+  }
 
   return `<a href="pages/details.html?id=${item.id}&type=${type}" class="card">
       <div class="card-image">${imageContent}${featuredBadge}<span class="card-badge ${purposeClass}">${purposeText}</span></div>
@@ -205,7 +214,7 @@ function createCard(item, type) {
       </div>
     </a>`;
 }
-   
+
 /* ==========================================
    ✅ Empty States
    ========================================== */
@@ -526,7 +535,6 @@ async function handleCascadeShow() {
   }, 100);
 
   try {
-    // ✅ forceRefresh = true عشان نتجاوز الكاش
     const allListings = await getCachedListings(true);
     console.log(`📦 عدد الإعلانات الكلي: ${allListings.length}`);
 

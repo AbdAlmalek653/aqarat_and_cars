@@ -124,4 +124,4 @@ respond([
     'listing' => $listing,
     'is_admin_view' => $isAdmin,
     'cached' => true
-]);
+]); 
