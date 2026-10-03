@@ -46,7 +46,14 @@ function normalizeFilterValue(value) {
 function getPropertyType(property) {
   const details = property.details || {};
   return property.property_type || property.subType || property.subtype ||
-    details.propertyType || details.subType || details.subtype || details.type || '';
+    property.propertyType || details.propertyType || details.property_type ||
+    details.subType || details.subtype || details.type || '';
+}
+
+function propertyMatchesType(property, types) {
+  if (!types.length) return true;
+  const type = normalizeFilterValue(getPropertyType(property));
+  return types.some(value => normalizeFilterValue(value) === type);
 }
 
 function propertyMatchesCity(property, city) {
@@ -93,10 +100,7 @@ function applyFilters() {
     if (f.purpose && p.purpose !== f.purpose) return false;
 
     // فلترة نوع العقار (شقة، فيلا، الخ)
-    if (f.types.length) {
-      const pType = getPropertyType(p);
-      if (!f.types.includes(pType)) return false;
-    }
+    if (!propertyMatchesType(p, f.types)) return false;
 
     if (!propertyMatchesCity(p, f.city)) return false;
 
@@ -119,7 +123,12 @@ function applyFilters() {
 
   // عند عدم وجود تطابق كامل، اعرض الأقرب بدل ترك النتائج فارغة.
   if (!filteredProperties.length && allProperties.length) {
-    filteredProperties = allProperties
+    const compatibleProperties = allProperties.filter(property =>
+      (!f.purpose || property.purpose === f.purpose) &&
+      propertyMatchesType(property, f.types)
+    );
+
+    filteredProperties = (compatibleProperties.length ? compatibleProperties : allProperties)
       .map(property => ({ property, score: propertyMatchScore(property, f) }))
       .sort((a, b) => a.score - b.score || new Date(b.property.createdAt) - new Date(a.property.createdAt))
       .slice(0, ITEMS_PER_PAGE)
