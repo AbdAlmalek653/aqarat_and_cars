@@ -1,21 +1,27 @@
-/* ==========================================
-   صفحة تفاصيل الإعلان - Responsive كامل
-   ========================================== */
+/* ==========================================================
+   📄 صفحة تفاصيل الإعلان - details.html
+   النسخة: 3.0 (نظيفة + متجاوبة + محسّنة)
+   ========================================================== */
 
-/* ===== الهيكل الرئيسي (Layout) ===== */
+/* ==========================================
+   1️⃣ التخطيط الرئيسي
+   ========================================== */
 .details-layout {
   display: grid;
   grid-template-columns: 1fr 380px;
   gap: 24px;
-  padding: 24px 0 60px;
+  padding: 20px 0 40px;
   align-items: start;
 }
 
-/* ===== معرض الصور ===== */
+/* ==========================================
+   2️⃣ معرض الصور
+   ========================================== */
 .details-gallery {
+  position: relative;
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  border-radius: 16px;
   overflow: hidden;
   margin-bottom: 20px;
 }
@@ -24,20 +30,15 @@
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 10;
-  max-height: 520px;
-  background: var(--bg-secondary);
+  background: #0f1729;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  cursor: zoom-in;
 }
 
-.gallery-main img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
+.gallery-main > i,
 .gallery-main > svg {
   width: 80px;
   height: 80px;
@@ -45,302 +46,393 @@
   opacity: 0.3;
 }
 
+.gallery-main img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #0a0e1a;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.gallery-main:hover img {
+  transform: scale(1.02);
+}
+
+/* أزرار التنقل */
 .gallery-nav {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
   width: 44px;
   height: 44px;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(8px);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: #fff;
   cursor: pointer;
-  transition: var(--transition);
-  z-index: 2;
+  z-index: 3;
+  transition: all 0.3s ease;
   user-select: none;
 }
 
 .gallery-nav:hover {
-  background: rgba(59, 130, 246, 0.85);
+  background: rgba(59, 130, 246, 0.9);
   transform: translateY(-50%) scale(1.1);
 }
 
-.gallery-nav.prev { right: 12px; }
-.gallery-nav.next { left: 12px; }
+.gallery-nav.prev { right: 16px; }
+.gallery-nav.next { left: 16px; }
 .gallery-nav svg { width: 22px; height: 22px; }
 
+/* عدّاد الصور */
 .gallery-counter {
   position: absolute;
-  bottom: 12px;
-  left: 12px;
-  background: rgba(0, 0, 0, 0.65);
+  top: 16px;
+  right: 16px;
+  padding: 6px 14px;
+  background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(8px);
   color: #fff;
-  padding: 5px 12px;
-  border-radius: var(--radius-full);
-  font-size: 12px;
-  font-weight: 600;
-  z-index: 2;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 20px;
+  z-index: 3;
 }
 
+/* المصغرات */
 .gallery-thumbs {
   display: flex;
   gap: 8px;
   padding: 12px;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border);
   overflow-x: auto;
   scrollbar-width: thin;
-  background: var(--bg-card);
 }
 
-.gallery-thumbs::-webkit-scrollbar { height: 6px; }
+.gallery-thumbs::-webkit-scrollbar {
+  height: 6px;
+}
+
 .gallery-thumbs::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 4px;
+  background: var(--primary);
+  border-radius: 3px;
 }
 
-.gallery-thumbs img,
-.gallery-thumbs .thumb-item {
+.gallery-thumb {
+  flex: 0 0 80px;
   width: 80px;
-  height: 60px;
-  object-fit: cover;
-  border-radius: 8px;
+  height: 80px;
+  border-radius: 10px;
+  overflow: hidden;
   cursor: pointer;
   border: 2px solid transparent;
-  transition: var(--transition);
-  flex-shrink: 0;
+  background: var(--bg-card);
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.gallery-thumbs img:hover,
-.gallery-thumbs .thumb-item:hover {
+.gallery-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gallery-thumb.active {
   border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+.gallery-thumb:hover {
   transform: translateY(-2px);
+  border-color: rgba(59, 130, 246, 0.6);
 }
 
-.gallery-thumbs img.active,
-.gallery-thumbs .thumb-item.active {
-  border-color: var(--primary);
-  box-shadow: 0 0 12px rgba(59, 130, 246, 0.5);
-}
-
-/* ===== كروت المعلومات ===== */
+/* ==========================================
+   3️⃣ بطاقة المعلومات
+   ========================================== */
 .info-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 22px;
+  border-radius: 16px;
+  padding: 24px;
   margin-bottom: 20px;
 }
 
+/* الشارات */
 .info-badges {
   display: flex;
-  gap: 8px;
   flex-wrap: wrap;
-  margin-bottom: 14px;
+  gap: 8px;
+  margin-bottom: 16px;
 }
 
 .info-badge {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 5px 12px;
-  border-radius: var(--radius-full);
-  font-size: 12px;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
   font-weight: 700;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
 }
 
+.info-badge.sale {
+  background: linear-gradient(135deg, #10B981, #059669);
+  color: #fff;
+}
+
+.info-badge.rent {
+  background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+  color: #fff;
+}
+
+.info-badge.featured {
+  background: linear-gradient(135deg, #F59E0B, #B45309);
+  color: #fff;
+}
+
+.info-badge svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* العنوان */
 .info-title {
-  font-size: clamp(20px, 3vw, 26px);
+  font-size: 26px;
   font-weight: 800;
   line-height: 1.4;
-  margin-bottom: 12px;
   color: var(--text-primary);
+  margin: 0 0 16px 0;
 }
 
+/* السعر */
 .info-price {
-  font-size: clamp(24px, 4vw, 32px);
+  font-size: 32px;
   font-weight: 800;
-  color: var(--accent);
-  margin-bottom: 12px;
+  color: #FBBF24;
+  margin: 12px 0;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
   letter-spacing: -0.5px;
 }
 
+.info-price small {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* الموقع */
 .info-location {
   display: flex;
   align-items: center;
   gap: 8px;
+  font-size: 15px;
   color: var(--text-secondary);
-  font-size: 14px;
-  padding-bottom: 18px;
-  margin-bottom: 18px;
+  padding: 12px 0;
+  margin-bottom: 16px;
   border-bottom: 1px dashed var(--border);
 }
 
 .info-location svg {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   color: var(--primary);
   flex-shrink: 0;
 }
 
+/* عناوين الأقسام */
 .section-heading {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 17px;
-  font-weight: 700;
-  margin-bottom: 16px;
+  font-size: 18px;
+  font-weight: 800;
   color: var(--text-primary);
+  margin: 20px 0 16px 0;
 }
 
 .section-heading svg {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   color: var(--primary);
+  padding: 4px;
+  background: rgba(59, 130, 246, 0.15);
+  border-radius: 8px;
 }
 
-/* ===== شبكة المواصفات ===== */
+/* ==========================================
+   4️⃣ شبكة المواصفات
+   ========================================== */
 .specs-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
+  margin-bottom: 20px;
 }
 
 .spec-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
+  gap: 12px;
+  padding: 14px;
   background: var(--bg-secondary);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  transition: var(--transition);
+  border-radius: 12px;
+  transition: all 0.25s ease;
 }
 
 .spec-item:hover {
   border-color: var(--primary);
-  background: var(--bg-hover);
+  transform: translateY(-2px);
 }
 
 .spec-icon {
-  width: 34px;
-  height: 34px;
-  background: var(--primary-soft);
-  border-radius: 8px;
+  width: 44px;
+  height: 44px;
+  border-radius: 11px;
+  background: rgba(59, 130, 246, 0.12);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--primary);
   flex-shrink: 0;
 }
 
-.spec-icon svg { width: 16px; height: 16px; }
+.spec-icon svg {
+  width: 20px;
+  height: 20px;
+  color: var(--primary);
+}
 
-.spec-info {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
+.spec-content {
+  flex: 1;
   min-width: 0;
 }
 
 .spec-label {
-  font-size: 10.5px;
+  font-size: 12px;
   color: var(--text-muted);
-  font-weight: 500;
+  margin-bottom: 3px;
+  font-weight: 600;
 }
 
 .spec-value {
-  font-size: 13.5px;
-  color: var(--text-primary);
+  font-size: 14.5px;
   font-weight: 700;
+  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* ===== الوصف ===== */
+/* ==========================================
+   5️⃣ الوصف
+   ========================================== */
 .description-text {
-  color: var(--text-secondary);
   font-size: 15px;
   line-height: 1.9;
-  white-space: pre-wrap;
-  word-wrap: break-word;
+  color: var(--text-secondary);
+  white-space: pre-line;
+  padding: 0;
+  margin: 0;
 }
 
-/* ===== الشريط الجانبي ===== */
+/* ==========================================
+   6️⃣ الشريط الجانبي
+   ========================================== */
 .details-sidebar {
-  position: sticky;
-  top: 90px;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  position: sticky;
+  top: 90px;
 }
 
+/* رقم الإعلان */
 .ad-id {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 10px 14px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  font-size: 12.5px;
-  color: var(--text-muted);
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: rgba(59, 130, 246, 0.08);
+  border: 1.5px dashed rgba(59, 130, 246, 0.3);
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
 }
 
-.ad-id svg { width: 14px; height: 14px; }
-.ad-id strong { color: var(--text-primary); font-weight: 700; }
+.ad-id svg {
+  width: 16px;
+  height: 16px;
+  color: var(--primary);
+}
 
-/* ===== بطاقة البائع ===== */
+.ad-id strong {
+  color: #FBBF24;
+  font-family: 'Cairo', monospace;
+  letter-spacing: 0.5px;
+}
+
+/* بطاقة البائع */
 .seller-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  border-radius: 16px;
   padding: 20px;
 }
 
 .seller-info {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
   margin-bottom: 16px;
-  border-bottom: 1px dashed var(--border);
 }
 
 .seller-avatar {
-  width: 50px;
-  height: 50px;
+  width: 54px;
+  height: 54px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--primary), var(--accent));
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  font-size: 20px;
+  color: #fff;
+  font-size: 22px;
   font-weight: 800;
   flex-shrink: 0;
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35);
 }
 
 .seller-details {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  flex: 1;
   min-width: 0;
 }
 
 .seller-name {
-  font-size: 15px;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 800;
   color: var(--text-primary);
+  margin-bottom: 4px;
 }
 
 .seller-role {
-  font-size: 12px;
+  font-size: 12.5px;
   color: var(--text-muted);
+  font-weight: 600;
 }
 
 .seller-actions {
@@ -349,94 +441,123 @@
   gap: 10px;
 }
 
-.btn-block-full {
-  width: 100%;
+/* زر واتساب */
+.btn-whatsapp,
+.btn-seller-whatsapp {
+  display: flex;
+  align-items: center;
   justify-content: center;
-  padding: 13px 20px;
-  font-size: 14px;
+  gap: 10px;
+  padding: 14px 20px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 800;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
 }
 
 .btn-whatsapp {
   background: linear-gradient(135deg, #25D366, #128C7E);
-  color: white;
-  border: none;
+  color: #fff;
+  box-shadow: 0 8px 22px rgba(37, 211, 102, 0.35);
 }
 
 .btn-whatsapp:hover {
-  background: linear-gradient(135deg, #128C7E, #075E54);
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(37, 211, 102, 0.4);
+  box-shadow: 0 12px 30px rgba(37, 211, 102, 0.5);
 }
 
 .btn-seller-whatsapp {
   background: linear-gradient(135deg, #F59E0B, #B45309);
-  color: white;
+  color: #fff;
+  box-shadow: 0 8px 22px rgba(245, 158, 11, 0.35);
 }
 
+.btn-seller-whatsapp:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(245, 158, 11, 0.5);
+}
+
+.btn-whatsapp svg,
+.btn-seller-whatsapp svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* صف الأزرار السريعة */
 .action-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
 }
 
 .btn-icon-text {
-  display: inline-flex;
+  flex: 1;
+  display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 10px;
+  padding: 12px 14px;
   background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  font-size: 13px;
-  font-weight: 600;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
   color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
   cursor: pointer;
-  transition: var(--transition);
+  transition: all 0.25s ease;
 }
 
 .btn-icon-text:hover {
+  background: rgba(59, 130, 246, 0.1);
   border-color: var(--primary);
   color: var(--primary);
-  background: var(--primary-soft);
 }
 
 .btn-icon-text.active {
-  background: rgba(239, 68, 68, 0.15);
+  background: rgba(239, 68, 68, 0.1);
   border-color: var(--danger);
   color: var(--danger);
 }
 
-.btn-icon-text svg { width: 16px; height: 16px; }
+.btn-icon-text svg {
+  width: 16px;
+  height: 16px;
+}
 
+/* ملاحظة الأمان */
 .safety-note {
   display: flex;
   align-items: flex-start;
   gap: 10px;
   padding: 12px 14px;
-  background: rgba(16, 185, 129, 0.08);
-  border: 1px solid rgba(16, 185, 129, 0.25);
-  border-radius: var(--radius);
+  background: rgba(59, 130, 246, 0.05);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  border-radius: 10px;
   font-size: 12.5px;
   color: var(--text-secondary);
   line-height: 1.7;
 }
 
 .safety-note svg {
-  width: 16px;
-  height: 16px;
-  color: var(--success);
+  width: 18px;
+  height: 18px;
+  color: var(--primary);
   flex-shrink: 0;
   margin-top: 2px;
 }
 
-/* ===== لوحة الأدمن ===== */
+/* ==========================================
+   7️⃣ لوحة تحكم الأدمن
+   ========================================== */
 .admin-panel {
-  background: linear-gradient(135deg,
-    rgba(239, 68, 68, 0.08),
-    rgba(245, 158, 11, 0.06));
-  border: 1.5px solid rgba(239, 68, 68, 0.35);
-  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.06) 0%, rgba(245, 158, 11, 0.04) 100%);
+  border: 1.5px solid rgba(239, 68, 68, 0.3);
+  border-radius: 16px;
   padding: 18px;
 }
 
@@ -444,338 +565,123 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 800;
   color: #FCA5A5;
+  padding-bottom: 12px;
   margin-bottom: 14px;
+  border-bottom: 1px dashed rgba(239, 68, 68, 0.3);
 }
 
-.admin-panel-header svg { width: 18px; height: 18px; }
+.admin-panel-header svg {
+  width: 20px;
+  height: 20px;
+  color: var(--danger);
+}
 
 .admin-status-display {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   padding: 10px 12px;
-  background: var(--bg-secondary);
-  border-radius: var(--radius);
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
   margin-bottom: 12px;
   font-size: 13px;
 }
 
-.admin-label { color: var(--text-muted); }
+.admin-label {
+  color: var(--text-muted);
+  font-weight: 600;
+}
 
 .admin-current-status {
-  font-weight: 700;
-  padding: 3px 10px;
-  border-radius: var(--radius-full);
-  font-size: 11.5px;
+  font-weight: 800;
+  color: var(--accent);
 }
 
 .admin-actions {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-  margin-bottom: 10px;
+  gap: 8px;
+  margin-bottom: 12px;
 }
 
 .admin-status-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 10px 6px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  font-size: 11px;
-  font-weight: 600;
+  gap: 6px;
+  padding: 12px 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
   color: var(--text-secondary);
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-.admin-status-btn svg { width: 16px; height: 16px; }
-
-.admin-status-btn:hover {
-  border-color: var(--primary);
-  color: var(--primary);
-}
-
-.admin-status-btn.active-btn:hover {
-  background: rgba(16, 185, 129, 0.15);
-  border-color: var(--success);
-  color: var(--success);
-}
-
-.admin-status-btn.sold-btn:hover {
-  background: rgba(239, 68, 68, 0.15);
-  border-color: var(--danger);
-  color: var(--danger);
-}
-
-.admin-status-btn.rented-btn:hover {
-  background: rgba(59, 130, 246, 0.15);
-  border-color: var(--primary);
-  color: var(--primary);
-}
-
-.admin-delete-btn {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 11px;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  border-radius: var(--radius);
-  color: #FCA5A5;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-.admin-delete-btn:hover {
-  background: rgba(239, 68, 68, 0.2);
-  border-color: var(--danger);
-  color: white;
-}
-
-.admin-delete-btn svg { width: 16px; height: 16px; }
-
-/* ==========================================
-   📱 Responsive - الجوال (أقل من 900px)
-   ========================================== */
-@media (max-width: 900px) {
-  .details-layout {
-    grid-template-columns: 1fr;
-    gap: 16px;
-    padding: 16px 0 100px;
-  }
-
-  .details-sidebar {
-    position: static;
-    order: 2;
-  }
-
-  .details-layout > div:first-child {
-    order: 1;
-  }
-
-  .gallery-main {
-    aspect-ratio: 4 / 3;
-    max-height: 400px;
-  }
-
-  .gallery-nav {
-    width: 38px;
-    height: 38px;
-  }
-
-  .gallery-nav svg { width: 18px; height: 18px; }
-  .gallery-nav.prev { right: 8px; }
-  .gallery-nav.next { left: 8px; }
-
-  .gallery-thumbs img,
-  .gallery-thumbs .thumb-item {
-    width: 70px;
-    height: 52px;
-  }
-
-  .info-card {
-    padding: 16px;
-    margin-bottom: 14px;
-  }
-
-  .info-title {
-    font-size: 19px;
-    line-height: 1.4;
-  }
-
-  .info-price {
-    font-size: 24px;
-  }
-
-  .section-heading {
-    font-size: 15.5px;
-    margin-bottom: 12px;
-  }
-
-  .specs-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-  }
-
-  .spec-item {
-    padding: 10px 12px;
-    gap: 8px;
-  }
-
-  .spec-icon {
-    width: 30px;
-    height: 30px;
-  }
-
-  .spec-icon svg { width: 14px; height: 14px; }
-
-  .spec-label { font-size: 10px; }
-  .spec-value { font-size: 12.5px; }
-
-  .description-text {
-    font-size: 14px;
-    line-height: 1.8;
-  }
-
-  .seller-card {
-    padding: 16px;
-  }
-
-  .seller-avatar {
-    width: 44px;
-    height: 44px;
-    font-size: 18px;
-  }
-
-  .seller-name { font-size: 14px; }
-  .seller-role { font-size: 11px; }
-
-  .btn-block-full {
-    padding: 12px 18px;
-    font-size: 13.5px;
-  }
-}
-
-/* ==========================================
-   📱 جوال صغير (أقل من 480px)
-   ========================================== */
-@media (max-width: 480px) {
-  .details-layout {
-    padding: 12px 0 90px;
-  }
-
-  .gallery-main {
-    aspect-ratio: 1 / 1;
-    max-height: 320px;
-  }
-
-  .gallery-nav {
-    width: 34px;
-    height: 34px;
-  }
-
-  .gallery-nav svg { width: 16px; height: 16px; }
-
-  .gallery-counter {
-    font-size: 11px;
-    padding: 4px 10px;
-  }
-
-  .gallery-thumbs {
-    padding: 10px;
-    gap: 6px;
-  }
-
-  .gallery-thumbs img,
-  .gallery-thumbs .thumb-item {
-    width: 60px;
-    height: 45px;
-  }
-
-  .info-card {
-    padding: 14px;
-    border-radius: var(--radius);
-  }
-
-  .info-title { font-size: 17px; }
-  .info-price { font-size: 22px; }
-  .info-location { font-size: 13px; }
-
-  .specs-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-  }
-
-  .spec-item {
-    padding: 9px 10px;
-    border-radius: 10px;
-  }
-
-  .spec-icon {
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
-  }
-
-  .spec-icon svg { width: 13px; height: 13px; }
-
-  .spec-label { font-size: 9.5px; }
-  .spec-value { font-size: 11.5px; }
-
-  .description-text {
-    font-size: 13.5px;
-  }
-
-  .action-row {
-    gap: 6px;
-  }
-
-  .btn-icon-text {
-    padding: 9px 8px;
-    font-size: 12px;
-  }
-
-  .btn-icon-text svg { width: 14px; height: 14px; }
-
-  .admin-actions {
-    gap: 5px;
-  }
-
-  .admin-status-btn {
-    padding: 8px 4px;
-    font-size: 10px;
-  }
-
-  .admin-status-btn svg { width: 14px; height: 14px; }
-
-  .ad-id { font-size: 11.5px; }
-}
-
-/* ==========================================
-   ✏️ زر تعديل الإعلان (للأدمن)
-   ========================================== */
-.admin-edit-btn {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 11px;
-  margin-bottom: 10px;
-  background: rgba(59, 130, 246, 0.1);
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  border-radius: var(--radius);
-  color: #93C5FD;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   font-family: inherit;
   cursor: pointer;
-  transition: var(--transition);
+  transition: all 0.25s ease;
+}
+
+.admin-status-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.admin-status-btn.active-btn:hover { background: rgba(16, 185, 129, 0.15); border-color: #10B981; color: #34D399; }
+.admin-status-btn.sold-btn:hover { background: rgba(239, 68, 68, 0.15); border-color: #EF4444; color: #FCA5A5; }
+.admin-status-btn.rented-btn:hover { background: rgba(59, 130, 246, 0.15); border-color: #3B82F6; color: #93C5FD; }
+
+.admin-edit-btn,
+.admin-delete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  border: none;
+  margin-bottom: 8px;
+}
+
+.admin-edit-btn {
+  background: linear-gradient(135deg, #F59E0B, #B45309);
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.35);
 }
 
 .admin-edit-btn:hover {
-  background: rgba(59, 130, 246, 0.2);
-  border-color: var(--primary);
-  color: white;
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 10px 24px rgba(245, 158, 11, 0.5);
 }
 
-.admin-edit-btn svg { width: 16px; height: 16px; }
+.admin-delete-btn {
+  background: linear-gradient(135deg, #EF4444, #DC2626);
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.35);
+}
+
+.admin-delete-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(239, 68, 68, 0.5);
+}
+
+.admin-edit-btn svg,
+.admin-delete-btn svg {
+  width: 16px;
+  height: 16px;
+}
 
 /* ==========================================
-   ✏️ نافذة تعديل الإعلان (Modal)
+   8️⃣ نافذة التعديل
    ========================================== */
 .edit-modal {
   position: fixed;
@@ -789,7 +695,6 @@
 
 .edit-modal.show {
   display: flex;
-  animation: fadeIn 0.3s ease;
 }
 
 .edit-modal-overlay {
@@ -797,29 +702,20 @@
   inset: 0;
   background: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  cursor: pointer;
 }
 
 .edit-modal-content {
   position: relative;
-  z-index: 1;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 30px 28px;
-  max-width: 600px;
   width: 100%;
+  max-width: 600px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
-  animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-/* شكل السكرول بار */
-.edit-modal-content::-webkit-scrollbar { width: 6px; }
-.edit-modal-content::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 4px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.7);
 }
 
 .edit-modal-close {
@@ -836,8 +732,7 @@
   border-radius: 50%;
   color: var(--text-secondary);
   cursor: pointer;
-  transition: var(--transition);
-  z-index: 2;
+  transition: all 0.25s ease;
 }
 
 .edit-modal-close:hover {
@@ -847,40 +742,35 @@
   transform: rotate(90deg);
 }
 
-.edit-modal-close svg { width: 18px; height: 18px; }
-
 .edit-modal-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: 10px;
+  margin-bottom: 20px;
   padding-bottom: 16px;
   border-bottom: 1px solid var(--border);
 }
 
 .edit-modal-header svg {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   color: var(--primary);
+  padding: 5px;
+  background: rgba(59, 130, 246, 0.15);
+  border-radius: 8px;
 }
 
 .edit-modal-header h2 {
   font-size: 20px;
   font-weight: 800;
   color: var(--text-primary);
+  margin: 0;
 }
 
-/* حقول النموذج */
 .edit-form {
   display: flex;
   flex-direction: column;
   gap: 16px;
-}
-
-.edit-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
 }
 
 .edit-field {
@@ -890,67 +780,56 @@
 }
 
 .edit-field label {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 13.5px;
+  font-weight: 700;
   color: var(--text-secondary);
 }
 
 .edit-field input,
 .edit-field select,
 .edit-field textarea {
-  width: 100%;
   padding: 12px 14px;
   background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
   color: var(--text-primary);
   font-family: inherit;
   font-size: 14px;
   outline: none;
-  transition: var(--transition);
+  transition: all 0.25s ease;
 }
 
 .edit-field input:focus,
 .edit-field select:focus,
 .edit-field textarea:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--primary-soft);
+  background: rgba(59, 130, 246, 0.05);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
 
 .edit-field textarea {
   resize: vertical;
-  min-height: 100px;
-  line-height: 1.7;
+  min-height: 90px;
 }
 
-.edit-field select option {
-  background: var(--bg-secondary);
-  color: var(--text-primary);
+.edit-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
 }
 
 .edit-checkbox {
-  flex-direction: row;
+  padding: 10px 0;
 }
 
 .edit-toggle {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 16px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
   cursor: pointer;
-  transition: var(--transition);
-  font-weight: 600;
-  color: var(--text-primary);
   font-size: 14px;
-  width: 100%;
-}
-
-.edit-toggle:hover {
-  border-color: var(--primary);
-  background: rgba(59, 130, 246, 0.06);
+  font-weight: 700;
+  color: var(--text-primary);
 }
 
 .edit-toggle input[type="checkbox"] {
@@ -958,36 +837,51 @@
   height: 20px;
   accent-color: var(--primary);
   cursor: pointer;
-  flex-shrink: 0;
 }
 
 .edit-actions {
   display: flex;
-  gap: 10px;
-  margin-top: 8px;
-  padding-top: 16px;
-  border-top: 1px solid var(--border);
+  gap: 12px;
+  padding-top: 8px;
 }
 
-.edit-actions .btn {
+.edit-actions button {
   flex: 1;
-  justify-content: center;
-  padding: 12px 20px;
-  font-size: 14px;
-  font-weight: 700;
+  padding: 13px;
+  border-radius: 10px;
+  font-size: 14.5px;
+  font-weight: 800;
   font-family: inherit;
   cursor: pointer;
-  border-radius: var(--radius);
+  transition: all 0.25s ease;
+  border: none;
 }
 
-.edit-actions .btn svg {
-  width: 16px;
-  height: 16px;
+/* ==========================================
+   9️⃣ Toast
+   ========================================== */
+.toast-notification {
+  position: fixed;
+  top: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 14px 24px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 14px;
+  z-index: 99999;
+  animation: toastSlideDown 0.3s ease;
+  max-width: 90%;
+  text-align: center;
+  color: #fff;
 }
 
-/* الرابط الخاص بأيقونة الـ spin */
-.edit-actions .btn .spin,
-.edit-actions .btn svg.spin {
+@keyframes toastSlideDown {
+  from { opacity: 0; transform: translate(-50%, -20px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.spin {
   animation: spin 1s linear infinite;
 }
 
@@ -996,54 +890,434 @@
   to { transform: rotate(360deg); }
 }
 
-/* نافذة تعديل - جوال */
-@media (max-width: 600px) {
+/* ==========================================================
+   📱📱📱 الجوال (768px وأقل)
+   ========================================================== */
+@media (max-width: 768px) {
+  
+  /* التخطيط */
+  .details-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 14px !important;
+    padding: 0 12px 20px !important;
+  }
+
+  /* المعرض */
+  .details-gallery {
+    margin: 0 -12px 8px !important;
+    border-radius: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+  }
+
+  .gallery-main {
+    aspect-ratio: 4 / 3 !important;
+    max-height: 280px !important;
+    cursor: default;
+  }
+
+  .gallery-main img {
+    object-fit: cover !important;
+  }
+
+  .gallery-nav {
+    width: 38px !important;
+    height: 38px !important;
+  }
+
+  .gallery-nav svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .gallery-nav.prev { right: 10px !important; }
+  .gallery-nav.next { left: 10px !important; }
+
+  .gallery-counter {
+    font-size: 11px !important;
+    padding: 4px 10px !important;
+    top: 10px !important;
+    right: 10px !important;
+  }
+
+  .gallery-thumbs {
+    padding: 10px 12px !important;
+    gap: 6px !important;
+    scroll-snap-type: x mandatory;
+  }
+
+  .gallery-thumb {
+    flex: 0 0 64px !important;
+    width: 64px !important;
+    height: 64px !important;
+    border-radius: 9px !important;
+    scroll-snap-align: start;
+  }
+
+  /* بطاقة المعلومات */
+  .info-card {
+    padding: 16px 14px !important;
+    border-radius: 14px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .info-badges {
+    gap: 6px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .info-badge {
+    padding: 5px 12px !important;
+    font-size: 12px !important;
+  }
+
+  .info-badge svg {
+    width: 13px !important;
+    height: 13px !important;
+  }
+
+  .info-title {
+    font-size: 19px !important;
+    line-height: 1.35 !important;
+    margin: 8px 0 12px 0 !important;
+  }
+
+  .info-price {
+    font-size: 28px !important;
+    margin: 10px 0 !important;
+  }
+
+  .info-price small {
+    font-size: 14px !important;
+  }
+
+  .info-location {
+    font-size: 13.5px !important;
+    padding: 10px 0 !important;
+    margin-bottom: 12px !important;
+  }
+
+  .info-location svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
+
+  .section-heading {
+    font-size: 16px !important;
+    margin: 16px 0 12px 0 !important;
+  }
+
+  .section-heading svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  /* شبكة المواصفات - 2 عمود */
+  .specs-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .spec-item {
+    padding: 10px !important;
+    gap: 8px !important;
+    border-radius: 10px !important;
+  }
+
+  .spec-icon {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 9px !important;
+  }
+
+  .spec-icon svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
+
+  .spec-label {
+    font-size: 10.5px !important;
+    margin-bottom: 2px !important;
+  }
+
+  .spec-value {
+    font-size: 13px !important;
+  }
+
+  /* الوصف */
+  .description-text {
+    font-size: 14px !important;
+    line-height: 1.8 !important;
+  }
+
+  /* الشريط الجانبي */
+  .details-sidebar {
+    position: static !important;
+    width: 100% !important;
+    gap: 12px !important;
+  }
+
+  .ad-id {
+    padding: 10px 14px !important;
+    font-size: 12px !important;
+    border-radius: 10px !important;
+  }
+
+  .ad-id svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+
+  .seller-card {
+    padding: 16px 14px !important;
+    border-radius: 14px !important;
+  }
+
+  .seller-info {
+    padding-bottom: 12px !important;
+    margin-bottom: 12px !important;
+    gap: 12px !important;
+  }
+
+  .seller-avatar {
+    width: 46px !important;
+    height: 46px !important;
+    font-size: 18px !important;
+  }
+
+  .seller-name {
+    font-size: 15px !important;
+  }
+
+  .seller-role {
+    font-size: 12px !important;
+  }
+
+  .btn-whatsapp,
+  .btn-seller-whatsapp {
+    padding: 13px 18px !important;
+    font-size: 14px !important;
+    border-radius: 11px !important;
+  }
+
+  .btn-whatsapp svg,
+  .btn-seller-whatsapp svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .action-row {
+    gap: 8px !important;
+  }
+
+  .btn-icon-text {
+    padding: 11px 12px !important;
+    font-size: 12.5px !important;
+  }
+
+  .btn-icon-text svg {
+    width: 15px !important;
+    height: 15px !important;
+  }
+
+  .safety-note {
+    font-size: 11.5px !important;
+    padding: 10px 12px !important;
+  }
+
+  .safety-note svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
+
+  /* لوحة الأدمن */
+  .admin-panel {
+    padding: 14px !important;
+    border-radius: 14px !important;
+  }
+
+  .admin-panel-header {
+    font-size: 14px !important;
+    padding-bottom: 10px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .admin-status-display {
+    font-size: 12.5px !important;
+    padding: 9px 11px !important;
+  }
+
+  .admin-actions {
+    gap: 6px !important;
+  }
+
+  .admin-status-btn {
+    padding: 10px 6px !important;
+    font-size: 11px !important;
+    border-radius: 9px !important;
+  }
+
+  .admin-status-btn svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
+
+  .admin-edit-btn,
+  .admin-delete-btn {
+    padding: 11px 14px !important;
+    font-size: 13px !important;
+    border-radius: 10px !important;
+  }
+
+  /* نافذة التعديل */
   .edit-modal {
-    padding: 10px;
-    align-items: flex-start;
-    padding-top: 20px;
+    padding: 0 !important;
+    align-items: flex-end !important;
   }
 
   .edit-modal-content {
-    padding: 24px 18px;
-    max-height: 95vh;
-    border-radius: var(--radius);
+    max-width: 100% !important;
+    width: 100% !important;
+    max-height: 90vh !important;
+    border-radius: 20px 20px 0 0 !important;
+    padding: 24px 16px 16px !important;
   }
 
-  .edit-row {
-    grid-template-columns: 1fr;
-    gap: 10px;
+  .edit-modal-header {
+    padding-bottom: 12px !important;
+    margin-bottom: 16px !important;
   }
 
   .edit-modal-header h2 {
-    font-size: 18px;
+    font-size: 17px !important;
   }
 
-  .edit-modal-header svg {
-    width: 20px;
-    height: 20px;
+  .edit-form {
+    gap: 12px !important;
   }
 
-  .edit-modal-close {
-    width: 32px;
-    height: 32px;
-    top: 12px;
-    left: 12px;
-  }
-
-  .edit-actions {
-    flex-direction: column-reverse;
-    gap: 8px;
-  }
-
-  .edit-actions .btn {
-    width: 100%;
+  .edit-field label {
+    font-size: 13px !important;
   }
 
   .edit-field input,
   .edit-field select,
   .edit-field textarea {
-    font-size: 13.5px;
-    padding: 11px 12px;
+    padding: 11px 13px !important;
+    font-size: 14px !important;
+    border-radius: 10px !important;
+  }
+
+  .edit-row {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .edit-actions {
+    position: sticky !important;
+    bottom: 0 !important;
+    background: var(--bg-card) !important;
+    padding: 12px 0 4px !important;
+    margin: 8px -16px 0 !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    border-top: 1px solid var(--border) !important;
+  }
+
+  .edit-actions button {
+    padding: 12px !important;
+    font-size: 14px !important;
+  }
+}
+
+/* ==========================================================
+   📱 جوال صغير جداً (375px وأقل)
+   ========================================================== */
+@media (max-width: 375px) {
+  .gallery-main {
+    max-height: 240px !important;
+  }
+
+  .info-title {
+    font-size: 17px !important;
+  }
+
+  .info-price {
+    font-size: 24px !important;
+  }
+
+  .specs-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .gallery-thumb {
+    flex: 0 0 56px !important;
+    width: 56px !important;
+    height: 56px !important;
+  }
+
+  .seller-avatar {
+    width: 42px !important;
+    height: 42px !important;
+    font-size: 16px !important;
+  }
+
+  .btn-whatsapp,
+  .btn-seller-whatsapp {
+    font-size: 13px !important;
+    padding: 12px 16px !important;
+  }
+}
+
+/* ==========================================================
+   📱 تابلت (769px - 1023px)
+   ========================================================== */
+@media (min-width: 769px) and (max-width: 1023px) {
+  .details-layout {
+    grid-template-columns: 1fr !important;
+    gap: 20px;
+  }
+
+  .details-sidebar {
+    position: static !important;
+    max-width: 100% !important;
+    width: 100%;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .gallery-main {
+    aspect-ratio: 16 / 10;
+    max-height: 480px;
+  }
+
+  .specs-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+/* ==========================================================
+   💻 لابتوب وسطح مكتب (1024px+)
+   ========================================================== */
+@media (min-width: 1024px) {
+  .details-layout {
+    grid-template-columns: 1fr 380px;
+    gap: 24px;
+  }
+
+  .specs-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ==========================================================
+   🖥️ شاشات كبيرة (1440px+)
+   ========================================================== */
+@media (min-width: 1440px) {
+  .details-layout {
+    grid-template-columns: 1fr 420px;
+    gap: 32px;
   }
 }
