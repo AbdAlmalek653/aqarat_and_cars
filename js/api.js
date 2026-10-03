@@ -1,6 +1,6 @@
 /* ==========================================
    طبقة البيانات الموحدة
-   الإصدار: 3.1 (محسّن للصور الكبيرة + cache busting)
+   الإصدار: 4.0 (جلسة دائمة + إصلاح validateSession)
    ========================================== */
 
 const API = (function () {
@@ -14,7 +14,9 @@ const API = (function () {
     USERS: 'souq_users',
     LISTINGS: 'souq_listings',
     CURRENT_USER: 'souq_current_user',
-    FAVORITES: 'souq_favorites'
+    FAVORITES: 'souq_favorites',
+    REMEMBER_ME: 'souq_remember_me',
+    LOGIN_TIME: 'souq_login_time'
   };
 
   function read(key, defaultValue) {
@@ -54,6 +56,16 @@ const API = (function () {
   const SESSION_CACHE_TTL = 30000;
   const SESSION_CACHE_PREFIX = 'api_cache_';
 
+  // ✅ مسارات حساسة لا يتم عمل cache لها أبداً
+  const NO_CACHE_ENDPOINTS = ['/me.php', '/login.php', '/register.php', '/logout.php'];
+
+  function isNoCacheEndpoint(url) {
+    for (let i = 0; i < NO_CACHE_ENDPOINTS.length; i++) {
+      if (url.indexOf(NO_CACHE_ENDPOINTS[i]) !== -1) return true;
+    }
+    return false;
+  }
+
   function getSessionCache(key) {
     try {
       const raw = sessionStorage.getItem(SESSION_CACHE_PREFIX + key);
@@ -80,7 +92,7 @@ const API = (function () {
 
   function httpGet(url, options) {
     options = options || {};
-    const forceRefresh = options.forceRefresh || false;
+    const forceRefresh = options.forceRefresh === true || isNoCacheEndpoint(url);
     const fullUrl = API_BASE + url;
     const cacheKey = fullUrl;
 
@@ -111,8 +123,11 @@ const API = (function () {
     })
     .then(function (r) { return r.json(); })
     .then(function (data) {
-      _memoryCache[cacheKey] = { data: data, time: Date.now() };
-      setSessionCache(cacheKey, data);
+      // ✅ لا نخزن /me.php في الكاش
+      if (!isNoCacheEndpoint(url)) {
+        _memoryCache[cacheKey] = { data: data, time: Date.now() };
+        setSessionCache(cacheKey, data);
+      }
       return data;
     })
     .finally(function () {
@@ -153,10 +168,13 @@ const API = (function () {
       cache: 'no-store',
       body: JSON.stringify(data)
     }).then(function (r) {
+      // ✅ امسح كاش كل شي بعد أي POST
       clearApiCache('/listings.php');
       clearApiCache('/listing.php');
       clearApiCache('/stats.php');
       clearApiCache('/my_listings.php');
+      clearApiCache('/me.php');
+      clearApiCache('/favorites.php');
       return r.json();
     });
   }
@@ -223,14 +241,25 @@ const API = (function () {
       return Promise.resolve({ success: true, user: newUser });
     },
 
-    login: function(email, password) {
+    // ✅ تسجيل الدخول مع remember_me
+    login: function(email, password, rememberMe) {
       if (MODE === 'server') {
+        // ✅ افتراضياً remember_me = true (جلسة دائمة)
+        const shouldRemember = rememberMe !== false;
+
         return httpPost('/login.php', {
           email: email,
-          password: password
+          password: password,
+          remember_me: shouldRemember
         }).then(function(result) {
           if (result.success && result.user) {
             write(KEYS.CURRENT_USER, result.user);
+            try {
+              localStorage.setItem(KEYS.REMEMBER_ME, shouldRemember ? 'true' : 'false');
+              localStorage.setItem(KEYS.LOGIN_TIME, String(Date.now()));
+            } catch (e) {}
+            // ✅ امسح كاش me.php
+            clearApiCache('/me.php');
           }
           return result;
         });
@@ -263,6 +292,10 @@ const API = (function () {
       };
 
       write(KEYS.CURRENT_USER, sessionUser);
+      try {
+        localStorage.setItem(KEYS.REMEMBER_ME, 'true');
+        localStorage.setItem(KEYS.LOGIN_TIME, String(Date.now()));
+      } catch (e) {}
 
       return Promise.resolve({
         success: true,
@@ -271,14 +304,24 @@ const API = (function () {
     },
 
     logout: function () {
+      // ✅ امسح كل البيانات المحلية أولاً
+      try {
+        localStorage.removeItem(KEYS.CURRENT_USER);
+        localStorage.removeItem(KEYS.REMEMBER_ME);
+        localStorage.removeItem(KEYS.LOGIN_TIME);
+      } catch (e) {}
+
       if (MODE === 'server') {
         return httpPost('/logout.php', {}).then(function (result) {
-          localStorage.removeItem(KEYS.CURRENT_USER);
-          clearApiCache('/me.php');
+          clearApiCache();
           return result;
+        }).catch(function() {
+          clearApiCache();
+          return { success: true };
         });
       }
-      localStorage.removeItem(KEYS.CURRENT_USER);
+
+      return Promise.resolve({ success: true });
     },
 
     getCurrent: function () {
@@ -290,16 +333,41 @@ const API = (function () {
       }
     },
 
-    validateSession: function () {
+    // ✅ إصلاح validateSession - مع forceRefresh
+    validateSession: function (forceRefresh) {
       if (MODE !== 'server') return Promise.resolve(this.getCurrent());
-      return httpGet('/me.php').then(function (result) {
+
+      // ✅ مسح كاش me.php قبل الطلب
+      clearApiCache('/me.php');
+
+      return httpGet('/me.php', { forceRefresh: forceRefresh === true || true }).then(function (result) {
         if (result.success && result.user) {
           write(KEYS.CURRENT_USER, result.user);
           return result.user;
         }
-        localStorage.removeItem(KEYS.CURRENT_USER);
+
+        // ❌ ما في جلسة على السيرفر
+        // ✅ إذا "تذكرني" مفعّل، احتفظ بالبيانات المحلية
+        const rememberMe = localStorage.getItem(KEYS.REMEMBER_ME) === 'true';
+        const localUser = Users.getCurrent();
+
+        if (rememberMe && localUser) {
+          return localUser;
+        }
+
+        // ما في "تذكرني" - امسح
+        try {
+          localStorage.removeItem(KEYS.CURRENT_USER);
+        } catch (e) {}
         return null;
-      }).catch(function () {
+      }).catch(function (err) {
+        console.warn('⚠️ خطأ في validateSession:', err);
+
+        // ✅ في حالة خطأ الشبكة، احتفظ بالبيانات المحلية
+        const rememberMe = localStorage.getItem(KEYS.REMEMBER_ME) === 'true';
+        if (rememberMe) {
+          return Users.getCurrent();
+        }
         return null;
       });
     },
@@ -573,18 +641,12 @@ window.API = API;
 
 /* ==========================================
    🖼️ دالة موحّدة عالمية لبناء رابط الصورة
-   ✅ الإصدار 3.1 - الحل النهائي للمشكلة البكسلة
-   ✅ تستخدم size=large افتراضياً + cache busting
    ========================================== */
 window.getListingImageUrl = function (item, index, size) {
   if (!item) return null;
   const idx = (typeof index === 'number') ? index : 0;
-
-  // ✅ الحل: نستخدم large دائماً (مش medium)
   const sz = size || 'large';
   const apiBase = '/api';
-
-  // ✅ cache busting لمنع الكاش من إرجاع صورة قديمة
   const cb = item.updatedAt ? new Date(item.updatedAt).getTime() : '';
 
   let first = null;
@@ -599,29 +661,24 @@ window.getListingImageUrl = function (item, index, size) {
     return `${apiBase}/listing_image.php?id=${encodeURIComponent(item.id)}&index=${idx}&size=${sz}${cb ? '&v=' + cb : ''}`;
   }
 
-  // has_image أو has_image:N
   if (typeof first === 'string' && first.startsWith('has_image')) {
     const parts = first.split(':');
     const realIndex = parts[1] !== undefined ? parts[1] : idx;
     return `${apiBase}/listing_image.php?id=${encodeURIComponent(item.id)}&index=${realIndex}&size=${sz}${cb ? '&v=' + cb : ''}`;
   }
 
-  // Base64
   if (typeof first === 'string' && first.startsWith('data:image/')) {
     return first;
   }
 
-  // URL كامل
   if (typeof first === 'string' && /^https?:\/\//i.test(first)) {
     return first;
   }
 
-  // مسار مطلق
   if (typeof first === 'string' && first.startsWith('/')) {
     return first;
   }
 
-  // مسار نسبي
   if (typeof first === 'string' && first.startsWith('./')) {
     return first;
   }
@@ -630,20 +687,11 @@ window.getListingImageUrl = function (item, index, size) {
   return `${apiBase}/listing_image.php?id=${encodeURIComponent(item.id)}&index=${idx}&size=${sz}${cb ? '&v=' + cb : ''}`;
 };
 
-/* ==========================================
-   🎨 دالة srcset (مبسّطة - نستخدم large فقط)
-   ========================================== */
 window.getListingImageSrcset = function (item, index) {
   if (!item || !item.id) return { src: null, srcset: '', sizes: '' };
-
   const idx = (typeof index === 'number') ? index : 0;
   const large = window.getListingImageUrl(item, idx, 'large');
-
-  return {
-    src: large,
-    srcset: '',
-    sizes: '100vw'
-  };
+  return { src: large, srcset: '', sizes: '100vw' };
 };
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -658,7 +706,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function addDetailsButton(card) {
     if (!card || card.querySelector('.card-details-btn')) return;
-
     const cardBody = card.querySelector('.card-body');
     if (!cardBody) return;
 
@@ -679,7 +726,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function init() {
     scanCards();
-
     const observer = new MutationObserver(function (mutations) {
       mutations.forEach(function (mutation) {
         mutation.addedNodes.forEach(function (node) {
@@ -692,7 +738,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
       });
     });
-
     observer.observe(document.body, { childList: true, subtree: true });
   }
 

@@ -1,5 +1,6 @@
 /* ==========================================
    منطق صفحات المصادقة
+   الإصدار: 2.0 (جلسة دائمة + remember me)
    ========================================== */
 
 /* ==========================================
@@ -7,13 +8,12 @@
    ========================================== */
 (function() {
   function checkLoggedIn() {
-    // انتظر حتى يتم تحميل api.js
     if (!window.API || !API.Users) {
       setTimeout(checkLoggedIn, 50);
       return;
     }
 
-    // إذا المستخدم مسجل دخول → وجهه للصفحة الرئيسية
+    // ✅ إذا المستخدم مسجل دخول → وجهه للصفحة الرئيسية
     if (API.Users.isLoggedIn && API.Users.isLoggedIn()) {
       const isInPages = window.location.pathname.includes('/pages/');
       const target = isInPages ? '../index.html' : 'index.html';
@@ -110,7 +110,7 @@ function hideAlert() {
 }
 
 /* ==========================================
-   نموذج تسجيل الدخول
+   نموذج تسجيل الدخول (مع جلسة دائمة)
    ========================================== */
 function setupLoginForm() {
   const form = document.getElementById('loginForm');
@@ -121,17 +121,11 @@ function setupLoginForm() {
   const rememberCheck = document.getElementById('rememberMe');
   const submitBtn = document.getElementById('loginBtn');
 
-  const remembered = localStorage.getItem('souq_remembered_user');
-  if (remembered) {
-    try {
-      const data = JSON.parse(remembered);
-      if (data.email && emailInput) emailInput.value = data.email;
-      if (data.password && passwordInput) passwordInput.value = data.password;
-      if (rememberCheck) rememberCheck.checked = true;
-    } catch (e) {
-      console.error('خطأ في تحميل البيانات المحفوظة:', e);
-      localStorage.removeItem('souq_remembered_user');
-    }
+  // ✅ تحميل البيانات المحفوظة (كوكي المتصفح فقط - مو كلمة المرور)
+  const rememberedEmail = localStorage.getItem('souq_remembered_email');
+  if (rememberedEmail && emailInput) {
+    emailInput.value = rememberedEmail;
+    if (rememberCheck) rememberCheck.checked = true;
   }
 
   emailInput?.addEventListener('input', () => clearFieldError('email'));
@@ -143,6 +137,7 @@ function setupLoginForm() {
 
     const email = emailInput.value.trim();
     const password = passwordInput.value;
+    const rememberMe = rememberCheck ? rememberCheck.checked : true; // ✅ افتراضياً true
     let hasError = false;
 
     if (!email) {
@@ -180,7 +175,8 @@ function setupLoginForm() {
 
     setTimeout(async () => {
       try {
-        const result = await API.Users.login(email, password);
+        // ✅ نمرر rememberMe للـ API
+        const result = await API.Users.login(email, password, rememberMe);
 
         if (!result.success) {
           showAlert(result.error || 'حدث خطأ');
@@ -190,13 +186,15 @@ function setupLoginForm() {
           return;
         }
 
-        if (rememberCheck && rememberCheck.checked) {
-          localStorage.setItem('souq_remembered_user', JSON.stringify({
-            email: email,
-            password: password
-          }));
+        // ✅ احفظ البريد فقط (ليس كلمة المرور) - للأمان
+        if (rememberMe) {
+          try {
+            localStorage.setItem('souq_remembered_email', email);
+          } catch (e) {}
         } else {
-          localStorage.removeItem('souq_remembered_user');
+          try {
+            localStorage.removeItem('souq_remembered_email');
+          } catch (e) {}
         }
 
         showAlert('تم تسجيل الدخول بنجاح! جاري التحويل...', 'success');
@@ -218,12 +216,12 @@ function setupLoginForm() {
         submitBtn.innerHTML = `<i data-lucide="log-in"></i><span>تسجيل الدخول</span>`;
         initIcons();
       }
-    }, 700);
+    }, 500);
   });
 }
 
 /* ==========================================
-   نموذج إنشاء حساب
+   نموذج إنشاء حساب (مع تسجيل دخول تلقائي)
    ========================================== */
 function setupRegisterForm() {
   const form = document.getElementById('registerForm');
@@ -306,7 +304,6 @@ function setupRegisterForm() {
     submitBtn.innerHTML = `<i data-lucide="loader-2" class="spin"></i><span>جاري إنشاء الحساب...</span>`;
     initIcons();
 
-    // ✅ فحص أن api.js محمّل
     if (typeof API === 'undefined' || !API.Users) {
       setTimeout(() => {
         showAlert('❌ خطأ تقني: ملف api.js لم يُحمَّل.');
@@ -317,7 +314,6 @@ function setupRegisterForm() {
       return;
     }
 
-    // ✅ دمج رمز الدولة مع الرقم (إزالة أي رموز غير رقمية)
     const fullPhone = countryCode + phone.replace(/\D/g, '');
 
     setTimeout(async () => {
@@ -332,8 +328,14 @@ function setupRegisterForm() {
           return;
         }
 
-        // تسجيل الدخول تلقائياً (API يتكفل بحفظ الجلسة)
-        await API.Users.login(email, password);
+        // ✅ تسجيل دخول تلقائي مع جلسة دائمة (rememberMe = true)
+        await API.Users.login(email, password, true);
+
+        // ✅ احفظ البريد للـ remember me
+        try {
+          localStorage.setItem('souq_remembered_email', email);
+        } catch (e) {}
+
         showAlert('تم إنشاء حسابك بنجاح! جاري التحويل...', 'success');
 
         setTimeout(() => {
@@ -347,7 +349,7 @@ function setupRegisterForm() {
         submitBtn.innerHTML = `<i data-lucide="user-plus"></i><span>إنشاء الحساب</span>`;
         initIcons();
       }
-    }, 700);
+    }, 500);
   });
 }
 

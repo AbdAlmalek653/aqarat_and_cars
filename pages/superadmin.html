@@ -5,91 +5,773 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>لوحة السوبر أدمن | سوق</title>
 
-<link rel="icon" type="image/x-icon" href="../images/favicon.ico">
-
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👑</text></svg>">
 <script src="../js/icons.js" defer></script>
 
-<link rel="stylesheet" href="../css/style.css">
-<link rel="stylesheet" href="../css/admin.css">
-<link rel="stylesheet" href="../css/fix-mobile.css">
-<link rel="stylesheet" href="../css/master-fix.css">
-<link rel="stylesheet" href="../css/swipe-cards.css">
+<style>
+/* ==========================================================
+   لوحة السوبر أدمن - التصميم الاحترافي
+   ========================================================== */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-primary: #0B1120;
+  --bg-secondary: #131C31;
+  --bg-card: #1A2438;
+  --bg-hover: #1F2A42;
+  --border: #2A3650;
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  --primary: #3B82F6;
+  --primary-dark: #2563EB;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  --purple: #8B5CF6;
+  --cyan: #06B6D4;
+  --radius: 12px;
+  --radius-lg: 18px;
+  --shadow: 0 4px 20px rgba(0,0,0,0.15);
+  --shadow-lg: 0 10px 40px rgba(0,0,0,0.3);
+}
+
+body {
+  font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ===================== Header ===================== */
+.admin-header {
+  background: linear-gradient(135deg, rgba(26,36,56,0.95), rgba(15,23,42,0.98));
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.admin-header-inner {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.admin-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: var(--text-primary);
+}
+
+.admin-logo-icon {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, var(--primary), var(--purple));
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  box-shadow: 0 4px 15px rgba(59,130,246,0.4);
+}
+
+.admin-logo-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-logo-title {
+  font-size: 18px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #fff, #93C5FD);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.admin-logo-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.admin-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid transparent;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+}
+
+.admin-btn-outline {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+
+.admin-btn-outline:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.admin-btn-danger {
+  background: linear-gradient(135deg, var(--danger), #DC2626);
+  color: white;
+  box-shadow: 0 4px 15px rgba(239,68,68,0.3);
+}
+
+.admin-btn-danger:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(239,68,68,0.4);
+}
+
+.admin-btn-primary {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white;
+  box-shadow: 0 4px 15px rgba(59,130,246,0.3);
+}
+
+.admin-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59,130,246,0.5);
+}
+
+/* ===================== Shell ===================== */
+.admin-shell {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 28px 24px 60px;
+}
+
+/* ===================== Welcome ===================== */
+.welcome-banner {
+  background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(139,92,246,0.1));
+  border: 1px solid rgba(59,130,246,0.25);
+  border-radius: var(--radius-lg);
+  padding: 28px 32px;
+  margin-bottom: 28px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.welcome-banner::before {
+  content: '';
+  position: absolute;
+  top: -100px; left: -100px;
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(59,130,246,0.3), transparent 70%);
+  border-radius: 50%;
+}
+
+.welcome-text {
+  position: relative;
+  z-index: 1;
+}
+
+.welcome-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: rgba(245,158,11,0.15);
+  border: 1px solid rgba(245,158,11,0.3);
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #FBBF24;
+  margin-bottom: 10px;
+}
+
+.welcome-title {
+  font-size: 26px;
+  font-weight: 800;
+  margin-bottom: 6px;
+  background: linear-gradient(135deg, #fff, #93C5FD);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.welcome-subtitle {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+/* ===================== Stats ===================== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+  margin-bottom: 28px;
+}
+
+.stat-card {
+  background: linear-gradient(135deg, var(--bg-card), var(--bg-secondary));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 100px; height: 100px;
+  border-radius: 50%;
+  filter: blur(40px);
+  opacity: 0.4;
+}
+
+.stat-card.blue::before { background: var(--primary); }
+.stat-card.green::before { background: var(--success); }
+.stat-card.orange::before { background: var(--warning); }
+.stat-card.purple::before { background: var(--purple); }
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(59,130,246,0.4);
+  box-shadow: var(--shadow-lg);
+}
+
+.stat-card-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  position: relative;
+  z-index: 1;
+}
+
+.stat-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-icon.blue { background: rgba(59,130,246,0.15); color: var(--primary); }
+.stat-icon.green { background: rgba(16,185,129,0.15); color: var(--success); }
+.stat-icon.orange { background: rgba(245,158,11,0.15); color: var(--warning); }
+.stat-icon.purple { background: rgba(139,92,246,0.15); color: var(--purple); }
+
+.stat-icon svg { width: 26px; height: 26px; }
+
+.stat-info { text-align: left; flex: 1; }
+
+.stat-num {
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -1px;
+  color: var(--text-primary);
+}
+
+.stat-lbl {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+/* ===================== Section Card ===================== */
+.admin-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow);
+}
+
+.card-heading {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  background: linear-gradient(135deg, rgba(26,36,56,0.8), rgba(15,23,42,0.6));
+}
+
+.card-heading-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.card-heading-icon {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, var(--primary), var(--purple));
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: white;
+}
+
+.card-heading-icon svg { width: 22px; height: 22px; }
+
+.card-heading h2 {
+  font-size: 17px;
+  font-weight: 800;
+  margin-bottom: 3px;
+}
+
+.card-heading p {
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+/* ===================== Filter / Select ===================== */
+.admin-select {
+  padding: 9px 32px 9px 14px;
+  background: var(--bg-secondary) url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e") no-repeat left 10px center;
+  background-size: 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: all 0.25s ease;
+  min-width: 160px;
+}
+
+.admin-select:hover,
+.admin-select:focus {
+  border-color: var(--primary);
+  background-color: var(--bg-hover);
+}
+
+/* ===================== Table ===================== */
+.table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}
+
+.admin-table thead {
+  background: linear-gradient(135deg, rgba(26,36,56,0.6), rgba(15,23,42,0.5));
+}
+
+.admin-table th {
+  padding: 14px 16px;
+  text-align: right;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.admin-table td {
+  padding: 16px;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.admin-table tbody tr {
+  transition: background 0.2s ease;
+}
+
+.admin-table tbody tr:hover {
+  background: rgba(59,130,246,0.05);
+}
+
+.admin-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.empty-cell {
+  text-align: center;
+  padding: 50px 20px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* ===================== Listing cell ===================== */
+.listing-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.listing-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+.listing-id {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-family: 'Consolas', monospace;
+  direction: ltr;
+  text-align: right;
+}
+
+/* ===================== Badges ===================== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.badge-property { background: rgba(59,130,246,0.15); color: #60A5FA; }
+.badge-car { background: rgba(16,185,129,0.15); color: #34D399; }
+.badge-active { background: rgba(16,185,129,0.15); color: #34D399; }
+.badge-pending { background: rgba(245,158,11,0.15); color: #FBBF24; }
+.badge-rejected { background: rgba(239,68,68,0.15); color: #F87171; }
+.badge-sold { background: rgba(139,92,246,0.15); color: #A78BFA; }
+.badge-rented { background: rgba(6,182,212,0.15); color: #22D3EE; }
+.badge-admin { background: rgba(139,92,246,0.15); color: #A78BFA; }
+.badge-super { background: linear-gradient(135deg, #F59E0B, #B45309); color: white; }
+.badge-user { background: rgba(148,163,184,0.15); color: #94A3B8; }
+
+/* ===================== Actions ===================== */
+.actions-cell {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.icon-btn {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  flex-shrink: 0;
+}
+
+.icon-btn:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.icon-btn.danger:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: rgba(239,68,68,0.1);
+}
+
+.icon-btn svg { width: 15px; height: 15px; }
+
+.price-tag {
+  font-weight: 800;
+  color: #FBBF24;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.seller-name {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+/* ===================== Message ===================== */
+.admin-message {
+  max-width: 600px;
+  margin: 60px auto;
+  text-align: center;
+  padding: 60px 30px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.admin-message svg {
+  width: 70px; height: 70px;
+  color: var(--danger);
+  opacity: 0.5;
+  margin-bottom: 20px;
+}
+
+.admin-message h2 {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.admin-message p {
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+}
+
+/* ===================== Toast ===================== */
+.admin-toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  padding: 14px 28px;
+  background: linear-gradient(135deg, var(--success), #059669);
+  color: white;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: var(--shadow-lg);
+  z-index: 9999;
+  opacity: 0;
+  transition: all 0.3s ease;
+  pointer-events: none;
+  max-width: 90%;
+  text-align: center;
+}
+
+.admin-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ===================== Responsive ===================== */
+@media (max-width: 768px) {
+  .admin-header-inner {
+    padding: 12px 16px;
+  }
+
+  .admin-logo-text { display: none; }
+
+  .admin-btn span { display: none; }
+  .admin-btn { padding: 10px 12px; }
+
+  .admin-shell {
+    padding: 20px 14px 40px;
+  }
+
+  .welcome-banner {
+    padding: 20px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .welcome-title {
+    font-size: 20px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .stat-card { padding: 18px; }
+  .stat-num { font-size: 26px; }
+  .stat-icon { width: 48px; height: 48px; }
+  .stat-icon svg { width: 22px; height: 22px; }
+
+  .card-heading {
+    padding: 16px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-select { width: 100%; }
+
+  .admin-table th,
+  .admin-table td {
+    padding: 12px 10px;
+    font-size: 12.5px;
+  }
+
+  .icon-btn {
+    width: 30px;
+    height: 30px;
+  }
+}
+
+/* ===================== Scrollbar ===================== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+</style>
 </head>
 <body data-dashboard-role="super_admin">
 
+<!-- ===================== Header ===================== -->
 <header class="admin-header">
   <div class="admin-header-inner">
-    <a class="logo" href="../index.html">
-      <span class="logo-icon"><i data-lucide="home"></i></span>
-      <span class="logo-text">سوق</span>
+    <a class="admin-logo" href="../index.html">
+      <div class="admin-logo-icon">👑</div>
+      <div class="admin-logo-text">
+        <div class="admin-logo-title">سوق</div>
+        <div class="admin-logo-sub">SUPER ADMIN</div>
+      </div>
     </a>
-    <div class="admin-title">
-      <span class="eyebrow">لوحة التحكم العليا</span>
-      <strong>السوبر أدمن</strong>
-    </div>
+
     <div class="admin-header-actions">
-      <a class="btn btn-outline" href="account.html"><i data-lucide="user"></i> حسابي</a>
-      <button class="btn btn-danger" id="logoutBtn"><i data-lucide="log-out"></i> خروج</button>
+      <a class="admin-btn admin-btn-outline" href="account.html">
+        <i data-lucide="user"></i>
+        <span>حسابي</span>
+      </a>
+      <button class="admin-btn admin-btn-danger" id="logoutBtn">
+        <i data-lucide="log-out"></i>
+        <span>خروج</span>
+      </button>
     </div>
   </div>
 </header>
 
+<!-- ===================== Shell ===================== -->
 <main class="admin-shell">
+
+  <!-- رسالة عدم الصلاحية -->
   <div id="accessDenied" class="admin-message" hidden>
     <i data-lucide="shield-alert"></i>
     <h2>غير مصرح بالدخول</h2>
-    <p>هذه الصفحة مخصصة للسوبر أدمن فقط.</p>
-    <a href="login.html" class="btn btn-primary">تسجيل الدخول</a>
+    <p>هذه الصفحة مخصصة للسوبر أدمن فقط</p>
+    <a href="login.html" class="admin-btn admin-btn-primary">
+      <i data-lucide="log-in"></i>
+      <span>تسجيل الدخول</span>
+    </a>
   </div>
 
+  <!-- محتوى اللوحة -->
   <div id="dashboardContent" hidden>
-    <div class="welcome-row">
-      <div>
-        <p class="eyebrow">صلاحيات كاملة</p>
-        <h1 id="welcomeName">لوحة السوبر أدمن</h1>
-        <p class="muted">إدارة الإعلانات والمستخدمين وصلاحيات الحسابات.</p>
+
+    <!-- Welcome Banner -->
+    <div class="welcome-banner">
+      <div class="welcome-text">
+        <div class="welcome-badge">
+          <i data-lucide="crown"></i>
+          <span>صلاحيات كاملة</span>
+        </div>
+        <h1 class="welcome-title" id="welcomeName">لوحة السوبر أدمن</h1>
+        <p class="welcome-subtitle">إدارة شاملة للإعلانات والمستخدمين ومراقبة نشاط المنصة</p>
       </div>
-      <button class="btn btn-primary" id="refreshBtn">
-        <i data-lucide="refresh-cw"></i> تحديث البيانات
+      <button class="admin-btn admin-btn-primary" id="refreshBtn">
+        <i data-lucide="refresh-cw"></i>
+        <span>تحديث البيانات</span>
       </button>
     </div>
 
-    <section class="stats-grid" id="statsGrid">
-      <div class="admin-stat-card">
-        <div class="admin-stat-icon blue"><i data-lucide="building-2"></i></div>
-        <div class="admin-stat-info">
-          <div class="admin-stat-num" id="statTotalProps">0</div>
-          <div class="admin-stat-lbl">إجمالي العقارات</div>
+    <!-- Stats -->
+    <section class="stats-grid">
+      <div class="stat-card blue">
+        <div class="stat-card-inner">
+          <div class="stat-icon blue"><i data-lucide="building-2"></i></div>
+          <div class="stat-info">
+            <div class="stat-num" id="statTotalProps">0</div>
+            <div class="stat-lbl">إجمالي العقارات</div>
+          </div>
         </div>
       </div>
-      <div class="admin-stat-card">
-        <div class="admin-stat-icon green"><i data-lucide="car"></i></div>
-        <div class="admin-stat-info">
-          <div class="admin-stat-num" id="statTotalCars">0</div>
-          <div class="admin-stat-lbl">إجمالي السيارات</div>
+      <div class="stat-card green">
+        <div class="stat-card-inner">
+          <div class="stat-icon green"><i data-lucide="car"></i></div>
+          <div class="stat-info">
+            <div class="stat-num" id="statTotalCars">0</div>
+            <div class="stat-lbl">إجمالي السيارات</div>
+          </div>
         </div>
       </div>
-      <div class="admin-stat-card">
-        <div class="admin-stat-icon orange"><i data-lucide="users"></i></div>
-        <div class="admin-stat-info">
-          <div class="admin-stat-num" id="statTotalUsers">0</div>
-          <div class="admin-stat-lbl">إجمالي المستخدمين</div>
+      <div class="stat-card orange">
+        <div class="stat-card-inner">
+          <div class="stat-icon orange"><i data-lucide="users"></i></div>
+          <div class="stat-info">
+            <div class="stat-num" id="statTotalUsers">0</div>
+            <div class="stat-lbl">إجمالي المستخدمين</div>
+          </div>
         </div>
       </div>
-      <div class="admin-stat-card">
-        <div class="admin-stat-icon purple"><i data-lucide="eye"></i></div>
-        <div class="admin-stat-info">
-          <div class="admin-stat-num" id="statTotalViews">0</div>
-          <div class="admin-stat-lbl">إجمالي المشاهدات</div>
+      <div class="stat-card purple">
+        <div class="stat-card-inner">
+          <div class="stat-icon purple"><i data-lucide="eye"></i></div>
+          <div class="stat-info">
+            <div class="stat-num" id="statTotalViews">0</div>
+            <div class="stat-lbl">إجمالي المشاهدات</div>
+          </div>
         </div>
       </div>
     </section>
 
+    <!-- Listings Management -->
     <section class="admin-card">
       <div class="card-heading">
-        <div>
-          <h2>إدارة جميع الإعلانات</h2>
-          <p class="muted">مراجعة الإعلانات وتغيير حالتها.</p>
+        <div class="card-heading-left">
+          <div class="card-heading-icon"><i data-lucide="list"></i></div>
+          <div>
+            <h2>إدارة جميع الإعلانات</h2>
+            <p>مراجعة الإعلانات وتغيير حالتها</p>
+          </div>
         </div>
         <select id="statusFilter" class="admin-select">
           <option value="">كل الإعلانات</option>
@@ -101,11 +783,15 @@
         </select>
       </div>
       <div class="table-wrap">
-        <table>
+        <table class="admin-table">
           <thead>
             <tr>
-              <th>الإعلان</th><th>المالك</th><th>النوع</th>
-              <th>السعر</th><th>الحالة</th><th>إجراءات</th>
+              <th>الإعلان</th>
+              <th>المالك</th>
+              <th>النوع</th>
+              <th>السعر</th>
+              <th>الحالة</th>
+              <th>إجراءات</th>
             </tr>
           </thead>
           <tbody id="listingsTable">
@@ -115,19 +801,27 @@
       </div>
     </section>
 
-    <section class="admin-card super-only">
+    <!-- Users Management -->
+    <section class="admin-card">
       <div class="card-heading">
-        <div>
-          <h2>إدارة المستخدمين</h2>
-          <p class="muted">تعديل الأدوار وتفعيل أو تعطيل الحسابات.</p>
+        <div class="card-heading-left">
+          <div class="card-heading-icon"><i data-lucide="users"></i></div>
+          <div>
+            <h2>إدارة المستخدمين</h2>
+            <p>تعديل الأدوار وتفعيل أو تعطيل الحسابات</p>
+          </div>
         </div>
       </div>
       <div class="table-wrap">
-        <table>
+        <table class="admin-table">
           <thead>
             <tr>
-              <th>المستخدم</th><th>البريد</th><th>الدور</th>
-              <th>الإعلانات</th><th>الحالة</th><th>إجراء</th>
+              <th>المستخدم</th>
+              <th>البريد</th>
+              <th>الدور</th>
+              <th>الإعلانات</th>
+              <th>الحالة</th>
+              <th>إجراء</th>
             </tr>
           </thead>
           <tbody id="usersTable">
@@ -144,7 +838,10 @@
 <script src="../js/api.js" defer></script>
 <script src="../js/admin.js" defer></script>
 <script src="../js/sw-register.js" defer></script>
-<script src="../js/master-fix.js"></script>
-
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    if (window.lucide) window.lucide.createIcons();
+  });
+</script>
 </body>
 </html>

@@ -1,4 +1,40 @@
 <?php
+/**
+ * ==========================================
+ * config.php - الإعدادات الأساسية
+ * الإصدار: 3.0 (جلسة دائمة 10 سنوات)
+ * ==========================================
+ */
+
+// ==========================================
+// ✅ إعدادات الجلسة الدائمة (10 سنوات)
+// ==========================================
+$SESSION_LIFETIME = 315360000; // 10 سنوات بالثواني
+
+// ✅ إعدادات PHP للجلسة
+ini_set('session.gc_maxlifetime', $SESSION_LIFETIME);
+ini_set('session.cookie_lifetime', $SESSION_LIFETIME);
+ini_set('session.use_strict_mode', 0);
+ini_set('session.use_cookies', 1);
+ini_set('session.use_only_cookies', 1);
+ini_set('session.cookie_httponly', 1);
+ini_set('session.cookie_secure', 1);
+ini_set('session.cookie_samesite', 'Lax');
+ini_set('session.gc_probability', 1);
+ini_set('session.gc_divisor', 100);
+
+// ✅ بدء الجلسة بإعدادات دائمة
+if (session_status() === PHP_SESSION_NONE) {
+    session_set_cookie_params([
+        'lifetime' => $SESSION_LIFETIME,
+        'path'     => '/',
+        'domain'   => '',
+        'secure'   => true,
+        'httponly' => true,
+        'samesite' => 'Lax'
+    ]);
+    session_start();
+}
 
 // ==========================================
 // ✅ إنشاء مجلد الكاش تلقائياً
@@ -9,11 +45,11 @@ if (!is_dir($__cacheDir)) {
     @chmod($__cacheDir, 0777);
 }
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
+// ==========================================
+// ✅ ترويسات CORS
+// ==========================================
 header('Content-Type: application/json; charset=utf-8');
+
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 if ($origin !== '') {
     header('Access-Control-Allow-Origin: ' . $origin);
@@ -28,6 +64,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
+// ==========================================
+// ✅ الاتصال بقاعدة البيانات (SQLite)
+// ==========================================
 $dbPath = __DIR__ . '/../database/souq.db';
 $isNewDatabase = !is_file($dbPath);
 

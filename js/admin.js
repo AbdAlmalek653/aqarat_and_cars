@@ -1,14 +1,11 @@
 /* ==========================================
-   لوحة التحكم - Admin Dashboard (نسخة الصاروخ V3.0)
-   الإصدار: 3.0 (تحسينات أداء جذرية + جلب سريع)
+   لوحة التحكم - Admin Dashboard V4.0
    ========================================== */
 
 let currentAdmin = null;
 let allListings = [];
 let allUsers = [];
-let statsCache = null; // ✅ تخزين الإحصائيات لتجنب إعادة حسابها
-let sortedRecentListings = []; // ✅ تخزين أحدث الإعلانات مرتبة
-const MAX_RENDER_ROWS = 200; // ✅ تحديد حد أقصى للصفوف المعروضة لتجنب تجميد المتصفح
+let statsCache = null;
 
 const ADMIN_API_BASE = '../api';
 const listingStatusLabels = {
@@ -25,29 +22,6 @@ function escapeHtml(value) {
   });
 }
 
-/* ==========================================
-   ✅ أداة Debounce لتأخير تنفيذ البحث (تمنع تجميد المتصفح)
-   ========================================== */
-function debounce(func, wait) {
-  let timeout;
-  return function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-  };
-}
-
-function buildAdminImageUrl(listing, index = 0, size = 'medium') {
-  if (!listing || !listing.id) return null;
-  if (window.getListingImageUrl) {
-    return window.getListingImageUrl(listing, index, size);
-  }
-  return `${ADMIN_API_BASE}/listing_image.php?id=${encodeURIComponent(listing.id)}&index=${index}&size=${size}`;
-}
-
 async function adminRequest(path, options) {
   try {
     const response = await fetch(`${ADMIN_API_BASE}/${path}`, {
@@ -55,12 +29,10 @@ async function adminRequest(path, options) {
       headers: { 'Content-Type': 'application/json' },
       ...options
     });
-
     const contentType = response.headers.get("content-type");
     if (!contentType || !contentType.includes("application/json")) {
-      throw new Error(`الخادم أرجع استجابة غير صالحة (${response.status}). تأكد من وجود ملف ${path}`);
+      throw new Error(`الخادم أرجع استجابة غير صالحة (${response.status})`);
     }
-
     const result = await response.json();
     if (!response.ok || result.success === false) {
       throw new Error(result.error || `خطأ في الخادم (${response.status})`);
@@ -73,123 +45,57 @@ async function adminRequest(path, options) {
 }
 
 /* ==========================================
-   الدوال المساعدة للتعديل
-   ========================================== */
-
-async function updateAdminListing(id, changes) {
-  try {
-    await adminRequest('admin_update_listing.php', {
-      method: 'POST',
-      body: JSON.stringify({ id, ...changes })
-    });
-
-    const index = allListings.findIndex(l => l.id === id);
-    if (index > -1) {
-      Object.assign(allListings[index], changes);
-      statsCache = null; // ✅ مسح الكاش لتحديث الإحصائيات
-    }
-
-    renderOverview();
-    renderListingsTable();
-    alert('✅ تم حفظ التعديل بنجاح');
-  } catch (error) {
-    alert('❌ فشل التعديل: ' + error.message);
-  }
-}
-
-window.editAdminListing = async function (id, currentTitle, currentPrice) {
-  const newTitle = prompt('عنوان الإعلان:', currentTitle || '');
-  if (newTitle === null) return;
-
-  const newPrice = prompt('السعر:', currentPrice || '0');
-  if (newPrice === null) return;
-
-  await updateAdminListing(id, {
-    title: newTitle.trim(),
-    price: newPrice.trim()
-  });
-};
-
-async function updateAdminUser(id, changes) {
-  try {
-    await adminRequest('admin_update_user.php', {
-      method: 'POST',
-      body: JSON.stringify({ id, ...changes })
-    });
-    alert('✅ تم حفظ تعديل المستخدم');
-    await loadData();
-  } catch (error) {
-    alert(error.message);
-  }
-}
-
-/* ==========================================
    التحقق من الصلاحيات
    ========================================== */
 async function checkAccess() {
-  const dashboardEl = document.getElementById('adminDashboard') || document.getElementById('dashboardContent');
-  const noAccessEl = document.getElementById('noAccess') || document.getElementById('accessDenied');
+  const dashboardEl = document.getElementById('dashboardContent');
+  const noAccessEl = document.getElementById('accessDenied');
 
   if (!dashboardEl || !noAccessEl) return false;
 
   try {
     const localUser = API.Users.getCurrent();
     if (!localUser || !API.Users.isAdmin()) {
-      noAccessEl.style.display = 'block';
-      dashboardEl.style.display = 'none';
+      noAccessEl.hidden = false;
+      dashboardEl.hidden = true;
       initIcons();
       return false;
     }
 
     dashboardEl.hidden = false;
-    dashboardEl.style.display = dashboardEl.id === 'adminDashboard' ? 'grid' : '';
-    document.getElementById('adminName')?.replaceChildren(document.createTextNode(localUser.name || 'أدمن'));
-    document.getElementById('adminAvatar')?.replaceChildren(document.createTextNode((localUser.name || 'م').charAt(0)));
+    noAccessEl.hidden = true;
 
-    const roleEl = document.getElementById('adminRole');
-    if (roleEl) {
-      if (localUser.role === 'super_admin') {
-        roleEl.textContent = 'أدمن عام';
-        roleEl.classList.add('super');
-      } else {
-        roleEl.textContent = 'أدمن';
-      }
-    }
-
-    const usersTab = document.getElementById('usersTabBtn');
-    if (localUser.role !== 'super_admin' && usersTab) {
-      usersTab.style.display = 'none';
-    }
-
-    const serverUser = await API.Users.validateSession();
+    // ✅ forceRefresh = true
+    const serverUser = await API.Users.validateSession(true);
 
     if (!serverUser) {
-      console.warn('⚠️ الجلسة منتهية، إعادة التوجيه لتسجيل الدخول...');
       window.location.href = 'login.html';
       return false;
     }
 
     currentAdmin = serverUser;
-    document.getElementById('adminName')?.replaceChildren(document.createTextNode(serverUser.name || 'أدمن'));
-    document.getElementById('adminAvatar')?.replaceChildren(document.createTextNode((serverUser.name || 'م').charAt(0)));
+    const welcomeEl = document.getElementById('welcomeName');
+    if (welcomeEl) {
+      welcomeEl.textContent = serverUser.role === 'super_admin'
+        ? 'لوحة السوبر أدمن'
+        : 'لوحة التحكم';
+    }
 
     return true;
-
   } catch (e) {
-    console.error('❌ خطأ في دالة checkAccess:', e);
+    console.error('❌ خطأ في checkAccess:', e);
     return false;
   }
 }
 
 /* ==========================================
-   تحميل البيانات (محسّن)
+   تحميل البيانات
    ========================================== */
 async function loadData() {
   try {
     console.log('⏳ جاري جلب البيانات...');
     const startTime = performance.now();
 
-    // ✅ يمكنك لاحقاً تعديل هذا ليقبل Pagination من السيرفر
     const listingsResult = await adminRequest('admin_listings.php');
     const usersResult = (currentAdmin && currentAdmin.role === 'super_admin')
       ? await adminRequest('admin_users.php')
@@ -211,32 +117,28 @@ async function loadData() {
     });
 
     allUsers = rawUsers;
-
-    // ✅ حساب الإحصائيات وترتيب الأحدث مرة واحدة فقط
-    prepareStatsAndRecent();
+    prepareStats();
 
     const endTime = performance.now();
-    console.log(`✅ تم جلب ${allListings.length} إعلان و ${allUsers.length} مستخدم في ${(endTime - startTime).toFixed(2)} مللي ثانية`);
+    console.log(`✅ تم جلب ${allListings.length} إعلان و ${allUsers.length} مستخدم في ${(endTime - startTime).toFixed(2)}ms`);
 
-    renderOverview();
+    renderStats();
     renderListingsTable();
     if (currentAdmin.role === 'super_admin') renderUsersTable();
-    renderReports();
 
   } catch (e) {
-    console.error('❌ خطأ أثناء تحميل البيانات:', e);
+    console.error('❌ خطأ في تحميل البيانات:', e);
   }
 }
 
 /* ==========================================
-   ✅ تجهيز الإحصائيات مسبقاً (لتجنب التكرار في كل render)
+   تجهيز الإحصائيات
    ========================================== */
-function prepareStatsAndRecent() {
+function prepareStats() {
   let propsCount = 0;
   let carsCount = 0;
   let totalViews = 0;
 
-  // حساب الإحصائيات في مرور واحد فقط (O(n))
   allListings.forEach(l => {
     if (l.type === 'property') propsCount++;
     else if (l.type === 'car') carsCount++;
@@ -250,98 +152,38 @@ function prepareStatsAndRecent() {
     totalListings: allListings.length,
     totalUsers: allUsers.length
   };
-
-  // ترتيب أحدث 5 إعلانات مرة واحدة فقط
-  sortedRecentListings = [...allListings]
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    .slice(0, 5);
 }
 
 /* ==========================================
-   Overview
+   عرض الإحصائيات
    ========================================== */
-function renderOverview() {
-  if (!statsCache) prepareStatsAndRecent();
-
+function renderStats() {
+  if (!statsCache) prepareStats();
   const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-
   setEl('statTotalProps', statsCache.totalProps);
   setEl('statTotalCars', statsCache.totalCars);
   setEl('statTotalUsers', statsCache.totalUsers);
   setEl('statTotalViews', statsCache.totalViews.toLocaleString('en-US'));
-  setEl('badgeListings', statsCache.totalListings);
-  setEl('badgeUsers', statsCache.totalUsers);
-
-  const recentEl = document.getElementById('recentListings');
-  if (recentEl) {
-    if (!sortedRecentListings.length) {
-      recentEl.innerHTML = `<div class="admin-empty"><i data-lucide="inbox"></i><p>لا توجد إعلانات</p></div>`;
-    } else {
-      recentEl.innerHTML = sortedRecentListings.map(l => {
-        const icon = l.type === 'property' ? 'building-2' : 'car';
-        return `<div class="admin-recent-item">
-          <div class="admin-recent-icon"><i data-lucide="${icon}"></i></div>
-          <div class="admin-recent-info">
-            <div class="admin-recent-title">${escapeHtml(l.title)}</div>
-            <div class="admin-recent-sub">${escapeHtml(l.city || '—')}</div>
-          </div>
-        </div>`;
-      }).join('');
-    }
-  }
-
-  const recentUsersEl = document.getElementById('recentUsers');
-  if (recentUsersEl && currentAdmin && currentAdmin.role === 'super_admin') {
-    const recentU = [...allUsers].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
-    if (!recentU.length) {
-      recentUsersEl.innerHTML = `<div class="admin-empty"><i data-lucide="users"></i><p>لا يوجد مستخدمون</p></div>`;
-    } else {
-      recentUsersEl.innerHTML = recentU.map(u => `
-        <div class="admin-recent-item">
-          <div class="admin-recent-icon"><i data-lucide="user"></i></div>
-          <div class="admin-recent-info">
-            <div class="admin-recent-title">${escapeHtml(u.name)}</div>
-            <div class="admin-recent-sub">${escapeHtml(u.email)}</div>
-          </div>
-        </div>`).join('');
-    }
-  }
-
-  initIcons();
 }
 
 /* ==========================================
-   إدارة الإعلانات (محسّنة بحد أقصى للصفوف)
+   إدارة الإعلانات
    ========================================== */
 function renderListingsTable() {
-  const search = (document.getElementById('searchListings')?.value || '').toLowerCase().trim();
-  const typeFilter = document.getElementById('filterType')?.value || '';
-  const statusFilter = document.getElementById('filterStatus')?.value || '';
-
+  const statusFilter = document.getElementById('statusFilter')?.value || '';
   let filtered = allListings;
-
-  if (typeFilter) filtered = filtered.filter(l => l.type === typeFilter);
   if (statusFilter) filtered = filtered.filter(l => (l.status || 'active') === statusFilter);
-  if (search) {
-    filtered = filtered.filter(l =>
-      (l.title || '').toLowerCase().includes(search) ||
-      (l.city || '').toLowerCase().includes(search) ||
-      (l.area || '').toLowerCase().includes(search)
-    );
-  }
 
   const tbody = document.getElementById('listingsTable');
   if (!tbody) return;
 
   if (!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="7"><div class="admin-empty"><i data-lucide="inbox"></i><p>لا توجد إعلانات مطابقة</p></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" class="empty-cell">لا توجد إعلانات مطابقة</td></tr>`;
     initIcons();
     return;
   }
 
-  // ✅ تحديد حد أقصى للصفوف المعروضة لتجنب تجميد المتصفح
-  const displayListings = filtered.slice(0, MAX_RENDER_ROWS);
-  const hasMore = filtered.length > MAX_RENDER_ROWS;
+  const displayListings = filtered.slice(0, 200);
 
   tbody.innerHTML = displayListings.map(l => {
     const typeText = l.type === 'property' ? 'عقار' : 'سيارة';
@@ -353,63 +195,78 @@ function renderListingsTable() {
 
     const seller = allUsers.find(u => u.id === l.userId);
     const sellerName = l.owner_name || (seller ? seller.name : 'مستخدم');
-
-    const wa = l.whatsapp || (l.details && l.details._whatsapp) || '';
-    const waClean = String(wa).replace(/[^0-9]/g, '');
-
     const title = escapeHtml(l.title);
     const listingId = escapeHtml(l.id);
-    const isFeatured = Boolean(l.featured || l.is_featured);
 
     return `<tr>
       <td>
-        <div class="admin-table-title">${title}</div>
-        <div class="admin-table-sub">#${listingId}</div>
+        <div class="listing-cell">
+          <div class="listing-title">${title}</div>
+          <div class="listing-id">#${listingId}</div>
+        </div>
       </td>
-      <td><span class="admin-tag ${l.type}">${typeText}</span></td>
-      <td>${escapeHtml(price)}</td>
-      <td><span class="admin-tag ${status}">${escapeHtml(statusText)}</span>${isFeatured ? '<div class="admin-table-sub">★ مميز</div>' : ''}</td>
-      <td>${escapeHtml(sellerName)}</td>
+      <td><span class="seller-name">${escapeHtml(sellerName)}</span></td>
+      <td><span class="badge badge-${l.type}">${typeText}</span></td>
+      <td><span class="price-tag">${escapeHtml(price)}</span></td>
       <td>
-        ${waClean
-        ? `<a href="https://wa.me/${waClean}" target="_blank" class="admin-icon-btn wa" title="واتساب البائع"><i data-lucide="message-circle"></i></a>`
-        : `<span style="color:var(--text-muted);font-size:12px;">—</span>`}
+        <select class="admin-select" data-status-id="${listingId}" style="min-width:130px;padding:6px 28px 6px 10px;font-size:12px;">
+          ${Object.entries(listingStatusLabels).map(([value, label]) =>
+            `<option value="${value}" ${status === value ? 'selected' : ''}>${label}</option>`
+          ).join('')}
+        </select>
       </td>
       <td>
-        <div class="admin-actions">
-          <a href="details.html?id=${encodeURIComponent(l.id)}&type=${encodeURIComponent(l.type)}" class="admin-icon-btn" title="عرض"><i data-lucide="eye"></i></a>
-          <select class="admin-select admin-action-select" data-status-id="${listingId}" title="تغيير الحالة">
-            ${Object.entries(listingStatusLabels).map(([value, label]) => `<option value="${value}" ${status === value ? 'selected' : ''}>${label}</option>`).join('')}
-          </select>
-          <button class="admin-icon-btn ${isFeatured ? 'featured' : ''}" data-feature-id="${listingId}" data-featured="${isFeatured ? '1' : '0'}" title="${isFeatured ? 'إلغاء التمييز' : 'تمييز'}"><i data-lucide="star"></i></button>
-          
-          <button class="admin-icon-btn" onclick="editAdminListing('${listingId}', '${escapeHtml(l.title)}', '${escapeHtml(l.price)}')" title="تعديل"><i data-lucide="pencil"></i></button>
-          
-          <button class="admin-icon-btn danger" onclick="adminDeleteListing('${listingId}')" title="حذف"><i data-lucide="trash-2"></i></button>
+        <div class="actions-cell">
+          <a href="details.html?id=${encodeURIComponent(l.id)}&type=${encodeURIComponent(l.type)}" class="icon-btn" title="عرض" target="_blank">
+            <i data-lucide="eye"></i>
+          </a>
+          <button class="icon-btn" onclick="editAdminListing('${listingId}', '${escapeHtml(l.title)}', '${escapeHtml(l.price)}')" title="تعديل">
+            <i data-lucide="pencil"></i>
+          </button>
+          <button class="icon-btn danger" onclick="adminDeleteListing('${listingId}')" title="حذف">
+            <i data-lucide="trash-2"></i>
+          </button>
         </div>
       </td>
     </tr>`;
   }).join('');
 
-  if (hasMore) {
-    tbody.innerHTML += `<tr><td colspan="7" style="text-align:center; padding:15px; color:var(--text-muted); font-size:14px;">
-      ⚠️ يتم عرض أول ${MAX_RENDER_ROWS} إعلان فقط من أصل ${filtered.length} إعلان. استخدم البحث للوصول لإعلانات محددة.
-    </td></tr>`;
-  }
-
-  document.querySelectorAll('[data-status-id]').forEach(function (select) {
+  document.querySelectorAll('[data-status-id]').forEach(select => {
     select.addEventListener('change', function () {
       updateAdminListing(select.dataset.statusId, { status: select.value });
-    });
-  });
-  document.querySelectorAll('[data-feature-id]').forEach(function (button) {
-    button.addEventListener('click', function () {
-      updateAdminListing(button.dataset.featureId, { featured: button.dataset.featured !== '1' });
     });
   });
 
   initIcons();
 }
+
+async function updateAdminListing(id, changes) {
+  try {
+    await adminRequest('admin_update_listing.php', {
+      method: 'POST',
+      body: JSON.stringify({ id, ...changes })
+    });
+    const index = allListings.findIndex(l => l.id === id);
+    if (index > -1) {
+      Object.assign(allListings[index], changes);
+      statsCache = null;
+    }
+    prepareStats();
+    renderStats();
+    renderListingsTable();
+    showToast('✅ تم حفظ التعديل بنجاح');
+  } catch (error) {
+    showToast('❌ فشل التعديل: ' + error.message);
+  }
+}
+
+window.editAdminListing = async function (id, currentTitle, currentPrice) {
+  const newTitle = prompt('عنوان الإعلان:', currentTitle || '');
+  if (newTitle === null) return;
+  const newPrice = prompt('السعر:', currentPrice || '0');
+  if (newPrice === null) return;
+  await updateAdminListing(id, { title: newTitle.trim(), price: newPrice.trim() });
+};
 
 window.adminDeleteListing = async function (id) {
   if (!confirm('⚠️ هل أنت متأكد من حذف هذا الإعلان نهائياً؟')) return;
@@ -418,12 +275,13 @@ window.adminDeleteListing = async function (id) {
   const result = await API.Listings.delete(id);
   if (result.success) {
     allListings = allListings.filter(l => l.id !== id);
-    statsCache = null; // ✅ مسح الكاش
-    prepareStatsAndRecent();
-    renderOverview();
+    statsCache = null;
+    prepareStats();
+    renderStats();
     renderListingsTable();
+    showToast('✅ تم الحذف بنجاح');
   } else {
-    alert(result.error || 'فشل الحذف');
+    showToast(result.error || 'فشل الحذف');
   }
 };
 
@@ -433,28 +291,16 @@ window.adminDeleteListing = async function (id) {
 function renderUsersTable() {
   if (!currentAdmin || currentAdmin.role !== 'super_admin') return;
 
-  const search = (document.getElementById('searchUsers')?.value || '').toLowerCase().trim();
-  const roleFilter = document.getElementById('filterRole')?.value || '';
-
-  let filtered = allUsers;
-  if (roleFilter) filtered = filtered.filter(u => (u.role || 'user') === roleFilter);
-  if (search) {
-    filtered = filtered.filter(u =>
-      (u.name || '').toLowerCase().includes(search) ||
-      (u.email || '').toLowerCase().includes(search)
-    );
-  }
-
   const tbody = document.getElementById('usersTable');
   if (!tbody) return;
 
-  if (!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="6"><div class="admin-empty"><i data-lucide="users"></i><p>لا يوجد مستخدمون مطابقون</p></div></td></tr>`;
+  if (!allUsers.length) {
+    tbody.innerHTML = `<tr><td colspan="6" class="empty-cell">لا يوجد مستخدمون</td></tr>`;
     initIcons();
     return;
   }
 
-  const displayUsers = filtered.slice(0, MAX_RENDER_ROWS);
+  const displayUsers = allUsers.slice(0, 200);
 
   tbody.innerHTML = displayUsers.map(u => {
     const role = u.role || 'user';
@@ -464,35 +310,41 @@ function renderUsersTable() {
     const isActive = u.is_active !== false;
 
     return `<tr>
-      <td>
-        <div class="admin-table-title">${escapeHtml(u.name)}</div>
-        <small class="muted">${escapeHtml(u.phone || '—')}</small>
-      </td>
+      <td><div class="listing-title">${escapeHtml(u.name)}</div></td>
       <td>${escapeHtml(u.email)}</td>
-      <td><span class="admin-tag ${role}">${escapeHtml(roleText)}</span></td>
-      <td>${Number(u.listings_count) || 0}</td>
-      <td><span class="admin-tag ${isActive ? 'active' : 'disabled'}">${isActive ? 'فعال' : 'معطل'}</span></td>
+      <td><span class="badge badge-${role}">${escapeHtml(roleText)}</span></td>
+      <td>${allListings.filter(l => l.userId === u.id).length}</td>
       <td>
-        <div class="admin-actions">
+        <span class="badge badge-${isActive ? 'active' : 'rejected'}">
+          ${isActive ? 'نشط' : 'معطل'}
+        </span>
+      </td>
+      <td>
+        <div class="actions-cell">
           ${!isSelf ? `
-            <select class="admin-select admin-action-select" data-role-id="${userId}" title="تغيير الدور">
-              ${Object.entries(roleLabels).map(([value, label]) => `<option value="${value}" ${role === value ? 'selected' : ''}>${label}</option>`).join('')}
+            <select class="admin-select" data-role-id="${userId}" style="min-width:120px;padding:6px 28px 6px 10px;font-size:12px;">
+              ${Object.entries(roleLabels).map(([value, label]) =>
+                `<option value="${value}" ${role === value ? 'selected' : ''}>${label}</option>`
+              ).join('')}
             </select>
-            <button class="admin-icon-btn" data-active-id="${userId}" data-active="${isActive ? '1' : '0'}" title="${isActive ? 'تعطيل' : 'تفعيل'}"><i data-lucide="${isActive ? 'user-round-x' : 'user-round-check'}"></i></button>
-            
-            <button class="admin-icon-btn danger" onclick="adminDeleteUser('${userId}')" title="حذف الحساب"><i data-lucide="trash-2"></i></button>
+            <button class="icon-btn ${isActive ? '' : 'danger'}" data-active-id="${userId}" data-active="${isActive ? '1' : '0'}" title="${isActive ? 'تعطيل' : 'تفعيل'}">
+              <i data-lucide="${isActive ? 'user-x' : 'user-check'}"></i>
+            </button>
+            <button class="icon-btn danger" onclick="adminDeleteUser('${userId}')" title="حذف">
+              <i data-lucide="trash-2"></i>
+            </button>
           ` : `<span style="color:var(--text-muted);font-size:11px;">أنت</span>`}
         </div>
       </td>
     </tr>`;
   }).join('');
 
-  document.querySelectorAll('[data-role-id]').forEach(function (select) {
+  document.querySelectorAll('[data-role-id]').forEach(select => {
     select.addEventListener('change', function () {
       updateAdminUser(select.dataset.roleId, { role: select.value });
     });
   });
-  document.querySelectorAll('[data-active-id]').forEach(function (button) {
+  document.querySelectorAll('[data-active-id]').forEach(button => {
     button.addEventListener('click', function () {
       updateAdminUser(button.dataset.activeId, { is_active: button.dataset.active !== '1' });
     });
@@ -501,97 +353,57 @@ function renderUsersTable() {
   initIcons();
 }
 
+async function updateAdminUser(id, changes) {
+  try {
+    await adminRequest('admin_update_user.php', {
+      method: 'POST',
+      body: JSON.stringify({ id, ...changes })
+    });
+    showToast('✅ تم حفظ التعديل');
+    await loadData();
+  } catch (error) {
+    showToast('❌ ' + error.message);
+  }
+}
+
 window.adminDeleteUser = async function (id) {
   const user = allUsers.find(u => u.id === id);
   if (!user) return;
-
   if (!confirm(`⚠️ هل أنت متأكد من حذف المستخدم "${user.name}"؟`)) return;
-  if (!confirm('🔴 سيتم حذف الحساب نهائياً ولا يمكن استرجاعه.')) return;
+  if (!confirm('🔴 سيتم حذف الحساب نهائياً.')) return;
 
   try {
     const result = await adminRequest('admin_delete_user.php', {
       method: 'POST',
       body: JSON.stringify({ id })
     });
-
     if (result.success) {
       allUsers = allUsers.filter(u => u.id !== id);
       statsCache = null;
-      prepareStatsAndRecent();
-      renderOverview();
+      prepareStats();
+      renderStats();
       renderUsersTable();
-      alert('✅ تم حذف المستخدم بنجاح');
+      showToast('✅ تم حذف المستخدم');
     } else {
-      alert(result.error || 'فشل حذف المستخدم');
+      showToast(result.error || 'فشل الحذف');
     }
   } catch (error) {
-    console.error('❌ خطأ أثناء حذف المستخدم:', error);
-    alert('حدث خطأ في الخادم أثناء محاولة الحذف. تأكد من وجود ملف admin_delete_user.php');
+    showToast('❌ حدث خطأ في الخادم');
   }
 };
 
 /* ==========================================
-   البلاغات
+   Toast
    ========================================== */
-function renderReports() {
-  const el = document.getElementById('reportsContent');
-  if (!el) return;
-  el.innerHTML = `
-    <div class="admin-panel-card">
-      <div class="admin-empty">
-        <i data-lucide="check-circle"></i>
-        <h3 style="font-size:18px;margin-bottom:8px;color:var(--text-primary);">لا توجد بلاغات حالياً</h3>
-        <p>جميع الإعلانات تعمل بشكل جيد</p>
-      </div>
-    </div>
-  `;
-  initIcons();
-}
-
-/* ==========================================
-   Tab Switching
-   ========================================== */
-window.switchAdminTab = function (tab) {
-  document.querySelectorAll('.admin-menu-btn[data-tab]').forEach(b => {
-    b.classList.toggle('active', b.dataset.tab === tab);
-  });
-  document.querySelectorAll('.admin-tab').forEach(t => {
-    t.classList.toggle('active', t.dataset.tab === tab);
-  });
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-  initIcons();
-};
-
-function setupTabs() {
-  document.querySelectorAll('.admin-menu-btn[data-tab]').forEach(btn => {
-    btn.addEventListener('click', () => switchAdminTab(btn.dataset.tab));
-  });
-
-  document.getElementById('adminLogoutBtn')?.addEventListener('click', () => {
-    if (!confirm('هل تريد تسجيل الخروج؟')) return;
-    Promise.resolve(API.Users.logout()).finally(() => {
-      window.location.href = '../index.html';
-    });
-  });
-}
-
-/* ==========================================
-   ✅ إعداد الفلاتر مع Debounce (لتسريع البحث)
-   ========================================== */
-function setupFilters() {
-  // استخدام debounce لتأخير التنفيذ 300 مللي ثانية بعد توقف الكتابة
-  const debouncedListingsRender = debounce(renderListingsTable, 300);
-  const debouncedUsersRender = debounce(renderUsersTable, 300);
-
-  ['searchListings', 'filterType', 'filterStatus'].forEach(id => {
-    document.getElementById(id)?.addEventListener('input', debouncedListingsRender);
-    document.getElementById(id)?.addEventListener('change', debouncedListingsRender);
-  });
-
-  ['searchUsers', 'filterRole'].forEach(id => {
-    document.getElementById(id)?.addEventListener('input', debouncedUsersRender);
-    document.getElementById(id)?.addEventListener('change', debouncedUsersRender);
-  });
+function showToast(message, type = 'success') {
+  const toast = document.getElementById('toast');
+  if (!toast) return;
+  toast.textContent = message;
+  toast.style.background = type === 'success'
+    ? 'linear-gradient(135deg, #10B981, #059669)'
+    : 'linear-gradient(135deg, #EF4444, #DC2626)';
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
 /* ==========================================
@@ -602,200 +414,117 @@ document.addEventListener('DOMContentLoaded', async () => {
   initIcons();
 
   if (typeof API === 'undefined') {
-    console.error('❌ خطأ قاتل: ملف api.js لم يتم تحميله بشكل صحيح!');
+    console.error('❌ خطأ قاتل: ملف api.js لم يتم تحميله!');
     return;
   }
 
   const hasAccess = await checkAccess();
   if (!hasAccess) return;
 
-  setupTabs();
-  setupFilters();
+  document.getElementById('adminLogoutBtn')?.addEventListener('click', () => {
+    if (!confirm('هل تريد تسجيل الخروج؟')) return;
+    Promise.resolve(API.Users.logout()).finally(() => {
+      window.location.href = '../index.html';
+    });
+  });
+
+  document.getElementById('refreshBtn')?.addEventListener('click', async () => {
+    showToast('🔄 جاري تحديث البيانات...');
+    await loadData();
+    showToast('✅ تم التحديث');
+  });
+
+  document.getElementById('statusFilter')?.addEventListener('change', renderListingsTable);
+
+  initListingIdSearch();
+
   await loadData();
-
   initIcons();
-  console.log('✅ اكتمل تشغيل لوحة التحكم بنجاح');
+  console.log('✅ اكتمل التشغيل');
 
+  // ✅ مراقبة الجلسة كل 5 دقائق
   setInterval(async () => {
-    const user = await API.Users.validateSession();
-    if (!user) {
-      window.location.href = 'login.html';
-    }
+    const user = await API.Users.validateSession(true);
+    if (!user) window.location.href = 'login.html';
   }, 5 * 60 * 1000);
 });
 
 /* ==========================================
-   🔍 البحث برقم الإعلان (محسّن)
+   البحث برقم الإعلان
    ========================================== */
-(function () {
-  'use strict';
+function initListingIdSearch() {
+  const searchInput = document.getElementById('listingIdSearch');
+  const searchBtn = document.getElementById('listingIdSearchBtn');
+  const resultBox = document.getElementById('listingSearchResult');
 
-  function initListingIdSearch() {
-    const searchInput = document.getElementById('listingIdSearch');
-    const searchBtn = document.getElementById('listingIdSearchBtn');
-    const resultBox = document.getElementById('listingSearchResult');
+  if (!searchInput || !searchBtn || !resultBox) return;
 
-    if (!searchInput || !searchBtn || !resultBox) return;
+  searchBtn.addEventListener('click', performSearch);
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); performSearch(); }
+  });
 
-    searchBtn.addEventListener('click', performSearch);
+  async function performSearch() {
+    let id = searchInput.value.trim();
+    if (!id) { showError('الرجاء إدخال رقم الإعلان'); return; }
+    if (!id.startsWith('L') && !id.startsWith('l')) id = 'L' + id;
+    id = id.replace(/^l/i, 'L');
 
-    searchInput.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        performSearch();
+    showLoading();
+
+    try {
+      const response = await fetch(`../api/listing.php?id=${encodeURIComponent(id)}`);
+      if (!response.ok) {
+        if (response.status === 404) { showNotFound(id); return; }
+        throw new Error('فشل الاتصال: ' + response.status);
       }
-    });
-
-    searchInput.addEventListener('input', function () {
-      this.value = this.value.trim().replace(/\s+/g, '');
-    });
-
-    async function performSearch() {
-      let id = searchInput.value.trim();
-
-      if (!id) {
-        showError('الرجاء إدخال رقم الإعلان');
-        return;
-      }
-
-      if (!id.startsWith('L') && !id.startsWith('l')) {
-        id = 'L' + id;
-      }
-
-      id = id.replace(/^l/i, 'L');
-
-      showLoading();
-      console.log('🔍 البحث برقم:', id);
-
-      try {
-        const response = await fetch(`../api/listing.php?id=${encodeURIComponent(id)}`);
-
-        if (!response.ok) {
-          if (response.status === 404) {
-            showNotFound(id);
-            return;
-          }
-          throw new Error('فشل الاتصال بالسيرفر: ' + response.status);
-        }
-
-        const data = await response.json();
-        const listing = data.listing || data.data || data;
-
-        if (!listing || (!listing.id && !listing.title)) {
-          showNotFound(id);
-          return;
-        }
-
-        showResult(listing);
-
-      } catch (err) {
-        console.error('❌ خطأ في البحث:', err);
-        showError('حدث خطأ أثناء البحث. تحقق من اتصالك.');
-      }
-    }
-
-    function showLoading() {
-      resultBox.style.display = 'block';
-      resultBox.className = 'admin-search-result loading';
-      resultBox.innerHTML = `
-        <div style="display:flex;align-items:center;gap:10px;color:#93C5FD;font-weight:700;">
-          <i data-lucide="loader-2" class="spin" style="width:20px;height:20px;"></i>
-          <span>جاري البحث...</span>
-        </div>
-      `;
-      if (window.lucide) window.lucide.createIcons();
-    }
-
-    function showNotFound(id) {
-      resultBox.style.display = 'block';
-      resultBox.className = 'admin-search-result not-found';
-      resultBox.innerHTML = `
-        <div class="admin-no-result">
-          <i data-lucide="alert-circle"></i>
-          <span>لا يوجد إعلان بالرقم: <code dir="ltr" style="color:#FBBF24;">${id}</code></span>
-        </div>
-      `;
-      if (window.lucide) window.lucide.createIcons();
-    }
-
-    function showError(msg) {
-      resultBox.style.display = 'block';
-      resultBox.className = 'admin-search-result not-found';
-      resultBox.innerHTML = `
-        <div class="admin-no-result">
-          <i data-lucide="alert-circle"></i>
-          <span>${msg}</span>
-        </div>
-      `;
-      if (window.lucide) window.lucide.createIcons();
-    }
-
-    function showResult(listing) {
-      resultBox.style.display = 'block';
-      resultBox.className = 'admin-search-result found';
-
-      const id = listing.id || '';
-      const title = listing.title || 'بدون عنوان';
-      const safeTitle = escapeHtml(title);
-      const type = listing.type === 'car' ? 'سيارة' : 'عقار';
-      const purpose = listing.purpose === 'sale' ? 'للبيع' : 'للإيجار';
-      const city = listing.city || '';
-      const price = listing.price ? Number(listing.price).toLocaleString('en-US') + ' ' + (listing.currency || 'USD') : '—';
-
-      const imageUrl = buildAdminImageUrl(listing, 0, 'medium');
-
-      const imageHTML = imageUrl
-        ? `<img 
-             src="${imageUrl}" 
-             alt="${safeTitle}"
-             loading="lazy"
-             decoding="async"
-             width="200"
-             height="200"
-             onerror="this.parentNode.innerHTML='<i data-lucide=&quot;image-off&quot;></i>';if(window.lucide)window.lucide.createIcons();">`
-        : `<i data-lucide="image-off"></i>`;
-
-      const detailsUrl = `../pages/details.html?id=${encodeURIComponent(id)}&type=${listing.type || 'property'}`;
-
-      resultBox.innerHTML = `
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;color:#34D399;font-weight:800;font-size:15px;">
-          <i data-lucide="check-circle" style="width:20px;height:20px;"></i>
-          <span>تم العثور على الإعلان ✅</span>
-        </div>
-        
-        <div class="admin-result-card">
-          <div class="admin-result-image">${imageHTML}</div>
-          <div class="admin-result-info">
-            <h4 class="admin-result-title">${safeTitle}</h4>
-            <div class="admin-result-meta">
-              <span><i data-lucide="tag"></i>${type}</span>
-              <span><i data-lucide="badge-dollar-sign"></i>${purpose}</span>
-              ${city ? `<span><i data-lucide="map-pin"></i>${escapeHtml(city)}</span>` : ''}
-              <span><i data-lucide="wallet"></i>${escapeHtml(price)}</span>
-            </div>
-            <div class="admin-result-id">ID: ${escapeHtml(id)}</div>
-          </div>
-        </div>
-        
-        <div class="admin-result-actions">
-          <a href="${detailsUrl}" target="_blank" class="btn-view">
-            <i data-lucide="eye"></i>
-            <span>عرض الإعلان</span>
-          </a>
-          <a href="../pages/add-listing.html?id=${encodeURIComponent(id)}" target="_blank" class="btn-edit">
-            <i data-lucide="pencil"></i>
-            <span>تعديل</span>
-          </a>
-        </div>
-      `;
-
-      if (window.lucide) window.lucide.createIcons();
+      const data = await response.json();
+      const listing = data.listing || data.data || data;
+      if (!listing || (!listing.id && !listing.title)) { showNotFound(id); return; }
+      showResult(listing);
+    } catch (err) {
+      console.error('❌', err);
+      showError('حدث خطأ أثناء البحث');
     }
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initListingIdSearch);
-  } else {
-    initListingIdSearch();
+  function showLoading() {
+    resultBox.style.display = 'block';
+    resultBox.innerHTML = `<div style="text-align:center;padding:20px;color:#93C5FD;font-weight:700;">جاري البحث...</div>`;
   }
-})();
+
+  function showNotFound(id) {
+    resultBox.style.display = 'block';
+    resultBox.innerHTML = `<div style="text-align:center;padding:20px;color:#F87171;">❌ لا يوجد إعلان بالرقم: <code>${id}</code></div>`;
+  }
+
+  function showError(msg) {
+    resultBox.style.display = 'block';
+    resultBox.innerHTML = `<div style="text-align:center;padding:20px;color:#F87171;">⚠️ ${msg}</div>`;
+  }
+
+  function showResult(listing) {
+    const id = listing.id || '';
+    const title = escapeHtml(listing.title || 'بدون عنوان');
+    const type = listing.type === 'car' ? 'سيارة' : 'عقار';
+    const purpose = listing.purpose === 'sale' ? 'للبيع' : 'للإيجار';
+    const city = listing.city || '';
+    const price = listing.price ? Number(listing.price).toLocaleString('en-US') + ' ' + (listing.currency || 'USD') : '—';
+    const detailsUrl = `../pages/details.html?id=${encodeURIComponent(id)}&type=${listing.type || 'property'}`;
+
+    resultBox.style.display = 'block';
+    resultBox.innerHTML = `
+      <div style="padding:16px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.3);border-radius:12px;">
+        <div style="color:#34D399;font-weight:800;margin-bottom:12px;">✅ تم العثور على الإعلان</div>
+        <div style="font-size:15px;font-weight:700;color:#F8FAFC;margin-bottom:8px;">${title}</div>
+        <div style="font-size:13px;color:#94A3B8;margin-bottom:12px;">
+          ${type} • ${purpose} • ${price}${city ? ' • ' + escapeHtml(city) : ''}
+        </div>
+        <div style="font-size:11.5px;color:#64748B;margin-bottom:14px;font-family:monospace;direction:ltr;">ID: ${escapeHtml(id)}</div>
+        <a href="${detailsUrl}" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:9px 16px;background:linear-gradient(135deg,#3B82F6,#2563EB);color:white;border-radius:9px;text-decoration:none;font-weight:700;font-size:13px;">
+          👁️ عرض الإعلان
+        </a>
+      </div>
+    `;
+  }
+}
