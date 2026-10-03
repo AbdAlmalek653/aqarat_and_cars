@@ -39,25 +39,72 @@ function getFilters() {
   };
 }
 
+function normalizeFilterValue(value) {
+  return String(value ?? '').trim().toLowerCase();
+}
+
+function getPropertyType(property) {
+  const details = property.details || {};
+  return property.property_type || property.subType || property.subtype ||
+    details.propertyType || details.subType || details.subtype || details.type || '';
+}
+
+function propertyMatchesCity(property, city) {
+  if (!city) return true;
+  if (typeof cityMatches === 'function') return cityMatches(property, city);
+
+  const target = normalizeFilterValue(city);
+  return [property.city, property.city_slug, property.city_name]
+    .filter(Boolean)
+    .some(value => normalizeFilterValue(value) === target);
+}
+
+function propertyMatchScore(property, filters) {
+  const details = property.details || {};
+  let score = 0;
+
+  if (filters.purpose && property.purpose !== filters.purpose) score += 5;
+  if (filters.types.length && !filters.types.includes(getPropertyType(property))) score += 4;
+  if (filters.city && !propertyMatchesCity(property, filters.city)) score += 4;
+
+  const price = Number(property.price) || 0;
+  if (price < filters.priceMin) score += Math.min(3, (filters.priceMin - price) / Math.max(filters.priceMin, 1));
+  if (price > filters.priceMax) score += Math.min(3, (price - filters.priceMax) / Math.max(filters.priceMax, 1));
+
+  const rooms = Number(details.rooms) || Number(property.rooms) || 0;
+  if (filters.rooms) score += filters.rooms === 5 ? Math.max(0, 5 - rooms) : Math.abs(rooms - filters.rooms);
+
+  const area = Number(details.area) || Number(property.area) || 0;
+  if (area < filters.areaMin) score += Math.min(3, (filters.areaMin - area) / Math.max(filters.areaMin, 1));
+  if (area > filters.areaMax) score += Math.min(3, (area - filters.areaMax) / Math.max(filters.areaMax, 1));
+
+  if (filters.furnished.length) {
+    const furnished = details.furnished || property.furnished;
+    if (!filters.furnished.includes(furnished)) score += 2;
+  }
+
+  return score;
+}
+
 function applyFilters() {
   const f = getFilters();
 
   filteredProperties = allProperties.filter(p => {
     if (f.purpose && p.purpose !== f.purpose) return false;
-    
+
     // فلترة نوع العقار (شقة، فيلا، الخ)
     if (f.types.length) {
-      const pType = p.property_type || p.details?.type || p.type;
+      const pType = getPropertyType(p);
       if (!f.types.includes(pType)) return false;
     }
-    
-    if (f.city && p.city !== f.city) return false;
+
+    if (!propertyMatchesCity(p, f.city)) return false;
 
     const price = Number(p.price) || 0;
     if (price < f.priceMin || price > f.priceMax) return false;
 
     const rooms = Number(p.details?.rooms) || Number(p.rooms) || 0;
-    if (f.rooms && rooms !== f.rooms) return false;
+    if (f.rooms && (f.rooms === 5 ? rooms < 5 : rooms !== f.rooms)) return false;
 
     const area = Number(p.details?.area) || Number(p.area) || 0;
     if (area < f.areaMin || area > f.areaMax) return false;
@@ -69,6 +116,15 @@ function applyFilters() {
 
     return true;
   });
+
+  // عند عدم وجود تطابق كامل، اعرض الأقرب بدل ترك النتائج فارغة.
+  if (!filteredProperties.length && allProperties.length) {
+    filteredProperties = allProperties
+      .map(property => ({ property, score: propertyMatchScore(property, f) }))
+      .sort((a, b) => a.score - b.score || new Date(b.property.createdAt) - new Date(a.property.createdAt))
+      .slice(0, ITEMS_PER_PAGE)
+      .map(result => result.property);
+  }
 
   currentPage = 1;
   sortProperties();
@@ -85,7 +141,7 @@ function sortProperties() {
   }
 
   renderProperties();
-  
+
   if (mapInitialized && document.getElementById('viewMapBtn')?.classList.contains('active')) {
     setTimeout(() => {
       if (window.MapView) window.MapView.addMarkers(filteredProperties || allProperties || []);
@@ -218,21 +274,21 @@ function renderPagination(totalPages) {
   initIcons();
 }
 
-window.goToPage = function(page) {
+window.goToPage = function (page) {
   currentPage = page;
   renderProperties();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
-window.clearAllFilters = function() {
+window.clearAllFilters = function () {
   document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
   document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
-  
+
   const purposeAll = document.querySelector('input[name="purpose"][value=""]');
   if (purposeAll) purposeAll.checked = true;
   const roomsAll = document.querySelector('input[name="rooms"][value=""]');
   if (roomsAll) roomsAll.checked = true;
-  
+
   ['filterCity', 'priceMin', 'priceMax', 'areaMin', 'areaMax'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';

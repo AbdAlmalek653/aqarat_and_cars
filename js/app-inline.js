@@ -6,7 +6,7 @@
 /* ==========================================
    🟢 1. نافذة تصفح الإعلانات (Browse Modal)
    ========================================== */
-(function() {
+(function () {
   'use strict';
 
   function openBrowseModal() {
@@ -47,7 +47,7 @@
     }, 350);
   }
 
-  document.addEventListener('click', function(e) {
+  document.addEventListener('click', function (e) {
     const browseBtn = e.target.closest('#browseBtn');
     if (browseBtn) {
       e.preventDefault(); e.stopPropagation(); openBrowseModal(); return false;
@@ -62,7 +62,7 @@
     }
   }, true);
 
-  document.addEventListener('keydown', function(e) {
+  document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') closeBrowseModal();
   });
 
@@ -74,7 +74,7 @@
 /* ==========================================
    🎯 2. زر إضافة إعلان (Add Listing Modal)
    ========================================== */
-(function() {
+(function () {
   'use strict';
 
   function openAddModal() {
@@ -100,7 +100,7 @@
       if (window.API && API.Users && API.Users.getCurrent) {
         currentUser = API.Users.getCurrent();
       }
-    } catch (e) {}
+    } catch (e) { }
 
     const isLoggedIn = !!(currentUser && currentUser.id);
     const addUrl = `/pages/add-listing.html?type=${type}`;
@@ -113,7 +113,7 @@
     }
   }
 
-  document.addEventListener('click', function(e) {
+  document.addEventListener('click', function (e) {
     if (e.target.closest('#addTypeModal') && !e.target.closest('[data-add-type]') && !e.target.closest('[data-close-add-type]')) {
       return;
     }
@@ -137,7 +137,7 @@
     }
   }, true);
 
-  document.addEventListener('keydown', function(e) {
+  document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') closeAddModal();
   });
 })();
@@ -145,7 +145,7 @@
 /* ==========================================
    🍔 3. قائمة الهامبرغر (فتح/إغلاق القائمة الجانبية)
    ========================================== */
-(function() {
+(function () {
   'use strict';
 
   function initHamburger() {
@@ -179,7 +179,7 @@
       document.body.style.overflow = '';
     }
 
-    toggleBtn.addEventListener('click', function(e) {
+    toggleBtn.addEventListener('click', function (e) {
       e.preventDefault();
       e.stopPropagation();
       if (menu.classList.contains('show')) {
@@ -190,18 +190,18 @@
     });
 
     if (closeBtn) {
-      closeBtn.addEventListener('click', function(e) {
+      closeBtn.addEventListener('click', function (e) {
         e.preventDefault();
         closeMenu();
       });
     }
 
-    overlay.addEventListener('click', function(e) {
+    overlay.addEventListener('click', function (e) {
       e.preventDefault();
       closeMenu();
     });
 
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') closeMenu();
     });
 
@@ -219,7 +219,7 @@
 /* ==========================================
    📱 4. محتوى القائمة الذكية (حسابي / لوحة التحكم / خروج)
    ========================================== */
-(function() {
+(function () {
   'use strict';
 
   function getCurrentUser() {
@@ -263,8 +263,9 @@
         </a>`;
 
       if (isAdmin) {
+        const adminPage = user.role === 'super_admin' ? 'superadmin.html' : 'admin.html';
         html += `
-          <a href="/pages/admin.html" class="mobile-menu-item mobile-menu-item-admin">
+          <a href="/pages/${adminPage}" class="mobile-menu-item mobile-menu-item-admin">
             <i data-lucide="layout-dashboard"></i><span>لوحة التحكم</span>
             <span class="mobile-menu-badge">أدمن</span><i data-lucide="chevron-left" class="mobile-menu-item-arrow"></i>
           </a>`;
@@ -288,7 +289,7 @@
 
     const logoutBtn = document.getElementById('mobileLogoutBtn');
     if (logoutBtn) {
-      logoutBtn.addEventListener('click', async function(e) {
+      logoutBtn.addEventListener('click', async function (e) {
         e.preventDefault(); e.stopPropagation();
         try {
           if (window.API && API.Auth && API.Auth.logout) await API.Auth.logout();
@@ -303,7 +304,7 @@
 
   function run() {
     let attempts = 0;
-    const checkInterval = setInterval(function() {
+    const checkInterval = setInterval(function () {
       attempts++;
       if (window.API && window.API.Users) {
         clearInterval(checkInterval); buildMenuItems();
@@ -316,7 +317,7 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
   else run();
 
-  document.addEventListener('click', function(e) {
+  document.addEventListener('click', function (e) {
     if (e.target.closest('#mobileMenuToggle')) setTimeout(buildMenuItems, 100);
   }, true);
 })();
@@ -324,7 +325,7 @@
 /* ==========================================
    👤 5. تحويل "تسجيل الدخول" إلى "حسابي" في الشريط السفلي
    ========================================== */
-(function() {
+(function () {
   'use strict';
 
   function getCurrentUser() {
@@ -340,7 +341,7 @@
     const user = getCurrentUser();
     const isLoggedIn = !!(user && (user.id || user.email));
     const accountLink = document.querySelector('.bottom-nav-item[href*="account"], .bottom-nav-item[href*="login"]');
-    
+
     if (!accountLink) return;
     const textSpan = accountLink.querySelector('span');
     if (!textSpan) return;
@@ -360,13 +361,13 @@
   function run() {
     updateBottomNav();
     let attempts = 0;
-    const interval = setInterval(function() {
+    const interval = setInterval(function () {
       attempts++; updateBottomNav();
       if (attempts >= 10) clearInterval(interval);
     }, 300);
 
     window.addEventListener('storage', updateBottomNav);
-    const checkUserChange = setInterval(function() {
+    const checkUserChange = setInterval(function () {
       const currentUser = localStorage.getItem('user');
       if (currentUser !== window.__lastUserState) {
         window.__lastUserState = currentUser; updateBottomNav();

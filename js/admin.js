@@ -55,7 +55,7 @@ async function adminRequest(path, options) {
       headers: { 'Content-Type': 'application/json' },
       ...options
     });
-    
+
     const contentType = response.headers.get("content-type");
     if (!contentType || !contentType.includes("application/json")) {
       throw new Error(`الخادم أرجع استجابة غير صالحة (${response.status}). تأكد من وجود ملف ${path}`);
@@ -82,13 +82,13 @@ async function updateAdminListing(id, changes) {
       method: 'POST',
       body: JSON.stringify({ id, ...changes })
     });
-    
+
     const index = allListings.findIndex(l => l.id === id);
     if (index > -1) {
       Object.assign(allListings[index], changes);
       statsCache = null; // ✅ مسح الكاش لتحديث الإحصائيات
     }
-    
+
     renderOverview();
     renderListingsTable();
     alert('✅ تم حفظ التعديل بنجاح');
@@ -97,16 +97,16 @@ async function updateAdminListing(id, changes) {
   }
 }
 
-window.editAdminListing = async function(id, currentTitle, currentPrice) {
+window.editAdminListing = async function (id, currentTitle, currentPrice) {
   const newTitle = prompt('عنوان الإعلان:', currentTitle || '');
   if (newTitle === null) return;
-  
+
   const newPrice = prompt('السعر:', currentPrice || '0');
   if (newPrice === null) return;
 
-  await updateAdminListing(id, { 
-    title: newTitle.trim(), 
-    price: newPrice.trim() 
+  await updateAdminListing(id, {
+    title: newTitle.trim(),
+    price: newPrice.trim()
   });
 };
 
@@ -127,9 +127,9 @@ async function updateAdminUser(id, changes) {
    التحقق من الصلاحيات
    ========================================== */
 async function checkAccess() {
-  const dashboardEl = document.getElementById('adminDashboard');
-  const noAccessEl = document.getElementById('noAccess');
-  
+  const dashboardEl = document.getElementById('adminDashboard') || document.getElementById('dashboardContent');
+  const noAccessEl = document.getElementById('noAccess') || document.getElementById('accessDenied');
+
   if (!dashboardEl || !noAccessEl) return false;
 
   try {
@@ -141,9 +141,10 @@ async function checkAccess() {
       return false;
     }
 
-    dashboardEl.style.display = 'grid';
-    document.getElementById('adminName').textContent = localUser.name || 'أدمن';
-    document.getElementById('adminAvatar').textContent = (localUser.name || 'م').charAt(0);
+    dashboardEl.hidden = false;
+    dashboardEl.style.display = dashboardEl.id === 'adminDashboard' ? 'grid' : '';
+    document.getElementById('adminName')?.replaceChildren(document.createTextNode(localUser.name || 'أدمن'));
+    document.getElementById('adminAvatar')?.replaceChildren(document.createTextNode((localUser.name || 'م').charAt(0)));
 
     const roleEl = document.getElementById('adminRole');
     if (roleEl) {
@@ -161,7 +162,7 @@ async function checkAccess() {
     }
 
     const serverUser = await API.Users.validateSession();
-    
+
     if (!serverUser) {
       console.warn('⚠️ الجلسة منتهية، إعادة التوجيه لتسجيل الدخول...');
       window.location.href = 'login.html';
@@ -169,8 +170,8 @@ async function checkAccess() {
     }
 
     currentAdmin = serverUser;
-    document.getElementById('adminName').textContent = serverUser.name || 'أدمن';
-    document.getElementById('adminAvatar').textContent = (serverUser.name || 'م').charAt(0);
+    document.getElementById('adminName')?.replaceChildren(document.createTextNode(serverUser.name || 'أدمن'));
+    document.getElementById('adminAvatar')?.replaceChildren(document.createTextNode((serverUser.name || 'م').charAt(0)));
 
     return true;
 
@@ -190,9 +191,9 @@ async function loadData() {
 
     // ✅ يمكنك لاحقاً تعديل هذا ليقبل Pagination من السيرفر
     const listingsResult = await adminRequest('admin_listings.php');
-    const usersResult = (currentAdmin && currentAdmin.role === 'super_admin') 
-        ? await adminRequest('admin_users.php') 
-        : { success: true };
+    const usersResult = (currentAdmin && currentAdmin.role === 'super_admin')
+      ? await adminRequest('admin_users.php')
+      : { success: true };
 
     let rawListings = listingsResult.listings || listingsResult.data || listingsResult.items || [];
     if (!Array.isArray(rawListings)) rawListings = [];
@@ -210,7 +211,7 @@ async function loadData() {
     });
 
     allUsers = rawUsers;
-    
+
     // ✅ حساب الإحصائيات وترتيب الأحدث مرة واحدة فقط
     prepareStatsAndRecent();
 
@@ -458,18 +459,19 @@ function renderUsersTable() {
   tbody.innerHTML = displayUsers.map(u => {
     const role = u.role || 'user';
     const roleText = roleLabels[role] || role;
-    const createdAt = u.createdAt || u.created_at;
-    const created = createdAt ? new Date(createdAt).toLocaleDateString('ar-EG') : '—';
     const isSelf = u.id === currentAdmin.id;
     const userId = escapeHtml(u.id);
     const isActive = u.is_active !== false;
 
     return `<tr>
-      <td><div class="admin-table-title">${escapeHtml(u.name)}</div></td>
+      <td>
+        <div class="admin-table-title">${escapeHtml(u.name)}</div>
+        <small class="muted">${escapeHtml(u.phone || '—')}</small>
+      </td>
       <td>${escapeHtml(u.email)}</td>
-      <td>${escapeHtml(u.phone || '—')}</td>
       <td><span class="admin-tag ${role}">${escapeHtml(roleText)}</span></td>
-      <td>${created}</td>
+      <td>${Number(u.listings_count) || 0}</td>
+      <td><span class="admin-tag ${isActive ? 'active' : 'disabled'}">${isActive ? 'فعال' : 'معطل'}</span></td>
       <td>
         <div class="admin-actions">
           ${!isSelf ? `
@@ -508,19 +510,19 @@ window.adminDeleteUser = async function (id) {
 
   try {
     const result = await adminRequest('admin_delete_user.php', {
-        method: 'POST',
-        body: JSON.stringify({ id })
+      method: 'POST',
+      body: JSON.stringify({ id })
     });
 
     if (result.success) {
-        allUsers = allUsers.filter(u => u.id !== id);
-        statsCache = null;
-        prepareStatsAndRecent();
-        renderOverview();
-        renderUsersTable();
-        alert('✅ تم حذف المستخدم بنجاح');
+      allUsers = allUsers.filter(u => u.id !== id);
+      statsCache = null;
+      prepareStatsAndRecent();
+      renderOverview();
+      renderUsersTable();
+      alert('✅ تم حذف المستخدم بنجاح');
     } else {
-        alert(result.error || 'فشل حذف المستخدم');
+      alert(result.error || 'فشل حذف المستخدم');
     }
   } catch (error) {
     console.error('❌ خطأ أثناء حذف المستخدم:', error);
@@ -600,8 +602,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   initIcons();
 
   if (typeof API === 'undefined') {
-      console.error('❌ خطأ قاتل: ملف api.js لم يتم تحميله بشكل صحيح!');
-      return;
+    console.error('❌ خطأ قاتل: ملف api.js لم يتم تحميله بشكل صحيح!');
+    return;
   }
 
   const hasAccess = await checkAccess();
@@ -625,7 +627,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 /* ==========================================
    🔍 البحث برقم الإعلان (محسّن)
    ========================================== */
-(function() {
+(function () {
   'use strict';
 
   function initListingIdSearch() {
@@ -637,20 +639,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     searchBtn.addEventListener('click', performSearch);
 
-    searchInput.addEventListener('keydown', function(e) {
+    searchInput.addEventListener('keydown', function (e) {
       if (e.key === 'Enter') {
         e.preventDefault();
         performSearch();
       }
     });
 
-    searchInput.addEventListener('input', function() {
+    searchInput.addEventListener('input', function () {
       this.value = this.value.trim().replace(/\s+/g, '');
     });
 
     async function performSearch() {
       let id = searchInput.value.trim();
-      
+
       if (!id) {
         showError('الرجاء إدخال رقم الإعلان');
         return;
@@ -659,7 +661,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (!id.startsWith('L') && !id.startsWith('l')) {
         id = 'L' + id;
       }
-      
+
       id = id.replace(/^l/i, 'L');
 
       showLoading();
@@ -667,7 +669,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       try {
         const response = await fetch(`../api/listing.php?id=${encodeURIComponent(id)}`);
-        
+
         if (!response.ok) {
           if (response.status === 404) {
             showNotFound(id);
@@ -678,7 +680,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const data = await response.json();
         const listing = data.listing || data.data || data;
-        
+
         if (!listing || (!listing.id && !listing.title)) {
           showNotFound(id);
           return;
@@ -739,10 +741,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       const purpose = listing.purpose === 'sale' ? 'للبيع' : 'للإيجار';
       const city = listing.city || '';
       const price = listing.price ? Number(listing.price).toLocaleString('en-US') + ' ' + (listing.currency || 'USD') : '—';
-      
+
       const imageUrl = buildAdminImageUrl(listing, 0, 'medium');
 
-      const imageHTML = imageUrl 
+      const imageHTML = imageUrl
         ? `<img 
              src="${imageUrl}" 
              alt="${safeTitle}"
@@ -786,7 +788,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           </a>
         </div>
       `;
-      
+
       if (window.lucide) window.lucide.createIcons();
     }
   }

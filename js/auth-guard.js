@@ -3,7 +3,7 @@
    الإصدار: 2.0 (محسّن للأداء + بدون تكرار)
    ========================================== */
 
-(function() {
+(function () {
   'use strict';
 
   /* ==========================================
@@ -16,7 +16,7 @@
     window.__authGuardAddProtected = true;
 
     // ✅ مستمع واحد فقط على الـ document
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
       const btn = e.target.closest('a[href*="add-listing.html"]');
       if (!btn) return;
 
@@ -33,7 +33,7 @@
           sessionStorage.setItem('souq_redirect_after_login', currentPage);
           sessionStorage.setItem('souq_login_message',
             'يجب تسجيل الدخول أولاً لإضافة إعلان');
-        } catch (err) {}
+        } catch (err) { }
 
         window.location.href = isInPages ? 'login.html' : 'pages/login.html';
         return false;
@@ -52,7 +52,7 @@
     if (!window.API || !API.Users || typeof API.Users.isAdmin !== 'function') {
       // ✅ إعادة محاولة محدودة (حتى 2 ثانية)
       if (attempt < 10) {
-        setTimeout(function() { injectAdminButton(attempt + 1); }, 200);
+        setTimeout(function () { injectAdminButton(attempt + 1); }, 200);
       }
       return;
     }
@@ -66,7 +66,9 @@
     if (!headerActions) return;
 
     const isInPages = window.location.pathname.includes('/pages/');
-    const adminLink = isInPages ? 'admin.html' : 'pages/admin.html';
+    const isSuperAdmin = typeof API.Users.isSuperAdmin === 'function' && API.Users.isSuperAdmin();
+    const adminPage = isSuperAdmin ? 'superadmin.html' : 'admin.html';
+    const adminLink = isInPages ? adminPage : `pages/${adminPage}`;
 
     const btn = document.createElement('a');
     btn.href = adminLink;
@@ -98,7 +100,7 @@
 
     if (!window.API || !API.Users || typeof API.Users.isAdmin !== 'function') {
       if (attempt < 10) {
-        setTimeout(function() { showStaticAdminButton(attempt + 1); }, 200);
+        setTimeout(function () { showStaticAdminButton(attempt + 1); }, 200);
       }
       return;
     }
