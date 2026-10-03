@@ -13,10 +13,6 @@
 <link rel="stylesheet" href="../css/mobile-tables.css">
 
 <style>
-/* ==========================================================
-   لوحة السوبر أدمن - التصميم الاحترافي
-   ========================================================== */
-
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
@@ -49,7 +45,6 @@ body {
   min-height: 100vh;
 }
 
-/* ===================== Header ===================== */
 .admin-header {
   background: linear-gradient(135deg, rgba(26,36,56,0.95), rgba(15,23,42,0.98));
   backdrop-filter: blur(20px);
@@ -154,14 +149,12 @@ body {
   box-shadow: 0 6px 20px rgba(59,130,246,0.5);
 }
 
-/* ===================== Shell ===================== */
 .admin-shell {
   max-width: 1600px;
   margin: 0 auto;
   padding: 28px 24px 60px;
 }
 
-/* ===================== Welcome ===================== */
 .welcome-banner {
   background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(139,92,246,0.1));
   border: 1px solid rgba(59,130,246,0.25);
@@ -213,7 +206,6 @@ body {
 
 .welcome-subtitle { color: var(--text-secondary); font-size: 14px; }
 
-/* ===================== Stats ===================== */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -295,7 +287,6 @@ body {
   margin-top: 4px;
 }
 
-/* ===================== Section Card ===================== */
 .admin-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -335,7 +326,14 @@ body {
 .card-heading h2 { font-size: 17px; font-weight: 800; margin-bottom: 3px; }
 .card-heading p { font-size: 12.5px; color: var(--text-muted); }
 
-/* ===================== Filter / Select ===================== */
+/* ✅ فلاتر متعددة */
+.card-heading-filters {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
 .admin-select {
   padding: 9px 32px 9px 14px;
   background: var(--bg-secondary) url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e") no-repeat left 10px center;
@@ -360,7 +358,6 @@ body {
   background-color: var(--bg-hover);
 }
 
-/* ===================== Table ===================== */
 .table-wrap {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
@@ -407,7 +404,6 @@ body {
   font-size: 14px;
 }
 
-/* ===================== Listing cell ===================== */
 .listing-cell { display: flex; flex-direction: column; gap: 4px; }
 
 .listing-title {
@@ -425,7 +421,6 @@ body {
   text-align: right;
 }
 
-/* ===================== Badges ===================== */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -448,7 +443,6 @@ body {
 .badge-super { background: linear-gradient(135deg, #F59E0B, #B45309); color: white; }
 .badge-user { background: rgba(148,163,184,0.15); color: #94A3B8; }
 
-/* ===================== Actions ===================== */
 .actions-cell { display: flex; gap: 6px; align-items: center; }
 
 .icon-btn {
@@ -494,7 +488,6 @@ body {
   font-size: 13px;
 }
 
-/* ===================== Message ===================== */
 .admin-message {
   max-width: 600px;
   margin: 60px auto;
@@ -515,7 +508,6 @@ body {
 .admin-message h2 { font-size: 22px; font-weight: 800; margin-bottom: 10px; }
 .admin-message p { color: var(--text-secondary); margin-bottom: 24px; }
 
-/* ===================== Toast ===================== */
 .admin-toast {
   position: fixed;
   bottom: 30px;
@@ -541,7 +533,6 @@ body {
   transform: translateX(-50%) translateY(0);
 }
 
-/* ===================== Responsive ===================== */
 @media (max-width: 768px) {
   .admin-header-inner { padding: 12px 16px; }
   .admin-logo-text { display: none; }
@@ -556,12 +547,13 @@ body {
   .stat-icon { width: 48px; height: 48px; }
   .stat-icon svg { width: 22px; height: 22px; }
   .card-heading { padding: 16px; flex-direction: column; align-items: stretch; }
+  .card-heading-filters { flex-direction: column; width: 100%; }
+  .card-heading-filters .admin-select { width: 100%; }
   .admin-select { width: 100%; }
   .admin-table th, .admin-table td { padding: 12px 10px; font-size: 12.5px; }
   .icon-btn { width: 30px; height: 30px; }
 }
 
-/* ===================== Scrollbar ===================== */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: var(--bg-secondary); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
@@ -570,7 +562,6 @@ body {
 </head>
 <body data-dashboard-role="super_admin">
 
-<!-- ===================== Header ===================== -->
 <header class="admin-header">
   <div class="admin-header-inner">
     <a class="admin-logo" href="../index.html">
@@ -594,10 +585,8 @@ body {
   </div>
 </header>
 
-<!-- ===================== Shell ===================== -->
 <main class="admin-shell">
 
-  <!-- رسالة عدم الصلاحية -->
   <div id="accessDenied" class="admin-message" hidden>
     <i data-lucide="shield-alert"></i>
     <h2>غير مصرح بالدخول</h2>
@@ -608,10 +597,8 @@ body {
     </a>
   </div>
 
-  <!-- محتوى اللوحة -->
   <div id="dashboardContent" hidden>
 
-    <!-- Welcome Banner -->
     <div class="welcome-banner">
       <div class="welcome-text">
         <div class="welcome-badge">
@@ -627,7 +614,6 @@ body {
       </button>
     </div>
 
-    <!-- Stats -->
     <section class="stats-grid">
       <div class="stat-card blue">
         <div class="stat-card-inner">
@@ -667,7 +653,6 @@ body {
       </div>
     </section>
 
-    <!-- Listings Management -->
     <section class="admin-card">
       <div class="card-heading">
         <div class="card-heading-left">
@@ -677,14 +662,21 @@ body {
             <p>مراجعة الإعلانات وتغيير حالتها</p>
           </div>
         </div>
-        <select id="statusFilter" class="admin-select">
-          <option value="">كل الإعلانات</option>
-          <option value="pending">قيد المراجعة</option>
-          <option value="active">نشطة</option>
-          <option value="rejected">مرفوضة</option>
-          <option value="sold">مباعة</option>
-          <option value="rented">مؤجرة</option>
-        </select>
+        <div class="card-heading-filters">
+          <select id="typeFilter" class="admin-select" title="نوع الإعلان">
+            <option value="all">جميع الإعلانات</option>
+            <option value="property">عقارات فقط</option>
+            <option value="car">سيارات فقط</option>
+          </select>
+          <select id="statusFilter" class="admin-select" title="حالة الإعلان">
+            <option value="">كل الحالات</option>
+            <option value="pending">قيد المراجعة</option>
+            <option value="active">نشطة</option>
+            <option value="rejected">مرفوضة</option>
+            <option value="sold">مباعة</option>
+            <option value="rented">مؤجرة</option>
+          </select>
+        </div>
       </div>
       <div class="table-wrap">
         <table class="admin-table">
@@ -705,7 +697,6 @@ body {
       </div>
     </section>
 
-    <!-- Users Management -->
     <section class="admin-card">
       <div class="card-heading">
         <div class="card-heading-left">
@@ -715,6 +706,11 @@ body {
             <p>تعديل الأدوار وتفعيل أو تعطيل الحسابات</p>
           </div>
         </div>
+        <select id="roleFilter" class="admin-select" title="نوع المستخدم">
+          <option value="all">جميع المستخدمين</option>
+          <option value="admin">الأدمن فقط</option>
+          <option value="user">المستخدمين فقط</option>
+        </select>
       </div>
       <div class="table-wrap">
         <table class="admin-table">

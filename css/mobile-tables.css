@@ -1,10 +1,11 @@
 /* ============================================================
-   mobile-tables.css - تصميم احترافي Premium SaaS للجوال
+   mobile-tables.css - جداول متجاوبة للجوال
+   الإصدار: 3.0 (يدعم جداول الإعلانات + المستخدمين)
    ============================================================ */
 
 @media (max-width: 768px) {
 
-  /* ===================== الجدول ===================== */
+  /* ===================== إعدادات عامة ===================== */
   .admin-table-wrap,
   .table-wrap {
     overflow: visible !important;
@@ -18,34 +19,32 @@
     min-width: 0 !important;
     width: 100% !important;
     border-collapse: separate !important;
-    border-spacing: 0 10px !important;
+    border-spacing: 0 12px !important;
     background: transparent !important;
   }
 
   .admin-table thead { display: none !important; }
   .admin-table tbody { display: block !important; }
 
-  /* ===================== البطاقة الاحترافية ===================== */
+  /* ===================== البطاقة ===================== */
   .admin-table tbody tr {
-    display: grid !important;
-    grid-template-columns: 1fr auto !important;
-    grid-template-rows: auto auto auto !important;
+    display: flex !important;
+    flex-direction: column !important;
     background: linear-gradient(145deg, #1E2A42 0%, #161F33 100%) !important;
     border: 1px solid rgba(59, 130, 246, 0.15) !important;
     border-radius: 16px !important;
     padding: 16px !important;
-    margin-bottom: 10px !important;
-    gap: 12px 8px !important;
+    margin-bottom: 0 !important;
+    gap: 10px !important;
     position: relative !important;
     overflow: hidden !important;
     box-shadow:
       0 1px 3px rgba(0, 0, 0, 0.2),
       0 8px 24px rgba(0, 0, 0, 0.15),
       inset 0 1px 0 rgba(255, 255, 255, 0.03) !important;
-    transition: all 0.3s ease !important;
   }
 
-  /* ✨ شريط زخرفي علوي متدرج */
+  /* ✨ شريط زخرفي علوي */
   .admin-table tbody tr::before {
     content: '' !important;
     position: absolute !important;
@@ -57,45 +56,25 @@
       #3B82F6 0%,
       #8B5CF6 50%,
       #EC4899 100%) !important;
-    border-radius: 16px 16px 0 0 !important;
   }
 
-  /* ✨ تأثير لمعان عند اللمس */
-  .admin-table tbody tr::after {
-    content: '' !important;
-    position: absolute !important;
-    top: 0 !important;
-    right: 0 !important;
-    width: 200px !important;
-    height: 200px !important;
-    background: radial-gradient(circle,
-      rgba(59, 130, 246, 0.08) 0%,
-      transparent 70%) !important;
-    pointer-events: none !important;
-    border-radius: 50% !important;
-    transform: translate(50%, -50%) !important;
-  }
-
-  .admin-table tbody tr:active {
-    transform: scale(0.99) !important;
-  }
-
-  /* ===================== اخفاء الحدود الافتراضية ===================== */
   .admin-table tbody td {
     padding: 0 !important;
     border: none !important;
     background: transparent !important;
     min-height: auto !important;
     display: block !important;
+    width: 100% !important;
   }
 
-  /* ===================== 1. العنوان الرئيسي (السطر 1) ===================== */
+  /* ===================== 1. الخلية الأولى (العنوان/الاسم) ===================== */
   .admin-table tbody td:nth-child(1) {
-    grid-column: 1 / -1 !important;
-    grid-row: 1 !important;
-    padding-bottom: 14px !important;
-    position: relative !important;
-    z-index: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+    padding-bottom: 12px !important;
+    border-bottom: 1px dashed rgba(42, 54, 80, 0.5) !important;
+    width: 100% !important;
   }
 
   .admin-table tbody td:nth-child(1)::before {
@@ -103,293 +82,167 @@
     display: none !important;
   }
 
+  /* عنوان الإعلان / اسم المستخدم */
   .admin-table tbody td:nth-child(1) .listing-cell {
     display: flex !important;
     flex-direction: column !important;
-    gap: 5px !important;
+    gap: 6px !important;
+    width: 100% !important;
   }
 
-  /* ✨ العنوان بتصميم فاخر */
   .admin-table tbody td:nth-child(1) .listing-title,
   .admin-table tbody td:nth-child(1) .admin-table-title {
-    font-size: 15px !important;
+    font-size: 16px !important;
     font-weight: 800 !important;
     color: #F1F5F9 !important;
     margin: 0 !important;
     line-height: 1.4 !important;
-    letter-spacing: -0.2px !important;
     white-space: normal !important;
-    display: -webkit-box !important;
-    -webkit-line-clamp: 2 !important;
-    -webkit-box-orient: vertical !important;
-    overflow: hidden !important;
+    word-break: break-word !important;
   }
 
-  /* ✨ رقم الإعلان بتصميم شارة صغيرة */
+  /* ID الإعلان */
   .admin-table tbody td:nth-child(1) .listing-id,
   .admin-table tbody td:nth-child(1) .admin-table-sub {
     display: inline-flex !important;
     align-items: center !important;
-    gap: 4px !important;
-    font-size: 10px !important;
+    font-size: 10.5px !important;
     color: #94A3B8 !important;
     font-family: 'Consolas', 'Monaco', monospace !important;
     direction: ltr !important;
-    margin: 0 !important;
-    padding: 3px 8px !important;
+    padding: 4px 10px !important;
     background: rgba(148, 163, 184, 0.08) !important;
     border: 1px solid rgba(148, 163, 184, 0.15) !important;
     border-radius: 6px !important;
     width: fit-content !important;
-    letter-spacing: 0.5px !important;
-  }
-
-  .admin-table tbody td:nth-child(1) .listing-id::before {
-    content: '🆔' !important;
-    font-size: 9px !important;
-  }
-
-  /* ===================== 2. صف المعلومات (السطر 2) ===================== */
-  .admin-table tbody td:nth-child(2),
-  .admin-table tbody td:nth-child(3),
-  .admin-table tbody td:nth-child(4) {
-    grid-row: 2 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    padding: 10px 8px !important;
-    background: rgba(30, 41, 59, 0.6) !important;
-    backdrop-filter: blur(10px) !important;
-    border: 1px solid rgba(148, 163, 184, 0.1) !important;
-    border-radius: 10px !important;
-    font-size: 12px !important;
-    min-height: 44px !important;
-    position: relative !important;
-    transition: all 0.2s ease !important;
-  }
-
-  /* ===== المالك ===== */
-  .admin-table tbody td:nth-child(2) {
-    grid-column: 1 !important;
-    flex-direction: row !important;
-    gap: 4px !important;
-  }
-
-  .admin-table tbody td:nth-child(2)::before {
-    content: '' !important;
-    display: inline-block !important;
-    width: 14px !important;
-    height: 14px !important;
-    background: linear-gradient(135deg, #3B82F6, #1E40AF) !important;
-    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E") center/contain no-repeat !important;
-    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E") center/contain no-repeat !important;
-    flex-shrink: 0 !important;
-  }
-
-  .admin-table tbody td:nth-child(2) .seller-name {
-    font-size: 11.5px !important;
-    font-weight: 700 !important;
-    color: #CBD5E1 !important;
-    white-space: nowrap !important;
+    max-width: 100% !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
-    max-width: 100% !important;
-  }
-
-  /* ===== النوع (Badge) ===== */
-  .admin-table tbody td:nth-child(3) {
-    grid-column: 2 !important;
-    padding: 10px 12px !important;
-  }
-
-  .admin-table tbody td:nth-child(3) .badge {
-    font-size: 10.5px !important;
-    padding: 5px 10px !important;
-    font-weight: 800 !important;
-    letter-spacing: 0.3px !important;
-    border-radius: 8px !important;
     white-space: nowrap !important;
-    position: relative !important;
-    overflow: hidden !important;
   }
 
-  /* ✨ تأثير لمعان على الـ badge */
-  .admin-table tbody td:nth-child(3) .badge::before {
-    content: '' !important;
-    position: absolute !important;
-    top: 0 !important;
-    left: -100% !important;
+  /* ===================== 2. الخلايا الوسطى (معلومات) ===================== */
+
+  /* ✅ كل الخلايا من 2 إلى 5 تكون في صف واحد (grid) */
+  .admin-table tbody tr {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  .admin-table tbody td:nth-child(1) {
+    grid-column: 1 / -1 !important;
     width: 100% !important;
-    height: 100% !important;
-    background: linear-gradient(90deg,
-      transparent 0%,
-      rgba(255, 255, 255, 0.15) 50%,
-      transparent 100%) !important;
-    animation: shine 3s ease-in-out infinite !important;
   }
 
-  @keyframes shine {
-    0%, 100% { left: -100%; }
-    50% { left: 100%; }
-  }
-
-  /* ===== السعر ===== */
-  .admin-table tbody td:nth-child(4) {
-    grid-column: 3 !important;
-    background: linear-gradient(135deg,
-      rgba(245, 158, 11, 0.12),
-      rgba(245, 158, 11, 0.04)) !important;
-    border-color: rgba(245, 158, 11, 0.25) !important;
-  }
-
-  .admin-table tbody td:nth-child(4)::before {
-    content: '' !important;
-    display: none !important;
-  }
-
-  .admin-table tbody td:nth-child(4) .price-tag {
-    font-size: 13px !important;
-    font-weight: 900 !important;
-    color: #FBBF24 !important;
-    white-space: nowrap !important;
-    letter-spacing: -0.3px !important;
-    text-shadow: 0 1px 8px rgba(251, 191, 36, 0.3) !important;
-  }
-
-  /* ===================== 3. الحالة + الإجراءات (السطر 3) ===================== */
+  /* المالك / البريد / النوع / الدور / الحالة */
+  .admin-table tbody td:nth-child(2),
+  .admin-table tbody td:nth-child(3),
+  .admin-table tbody td:nth-child(4),
   .admin-table tbody td:nth-child(5) {
-    grid-column: 1 !important;
-    grid-row: 3 !important;
     display: flex !important;
-    align-items: center !important;
-    padding-top: 4px !important;
-    position: relative !important;
-    z-index: 1 !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    padding: 10px 12px !important;
+    background: rgba(30, 41, 59, 0.6) !important;
+    border: 1px solid rgba(148, 163, 184, 0.1) !important;
+    border-radius: 10px !important;
+    min-height: 58px !important;
+    gap: 4px !important;
+    width: 100% !important;
   }
 
+  /* حذف ::before القديم */
+  .admin-table tbody td:nth-child(2)::before,
+  .admin-table tbody td:nth-child(3)::before,
+  .admin-table tbody td:nth-child(4)::before,
   .admin-table tbody td:nth-child(5)::before {
     content: '' !important;
     display: none !important;
   }
 
-  /* ✨ Select الحالة بتصميم احترافي */
-  .admin-table tbody td:nth-child(5) .admin-select {
-    font-size: 11px !important;
+  /* Labels موحدة لكل خلية */
+  .admin-table tbody td:nth-child(2)::after {
+    content: 'المالك' !important;
+    order: -1 !important;
+    font-size: 10px !important;
+    color: #64748B !important;
     font-weight: 700 !important;
-    padding: 7px 26px 7px 10px !important;
-    height: 34px !important;
-    min-width: 110px !important;
-    max-width: 150px !important;
-    border-radius: 10px !important;
-    background: rgba(15, 23, 42, 0.8) !important;
-    border: 1px solid rgba(59, 130, 246, 0.2) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    margin-bottom: 2px !important;
+  }
+
+  .admin-table tbody td:nth-child(3)::after {
+    content: 'النوع / البريد' !important;
+    order: -1 !important;
+    font-size: 10px !important;
+    color: #64748B !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    margin-bottom: 2px !important;
+  }
+
+  .admin-table tbody td:nth-child(4)::after {
+    content: 'السعر / الدور' !important;
+    order: -1 !important;
+    font-size: 10px !important;
+    color: #64748B !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    margin-bottom: 2px !important;
+  }
+
+  .admin-table tbody td:nth-child(5)::after {
+    content: 'الحالة' !important;
+    order: -1 !important;
+    font-size: 10px !important;
+    color: #64748B !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    margin-bottom: 2px !important;
+  }
+
+  /* نص المالك */
+  .admin-table tbody td:nth-child(2) .seller-name,
+  .admin-table tbody td:nth-child(2) {
+    font-size: 13px !important;
+    font-weight: 700 !important;
     color: #E2E8F0 !important;
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2) !important;
-    transition: all 0.2s ease !important;
   }
 
-  .admin-table tbody td:nth-child(5) .admin-select:focus {
-    border-color: #3B82F6 !important;
-    box-shadow:
-      inset 0 1px 2px rgba(0, 0, 0, 0.2),
-      0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+  /* ===================== النصوص في الخلايا ===================== */
+  .admin-table tbody td .seller-name {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #E2E8F0 !important;
   }
 
-  /* ===== الإجراءات ===== */
-  .admin-table tbody td:nth-child(6) {
-    grid-column: 2 / -1 !important;
-    grid-row: 3 !important;
-    display: flex !important;
-    justify-content: flex-end !important;
-    align-items: center !important;
-    padding-top: 4px !important;
-    gap: 6px !important;
-    position: relative !important;
-    z-index: 1 !important;
-  }
-
-  .admin-table tbody td:nth-child(6)::before {
-    content: '' !important;
-    display: none !important;
-  }
-
-  /* مجموعة الأزرار */
-  .admin-table tbody td:nth-child(6) .actions-cell,
-  .admin-table tbody td:nth-child(6) .admin-actions {
-    display: flex !important;
-    justify-content: flex-end !important;
-    gap: 6px !important;
-    flex-wrap: nowrap !important;
-    width: auto !important;
-  }
-
-  /* ✨ الأزرار بتصميم Premium */
-  .admin-table tbody td:nth-child(6) .icon-btn,
-  .admin-table tbody td:nth-child(6) .admin-icon-btn {
-    width: 36px !important;
-    height: 36px !important;
-    border-radius: 10px !important;
-    flex-shrink: 0 !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    background: linear-gradient(145deg, #1E293B 0%, #0F172A 100%) !important;
-    border: 1px solid rgba(148, 163, 184, 0.15) !important;
+  /* الإيميل */
+  .admin-table tbody td:nth-child(3) {
+    font-size: 11.5px !important;
     color: #94A3B8 !important;
-    transition: all 0.25s ease !important;
-    box-shadow:
-      0 2px 4px rgba(0, 0, 0, 0.15),
-      inset 0 1px 0 rgba(255, 255, 255, 0.03) !important;
-    position: relative !important;
-    overflow: hidden !important;
-    cursor: pointer !important;
+    word-break: break-all !important;
+    line-height: 1.4 !important;
+    direction: ltr !important;
+    text-align: right !important;
   }
 
-  /* ✨ تأثير الضغط */
-  .admin-table tbody td:nth-child(6) .icon-btn:active,
-  .admin-table tbody td:nth-child(6) .admin-icon-btn:active {
-    transform: scale(0.92) !important;
-    box-shadow:
-      0 1px 2px rgba(0, 0, 0, 0.2),
-      inset 0 2px 4px rgba(0, 0, 0, 0.1) !important;
-  }
-
-  .admin-table tbody td:nth-child(6) .icon-btn svg,
-  .admin-table tbody td:nth-child(6) .admin-icon-btn svg {
-    width: 15px !important;
-    height: 15px !important;
-    transition: all 0.2s ease !important;
-  }
-
-  /* زر العرض - أزرق */
-  .admin-table tbody td:nth-child(6) .icon-btn:not(.danger):nth-child(1) {
-    color: #60A5FA !important;
-    border-color: rgba(96, 165, 250, 0.25) !important;
-    background: linear-gradient(145deg,
-      rgba(59, 130, 246, 0.12),
-      rgba(59, 130, 246, 0.04)) !important;
-  }
-
-  /* زر التعديل - برتقالي */
-  .admin-table tbody td:nth-child(6) .icon-btn:not(.danger):nth-child(2) {
+  /* السعر */
+  .admin-table tbody td .price-tag {
+    font-size: 14px !important;
+    font-weight: 900 !important;
     color: #FBBF24 !important;
-    border-color: rgba(251, 191, 36, 0.25) !important;
-    background: linear-gradient(145deg,
-      rgba(245, 158, 11, 0.12),
-      rgba(245, 158, 11, 0.04)) !important;
+    white-space: nowrap !important;
+    text-shadow: 0 1px 8px rgba(251, 191, 36, 0.3) !important;
   }
 
-  /* زر الحذف - أحمر */
-  .admin-table tbody td:nth-child(6) .icon-btn.danger {
-    color: #F87171 !important;
-    border-color: rgba(248, 113, 113, 0.25) !important;
-    background: linear-gradient(145deg,
-      rgba(239, 68, 68, 0.12),
-      rgba(239, 68, 68, 0.04)) !important;
-  }
-
-  /* ===================== 4. Badges احترافية ===================== */
-  .badge {
+  /* ===================== Badges ===================== */
+  .admin-table tbody td .badge {
     font-size: 10.5px !important;
     padding: 5px 11px !important;
     font-weight: 800 !important;
@@ -400,83 +253,123 @@
     align-items: center !important;
     gap: 4px !important;
     border: 1px solid !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+    width: fit-content !important;
+    max-width: 100% !important;
   }
 
-  /* Badge النوع - Property */
-  .badge-property {
-    background: linear-gradient(135deg,
-      rgba(59, 130, 246, 0.15),
-      rgba(59, 130, 246, 0.05)) !important;
-    color: #60A5FA !important;
-    border-color: rgba(96, 165, 250, 0.3) !important;
+  /* ===================== Selects ===================== */
+  .admin-table tbody td .admin-select,
+  .admin-table tbody td select {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    padding: 6px 26px 6px 10px !important;
+    height: 34px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    border-radius: 9px !important;
+    background: rgba(15, 23, 42, 0.9) !important;
+    border: 1px solid rgba(59, 130, 246, 0.25) !important;
+    color: #E2E8F0 !important;
+    text-align: right !important;
   }
 
-  /* Badge النوع - Car */
-  .badge-car {
-    background: linear-gradient(135deg,
-      rgba(16, 185, 129, 0.15),
-      rgba(16, 185, 129, 0.05)) !important;
-    color: #34D399 !important;
-    border-color: rgba(52, 211, 153, 0.3) !important;
+  /* ===================== 3. خلية الإجراءات (كامل العرض) ===================== */
+  .admin-table tbody td:last-child,
+  .admin-table tbody td:nth-child(6) {
+    grid-column: 1 / -1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 12px 0 0 0 !important;
+    border-top: 1px solid rgba(42, 54, 80, 0.5) !important;
+    margin-top: 4px !important;
+    min-height: auto !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    width: 100% !important;
   }
 
-  /* Badge الحالة - Active */
-  .badge-active {
-    background: linear-gradient(135deg,
-      rgba(16, 185, 129, 0.15),
-      rgba(16, 185, 129, 0.05)) !important;
-    color: #34D399 !important;
-    border-color: rgba(52, 211, 153, 0.3) !important;
+  .admin-table tbody td:last-child::before,
+  .admin-table tbody td:last-child::after,
+  .admin-table tbody td:nth-child(6)::before,
+  .admin-table tbody td:nth-child(6)::after {
+    content: '' !important;
+    display: none !important;
   }
 
-  /* Badge الحالة - Pending */
-  .badge-pending {
-    background: linear-gradient(135deg,
-      rgba(245, 158, 11, 0.15),
-      rgba(245, 158, 11, 0.05)) !important;
-    color: #FBBF24 !important;
-    border-color: rgba(251, 191, 36, 0.3) !important;
+  /* label الإجراءات */
+  .admin-table tbody td:last-child::before,
+  .admin-table tbody td:nth-child(6)::before {
+    content: '⚙️ الإجراءات' !important;
+    display: block !important;
+    font-size: 10px !important;
+    color: #64748B !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    margin-bottom: 8px !important;
+    text-align: center !important;
   }
 
-  /* Badge الحالة - Rejected */
-  .badge-rejected {
-    background: linear-gradient(135deg,
-      rgba(239, 68, 68, 0.15),
-      rgba(239, 68, 68, 0.05)) !important;
-    color: #F87171 !important;
-    border-color: rgba(248, 113, 113, 0.3) !important;
+  /* مجموعة الأزرار */
+  .admin-table tbody td:last-child .actions-cell,
+  .admin-table tbody td:last-child .admin-actions,
+  .admin-table tbody td:nth-child(6) .actions-cell,
+  .admin-table tbody td:nth-child(6) .admin-actions {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    padding: 0 !important;
   }
 
-  /* Badge الحالة - Sold */
-  .badge-sold {
-    background: linear-gradient(135deg,
-      rgba(139, 92, 246, 0.15),
-      rgba(139, 92, 246, 0.05)) !important;
-    color: #A78BFA !important;
-    border-color: rgba(167, 139, 250, 0.3) !important;
+  /* الأزرار */
+  .admin-table tbody td:last-child .icon-btn,
+  .admin-table tbody td:last-child .admin-icon-btn,
+  .admin-table tbody td:nth-child(6) .icon-btn,
+  .admin-table tbody td:nth-child(6) .admin-icon-btn {
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 11px !important;
+    flex-shrink: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: linear-gradient(145deg, #1E293B 0%, #0F172A 100%) !important;
+    border: 1px solid rgba(148, 163, 184, 0.15) !important;
+    color: #94A3B8 !important;
+    transition: all 0.25s ease !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
+    cursor: pointer !important;
   }
 
-  /* Badge الحالة - Rented */
-  .badge-rented {
-    background: linear-gradient(135deg,
-      rgba(6, 182, 212, 0.15),
-      rgba(6, 182, 212, 0.05)) !important;
-    color: #22D3EE !important;
-    border-color: rgba(34, 211, 238, 0.3) !important;
+  .admin-table tbody td:last-child .icon-btn:active,
+  .admin-table tbody td:nth-child(6) .icon-btn:active {
+    transform: scale(0.92) !important;
   }
 
-  /* ===================== 5. Empty cell ===================== */
+  .admin-table tbody td:last-child .icon-btn svg,
+  .admin-table tbody td:nth-child(6) .icon-btn svg {
+    width: 17px !important;
+    height: 17px !important;
+  }
+
+  /* ===================== Empty Cell ===================== */
   .admin-table tbody td.empty-cell {
     grid-column: 1 / -1 !important;
     text-align: center !important;
     padding: 50px 20px !important;
-    font-size: 14px !important;
+    font-size: 13px !important;
     color: #64748B !important;
-    background: linear-gradient(145deg, #1E2A42 0%, #161F33 100%) !important;
-    border-radius: 16px !important;
-    border: 1px dashed rgba(148, 163, 184, 0.2) !important;
-    font-weight: 600 !important;
+    background: transparent !important;
+    border: none !important;
+  }
+
+  .admin-table tbody td.empty-cell::before {
+    display: none !important;
   }
 }
 
@@ -487,74 +380,59 @@
 
   .admin-table tbody tr {
     padding: 14px 12px !important;
-    gap: 10px 6px !important;
-    border-radius: 14px !important;
+    gap: 8px !important;
   }
 
-  .admin-table tbody td:nth-child(1) .listing-title {
-    font-size: 14px !important;
-    -webkit-line-clamp: 2 !important;
-  }
-
-  .admin-table tbody td:nth-child(1) .listing-id {
-    font-size: 9px !important;
-    padding: 2px 6px !important;
+  .admin-table tbody td:nth-child(1) .listing-title,
+  .admin-table tbody td:nth-child(1) .admin-table-title {
+    font-size: 15px !important;
   }
 
   .admin-table tbody td:nth-child(2),
   .admin-table tbody td:nth-child(3),
-  .admin-table tbody td:nth-child(4) {
-    padding: 8px 6px !important;
-    font-size: 11px !important;
-    min-height: 38px !important;
+  .admin-table tbody td:nth-child(4),
+  .admin-table tbody td:nth-child(5) {
+    padding: 8px 10px !important;
+    min-height: 52px !important;
   }
 
-  .admin-table tbody td:nth-child(2) .seller-name {
+  .admin-table tbody td:nth-child(2) .seller-name,
+  .admin-table tbody td .seller-name {
+    font-size: 12px !important;
+  }
+
+  .admin-table tbody td:nth-child(3) {
     font-size: 10.5px !important;
   }
 
-  .admin-table tbody td:nth-child(4) .price-tag {
-    font-size: 11.5px !important;
-  }
-
-  .admin-table tbody td:nth-child(3) .badge {
+  .admin-table tbody td .badge {
     font-size: 9.5px !important;
-    padding: 4px 8px !important;
+    padding: 4px 9px !important;
   }
 
-  .admin-table tbody td:nth-child(6) .icon-btn,
-  .admin-table tbody td:nth-child(6) .admin-icon-btn {
-    width: 32px !important;
-    height: 32px !important;
-    border-radius: 9px !important;
+  .admin-table tbody td:last-child .icon-btn,
+  .admin-table tbody td:nth-child(6) .icon-btn {
+    width: 38px !important;
+    height: 38px !important;
   }
 
+  .admin-table tbody td:last-child .icon-btn svg,
   .admin-table tbody td:nth-child(6) .icon-btn svg {
-    width: 13px !important;
-    height: 13px !important;
-  }
-
-  .admin-table tbody td:nth-child(5) .admin-select {
-    font-size: 10px !important;
-    height: 30px !important;
-    padding: 5px 22px 5px 8px !important;
-    min-width: 95px !important;
+    width: 15px !important;
+    height: 15px !important;
   }
 }
 
 /* ============================================================
-   🌙 شاشات tablet (769px - 1024px)
+   📱 تابلت (769px - 1024px)
    ============================================================ */
 @media (min-width: 769px) and (max-width: 1024px) {
-
   .admin-table tbody tr {
     transition: all 0.2s ease !important;
   }
 
   .admin-table tbody tr:hover {
     background: linear-gradient(145deg, #1F2B45 0%, #17203A 100%) !important;
-    border-color: rgba(59, 130, 246, 0.25) !important;
     transform: translateY(-1px) !important;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2) !important;
   }
 }

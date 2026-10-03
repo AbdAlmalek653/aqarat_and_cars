@@ -1,5 +1,6 @@
 /* ==========================================
-   لوحة التحكم - Admin Dashboard V4.0
+   لوحة التحكم - Admin Dashboard V5.0
+   إضافة فلاتر النوع والدور
    ========================================== */
 
 let currentAdmin = null;
@@ -65,7 +66,6 @@ async function checkAccess() {
     dashboardEl.hidden = false;
     noAccessEl.hidden = true;
 
-    // ✅ forceRefresh = true
     const serverUser = await API.Users.validateSession(true);
 
     if (!serverUser) {
@@ -167,12 +167,27 @@ function renderStats() {
 }
 
 /* ==========================================
-   إدارة الإعلانات
+   ✅ إدارة الإعلانات - مع فلتر النوع
    ========================================== */
 function renderListingsTable() {
+  // ✅ فلتر النوع (جديد)
+  const typeFilter = document.getElementById('typeFilter')?.value || 'all';
+  // فلتر الحالة
   const statusFilter = document.getElementById('statusFilter')?.value || '';
+
   let filtered = allListings;
-  if (statusFilter) filtered = filtered.filter(l => (l.status || 'active') === statusFilter);
+
+  // ✅ فلترة النوع
+  if (typeFilter === 'property') {
+    filtered = filtered.filter(l => l.type === 'property');
+  } else if (typeFilter === 'car') {
+    filtered = filtered.filter(l => l.type === 'car');
+  }
+
+  // ✅ فلترة الحالة
+  if (statusFilter) {
+    filtered = filtered.filter(l => (l.status || 'active') === statusFilter);
+  }
 
   const tbody = document.getElementById('listingsTable');
   if (!tbody) return;
@@ -286,21 +301,33 @@ window.adminDeleteListing = async function (id) {
 };
 
 /* ==========================================
-   إدارة المستخدمين
+   ✅ إدارة المستخدمين - مع فلتر الدور
    ========================================== */
 function renderUsersTable() {
   if (!currentAdmin || currentAdmin.role !== 'super_admin') return;
 
+  // ✅ فلتر الدور (جديد)
+  const roleFilter = document.getElementById('roleFilter')?.value || 'all';
+
+  let filtered = allUsers;
+
+  // ✅ فلترة الدور
+  if (roleFilter === 'admin') {
+    filtered = filtered.filter(u => u.role === 'admin' || u.role === 'super_admin');
+  } else if (roleFilter === 'user') {
+    filtered = filtered.filter(u => (u.role || 'user') === 'user');
+  }
+
   const tbody = document.getElementById('usersTable');
   if (!tbody) return;
 
-  if (!allUsers.length) {
-    tbody.innerHTML = `<tr><td colspan="6" class="empty-cell">لا يوجد مستخدمون</td></tr>`;
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="6" class="empty-cell">لا يوجد مستخدمون مطابقون</td></tr>`;
     initIcons();
     return;
   }
 
-  const displayUsers = allUsers.slice(0, 200);
+  const displayUsers = filtered.slice(0, 200);
 
   tbody.innerHTML = displayUsers.map(u => {
     const role = u.role || 'user';
@@ -434,7 +461,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     showToast('✅ تم التحديث');
   });
 
+  // ✅ فلتر الحالة
   document.getElementById('statusFilter')?.addEventListener('change', renderListingsTable);
+
+  // ✅ فلتر النوع (جديد)
+  document.getElementById('typeFilter')?.addEventListener('change', renderListingsTable);
+
+  // ✅ فلتر الدور (جديد)
+  document.getElementById('roleFilter')?.addEventListener('change', renderUsersTable);
 
   initListingIdSearch();
 
@@ -442,7 +476,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   initIcons();
   console.log('✅ اكتمل التشغيل');
 
-  // ✅ مراقبة الجلسة كل 5 دقائق
   setInterval(async () => {
     const user = await API.Users.validateSession(true);
     if (!user) window.location.href = 'login.html';

@@ -2837,3 +2837,20 @@ html {
 .spec-item.highlight-no .spec-icon svg {
   color: #94A3B8;
 }
+/* ===================== Card Heading Filters ===================== */
+.card-heading-filters {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .card-heading-filters {
+    flex-direction: column;
+    width: 100%;
+  }
+  .card-heading-filters .admin-select {
+    width: 100%;
+  }
+}
