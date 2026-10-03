@@ -7,6 +7,10 @@
 
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
 <script src="../js/icons.js" defer></script>
+<script src="../js/brand.js" defer></script>
+
+<link rel="stylesheet" href="../css/admin.css">
+<link rel="stylesheet" href="../css/mobile-tables.css">
 
 <style>
 /* ==========================================================
@@ -85,10 +89,7 @@ body {
   box-shadow: 0 4px 15px rgba(59,130,246,0.4);
 }
 
-.admin-logo-text {
-  display: flex;
-  flex-direction: column;
-}
+.admin-logo-text { display: flex; flex-direction: column; }
 
 .admin-logo-title {
   font-size: 18px;
@@ -192,10 +193,7 @@ body {
   border-radius: 50%;
 }
 
-.welcome-text {
-  position: relative;
-  z-index: 1;
-}
+.welcome-text { position: relative; z-index: 1; }
 
 .welcome-badge {
   display: inline-flex;
@@ -220,10 +218,7 @@ body {
   -webkit-text-fill-color: transparent;
 }
 
-.welcome-subtitle {
-  color: var(--text-secondary);
-  font-size: 14px;
-}
+.welcome-subtitle { color: var(--text-secondary); font-size: 14px; }
 
 /* ===================== Stats ===================== */
 .stats-grid {
@@ -328,11 +323,7 @@ body {
   background: linear-gradient(135deg, rgba(26,36,56,0.8), rgba(15,23,42,0.6));
 }
 
-.card-heading-left {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
+.card-heading-left { display: flex; align-items: center; gap: 14px; }
 
 .card-heading-icon {
   width: 44px;
@@ -348,16 +339,8 @@ body {
 
 .card-heading-icon svg { width: 22px; height: 22px; }
 
-.card-heading h2 {
-  font-size: 17px;
-  font-weight: 800;
-  margin-bottom: 3px;
-}
-
-.card-heading p {
-  font-size: 12.5px;
-  color: var(--text-muted);
-}
+.card-heading h2 { font-size: 17px; font-weight: 800; margin-bottom: 3px; }
+.card-heading p { font-size: 12.5px; color: var(--text-muted); }
 
 /* ===================== Search Box ===================== */
 .search-box {
@@ -373,28 +356,11 @@ body {
   margin-bottom: 12px;
 }
 
-.search-box-header svg {
-  width: 20px;
-  height: 20px;
-  color: var(--primary);
-}
+.search-box-header svg { width: 20px; height: 20px; color: var(--primary); }
+.search-box-header h3 { font-size: 15px; font-weight: 800; }
+.search-box-hint { font-size: 12.5px; color: var(--text-muted); margin-bottom: 12px; }
 
-.search-box-header h3 {
-  font-size: 15px;
-  font-weight: 800;
-}
-
-.search-box-hint {
-  font-size: 12.5px;
-  color: var(--text-muted);
-  margin-bottom: 12px;
-}
-
-.search-input-wrap {
-  display: flex;
-  gap: 8px;
-  max-width: 600px;
-}
+.search-input-wrap { display: flex; gap: 8px; max-width: 600px; }
 
 .search-input {
   flex: 1;
@@ -416,11 +382,7 @@ body {
   box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
 }
 
-.search-input::placeholder {
-  color: var(--text-muted);
-  direction: rtl;
-  text-align: right;
-}
+.search-input::placeholder { color: var(--text-muted); direction: rtl; text-align: right; }
 
 .search-btn {
   padding: 11px 22px;
@@ -507,17 +469,9 @@ body {
   vertical-align: middle;
 }
 
-.admin-table tbody tr {
-  transition: background 0.2s ease;
-}
-
-.admin-table tbody tr:hover {
-  background: rgba(59,130,246,0.05);
-}
-
-.admin-table tbody tr:last-child td {
-  border-bottom: none;
-}
+.admin-table tbody tr { transition: background 0.2s ease; }
+.admin-table tbody tr:hover { background: rgba(59,130,246,0.05); }
+.admin-table tbody tr:last-child td { border-bottom: none; }
 
 .empty-cell {
   text-align: center;
@@ -527,11 +481,7 @@ body {
 }
 
 /* ===================== Listing cell ===================== */
-.listing-cell {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
+.listing-cell { display: flex; flex-direction: column; gap: 4px; }
 
 .listing-title {
   font-size: 14px;
@@ -571,11 +521,7 @@ body {
 .badge-user { background: rgba(148,163,184,0.15); color: #94A3B8; }
 
 /* ===================== Actions ===================== */
-.actions-cell {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-}
+.actions-cell { display: flex; gap: 6px; align-items: center; }
 
 .icon-btn {
   width: 34px;
@@ -638,16 +584,8 @@ body {
   margin-bottom: 20px;
 }
 
-.admin-message h2 {
-  font-size: 22px;
-  font-weight: 800;
-  margin-bottom: 10px;
-}
-
-.admin-message p {
-  color: var(--text-secondary);
-  margin-bottom: 24px;
-}
+.admin-message h2 { font-size: 22px; font-weight: 800; margin-bottom: 10px; }
+.admin-message p { color: var(--text-secondary); margin-bottom: 24px; }
 
 /* ===================== Toast ===================== */
 .admin-toast {
@@ -712,7 +650,7 @@ body {
     <a class="admin-logo" href="../index.html">
       <div class="admin-logo-icon">🛡️</div>
       <div class="admin-logo-text">
-        <div class="admin-logo-title">سوق</div>
+        <div class="admin-logo-title">بُنيان</div>
         <div class="admin-logo-sub">ADMIN PANEL</div>
       </div>
     </a>
@@ -733,7 +671,6 @@ body {
 <!-- ===================== Shell ===================== -->
 <main class="admin-shell">
 
-  <!-- رسالة عدم الصلاحية -->
   <div id="accessDenied" class="admin-message" hidden>
     <i data-lucide="shield-alert"></i>
     <h2>غير مصرح بالدخول</h2>
@@ -744,10 +681,8 @@ body {
     </a>
   </div>
 
-  <!-- محتوى اللوحة -->
   <div id="dashboardContent" hidden>
 
-    <!-- Welcome Banner -->
     <div class="welcome-banner">
       <div class="welcome-text">
         <div class="welcome-badge">
@@ -763,7 +698,6 @@ body {
       </button>
     </div>
 
-    <!-- Stats -->
     <section class="stats-grid">
       <div class="stat-card blue">
         <div class="stat-card-inner">
@@ -803,7 +737,6 @@ body {
       </div>
     </section>
 
-    <!-- Search by ID -->
     <section class="admin-card">
       <div class="search-box">
         <div class="search-box-header">
@@ -829,7 +762,6 @@ body {
       </div>
     </section>
 
-    <!-- Listings Management -->
     <section class="admin-card">
       <div class="card-heading">
         <div class="card-heading-left">

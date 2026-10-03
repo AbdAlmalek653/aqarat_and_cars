@@ -3,10 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>لوحة السوبر أدمن | سوق</title>
+<title>لوحة السوبر أدمن | بُنيان</title>
 
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👑</text></svg>">
 <script src="../js/icons.js" defer></script>
+<script src="../js/brand.js" defer></script>
+
+<link rel="stylesheet" href="../css/admin.css">
+<link rel="stylesheet" href="../css/mobile-tables.css">
 
 <style>
 /* ==========================================================
@@ -85,10 +89,7 @@ body {
   box-shadow: 0 4px 15px rgba(59,130,246,0.4);
 }
 
-.admin-logo-text {
-  display: flex;
-  flex-direction: column;
-}
+.admin-logo-text { display: flex; flex-direction: column; }
 
 .admin-logo-title {
   font-size: 18px;
@@ -105,11 +106,7 @@ body {
   letter-spacing: 0.5px;
 }
 
-.admin-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+.admin-header-actions { display: flex; align-items: center; gap: 10px; }
 
 .admin-btn {
   display: inline-flex;
@@ -133,10 +130,7 @@ body {
   color: var(--text-secondary);
 }
 
-.admin-btn-outline:hover {
-  border-color: var(--primary);
-  color: var(--primary);
-}
+.admin-btn-outline:hover { border-color: var(--primary); color: var(--primary); }
 
 .admin-btn-danger {
   background: linear-gradient(135deg, var(--danger), #DC2626);
@@ -192,10 +186,7 @@ body {
   border-radius: 50%;
 }
 
-.welcome-text {
-  position: relative;
-  z-index: 1;
-}
+.welcome-text { position: relative; z-index: 1; }
 
 .welcome-badge {
   display: inline-flex;
@@ -220,10 +211,7 @@ body {
   -webkit-text-fill-color: transparent;
 }
 
-.welcome-subtitle {
-  color: var(--text-secondary);
-  font-size: 14px;
-}
+.welcome-subtitle { color: var(--text-secondary); font-size: 14px; }
 
 /* ===================== Stats ===================== */
 .stats-grid {
@@ -328,11 +316,7 @@ body {
   background: linear-gradient(135deg, rgba(26,36,56,0.8), rgba(15,23,42,0.6));
 }
 
-.card-heading-left {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
+.card-heading-left { display: flex; align-items: center; gap: 14px; }
 
 .card-heading-icon {
   width: 44px;
@@ -348,16 +332,8 @@ body {
 
 .card-heading-icon svg { width: 22px; height: 22px; }
 
-.card-heading h2 {
-  font-size: 17px;
-  font-weight: 800;
-  margin-bottom: 3px;
-}
-
-.card-heading p {
-  font-size: 12.5px;
-  color: var(--text-muted);
-}
+.card-heading h2 { font-size: 17px; font-weight: 800; margin-bottom: 3px; }
+.card-heading p { font-size: 12.5px; color: var(--text-muted); }
 
 /* ===================== Filter / Select ===================== */
 .admin-select {
@@ -420,17 +396,9 @@ body {
   vertical-align: middle;
 }
 
-.admin-table tbody tr {
-  transition: background 0.2s ease;
-}
-
-.admin-table tbody tr:hover {
-  background: rgba(59,130,246,0.05);
-}
-
-.admin-table tbody tr:last-child td {
-  border-bottom: none;
-}
+.admin-table tbody tr { transition: background 0.2s ease; }
+.admin-table tbody tr:hover { background: rgba(59,130,246,0.05); }
+.admin-table tbody tr:last-child td { border-bottom: none; }
 
 .empty-cell {
   text-align: center;
@@ -440,11 +408,7 @@ body {
 }
 
 /* ===================== Listing cell ===================== */
-.listing-cell {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
+.listing-cell { display: flex; flex-direction: column; gap: 4px; }
 
 .listing-title {
   font-size: 14px;
@@ -485,11 +449,7 @@ body {
 .badge-user { background: rgba(148,163,184,0.15); color: #94A3B8; }
 
 /* ===================== Actions ===================== */
-.actions-cell {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-}
+.actions-cell { display: flex; gap: 6px; align-items: center; }
 
 .icon-btn {
   width: 34px;
@@ -552,16 +512,8 @@ body {
   margin-bottom: 20px;
 }
 
-.admin-message h2 {
-  font-size: 22px;
-  font-weight: 800;
-  margin-bottom: 10px;
-}
-
-.admin-message p {
-  color: var(--text-secondary);
-  margin-bottom: 24px;
-}
+.admin-message h2 { font-size: 22px; font-weight: 800; margin-bottom: 10px; }
+.admin-message p { color: var(--text-secondary); margin-bottom: 24px; }
 
 /* ===================== Toast ===================== */
 .admin-toast {
@@ -591,77 +543,29 @@ body {
 
 /* ===================== Responsive ===================== */
 @media (max-width: 768px) {
-  .admin-header-inner {
-    padding: 12px 16px;
-  }
-
+  .admin-header-inner { padding: 12px 16px; }
   .admin-logo-text { display: none; }
-
   .admin-btn span { display: none; }
   .admin-btn { padding: 10px 12px; }
-
-  .admin-shell {
-    padding: 20px 14px 40px;
-  }
-
-  .welcome-banner {
-    padding: 20px;
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .welcome-title {
-    font-size: 20px;
-  }
-
-  .stats-grid {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
+  .admin-shell { padding: 20px 14px 40px; }
+  .welcome-banner { padding: 20px; flex-direction: column; align-items: flex-start; }
+  .welcome-title { font-size: 20px; }
+  .stats-grid { grid-template-columns: 1fr; gap: 12px; }
   .stat-card { padding: 18px; }
   .stat-num { font-size: 26px; }
   .stat-icon { width: 48px; height: 48px; }
   .stat-icon svg { width: 22px; height: 22px; }
-
-  .card-heading {
-    padding: 16px;
-    flex-direction: column;
-    align-items: stretch;
-  }
-
+  .card-heading { padding: 16px; flex-direction: column; align-items: stretch; }
   .admin-select { width: 100%; }
-
-  .admin-table th,
-  .admin-table td {
-    padding: 12px 10px;
-    font-size: 12.5px;
-  }
-
-  .icon-btn {
-    width: 30px;
-    height: 30px;
-  }
+  .admin-table th, .admin-table td { padding: 12px 10px; font-size: 12.5px; }
+  .icon-btn { width: 30px; height: 30px; }
 }
 
 /* ===================== Scrollbar ===================== */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--bg-secondary);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--primary);
-}
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-secondary); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary); }
 </style>
 </head>
 <body data-dashboard-role="super_admin">
@@ -672,7 +576,7 @@ body {
     <a class="admin-logo" href="../index.html">
       <div class="admin-logo-icon">👑</div>
       <div class="admin-logo-text">
-        <div class="admin-logo-title">سوق</div>
+        <div class="admin-logo-title">بُنيان</div>
         <div class="admin-logo-sub">SUPER ADMIN</div>
       </div>
     </a>
