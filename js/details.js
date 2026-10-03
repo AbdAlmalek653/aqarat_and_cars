@@ -1,6 +1,6 @@
 /* ==========================================
    صفحة تفاصيل الإعلان
-   الإصدار: 4.0 (negotiable + city fix + ترجمة شاملة)
+   الإصدار: 5.0 (negotiable yes/no + city fix + ترجمة شاملة)
    ========================================== */
 
 const BROKER_PHONE = '963930932794';
@@ -11,8 +11,8 @@ let currentImageIndex = 0;
    بيانات تجريبية (Fallback)
    ========================================== */
 const MOCK_LISTINGS = {
-  '1001': {id:'1001',type:'property',purpose:'sale',title:'شقة فاخرة بتشطيب سوبر ديلوكس في المزة',location:'دمشق - المزة',price:185000,currency:'USD',featured:true,negotiable:'قابل',whatsapp:'0930000001',description:'شقة فاخرة بمساحة 180 متر مربع، تتكون من 3 غرف نوم، صالون واسع، مطبخ حديث، 2 حمام.\n\nتشطيب سوبر ديلوكس، طابق ثالث من أصل 5، عمر البناء 3 سنوات، مع مصعد وموقف سيارة خاص.',images:[],details:{propertyType:'apartment',area:180,rooms:3,bathrooms:2,floor:3,age:3,furnished:'furnished',heating:'central',negotiable:'قابل',_whatsapp:'0930000001'}},
-  '2001': {id:'2001',type:'car',purpose:'sale',title:'تويوتا كامري 2022 - فل كامل',location:'دمشق - المزة',price:28500,currency:'USD',featured:true,negotiable:'غير قابل',whatsapp:'0930000005',description:'تويوتا كامري 2022 فل كامل، ماشية 35,000 كم فقط، بحالة الوكالة.',images:[],details:{brand:'toyota',model:'كامري',year:2022,km:35000,transmission:'automatic',fuel:'petrol',color:'أبيض',condition:'used',negotiable:'غير قابل',_whatsapp:'0930000005'}}
+  '1001': {id:'1001',type:'property',purpose:'sale',title:'شقة فاخرة بتشطيب سوبر ديلوكس في المزة',location:'دمشق - المزة',price:185000,currency:'USD',featured:true,negotiable:'قابل',whatsapp:'0930000001',description:'شقة فاخرة بمساحة 180 متر مربع.',images:[],details:{propertyType:'apartment',area:180,rooms:3,bathrooms:2,floor:3,age:3,furnished:'furnished',heating:'central',negotiable:'قابل',_whatsapp:'0930000001'}},
+  '2001': {id:'2001',type:'car',purpose:'sale',title:'تويوتا كامري 2022 - فل كامل',location:'دمشق - المزة',price:28500,currency:'USD',featured:true,negotiable:'غير قابل',whatsapp:'0930000005',description:'تويوتا كامري 2022 فل كامل.',images:[],details:{brand:'toyota',model:'كامري',year:2022,km:35000,transmission:'automatic',fuel:'petrol',color:'أبيض',condition:'used',negotiable:'غير قابل',_whatsapp:'0930000005'}}
 };
 
 /* ==========================================
@@ -36,26 +36,27 @@ async function fetchListing(id) {
 }
 
 /* ==========================================
-   ✅ دالة موحدة للتحقق من "قابل للتفاوض"
+   ✅ دالة موحدة لتحليل "قابل للتفاوض"
+   تُرجع: 'yes' | 'no' | null
    ========================================== */
-function isNegotiable(listing) {
-  if (!listing) return false;
+function getNegotiableStatus(listing) {
+  if (!listing) return null;
   const d = listing.details || {};
-  const value = listing.negotiable || d.negotiable || '';
-  const str = String(value).toLowerCase().trim();
-  
-  return (
-    str === 'قابل' ||
-    str === 'قابل للتفاوض' ||
-    str === 'negotiable' ||
-    str === 'yes' ||
-    str === 'true' ||
-    str === '1'
-  );
+  const value = String(listing.negotiable || d.negotiable || '').trim().toLowerCase();
+
+  if (value === 'قابل' || value === 'قابل للتفاوض' || value === 'negotiable' || 
+      value === 'yes' || value === 'true' || value === '1') {
+    return 'yes';
+  }
+  if (value === 'غير قابل' || value === 'غير قابل للتفاوض' || value === 'no' || 
+      value === 'false' || value === '0') {
+    return 'no';
+  }
+  return null;
 }
 
 /* ==========================================
-   بناء المواصفات من التفاصيل - كل الحقول بالعربية
+   بناء المواصفات من التفاصيل
    ========================================== */
 function buildSpecsFromDetails(listing) {
   if (listing.specs && listing.specs.length > 0) return listing.specs;
@@ -66,9 +67,6 @@ function buildSpecsFromDetails(listing) {
 
   const sensitiveKeys = ['whatsapp', 'phone', 'mobile', 'email', '_whatsapp', '_phone', '_mobile'];
 
-  // ==========================================
-  // ✅ قاموس العقارات - شامل كل الحقول
-  // ==========================================
   const propertyMap = {
     propertyType: {
       icon: 'building-2', label: 'نوع العقار',
@@ -82,99 +80,39 @@ function buildSpecsFromDetails(listing) {
       icon: 'layers', label: 'نوع العقار',
       translate: { apartment: 'شقة', villa: 'فيلا', 'arabic-house': 'بيت عربي', land: 'أرض', office: 'مكتب', shop: 'محل تجاري', chalet: 'شاليه', building: 'بناء كامل' }
     },
-    'sub-type': {
-      icon: 'layers', label: 'نوع العقار',
-      translate: { apartment: 'شقة', villa: 'فيلا', 'arabic-house': 'بيت عربي', land: 'أرض', office: 'مكتب', shop: 'محل تجاري', chalet: 'شاليه', building: 'بناء كامل' }
-    },
 
     area: { icon: 'square', label: 'المساحة', suffix: ' م²' },
     propertyArea: { icon: 'square', label: 'المساحة', suffix: ' م²' },
-    property_area: { icon: 'square', label: 'المساحة', suffix: ' م²' },
-
     rooms: { icon: 'bed-double', label: 'عدد الغرف' },
     bedrooms: { icon: 'bed-double', label: 'غرف النوم' },
     bathrooms: { icon: 'bath', label: 'عدد الحمامات' },
     baths: { icon: 'bath', label: 'عدد الحمامات' },
-
     floor: { icon: 'layers', label: 'الطابق' },
     totalFloors: { icon: 'building', label: 'إجمالي الطوابق' },
-    total_floors: { icon: 'building', label: 'إجمالي الطوابق' },
-    floors: { icon: 'building', label: 'عدد الطوابق' },
-
     age: { icon: 'calendar', label: 'عمر البناء', suffix: ' سنة' },
     buildingAge: { icon: 'calendar', label: 'عمر البناء', suffix: ' سنة' },
-    building_age: { icon: 'calendar', label: 'عمر البناء', suffix: ' سنة' },
 
-    // ✅ "قابل للتفاوض"
-    negotiable: {
-      icon: 'handshake',
-      label: 'السعر قابل للتفاوض',
-      translate: {
-        'قابل': 'نعم ✅',
-        'غير قابل': 'لا ❌',
-        'قابل للتفاوض': 'نعم ✅',
-        'غير قابل للتفاوض': 'لا ❌',
-        'negotiable': 'نعم ✅',
-        'yes': 'نعم ✅',
-        'no': 'لا ❌',
-        'true': 'نعم ✅',
-        'false': 'لا ❌',
-        '1': 'نعم ✅',
-        '0': 'لا ❌'
-      }
-    },
-
-    // ✅ الاتجاه
     direction: {
       icon: 'compass', label: 'الاتجاه',
       translate: {
         'شمالي': 'شمالي', 'جنوبي': 'جنوبي', 'شرقي': 'شرقي', 'غربي': 'غربي',
         'شمالي شرقي': 'شمالي شرقي', 'شمالي غربي': 'شمالي غربي',
         'جنوبي شرقي': 'جنوبي شرقي', 'جنوبي غربي': 'جنوبي غربي',
-        north: 'شمالي', south: 'جنوبي', east: 'شرقي', west: 'غربي',
-        'north-east': 'شمالي شرقي', 'north-west': 'شمالي غربي',
-        'south-east': 'جنوبي شرقي', 'south-west': 'جنوبي غربي',
-        ne: 'شمالي شرقي', nw: 'شمالي غربي', se: 'جنوبي شرقي', sw: 'جنوبي غربي'
-      }
-    },
-    facing: {
-      icon: 'compass', label: 'الاتجاه',
-      translate: {
-        'شمالي': 'شمالي', 'جنوبي': 'جنوبي', 'شرقي': 'شرقي', 'غربي': 'غربي',
         north: 'شمالي', south: 'جنوبي', east: 'شرقي', west: 'غربي'
       }
     },
-
-    // ✅ نوع الفراغة
     vacancyType: {
-      icon: 'file-check', label: 'نوع الفراغة',
-      translate: {
-        'عقد تنازل': 'عقد تنازل', 'طابو أخضر': 'طابو أخضر', 'عن طريق محكمة': 'عن طريق محكمة',
-        contract: 'عقد تنازل', 'green-tabu': 'طابو أخضر', court: 'عن طريق محكمة'
-      }
-    },
-    vacancy_type: {
       icon: 'file-check', label: 'نوع الفراغة',
       translate: {
         'عقد تنازل': 'عقد تنازل', 'طابو أخضر': 'طابو أخضر', 'عن طريق محكمة': 'عن طريق محكمة'
       }
     },
-
-    // ✅ نوع الإكساء
     finishingType: {
-      icon: 'sparkles', label: 'نوع الإكساء',
-      translate: {
-        'عادي': 'عادي', 'متوسط': 'متوسط', 'جيد': 'جيد', 'سوبر ديلوكس': 'سوبر ديلوكس',
-        normal: 'عادي', medium: 'متوسط', good: 'جيد', 'super-deluxe': 'سوبر ديلوكس', deluxe: 'سوبر ديلوكس'
-      }
-    },
-    finishing_type: {
       icon: 'sparkles', label: 'نوع الإكساء',
       translate: {
         'عادي': 'عادي', 'متوسط': 'متوسط', 'جيد': 'جيد', 'سوبر ديلوكس': 'سوبر ديلوكس'
       }
     },
-
     furnished: {
       icon: 'sofa', label: 'الفرش',
       translate: { furnished: 'مفروش', 'semi-furnished': 'نصف مفروش', unfurnished: 'غير مفروش' }
@@ -191,18 +129,10 @@ function buildSpecsFromDetails(listing) {
       icon: 'waves', label: 'المسبح',
       translate: { yes: 'متوفر', no: 'غير متوفر', true: 'متوفر', false: 'غير متوفر' }
     },
-
     landArea: { icon: 'square', label: 'مساحة الأرض', suffix: ' م²' },
-    land_area: { icon: 'square', label: 'مساحة الأرض', suffix: ' م²' },
     landFrontage: { icon: 'route', label: 'عرض الواجهة', suffix: ' م' },
-    land_frontage: { icon: 'route', label: 'عرض الواجهة', suffix: ' م' },
     landDepth: { icon: 'move-horizontal', label: 'العمق', suffix: ' م' },
-    land_depth: { icon: 'move-horizontal', label: 'العمق', suffix: ' م' },
     landZoning: {
-      icon: 'map', label: 'التنظيم',
-      translate: { residential: 'سكني', commercial: 'تجاري', industrial: 'صناعي', agricultural: 'زراعي', mixed: 'مختلط' }
-    },
-    land_zoning: {
       icon: 'map', label: 'التنظيم',
       translate: { residential: 'سكني', commercial: 'تجاري', industrial: 'صناعي', agricultural: 'زراعي', mixed: 'مختلط' }
     },
@@ -210,21 +140,13 @@ function buildSpecsFromDetails(listing) {
       icon: 'file-check', label: 'الطابو',
       translate: { green: 'أخضر', blue: 'أزرق', organized: 'منظم', unorganized: 'غير منظم' }
     },
-
     rentPeriod: {
-      icon: 'calendar-clock', label: 'مدة الإيجار',
-      translate: { daily: 'يومي', monthly: 'شهري', yearly: 'سنوي' }
-    },
-    rent_period: {
       icon: 'calendar-clock', label: 'مدة الإيجار',
       translate: { daily: 'يومي', monthly: 'شهري', yearly: 'سنوي' }
     },
     deposit: { icon: 'wallet', label: 'مبلغ التأمين' }
   };
 
-  // ==========================================
-  // ✅ قاموس السيارات - شامل كل الحقول
-  // ==========================================
   const carMap = {
     brand: {
       icon: 'car', label: 'الماركة',
@@ -235,94 +157,42 @@ function buildSpecsFromDetails(listing) {
         volkswagen: 'فولكس فاجن', audi: 'أودي', lexus: 'لكزس',
         renault: 'رينو', peugeot: 'بيجو', fiat: 'فيات', seat: 'سيات',
         skoda: 'سكودا', opel: 'أوبل', jeep: 'جيب', landrover: 'لاند روفر',
-        'land-rover': 'لاند روفر', porsche: 'بورش', ferrari: 'فيراري',
-        tesla: 'تسلا', volvo: 'فولفو', subaru: 'سوبارو',
-        infiniti: 'إنفينيتي', cadillac: 'كاديلاك', gmc: 'جي إم سي',
-        dodge: 'دودج', chrysler: 'كرايسلر', suzuki: 'سوزوكي',
-        'mercedes-benz': 'مرسيدس', other: 'أخرى'
+        tesla: 'تسلا', volvo: 'فولفو', subaru: 'سوبارو', other: 'أخرى'
       }
     },
     brandName: { skip: true },
-    brand_name: { skip: true },
-
     model: { icon: 'tag', label: 'الموديل' },
-
     year: { icon: 'calendar', label: 'سنة الصنع' },
-
     km: { icon: 'gauge', label: 'الكيلومترات', suffix: ' كم' },
     mileage: { icon: 'gauge', label: 'الكيلومترات', suffix: ' كم' },
-
-    // ✅ "قابل للتفاوض" للسيارات
-    negotiable: {
-      icon: 'handshake',
-      label: 'السعر قابل للتفاوض',
-      translate: {
-        'قابل': 'نعم ✅',
-        'غير قابل': 'لا ❌',
-        'قابل للتفاوض': 'نعم ✅',
-        'غير قابل للتفاوض': 'لا ❌',
-        'negotiable': 'نعم ✅',
-        'yes': 'نعم ✅',
-        'no': 'لا ❌',
-        'true': 'نعم ✅',
-        'false': 'لا ❌'
-      }
-    },
-
     condition: {
       icon: 'sparkles', label: 'الحالة',
-      translate: { 
-        new: 'جديد', used: 'مستعمل', 'like-new': 'كالجديد',
-        excellent: 'ممتازة', good: 'جيدة', fair: 'مقبولة'
-      }
+      translate: { new: 'جديد', used: 'مستعمل', 'like-new': 'كالجديد', excellent: 'ممتازة', good: 'جيدة', fair: 'مقبولة' }
     },
-
     transmission: {
       icon: 'settings-2', label: 'ناقل الحركة',
-      translate: { 
-        automatic: 'أوتوماتيك', manual: 'عادي', auto: 'أوتوماتيك',
-        cvt: 'CVT', 'dual-clutch': 'دبل كلتش'
-      }
+      translate: { automatic: 'أوتوماتيك', manual: 'عادي', auto: 'أوتوماتيك', cvt: 'CVT' }
     },
     gear: {
       icon: 'settings-2', label: 'ناقل الحركة',
       translate: { automatic: 'أوتوماتيك', manual: 'عادي' }
     },
-
     fuel: {
       icon: 'fuel', label: 'الوقود',
-      translate: { 
-        petrol: 'بنزين', diesel: 'ديزل', electric: 'كهرباء',
-        hybrid: 'هايبرد', gasoline: 'بنزين', cng: 'غاز طبيعي'
-      }
+      translate: { petrol: 'بنزين', diesel: 'ديزل', electric: 'كهرباء', hybrid: 'هايبرد' }
     },
-
     color: {
       icon: 'palette', label: 'اللون',
       translate: {
-        white: 'أبيض', black: 'أسود', silver: 'فضي', gray: 'رمادي', grey: 'رمادي',
+        white: 'أبيض', black: 'أسود', silver: 'فضي', gray: 'رمادي',
         red: 'أحمر', blue: 'أزرق', green: 'أخضر', yellow: 'أصفر',
-        brown: 'بني', beige: 'بيج', gold: 'ذهبي', orange: 'برتقالي',
-        'أبيض': 'أبيض', 'أسود': 'أسود', 'فضي': 'فضي', 'رمادي': 'رمادي'
+        brown: 'بني', beige: 'بيج', gold: 'ذهبي', orange: 'برتقالي'
       }
     },
-
     bodyType: {
       icon: 'car', label: 'نوع الجسم',
-      translate: { 
-        sedan: 'سيدان', suv: 'SUV', hatchback: 'هاتشباك',
-        pickup: 'بيك أب', coupe: 'كوبيه', van: 'فان',
-        convertible: 'كشف', wagon: 'ستيشن', crossover: 'كروس أوفر'
-      }
+      translate: { sedan: 'سيدان', suv: 'SUV', hatchback: 'هاتشباك', pickup: 'بيك أب', coupe: 'كوبيه', van: 'فان' }
     },
-    body_type: {
-      icon: 'car', label: 'نوع الجسم',
-      translate: { 
-        sedan: 'سيدان', suv: 'SUV', hatchback: 'هاتشباك',
-        pickup: 'بيك أب', coupe: 'كوبيه', van: 'فان'
-      }
-    },
-
     carInsurance: {
       icon: 'shield-check', label: 'التأمين',
       translate: { yes: 'مؤمنة', no: 'غير مؤمنة', true: 'مؤمنة', false: 'غير مؤمنة' }
@@ -331,22 +201,15 @@ function buildSpecsFromDetails(listing) {
       icon: 'shield-check', label: 'التأمين',
       translate: { yes: 'مؤمنة', no: 'غير مؤمنة', true: 'مؤمنة', false: 'غير مؤمنة' }
     },
-
-    minDays: { icon: 'calendar-clock', label: 'أقل مدة إيجار', suffix: ' يوم' },
-    min_days: { icon: 'calendar-clock', label: 'أقل مدة إيجار', suffix: ' يوم' }
+    minDays: { icon: 'calendar-clock', label: 'أقل مدة إيجار', suffix: ' يوم' }
   };
 
-  // ==========================================
-  // ✅ قاموس عام (لأي حقل غير معروف)
-  // ==========================================
   const globalFieldTranslations = {
     subtype: 'النوع الفرعي', sub_type: 'النوع الفرعي', 'sub-type': 'النوع الفرعي',
-    propertytype: 'نوع العقار', property_type: 'نوع العقار', 'property-type': 'نوع العقار',
+    propertytype: 'نوع العقار', property_type: 'نوع العقار',
     direction: 'الاتجاه', facing: 'الاتجاه',
     vacancytype: 'نوع الفراغة', vacancy_type: 'نوع الفراغة',
     finishingtype: 'نوع الإكساء', finishing_type: 'نوع الإكساء',
-    negotiable: 'السعر قابل للتفاوض',
-
     totalfloors: 'إجمالي الطوابق', total_floors: 'إجمالي الطوابق',
     floors: 'عدد الطوابق', floor: 'الطابق',
     rooms: 'عدد الغرف', bedrooms: 'غرف النوم',
@@ -358,15 +221,12 @@ function buildSpecsFromDetails(listing) {
     garden: 'الحديقة', pool: 'المسبح', parking: 'موقف سيارة',
     elevator: 'مصعد', balcony: 'شرفة', terrace: 'تراس',
     address: 'العنوان', location: 'الموقع', city: 'المحافظة',
-    area_name: 'المنطقة', district: 'الحي', neighborhood: 'الحي',
-
     brand: 'الماركة', brandname: 'الماركة', brand_name: 'الماركة',
     model: 'الموديل', year: 'السنة', km: 'الكيلومترات', mileage: 'المسافة المقطوعة',
     color: 'اللون', bodytype: 'نوع الجسم', body_type: 'نوع الجسم',
     fuel: 'الوقود', transmission: 'ناقل الحركة', gear: 'ناقل الحركة',
     condition: 'الحالة', carinsurance: 'التأمين', insurance: 'التأمين',
     mindays: 'أقل مدة إيجار', min_days: 'أقل مدة إيجار',
-    wifi: 'واي فاي', ac: 'تكييف', kitchen: 'مطبخ',
     rentperiod: 'مدة الإيجار', rent_period: 'مدة الإيجار',
     deposit: 'مبلغ التأمين'
   };
@@ -375,34 +235,45 @@ function buildSpecsFromDetails(listing) {
   const specs = [];
   const usedLabels = new Set();
 
-  // ✅ 1. أضف "قابل للتفاوض" أول شي (للعرض المميز)
-  if (isNegotiable(listing)) {
+  // ✅ 1. أضف "قابل للتفاوض" في كل الحالات
+  const negotiableStatus = getNegotiableStatus(listing);
+  if (negotiableStatus === 'yes') {
     specs.push({
       icon: 'handshake',
       label: 'السعر قابل للتفاوض',
-      value: 'نعم ✅'
+      value: 'نعم ✅',
+      highlight: 'yes'
+    });
+    usedLabels.add('السعر قابل للتفاوض');
+  } else if (negotiableStatus === 'no') {
+    specs.push({
+      icon: 'x-circle',
+      label: 'السعر قابل للتفاوض',
+      value: 'لا ❌',
+      highlight: 'no'
     });
     usedLabels.add('السعر قابل للتفاوض');
   }
 
+  // ✅ 2. باقي الحقول
   Object.keys(d).forEach(key => {
     if (sensitiveKeys.includes(key.toLowerCase()) && !isAdmin) return;
     if (key.startsWith('_') && !isAdmin) return;
     if (key.startsWith('_') && key !== '_whatsapp' && key !== '_phone') return;
+    if (key === 'negotiable') return; // ← تجاهل لأنه أُضيف فوق
 
     let value = d[key];
     if (value === '' || value === null || value === undefined) return;
 
     let meta = map[key];
 
-    // البحث في القاموس العام
     if (!meta) {
       const lowerKey = key.toLowerCase();
       const label = globalFieldTranslations[lowerKey] || globalFieldTranslations[key];
       if (label) {
         meta = { icon: 'info', label: label };
       } else {
-        return; // ← لا نعرض الحقول غير المترجمة
+        return;
       }
     }
 
@@ -438,13 +309,7 @@ function buildTypeText(listing) {
       toyota: 'تويوتا', hyundai: 'هيونداي', kia: 'كيا', mercedes: 'مرسيدس',
       bmw: 'BMW', nissan: 'نيسان', honda: 'هوندا', chevrolet: 'شيفروليه',
       ford: 'فورد', mazda: 'مازدا', mitsubishi: 'ميتسوبيشي',
-      volkswagen: 'فولكس فاجن', audi: 'أودي', lexus: 'لكزس',
-      renault: 'رينو', peugeot: 'بيجو', fiat: 'فيات', seat: 'سيات',
-      skoda: 'سكودا', opel: 'أوبل', jeep: 'جيب', landrover: 'لاند روفر',
-      'land-rover': 'لاند روفر', porsche: 'بورش', ferrari: 'فيراري',
-      tesla: 'تسلا', volvo: 'فولفو', subaru: 'سوبارو',
-      infiniti: 'إنفينيتي', cadillac: 'كاديلاك', gmc: 'جي إم سي',
-      dodge: 'دودج', chrysler: 'كرايسلر', suzuki: 'سوزوكي', other: 'أخرى'
+      volkswagen: 'فولكس فاجن', audi: 'أودي', lexus: 'لكزس', other: 'أخرى'
     };
     const brand = d.brandName || brands[d.brand] || d.brand || '';
     const model = d.model || '';
@@ -454,7 +319,7 @@ function buildTypeText(listing) {
 }
 
 /* ==========================================
-   ✅ استخراج الموقع الصحيح (محدّث)
+   ✅ استخراج الموقع الصحيح
    ========================================== */
 function buildLocationText(listing) {
   const cityNames = {
@@ -464,7 +329,6 @@ function buildLocationText(listing) {
     'deir-ezzor': 'دير الزور', raqqa: 'الرقة', hasakah: 'الحسكة', idlib: 'إدلب'
   };
 
-  // ✅ دعم كل أشكال المحافظة
   const citySlug = listing.city_slug || listing.city || '';
   const cityNameFromAPI = listing.city_name || listing.cityName || '';
   const cityAr = listing.city ? (cityNames[listing.city] || listing.city) : '';
@@ -506,7 +370,7 @@ function preloadMainImage(item) {
 }
 
 /* ==========================================
-   عرض الإعلان (مع شارة "قابل للتفاوض")
+   عرض الإعلان (مع شارات التفاوض في كل الحالات)
    ========================================== */
 function renderListing(l) {
   currentListing = l;
@@ -533,12 +397,15 @@ function renderListing(l) {
     <span class="info-badge" style="background:var(--bg-secondary);color:var(--text-secondary);">
       <i data-lucide="${l.type === 'property' ? 'building-2' : 'car'}"></i>${typeText}
     </span>`;
-  
-  // ✅ إضافة شارة "قابل للتفاوض" في الأعلى
-  if (isNegotiable(l)) {
-    badges += `<span class="info-badge negotiable"><i data-lucide="handshake"></i>قابل للتفاوض</span>`;
+
+  // ✅ شارة "قابل للتفاوض" في الأعلى - في كل الحالات
+  const negotiableStatus = getNegotiableStatus(l);
+  if (negotiableStatus === 'yes') {
+    badges += `<span class="info-badge negotiable-yes"><i data-lucide="handshake"></i>قابل للتفاوض</span>`;
+  } else if (negotiableStatus === 'no') {
+    badges += `<span class="info-badge negotiable-no"><i data-lucide="x-circle"></i>غير قابل للتفاوض</span>`;
   }
-  
+
   if (l.featured) badges += `<span class="info-badge featured"><i data-lucide="star"></i>مميز</span>`;
   document.getElementById('infoBadges').innerHTML = badges;
 
@@ -555,15 +422,18 @@ function renderListing(l) {
   if (specs.length === 0) {
     specsContainer.innerHTML = '<p style="color:var(--text-muted);text-align:center;grid-column:1/-1;padding:20px;">لا توجد مواصفات متاحة</p>';
   } else {
-    specsContainer.innerHTML = specs.map(s => `
-      <div class="spec-item">
-        <div class="spec-icon"><i data-lucide="${s.icon}"></i></div>
-        <div class="spec-content">
-          <div class="spec-label">${s.label}</div>
-          <div class="spec-value">${s.value}</div>
+    specsContainer.innerHTML = specs.map(s => {
+      const highlightClass = s.highlight ? `highlight-${s.highlight}` : '';
+      return `
+        <div class="spec-item ${highlightClass}">
+          <div class="spec-icon"><i data-lucide="${s.icon}"></i></div>
+          <div class="spec-content">
+            <div class="spec-label">${s.label}</div>
+            <div class="spec-value">${s.value}</div>
+          </div>
         </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   }
 
   document.getElementById('adDescription').textContent = l.description || '';
@@ -574,7 +444,14 @@ function renderListing(l) {
   const priceText = l.purpose === 'sale' ? `${priceNum.toLocaleString('en-US')} ${l.currency || 'USD'}` : `${priceNum} ${l.currency || 'USD'} / شهرياً`;
   const specificType = buildTypeText(l);
   const typeLabel = l.type === 'property' ? 'نوع العقار' : 'نوع السيارة';
-  const negotiableText = isNegotiable(l) ? '\n🤝 السعر قابل للتفاوض' : '';
+
+  // ✅ نص التفاوض في رسالة الواتساب
+  let negotiableText = '';
+  if (negotiableStatus === 'yes') {
+    negotiableText = '\n🤝 السعر قابل للتفاوض';
+  } else if (negotiableStatus === 'no') {
+    negotiableText = '\n🔒 السعر غير قابل للتفاوض';
+  }
 
   const msg = `مرحباً، انا مهتم بـ ${typeText} ورقم الإعلان هو: ${l.id}\n🔍 ${typeLabel}: ${specificType}\n📍 الموقع: ${locationText}\n💰 السعر: ${priceText}${negotiableText}\n\n🔗 رابط الإعلان:\n${listingUrl}`;
 
@@ -649,7 +526,6 @@ function renderGallery(imgs, l) {
   }
 
   const getUrl = window.getListingImageUrl;
-
   const largeUrls = imgs.map((_, i) => getUrl ? getUrl(l, i, 'large') : null).filter(Boolean);
 
   if (!largeUrls.length) {
@@ -779,7 +655,14 @@ async function saveEdit(e) {
       const purposeClass = currentListing.purpose === 'sale' ? 'sale' : 'rent';
       const typeText = currentListing.type === 'property' ? 'عقار' : 'سيارة';
       let badges = `<span class="info-badge ${purposeClass}"><i data-lucide="tag"></i>${purposeText}</span><span class="info-badge" style="background:var(--bg-secondary);color:var(--text-secondary);"><i data-lucide="${currentListing.type === 'property' ? 'building-2' : 'car'}"></i>${typeText}</span>`;
-      if (isNegotiable(currentListing)) badges += `<span class="info-badge negotiable"><i data-lucide="handshake"></i>قابل للتفاوض</span>`;
+      
+      const negotiableStatus = getNegotiableStatus(currentListing);
+      if (negotiableStatus === 'yes') {
+        badges += `<span class="info-badge negotiable-yes"><i data-lucide="handshake"></i>قابل للتفاوض</span>`;
+      } else if (negotiableStatus === 'no') {
+        badges += `<span class="info-badge negotiable-no"><i data-lucide="x-circle"></i>غير قابل للتفاوض</span>`;
+      }
+      
       if (updates.featured) badges += `<span class="info-badge featured"><i data-lucide="star"></i>مميز</span>`;
       document.getElementById('infoBadges').innerHTML = badges;
 
