@@ -525,8 +525,7 @@ function renderGallery(imgs, l) {
   if (!imgs.length) {
     main.innerHTML = `<i data-lucide="${fallback}"></i>
       <div class="gallery-nav prev" onclick="prevImage()"><i data-lucide="chevron-right"></i></div>
-      <div class="gallery-nav next" onclick="nextImage()"><i data-lucide="chevron-left"></i></div>
-      <div class="gallery-counter">1 / 1</div>`;
+      <div class="gallery-nav next" onclick="nextImage()"><i data-lucide="chevron-left"></i></div>`;
     thumbs.innerHTML = `<div class="gallery-thumb active"><i data-lucide="${fallback}" style="color:var(--text-muted);"></i></div>`;
     initIcons();
     return;
@@ -547,8 +546,7 @@ function renderGallery(imgs, l) {
   main.innerHTML = `
     <img src="${largeUrls[0]}" alt="${safeTitle}" loading="eager" decoding="async" fetchpriority="high" style="width:100%;height:100%;object-fit:cover;display:block;">
     <div class="gallery-nav prev" onclick="prevImage()"><i data-lucide="chevron-right"></i></div>
-    <div class="gallery-nav next" onclick="nextImage()"><i data-lucide="chevron-left"></i></div>
-    <div class="gallery-counter" id="galleryCounter">1 / ${largeUrls.length}</div>`;
+    <div class="gallery-nav next" onclick="nextImage()"><i data-lucide="chevron-left"></i></div>`;
 
   thumbs.innerHTML = largeUrls.map((url, i) => 
     `<div class="gallery-thumb ${i === 0 ? 'active' : ''}" onclick="goToImage(${i})"><img src="${url}" alt="صورة ${i + 1}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;"></div>`
@@ -568,8 +566,6 @@ function updateGallery() {
   const main = document.getElementById('galleryMain');
   const imgEl = main.querySelector('img');
   if (imgEl) imgEl.src = urls.large[currentImageIndex];
-  const counter = document.getElementById('galleryCounter');
-  if (counter) counter.textContent = `${currentImageIndex + 1} / ${urls.large.length}`;
   document.querySelectorAll('.gallery-thumb').forEach((t, i) => t.classList.toggle('active', i === currentImageIndex));
 }
 
