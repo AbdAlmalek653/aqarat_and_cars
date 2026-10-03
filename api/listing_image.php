@@ -1,14 +1,14 @@
 <?php
 /**
  * ==========================================
- * listing_image.php - النسخة النهائية (v3.1)
+ * listing_image.php - النسخة النهائية (v3.2)
  * ==========================================
  * 
  * ✨ التحديثات:
- * - جودة WebP أعلى للصور الكبيرة (88 للـ large)
+ * - large = 2400px (بدل 1600) للشاشات الكبيرة
+ * - جودة WebP 92 للـ large
+ * - cache key جديد (v5) لإجبار تجديد الكاش
  * - Vary: Accept لضمان توافق المتصفحات
- * - كاش ذكي بدون immutable
- * - دعم كامل للأحجام الثلاثة
  */
 
 require_once 'config.php';
@@ -19,7 +19,7 @@ session_write_close();
    ========================================== */
 $id    = $_GET['id'] ?? '';
 $index = isset($_GET['index']) ? (int)$_GET['index'] : 0;
-$size  = $_GET['size'] ?? 'large';       // ✅ الافتراضي: large (مش medium)
+$size  = $_GET['size'] ?? 'large';
 $width = isset($_GET['w']) ? (int)$_GET['w'] : 0;
 $forceQuality = isset($_GET['q']) ? (int)$_GET['q'] : 0;
 
@@ -31,12 +31,12 @@ if (!$id) {
 $offset = max(0, $index);
 
 /* ==========================================
-   2. تحديد العرض المستهدف
+   2. تحديد العرض المستهدف (v3.2)
    ========================================== */
 $sizeMap = [
     'thumb'  => 400,
     'medium' => 900,
-    'large'  => 1600,
+    'large'  => 2400,   // ✅ رفعناها من 1600 إلى 2400
 ];
 
 if (!isset($sizeMap[$size])) {
@@ -65,15 +65,15 @@ if (!$row || empty($row['url'])) {
 $url = $row['url'];
 
 /* ==========================================
-   4. إعدادات الكاش
+   4. إعدادات الكاش (v5 - جديد)
    ========================================== */
 $cacheDir = __DIR__ . '/cache/images';
 if (!is_dir($cacheDir)) {
     @mkdir($cacheDir, 0755, true);
 }
 
-// ✅ مفتاح كاش جديد (v4) عشان نمسح كل الكاش القديم
-$cacheKey = md5($url . '_' . $targetWidth . '_v4');
+// ✅ مفتاح كاش v5 - لإجبار مسح الكاش القديم
+$cacheKey = md5($url . '_' . $targetWidth . '_v5');
 $cacheFile = $cacheDir . '/' . $cacheKey . '.webp';
 
 /* ==========================================
@@ -95,12 +95,10 @@ function sendPlaceholder($width = 400) {
    6. ترويسات الكاش
    ========================================== */
 function sendCacheHeaders($mime = null, $size = null) {
-    // ✅ كاش لمدة شهر (مش سنة) لتجنب مشاكل الصور القديمة
     header('Cache-Control: public, max-age=2592000');
     header('Expires: ' . gmdate('D, d M Y H:i:s', time() + 2592000) . ' GMT');
-    // ✅ Vary: Accept مهم للـ WebP
     header('Vary: Accept, Accept-Encoding');
-    
+
     if ($mime) {
         header('Content-Type: ' . $mime);
     }
@@ -110,16 +108,16 @@ function sendCacheHeaders($mime = null, $size = null) {
 }
 
 /* ==========================================
-   7. معالجة الصورة
+   7. معالجة الصورة (v3.2 - جودة أعلى)
    ========================================== */
-function processImage($data, $mime, $targetWidth = 1600, $forceQuality = 0) {
+function processImage($data, $mime, $targetWidth = 2400, $forceQuality = 0) {
     if (!function_exists('imagecreatefromstring')) {
-        return ['data' => $data, 'mime' => $mime, 'ext' => 'jpg'];
+        return ['data' => $data, 'mime' => $mime];
     }
 
     $img = @imagecreatefromstring($data);
     if (!$img) {
-        return ['data' => $data, 'mime' => $mime, 'ext' => 'jpg'];
+        return ['data' => $data, 'mime' => $mime];
     }
 
     $origW = imagesx($img);
@@ -146,36 +144,33 @@ function processImage($data, $mime, $targetWidth = 1600, $forceQuality = 0) {
     imagecopyresampled($newImg, $img, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
 
     ob_start();
-    
+
     if (function_exists('imagewebp')) {
-        // ✅ جودة أعلى بكثير
+        // ✅ جودة أعلى في v3.2
         if ($forceQuality > 0) {
             $quality = $forceQuality;
-        } elseif ($targetWidth >= 1600) {
-            $quality = 88;   // ✅ large: جودة عالية جداً
+        } elseif ($targetWidth >= 2000) {
+            $quality = 92;   // ✅ large (2400px)
         } elseif ($targetWidth >= 900) {
-            $quality = 85;   // ✅ medium: جودة عالية
+            $quality = 88;   // ✅ medium (900px)
         } else {
-            $quality = 80;   // thumb
+            $quality = 82;   // thumb
         }
-        
+
         imagewebp($newImg, null, $quality);
         $output = ob_get_clean();
         $finalMime = 'image/webp';
-        $ext = 'webp';
     } else {
-        // Fallback
-        $quality = $targetWidth >= 1600 ? 90 : 85;
+        $quality = $targetWidth >= 2000 ? 92 : 88;
         imagejpeg($newImg, null, $quality);
         $output = ob_get_clean();
         $finalMime = 'image/jpeg';
-        $ext = 'jpg';
     }
 
     imagedestroy($img);
     imagedestroy($newImg);
 
-    return ['data' => $output, 'mime' => $finalMime, 'ext' => $ext];
+    return ['data' => $output, 'mime' => $finalMime];
 }
 
 /* ==========================================
@@ -192,10 +187,10 @@ function fetchRemoteImage($url) {
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_FOLLOWLOCATION => true,
         CURLOPT_MAXREDIRS => 3,
-        CURLOPT_TIMEOUT => 10,
-        CURLOPT_CONNECTTIMEOUT => 5,
+        CURLOPT_TIMEOUT => 15,
+        CURLOPT_CONNECTTIMEOUT => 8,
         CURLOPT_SSL_VERIFYPEER => false,
-        CURLOPT_USERAGENT => 'Mozilla/5.0 (compatible; SouqBot/2.0)',
+        CURLOPT_USERAGENT => 'Mozilla/5.0 (compatible; SouqBot/3.2)',
         CURLOPT_HTTPHEADER => [
             'Accept: image/webp,image/avif,image/jpeg,image/png,image/*,*/*;q=0.8',
         ],
@@ -226,7 +221,7 @@ if (file_exists($cacheFile) && filesize($cacheFile) > 0) {
     $cachedData = file_get_contents($cacheFile);
     $finfo = new finfo(FILEINFO_MIME_TYPE);
     $mime = $finfo->buffer($cachedData) ?: 'image/webp';
-    
+
     sendCacheHeaders($mime, strlen($cachedData));
     echo $cachedData;
     exit;
@@ -266,7 +261,6 @@ if (strpos($url, 'http') === 0) {
         exit;
     }
 
-    // فشل → Placeholder
     sendPlaceholder($targetWidth);
 }
 
@@ -278,12 +272,11 @@ if (strpos($url, '/uploads/') === 0) {
     if (file_exists($localPath)) {
         $finfo = new finfo(FILEINFO_MIME_TYPE);
         $mime = $finfo->file($localPath);
-        
-        // ✅ نعالج الصورة المحلية بنفس المنطق
+
         $data = file_get_contents($localPath);
         $result = processImage($data, $mime, $targetWidth, $forceQuality);
         @file_put_contents($cacheFile, $result['data']);
-        
+
         sendCacheHeaders($result['mime'], strlen($result['data']));
         echo $result['data'];
         exit;
