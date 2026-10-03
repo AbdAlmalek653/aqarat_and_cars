@@ -1349,6 +1349,22 @@
   background: #0a0e1a;
 }
 
+.gallery-main::before,
+.gallery-main::after,
+.gallery-main img::before,
+.gallery-main img::after {
+  content: none !important;
+  display: none !important;
+}
+
+.gallery-main img {
+  opacity: 1 !important;
+  filter: none !important;
+  mix-blend-mode: normal !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
 .specs-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
 }
