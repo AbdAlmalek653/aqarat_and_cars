@@ -1,6 +1,6 @@
 /* ==========================================
    الصفحة الرئيسية - سوق
-   الإصدار: 4.0 (فلترة مصححة + حماية ضد الأخطاء)
+   الإصدار: 5.0 (فلترة مصححة + بدون cache)
    ========================================== */
 
 function initIcons() {
@@ -19,12 +19,8 @@ const TYPE_NAMES = { property: 'عقارات', car: 'سيارات' };
 const PURPOSE_NAMES = { sale: 'للبيع', rent: 'للإيجار' };
 
 /* ==========================================
-   ✅ دوال مساعدة: توحيد اسم المحافظة والمقارنة
+   ✅ دوال مساعدة
    ========================================== */
-
-/**
- * استخراج كل المفاتيح المحتملة للمحافظة من الإعلان
- */
 function normalizeCityKey(listing) {
   if (!listing) return [];
   const keys = [];
@@ -34,69 +30,48 @@ function normalizeCityKey(listing) {
   return keys.filter(Boolean);
 }
 
-/**
- * التحقق من تطابق المحافظة مع الفلتر (يدعم العربية والإنجليزية)
- */
 function cityMatches(listing, targetSlug) {
   if (!targetSlug) return true;
   const target = String(targetSlug).toLowerCase().trim();
   const targetName = String(CITY_NAMES[target] || '').toLowerCase().trim();
-  
   const listingKeys = normalizeCityKey(listing);
-  
-  return listingKeys.some(key => 
-    key === target || 
-    (targetName && key === targetName)
-  );
+  return listingKeys.some(key => key === target || (targetName && key === targetName));
 }
 
 /* ==========================================
-   ✅ تحسين 1: منع استدعاءات API المتزامنة
+   ✅ دالة جلب الإعلانات - بدون cache نهائياً
    ========================================== */
-let _listingsPromise = null;
-
 async function getCachedListings(forceRefresh) {
-  if (_listingsPromise && !forceRefresh) {
-    return _listingsPromise;
+  try {
+    const options = forceRefresh ? { forceRefresh: true } : {};
+    console.log('🔄 جلب الإعلانات من API...');
+    const data = await API.Listings.getAll({}, options);
+    console.log('✅ API رجع:', data);
+
+    if (Array.isArray(data)) return data;
+    if (data && Array.isArray(data.listings)) return data.listings;
+    if (data && Array.isArray(data.data)) return data.data;
+    if (data && Array.isArray(data.items)) return data.items;
+
+    console.warn('⚠️ استجابة غير متوقعة من API:', data);
+    return [];
+  } catch (error) {
+    console.error('❌ فشل تحميل الإعلانات:', error);
+    return [];
   }
-
-  _listingsPromise = (async () => {
-    try {
-      const options = forceRefresh ? { forceRefresh: true } : {};
-      const data = await API.Listings.getAll({}, options);
-
-      // ✅ حماية ضد أي شكل غير متوقع من البيانات
-      if (Array.isArray(data)) return data;
-      if (data && Array.isArray(data.listings)) return data.listings;
-      if (data && Array.isArray(data.data)) return data.data;
-      if (data && Array.isArray(data.items)) return data.items;
-
-      console.warn('⚠️ استجابة غير متوقعة من API:', data);
-      return [];
-    } catch (error) {
-      console.error('❌ فشل تحميل الإعلانات:', error);
-      return [];
-    } finally {
-      setTimeout(() => { _listingsPromise = null; }, 100);
-    }
-  })();
-
-  return _listingsPromise;
 }
 
 /* ==========================================
-   ✅ تحسين 2: دالة موحدة لتوليد روابط الصور
+   ✅ روابط الصور
    ========================================== */
 function getImageUrls(item, index = 0) {
   if (!item || !item.id) {
     return { thumb: null, medium: null, large: null, srcset: '', sizes: '' };
   }
-
   const base = `/api/listing_image.php?id=${item.id}&index=${index}`;
   const thumb  = `${base}&size=thumb`;
   const medium = `${base}&size=medium`;
   const large  = `${base}&size=large`;
-
   return {
     thumb,
     medium,
@@ -111,9 +86,6 @@ function getImageUrl(item) {
   return getImageUrls(item).medium;
 }
 
-/* ==========================================
-   ✅ تحسين 3: createCard مع srcset + المدينة المصححة
-   ========================================== */
 function createCard(item, type) {
   const purposeText = item.purpose === 'sale' ? 'للبيع' : 'للإيجار';
   const purposeClass = item.purpose === 'sale' ? 'sale' : 'rent';
@@ -150,13 +122,32 @@ function createCard(item, type) {
 
   const featuredBadge = item.featured ? `<span class="card-badge featured">⭐ مميز</span>` : '';
 
-  // ✅ إصلاح: استخدام city_slug و city_name و city بالترتيب الصحيح
-  let locationText = '';
-  const cityKey = item.city_slug || item.city;
-  const cityName = item.city_name || (cityKey ? CITY_NAMES[cityKey] : '');
-  if (cityName) locationText = cityName;
-  if (item.area) locationText = locationText ? `${locationText} - ${item.area}` : item.area;
-  if (!locationText) locationText = item.location || '—';
+  // ✅ الحل النهائي للمحافظة - يدعم كل الأشكال
+  let locationText = '—';
+  const citySlug = item.city_slug || item.city || '';
+  const cityNameFromAPI = item.city_name || item.cityName || '';
+  
+  // 1. جرّب الاسم من الـ API أولاً
+  if (cityNameFromAPI && cityNameFromAPI.trim()) {
+    locationText = cityNameFromAPI.trim();
+  }
+  // 2. جرّب ترجمة الـ slug
+  else if (citySlug && CITY_NAMES[citySlug]) {
+    locationText = CITY_NAMES[citySlug];
+  }
+  // 3. لو الـ slug عربي، استخدمه كما هو
+  else if (citySlug && /[\u0600-\u06FF]/.test(citySlug)) {
+    locationText = citySlug;
+  }
+  // 4. جرّب حقل location القديم
+  else if (item.location && item.location.trim()) {
+    locationText = item.location.trim();
+  }
+  
+  // ✅ أضف المنطقة لو موجودة
+  if (item.area && item.area.trim()) {
+    locationText = locationText === '—' ? item.area : `${locationText} - ${item.area}`;
+  }
 
   const d = item.details || {};
   let chips = [];
@@ -188,17 +179,36 @@ function createCard(item, type) {
     ? `<div class="card-meta">${chips.map(c => `<span class="card-meta-chip"><i data-lucide="${c.icon}"></i><span>${c.text}</span></span>`).join('')}</div>`
     : '';
 
+  // ✅ شارة "قابل للتفاوض"
+  const negotiableValue = String(item.negotiable || d.negotiable || '').toLowerCase().trim();
+  const isNegotiable = 
+    negotiableValue === 'قابل' || 
+    negotiableValue === 'قابل للتفاوض' || 
+    negotiableValue === 'negotiable' || 
+    negotiableValue === 'yes' ||
+    negotiableValue === 'true';
+  
+  const negotiableBadge = isNegotiable 
+    ? `<span class="card-negotiable"><i data-lucide="handshake"></i>قابل للتفاوض</span>` 
+    : '';
+
   return `<a href="pages/details.html?id=${item.id}&type=${type}" class="card">
       <div class="card-image">${imageContent}${featuredBadge}<span class="card-badge ${purposeClass}">${purposeText}</span></div>
       <div class="card-body">
         <h3 class="card-title">${item.title}</h3>
         <p class="card-location"><i data-lucide="map-pin"></i>${locationText}</p>
         ${chipsHTML}
-        <p class="card-price">${priceText}</p>
+        <div class="card-price-row">
+          <p class="card-price">${priceText}</p>
+          ${negotiableBadge}
+        </div>
       </div>
     </a>`;
 }
-
+   
+/* ==========================================
+   ✅ Empty States
+   ========================================== */
 function emptyState(type) {
   const isProperty = type === 'property';
   const icon = isProperty ? 'building-2' : 'car';
@@ -246,7 +256,7 @@ function emptyFilterState() {
 }
 
 /* ==========================================
-   ✅ تحسين 4: عرض 8 بطاقات فقط لكل قسم
+   ✅ Load Featured
    ========================================== */
 const MAX_FEATURED_ITEMS = 8;
 
@@ -290,44 +300,6 @@ async function loadAllFeatured(forceRefresh) {
   }
 }
 
-async function loadFeaturedProperties(forceRefresh) {
-  const container = document.getElementById('featuredProperties');
-  if (!container) return;
-  try {
-    const allListings = await getCachedListings(forceRefresh);
-    const properties = allListings
-      .filter(l => l.type === 'property')
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      .slice(0, MAX_FEATURED_ITEMS);
-    container.innerHTML = properties.length === 0
-      ? emptyState('property')
-      : properties.map(p => createCard(p, 'property')).join('');
-    initIcons();
-  } catch (e) {
-    container.innerHTML = emptyState('property');
-    initIcons();
-  }
-}
-
-async function loadFeaturedCars(forceRefresh) {
-  const container = document.getElementById('featuredCars');
-  if (!container) return;
-  try {
-    const allListings = await getCachedListings(forceRefresh);
-    const cars = allListings
-      .filter(l => l.type === 'car')
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      .slice(0, MAX_FEATURED_ITEMS);
-    container.innerHTML = cars.length === 0
-      ? emptyState('car')
-      : cars.map(c => createCard(c, 'car')).join('');
-    initIcons();
-  } catch (e) {
-    container.innerHTML = emptyState('car');
-    initIcons();
-  }
-}
-
 async function loadStats(forceRefresh) {
   try {
     const options = forceRefresh ? { forceRefresh: true } : {};
@@ -363,32 +335,9 @@ function animateNumber(elementId, target) {
   requestAnimationFrame(update);
 }
 
-function setupSearchTabs() {
-  document.querySelectorAll('.tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-    });
-  });
-}
-
-function setupSearchForm() {
-  const form = document.getElementById('searchForm');
-  if (!form) return;
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const activeTab = document.querySelector('.tab.active');
-    const type = activeTab ? activeTab.dataset.type : 'property';
-    const location = document.getElementById('searchLocation').value.trim();
-    const purpose = document.getElementById('searchPurpose').value;
-    const params = new URLSearchParams();
-    if (location) params.append('q', location);
-    if (purpose) params.append('purpose', purpose);
-    const page = type === 'property' ? 'properties.html' : 'cars.html';
-    window.location.href = `pages/${page}?${params.toString()}`;
-  });
-}
-
+/* ==========================================
+   ✅ Welcome Modal
+   ========================================== */
 function setupWelcomeModal() {
   const modal = document.getElementById('welcomeModal');
   if (!modal) return;
@@ -411,6 +360,9 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') window.closeWelcome();
 });
 
+/* ==========================================
+   ✅ Cascade Filter
+   ========================================== */
 const cascadeState = { type: null, purpose: null, city: null };
 
 function hideResults() {
@@ -423,19 +375,31 @@ function hideResults() {
 }
 
 window.resetCascadeFilter = function () {
-  cascadeState.type = null; cascadeState.purpose = null; cascadeState.city = null;
+  cascadeState.type = null;
+  cascadeState.purpose = null;
+  cascadeState.city = null;
+
   document.querySelectorAll('.cascade-btn').forEach(b => b.classList.remove('selected'));
+
   const step2 = document.querySelector('.cascade-step[data-step="2"]');
   const step3 = document.querySelector('.cascade-step[data-step="3"]');
   const step4 = document.querySelector('.cascade-step[data-step="4"]');
+
   if (step2) { step2.classList.add('locked'); step2.classList.remove('active'); }
   if (step3) { step3.classList.add('locked'); step3.classList.remove('active'); }
   if (step4) { step4.classList.add('locked'); step4.classList.remove('active'); }
-  document.querySelectorAll('.cascade-btn[data-purpose]').forEach(b => { b.disabled = true; b.classList.remove('selected'); });
+
+  document.querySelectorAll('.cascade-btn[data-purpose]').forEach(b => {
+    b.disabled = true;
+    b.classList.remove('selected');
+  });
+
   const citySelect = document.getElementById('cascadeCity');
   if (citySelect) { citySelect.disabled = true; citySelect.value = ''; }
+
   const showBtn = document.getElementById('cascadeShowBtn');
   if (showBtn) showBtn.disabled = true;
+
   hideResults();
   initIcons();
 };
@@ -448,18 +412,31 @@ function setupCascadeFilter() {
       cascadeState.type = btn.dataset.type;
       cascadeState.purpose = null;
       cascadeState.city = null;
+
       const step2 = document.querySelector('.cascade-step[data-step="2"]');
-      step2.classList.remove('locked'); step2.classList.add('active');
-      step2.querySelectorAll('.cascade-btn').forEach(b => { b.disabled = false; b.classList.remove('selected'); });
+      step2.classList.remove('locked');
+      step2.classList.add('active');
+      step2.querySelectorAll('.cascade-btn').forEach(b => {
+        b.disabled = false;
+        b.classList.remove('selected');
+      });
+
       const step3 = document.querySelector('.cascade-step[data-step="3"]');
-      step3.classList.add('locked'); step3.classList.remove('active');
+      step3.classList.add('locked');
+      step3.classList.remove('active');
+
       const citySelect = document.getElementById('cascadeCity');
       if (citySelect) { citySelect.disabled = true; citySelect.value = ''; }
+
       const step4 = document.querySelector('.cascade-step[data-step="4"]');
-      step4.classList.add('locked'); step4.classList.remove('active');
+      step4.classList.add('locked');
+      step4.classList.remove('active');
+
       const showBtn = document.getElementById('cascadeShowBtn');
       if (showBtn) showBtn.disabled = true;
-      hideResults(); initIcons();
+
+      hideResults();
+      initIcons();
     });
   });
 
@@ -470,15 +447,23 @@ function setupCascadeFilter() {
       btn.classList.add('selected');
       cascadeState.purpose = btn.dataset.purpose;
       cascadeState.city = null;
+
       const step3 = document.querySelector('.cascade-step[data-step="3"]');
-      step3.classList.remove('locked'); step3.classList.add('active');
+      step3.classList.remove('locked');
+      step3.classList.add('active');
+
       const citySelect = document.getElementById('cascadeCity');
       if (citySelect) { citySelect.disabled = false; citySelect.value = ''; }
+
       const step4 = document.querySelector('.cascade-step[data-step="4"]');
-      step4.classList.add('locked'); step4.classList.remove('active');
+      step4.classList.add('locked');
+      step4.classList.remove('active');
+
       const showBtn = document.getElementById('cascadeShowBtn');
       if (showBtn) showBtn.disabled = true;
-      hideResults(); initIcons();
+
+      hideResults();
+      initIcons();
     });
   });
 
@@ -495,7 +480,8 @@ function setupCascadeFilter() {
         if (step4) { step4.classList.add('locked'); step4.classList.remove('active'); }
         if (showBtn) showBtn.disabled = true;
       }
-      hideResults(); initIcons();
+      hideResults();
+      initIcons();
     });
   }
 
@@ -504,9 +490,12 @@ function setupCascadeFilter() {
 }
 
 /* ==========================================
-   🎯 الفلترة النهائية الشاملة (مصححة)
+   ✅ الفلترة النهائية
    ========================================== */
 async function handleCascadeShow() {
+  console.log('🎯 ضغط زر عرض الإعلانات');
+  console.log('📊 الحالة:', cascadeState);
+
   if (!cascadeState.type || !cascadeState.purpose || !cascadeState.city) {
     console.warn('⚠️ الفلتر غير مكتمل');
     return;
@@ -514,23 +503,22 @@ async function handleCascadeShow() {
 
   const resultsSection = document.getElementById('resultsSection');
   const grid = document.getElementById('latestGrid');
-  
-  if (!resultsSection || !grid) return;
 
-  // عرض قسم النتائج
+  if (!resultsSection || !grid) {
+    console.error('❌ نتائج البحث غير موجودة');
+    return;
+  }
+
   resultsSection.style.display = 'block';
-
-  // إزالة رسائل "لا توجد نتائج" القديمة
   resultsSection.querySelectorAll('.empty-state').forEach(el => el.remove());
 
-  // عرض مؤشر التحميل
   grid.style.display = 'grid';
   grid.innerHTML = `
     <div style="grid-column:1/-1;text-align:center;padding:60px 20px;">
       <i data-lucide="loader-2" class="spin" style="width:48px;height:48px;color:var(--primary);margin-bottom:16px;"></i>
       <p style="color:var(--text-secondary);">جاري تحميل الإعلانات...</p>
     </div>`;
-  
+
   if (window.lucide) window.lucide.createIcons();
 
   setTimeout(() => {
@@ -538,21 +526,18 @@ async function handleCascadeShow() {
   }, 100);
 
   try {
-    const allListings = await getCachedListings(false);
+    // ✅ forceRefresh = true عشان نتجاوز الكاش
+    const allListings = await getCachedListings(true);
+    console.log(`📦 عدد الإعلانات الكلي: ${allListings.length}`);
 
-    // ✅ الفلترة المحسّنة باستخدام cityMatches
     const listings = allListings.filter(l => {
-      // 1. النوع (سيارة/عقار)
       if (cascadeState.type && l.type !== cascadeState.type) return false;
-      
-      // 2. الغرض (بيع/إيجار)
       if (cascadeState.purpose && l.purpose !== cascadeState.purpose) return false;
-      
-      // 3. المحافظة (بالدالة المساعدة)
       if (cascadeState.city && !cityMatches(l, cascadeState.city)) return false;
-      
       return true;
     });
+
+    console.log(`✅ عدد النتائج بعد الفلترة: ${listings.length}`);
 
     listings.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
@@ -560,30 +545,24 @@ async function handleCascadeShow() {
     const purposeText = PURPOSE_NAMES[cascadeState.purpose] || '';
     const cityText = CITY_NAMES[cascadeState.city] || cascadeState.city;
 
-    if (resultsSection) {
-      const resultsTitleEl = resultsSection.querySelector('.section-title span');
-      const resultsSubtitleEl = resultsSection.querySelector('.section-subtitle');
-      if (resultsTitleEl) resultsTitleEl.textContent = `نتائج البحث (${listings.length})`;
-      if (resultsSubtitleEl) resultsSubtitleEl.textContent = `${typeText} ${purposeText} في ${cityText}`;
-    }
+    const resultsTitleEl = resultsSection.querySelector('.section-title span');
+    const resultsSubtitleEl = resultsSection.querySelector('.section-subtitle');
+    if (resultsTitleEl) resultsTitleEl.textContent = `نتائج البحث (${listings.length})`;
+    if (resultsSubtitleEl) resultsSubtitleEl.textContent = `${typeText} ${purposeText} في ${cityText}`;
 
-    // ✅ إذا لا توجد نتائج
     if (listings.length === 0) {
       grid.style.display = 'none';
       grid.innerHTML = '';
-      if (resultsSection) {
-        const newEmpty = document.createElement('div');
-        newEmpty.className = 'empty-state';
-        newEmpty.id = 'cascadeEmpty';
-        newEmpty.style.cssText = 'grid-column:1/-1;';
-        newEmpty.innerHTML = emptyFilterState();
-        resultsSection.appendChild(newEmpty);
-      }
+      const newEmpty = document.createElement('div');
+      newEmpty.className = 'empty-state';
+      newEmpty.id = 'cascadeEmpty';
+      newEmpty.style.cssText = 'grid-column:1/-1;';
+      newEmpty.innerHTML = emptyFilterState();
+      resultsSection.appendChild(newEmpty);
       if (window.lucide) window.lucide.createIcons();
       return;
     }
 
-    // ✅ عرض النتائج
     grid.style.display = 'grid';
     grid.innerHTML = listings.map(item => createCard(item, item.type)).join('');
     if (window.lucide) window.lucide.createIcons();
@@ -600,7 +579,7 @@ async function handleCascadeShow() {
 }
 
 /* ==========================================
-   ✅ Auto-refresh ذكي
+   ✅ Auto-refresh
    ========================================== */
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 let refreshIntervalId = null;
@@ -635,21 +614,18 @@ function stopAutoRefresh() {
 }
 
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) {
-    stopAutoRefresh();
-  } else {
-    startAutoRefresh();
-  }
+  if (document.hidden) stopAutoRefresh();
+  else startAutoRefresh();
 });
 
+/* ==========================================
+   ✅ تشغيل
+   ========================================== */
 document.addEventListener('DOMContentLoaded', () => {
   loadAllFeatured(false);
   loadStats(false);
-  setupSearchTabs();
-  setupSearchForm();
   setupWelcomeModal();
   setupCascadeFilter();
   initIcons();
-
   startAutoRefresh();
 });

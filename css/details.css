@@ -1435,3 +1435,28 @@
     font-size: 12px !important;
   }
 }
+/* ==========================================
+   ✅ شارة "قابل للتفاوض" في صفحة التفاصيل
+   ========================================== */
+
+.info-badge.negotiable {
+  background: linear-gradient(135deg, #10B981, #059669);
+  color: white;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.info-badge.negotiable svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* أيقونة handshake في المواصفات */
+.spec-item .spec-icon svg[data-lucide="handshake"],
+.spec-icon svg[data-lucide="handshake"] {
+  color: #10B981;
+}
+
+/* خلفية خضراء خفيفة لعنصر "قابل للتفاوض" في المواصفات */
+.spec-item:has(.spec-value:contains("نعم ✅")) {
+  border-color: rgba(16, 185, 129, 0.3);
+}

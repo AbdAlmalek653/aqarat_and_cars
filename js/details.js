@@ -1,6 +1,6 @@
 /* ==========================================
    صفحة تفاصيل الإعلان
-   الإصدار: 3.2 (كل الحقول بالعربية - عقارات وسيارات)
+   الإصدار: 4.0 (negotiable + city fix + ترجمة شاملة)
    ========================================== */
 
 const BROKER_PHONE = '963930932794';
@@ -11,8 +11,8 @@ let currentImageIndex = 0;
    بيانات تجريبية (Fallback)
    ========================================== */
 const MOCK_LISTINGS = {
-  '1001': {id:'1001',type:'property',purpose:'sale',title:'شقة فاخرة بتشطيب سوبر ديلوكس في المزة',location:'دمشق - المزة',price:185000,currency:'USD',featured:true,whatsapp:'0930000001',description:'شقة فاخرة بمساحة 180 متر مربع، تتكون من 3 غرف نوم، صالون واسع، مطبخ حديث، 2 حمام.\n\nتشطيب سوبر ديلوكس، طابق ثالث من أصل 5، عمر البناء 3 سنوات، مع مصعد وموقف سيارة خاص.',images:[],details:{propertyType:'apartment',area:180,rooms:3,bathrooms:2,floor:3,age:3,furnished:'furnished',heating:'central',_whatsapp:'0930000001'}},
-  '2001': {id:'2001',type:'car',purpose:'sale',title:'تويوتا كامري 2022 - فل كامل',location:'دمشق - المزة',price:28500,currency:'USD',featured:true,whatsapp:'0930000005',description:'تويوتا كامري 2022 فل كامل، ماشية 35,000 كم فقط، بحالة الوكالة.',images:[],details:{brand:'toyota',model:'كامري',year:2022,km:35000,transmission:'automatic',fuel:'petrol',color:'أبيض',condition:'used',_whatsapp:'0930000005'}}
+  '1001': {id:'1001',type:'property',purpose:'sale',title:'شقة فاخرة بتشطيب سوبر ديلوكس في المزة',location:'دمشق - المزة',price:185000,currency:'USD',featured:true,negotiable:'قابل',whatsapp:'0930000001',description:'شقة فاخرة بمساحة 180 متر مربع، تتكون من 3 غرف نوم، صالون واسع، مطبخ حديث، 2 حمام.\n\nتشطيب سوبر ديلوكس، طابق ثالث من أصل 5، عمر البناء 3 سنوات، مع مصعد وموقف سيارة خاص.',images:[],details:{propertyType:'apartment',area:180,rooms:3,bathrooms:2,floor:3,age:3,furnished:'furnished',heating:'central',negotiable:'قابل',_whatsapp:'0930000001'}},
+  '2001': {id:'2001',type:'car',purpose:'sale',title:'تويوتا كامري 2022 - فل كامل',location:'دمشق - المزة',price:28500,currency:'USD',featured:true,negotiable:'غير قابل',whatsapp:'0930000005',description:'تويوتا كامري 2022 فل كامل، ماشية 35,000 كم فقط، بحالة الوكالة.',images:[],details:{brand:'toyota',model:'كامري',year:2022,km:35000,transmission:'automatic',fuel:'petrol',color:'أبيض',condition:'used',negotiable:'غير قابل',_whatsapp:'0930000005'}}
 };
 
 /* ==========================================
@@ -33,6 +33,25 @@ async function fetchListing(id) {
     } catch (e) {}
   }
   return MOCK_LISTINGS[id] || null;
+}
+
+/* ==========================================
+   ✅ دالة موحدة للتحقق من "قابل للتفاوض"
+   ========================================== */
+function isNegotiable(listing) {
+  if (!listing) return false;
+  const d = listing.details || {};
+  const value = listing.negotiable || d.negotiable || '';
+  const str = String(value).toLowerCase().trim();
+  
+  return (
+    str === 'قابل' ||
+    str === 'قابل للتفاوض' ||
+    str === 'negotiable' ||
+    str === 'yes' ||
+    str === 'true' ||
+    str === '1'
+  );
 }
 
 /* ==========================================
@@ -85,6 +104,25 @@ function buildSpecsFromDetails(listing) {
     age: { icon: 'calendar', label: 'عمر البناء', suffix: ' سنة' },
     buildingAge: { icon: 'calendar', label: 'عمر البناء', suffix: ' سنة' },
     building_age: { icon: 'calendar', label: 'عمر البناء', suffix: ' سنة' },
+
+    // ✅ "قابل للتفاوض"
+    negotiable: {
+      icon: 'handshake',
+      label: 'السعر قابل للتفاوض',
+      translate: {
+        'قابل': 'نعم ✅',
+        'غير قابل': 'لا ❌',
+        'قابل للتفاوض': 'نعم ✅',
+        'غير قابل للتفاوض': 'لا ❌',
+        'negotiable': 'نعم ✅',
+        'yes': 'نعم ✅',
+        'no': 'لا ❌',
+        'true': 'نعم ✅',
+        'false': 'لا ❌',
+        '1': 'نعم ✅',
+        '0': 'لا ❌'
+      }
+    },
 
     // ✅ الاتجاه
     direction: {
@@ -171,7 +209,17 @@ function buildSpecsFromDetails(listing) {
     landTabu: {
       icon: 'file-check', label: 'الطابو',
       translate: { green: 'أخضر', blue: 'أزرق', organized: 'منظم', unorganized: 'غير منظم' }
-    }
+    },
+
+    rentPeriod: {
+      icon: 'calendar-clock', label: 'مدة الإيجار',
+      translate: { daily: 'يومي', monthly: 'شهري', yearly: 'سنوي' }
+    },
+    rent_period: {
+      icon: 'calendar-clock', label: 'مدة الإيجار',
+      translate: { daily: 'يومي', monthly: 'شهري', yearly: 'سنوي' }
+    },
+    deposit: { icon: 'wallet', label: 'مبلغ التأمين' }
   };
 
   // ==========================================
@@ -203,6 +251,23 @@ function buildSpecsFromDetails(listing) {
 
     km: { icon: 'gauge', label: 'الكيلومترات', suffix: ' كم' },
     mileage: { icon: 'gauge', label: 'الكيلومترات', suffix: ' كم' },
+
+    // ✅ "قابل للتفاوض" للسيارات
+    negotiable: {
+      icon: 'handshake',
+      label: 'السعر قابل للتفاوض',
+      translate: {
+        'قابل': 'نعم ✅',
+        'غير قابل': 'لا ❌',
+        'قابل للتفاوض': 'نعم ✅',
+        'غير قابل للتفاوض': 'لا ❌',
+        'negotiable': 'نعم ✅',
+        'yes': 'نعم ✅',
+        'no': 'لا ❌',
+        'true': 'نعم ✅',
+        'false': 'لا ❌'
+      }
+    },
 
     condition: {
       icon: 'sparkles', label: 'الحالة',
@@ -280,6 +345,7 @@ function buildSpecsFromDetails(listing) {
     direction: 'الاتجاه', facing: 'الاتجاه',
     vacancytype: 'نوع الفراغة', vacancy_type: 'نوع الفراغة',
     finishingtype: 'نوع الإكساء', finishing_type: 'نوع الإكساء',
+    negotiable: 'السعر قابل للتفاوض',
 
     totalfloors: 'إجمالي الطوابق', total_floors: 'إجمالي الطوابق',
     floors: 'عدد الطوابق', floor: 'الطابق',
@@ -300,12 +366,24 @@ function buildSpecsFromDetails(listing) {
     fuel: 'الوقود', transmission: 'ناقل الحركة', gear: 'ناقل الحركة',
     condition: 'الحالة', carinsurance: 'التأمين', insurance: 'التأمين',
     mindays: 'أقل مدة إيجار', min_days: 'أقل مدة إيجار',
-    wifi: 'واي فاي', ac: 'تكييف', kitchen: 'مطبخ'
+    wifi: 'واي فاي', ac: 'تكييف', kitchen: 'مطبخ',
+    rentperiod: 'مدة الإيجار', rent_period: 'مدة الإيجار',
+    deposit: 'مبلغ التأمين'
   };
 
   const map = isProperty ? propertyMap : carMap;
   const specs = [];
   const usedLabels = new Set();
+
+  // ✅ 1. أضف "قابل للتفاوض" أول شي (للعرض المميز)
+  if (isNegotiable(listing)) {
+    specs.push({
+      icon: 'handshake',
+      label: 'السعر قابل للتفاوض',
+      value: 'نعم ✅'
+    });
+    usedLabels.add('السعر قابل للتفاوض');
+  }
 
   Object.keys(d).forEach(key => {
     if (sensitiveKeys.includes(key.toLowerCase()) && !isAdmin) return;
@@ -356,7 +434,18 @@ function buildTypeText(listing) {
     return types[listing.subType || d.propertyType] || 'عقار';
   }
   if (listing.type === 'car') {
-    const brands = { toyota: 'تويوتا', hyundai: 'هيونداي', kia: 'كيا', mercedes: 'مرسيدس', bmw: 'BMW', nissan: 'نيسان', honda: 'هوندا', chevrolet: 'شيفروليه', ford: 'فورد', mazda: 'مازدا', mitsubishi: 'ميتسوبيشي', volkswagen: 'فولكس فاجن', audi: 'أودي', lexus: 'لكزس', other: 'أخرى' };
+    const brands = {
+      toyota: 'تويوتا', hyundai: 'هيونداي', kia: 'كيا', mercedes: 'مرسيدس',
+      bmw: 'BMW', nissan: 'نيسان', honda: 'هوندا', chevrolet: 'شيفروليه',
+      ford: 'فورد', mazda: 'مازدا', mitsubishi: 'ميتسوبيشي',
+      volkswagen: 'فولكس فاجن', audi: 'أودي', lexus: 'لكزس',
+      renault: 'رينو', peugeot: 'بيجو', fiat: 'فيات', seat: 'سيات',
+      skoda: 'سكودا', opel: 'أوبل', jeep: 'جيب', landrover: 'لاند روفر',
+      'land-rover': 'لاند روفر', porsche: 'بورش', ferrari: 'فيراري',
+      tesla: 'تسلا', volvo: 'فولفو', subaru: 'سوبارو',
+      infiniti: 'إنفينيتي', cadillac: 'كاديلاك', gmc: 'جي إم سي',
+      dodge: 'دودج', chrysler: 'كرايسلر', suzuki: 'سوزوكي', other: 'أخرى'
+    };
     const brand = d.brandName || brands[d.brand] || d.brand || '';
     const model = d.model || '';
     return [brand, model].filter(Boolean).join(' ') || 'سيارة';
@@ -365,14 +454,35 @@ function buildTypeText(listing) {
 }
 
 /* ==========================================
-   استخراج الموقع الصحيح
+   ✅ استخراج الموقع الصحيح (محدّث)
    ========================================== */
 function buildLocationText(listing) {
-  const cityNames = { damascus: 'دمشق', 'rif-dimashq': 'ريف دمشق', aleppo: 'حلب', homs: 'حمص', hama: 'حماة', latakia: 'اللاذقية', tartus: 'طرطوس', daraa: 'درعا', sweida: 'السويداء', quneitra: 'القنيطرة', 'deir-ezzor': 'دير الزور', raqqa: 'الرقة', hasakah: 'الحسكة', idlib: 'إدلب' };
+  const cityNames = {
+    damascus: 'دمشق', 'rif-dimashq': 'ريف دمشق', aleppo: 'حلب',
+    homs: 'حمص', hama: 'حماة', latakia: 'اللاذقية', tartus: 'طرطوس',
+    daraa: 'درعا', sweida: 'السويداء', quneitra: 'القنيطرة',
+    'deir-ezzor': 'دير الزور', raqqa: 'الرقة', hasakah: 'الحسكة', idlib: 'إدلب'
+  };
+
+  // ✅ دعم كل أشكال المحافظة
+  const citySlug = listing.city_slug || listing.city || '';
+  const cityNameFromAPI = listing.city_name || listing.cityName || '';
   const cityAr = listing.city ? (cityNames[listing.city] || listing.city) : '';
+
+  let cityText = '';
+  if (cityNameFromAPI && cityNameFromAPI.trim()) {
+    cityText = cityNameFromAPI.trim();
+  } else if (cityAr && /[\u0600-\u06FF]/.test(cityAr)) {
+    cityText = cityAr;
+  } else if (citySlug && cityNames[citySlug]) {
+    cityText = cityNames[citySlug];
+  } else if (citySlug && /[\u0600-\u06FF]/.test(citySlug)) {
+    cityText = citySlug;
+  }
+
   const area = listing.area || '';
-  if (cityAr && area) return `${cityAr} - ${area}`;
-  if (cityAr) return cityAr;
+  if (cityText && area) return `${cityText} - ${area}`;
+  if (cityText) return cityText;
   if (area) return area;
   return listing.location || '—';
 }
@@ -396,7 +506,7 @@ function preloadMainImage(item) {
 }
 
 /* ==========================================
-   عرض الإعلان
+   عرض الإعلان (مع شارة "قابل للتفاوض")
    ========================================== */
 function renderListing(l) {
   currentListing = l;
@@ -423,6 +533,12 @@ function renderListing(l) {
     <span class="info-badge" style="background:var(--bg-secondary);color:var(--text-secondary);">
       <i data-lucide="${l.type === 'property' ? 'building-2' : 'car'}"></i>${typeText}
     </span>`;
+  
+  // ✅ إضافة شارة "قابل للتفاوض" في الأعلى
+  if (isNegotiable(l)) {
+    badges += `<span class="info-badge negotiable"><i data-lucide="handshake"></i>قابل للتفاوض</span>`;
+  }
+  
   if (l.featured) badges += `<span class="info-badge featured"><i data-lucide="star"></i>مميز</span>`;
   document.getElementById('infoBadges').innerHTML = badges;
 
@@ -458,8 +574,9 @@ function renderListing(l) {
   const priceText = l.purpose === 'sale' ? `${priceNum.toLocaleString('en-US')} ${l.currency || 'USD'}` : `${priceNum} ${l.currency || 'USD'} / شهرياً`;
   const specificType = buildTypeText(l);
   const typeLabel = l.type === 'property' ? 'نوع العقار' : 'نوع السيارة';
+  const negotiableText = isNegotiable(l) ? '\n🤝 السعر قابل للتفاوض' : '';
 
-  const msg = `مرحباً، انا مهتم بـ ${typeText} ورقم الإعلان هو: ${l.id}\n🔍 ${typeLabel}: ${specificType}\n📍 الموقع: ${locationText}\n💰 السعر: ${priceText}\n\n🔗 رابط الإعلان:\n${listingUrl}`;
+  const msg = `مرحباً، انا مهتم بـ ${typeText} ورقم الإعلان هو: ${l.id}\n🔍 ${typeLabel}: ${specificType}\n📍 الموقع: ${locationText}\n💰 السعر: ${priceText}${negotiableText}\n\n🔗 رابط الإعلان:\n${listingUrl}`;
 
   document.getElementById('whatsappBtn').href = `https://wa.me/${BROKER_PHONE}?text=${encodeURIComponent(msg)}`;
 
@@ -662,6 +779,7 @@ async function saveEdit(e) {
       const purposeClass = currentListing.purpose === 'sale' ? 'sale' : 'rent';
       const typeText = currentListing.type === 'property' ? 'عقار' : 'سيارة';
       let badges = `<span class="info-badge ${purposeClass}"><i data-lucide="tag"></i>${purposeText}</span><span class="info-badge" style="background:var(--bg-secondary);color:var(--text-secondary);"><i data-lucide="${currentListing.type === 'property' ? 'building-2' : 'car'}"></i>${typeText}</span>`;
+      if (isNegotiable(currentListing)) badges += `<span class="info-badge negotiable"><i data-lucide="handshake"></i>قابل للتفاوض</span>`;
       if (updates.featured) badges += `<span class="info-badge featured"><i data-lucide="star"></i>مميز</span>`;
       document.getElementById('infoBadges').innerHTML = badges;
 

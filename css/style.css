@@ -2748,3 +2748,52 @@ html {
     gap: 8px;
   }
 }
+/* ==========================================
+   ✅ شارة "قابل للتفاوض" + صف السعر
+   ========================================== */
+
+.card-price-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.card-price-row .card-price {
+  margin: 0;
+}
+
+.card-negotiable {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #34D399;
+  border-radius: 20px;
+  font-size: 10.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.card-negotiable svg {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+
+/* على الجوال - تصغير الشارة */
+@media (max-width: 480px) {
+  .card-negotiable {
+    font-size: 9.5px;
+    padding: 3px 8px;
+  }
+  .card-negotiable svg {
+    width: 10px;
+    height: 10px;
+  }
+}
