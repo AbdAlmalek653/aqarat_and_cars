@@ -2,7 +2,7 @@
 /**
  * ==========================================
  * add_listing.php - إضافة إعلان جديد
- * الإصدار: 4.0 (مع مسح الكاش تلقائياً)
+ * الإصدار: 5.0 (يحفظ negotiable + subType)
  * ==========================================
  */
 
@@ -29,9 +29,32 @@ foreach (['type', 'purpose', 'title', 'price', 'city'] as $field) {
 // ==========================================
 $id = generateId('L');
 $detailsArr = $data['details'] ?? [];
+if (!is_array($detailsArr)) {
+    $detailsArr = [];
+}
+
+// ✅ حفظ رقم الواتساب في details (للأدمن)
 if (!empty($data['whatsapp'])) {
     $detailsArr['_whatsapp'] = $data['whatsapp'];
 }
+
+// ✅ حفظ "قابل للتفاوض" في details (مهم!)
+if (!empty($data['negotiable'])) {
+    $detailsArr['negotiable'] = $data['negotiable'];
+}
+
+// ✅ حفظ subType في details
+if (!empty($data['subType'])) {
+    $detailsArr['subType'] = $data['subType'];
+}
+
+// ✅ دمج أي حقول إضافية من الجذر في details
+foreach (['rentPeriod', 'deposit'] as $extraField) {
+    if (!empty($data[$extraField])) {
+        $detailsArr[$extraField] = $data[$extraField];
+    }
+}
+
 $details = json_encode($detailsArr, JSON_UNESCAPED_UNICODE);
 
 $city = trim($data['city'] ?? '');
@@ -108,12 +131,17 @@ if (is_array($images) && count($images) > 0) {
 }
 
 // ==========================================
-// 6. ✅ مسح الكاش (مهم جداً!)
+// 6. مسح الكاش
 // ==========================================
-// بدون هذه الخطوة، الإعلان الجديد لن يظهر لمدة 30-300 ثانية
-require_once 'cache.php';
-$cache = new SimpleCache();
-$cache->flush();
+try {
+    require_once 'cache.php';
+    if (class_exists('SimpleCache')) {
+        $cache = new SimpleCache();
+        $cache->flush();
+    }
+} catch (Throwable $e) {
+    error_log('add_listing: cache flush failed - ' . $e->getMessage());
+}
 
 // ==========================================
 // 7. الرد النهائي
