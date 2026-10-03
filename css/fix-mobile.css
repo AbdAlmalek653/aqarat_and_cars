@@ -1,0 +1,316 @@
+/* ============================================================
+   fix-mobile.css - إصلاحات شاملة للجوال والتابلت
+   ============================================================ */
+
+/* ===================== 1. البطاقات الأفقية على الجوال ===================== */
+@media (max-width: 768px) {
+
+  /* الشبكة: عمود واحد */
+  .properties-grid,
+  .cars-grid,
+  .listings-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    grid-template-columns: none !important;
+  }
+
+  /* البطاقة نفسها: أفقية */
+  .property-card,
+  .car-card,
+  .listing-card {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: stretch !important;
+    min-height: 140px !important;
+    height: auto !important;
+    overflow: hidden !important;
+    border-radius: 12px !important;
+    background: var(--bg-secondary, #fff) !important;
+  }
+
+  /* صورة البطاقة: على اليمين (لأن الاتجاه RTL) */
+  .property-card .property-image,
+  .property-card .card-image,
+  .car-card .car-image,
+  .car-card .card-image,
+  .listing-card .listing-image {
+    width: 130px !important;
+    min-width: 130px !important;
+    height: 140px !important;
+    flex-shrink: 0 !important;
+    border-radius: 0 !important;
+    overflow: hidden !important;
+    position: relative !important;
+  }
+
+  .property-card .property-image img,
+  .property-card .card-image img,
+  .car-card .car-image img,
+  .car-card .card-image img,
+  .listing-card .listing-image img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+  }
+
+  /* محتوى البطاقة */
+  .property-card .property-content,
+  .property-card .card-content,
+  .property-card .property-info,
+  .car-card .car-content,
+  .car-card .card-content,
+  .listing-card .listing-content {
+    flex: 1 !important;
+    padding: 10px 12px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* العنوان */
+  .property-card .property-title,
+  .property-card .card-title,
+  .car-card .car-title,
+  .listing-card .listing-title {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    margin-bottom: 4px !important;
+    line-height: 1.4 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+
+  /* السعر */
+  .property-card .property-price,
+  .property-card .card-price,
+  .car-card .car-price,
+  .listing-card .listing-price {
+    font-size: 15px !important;
+    font-weight: 800 !important;
+    color: var(--primary, #2563eb) !important;
+    margin-bottom: 4px !important;
+  }
+
+  /* الموقع */
+  .property-card .property-location,
+  .car-card .car-location,
+  .listing-card .listing-location {
+    font-size: 12px !important;
+    opacity: 0.8 !important;
+  }
+
+  /* المواصفات */
+  .property-card .property-features,
+  .property-card .card-features,
+  .car-card .car-features {
+    font-size: 11px !important;
+    gap: 4px !important;
+    margin-top: 4px !important;
+    flex-wrap: wrap !important;
+  }
+
+  /* الشارات */
+  .property-card .property-badges,
+  .property-card .card-badges,
+  .car-card .car-badges {
+    position: absolute !important;
+    top: 8px !important;
+    right: 8px !important;
+    font-size: 10px !important;
+    z-index: 2 !important;
+  }
+
+  /* زر المفضلة */
+  .property-card .fav-btn,
+  .car-card .fav-btn {
+    top: 6px !important;
+    left: 6px !important;
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  /* ===================== 2. صفحة التفاصيل على الجوال ===================== */
+  .details-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+    padding: 12px !important;
+  }
+
+  .details-gallery {
+    border-radius: 12px !important;
+    overflow: hidden !important;
+  }
+
+  .gallery-main {
+    height: 260px !important;
+    border-radius: 12px 12px 0 0 !important;
+  }
+
+  .gallery-main img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+
+  .gallery-thumbs {
+    display: flex !important;
+    overflow-x: auto !important;
+    gap: 6px !important;
+    padding: 8px !important;
+    scrollbar-width: none !important;
+  }
+
+  .gallery-thumbs::-webkit-scrollbar { display: none !important; }
+
+  .gallery-thumbs .thumb,
+  .gallery-thumbs img {
+    width: 60px !important;
+    height: 60px !important;
+    min-width: 60px !important;
+    border-radius: 8px !important;
+    object-fit: cover !important;
+    cursor: pointer !important;
+  }
+
+  .info-card {
+    padding: 16px !important;
+    border-radius: 12px !important;
+  }
+
+  .info-title {
+    font-size: 18px !important;
+    line-height: 1.4 !important;
+  }
+
+  .info-price {
+    font-size: 20px !important;
+  }
+
+  .specs-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+
+  .details-sidebar {
+    width: 100% !important;
+    position: static !important;
+  }
+
+  /* ===================== 3. الفلاتر على الجوال ===================== */
+  .page-layout {
+    display: block !important;
+    padding: 0 12px !important;
+  }
+
+  .filters-sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    right: -100% !important;
+    width: 85% !important;
+    max-width: 340px !important;
+    height: 100vh !important;
+    z-index: 9999 !important;
+    overflow-y: auto !important;
+    transition: right 0.3s ease !important;
+    border-radius: 0 !important;
+    padding: 20px 16px !important;
+  }
+
+  .filters-sidebar.open {
+    right: 0 !important;
+  }
+
+  .sidebar-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    background: rgba(0,0,0,0.5) !important;
+    z-index: 9998 !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transition: all 0.3s !important;
+  }
+
+  .sidebar-overlay.open {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  .filter-toggle-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+  }
+
+  .results-toolbar {
+    flex-direction: column !important;
+    gap: 10px !important;
+    align-items: stretch !important;
+    padding: 12px !important;
+  }
+
+  .toolbar-actions {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .sort-select {
+    flex: 1 !important;
+    min-width: 120px !important;
+  }
+
+  /* ===================== 4. الهيدر والفوتر ===================== */
+  .header-inner {
+    padding: 8px 12px !important;
+  }
+
+  .header .nav {
+    display: none !important;
+  }
+
+  .header-actions .btn span:not(.icon-only) {
+    font-size: 12px !important;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 20px !important;
+  }
+
+  /* ===================== 5. الجداول ===================== */
+  .admin-table-wrap,
+  .table-wrap {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+}
+
+/* ===================== شاشات صغيرة جداً ===================== */
+@media (max-width: 480px) {
+  .property-card .property-image,
+  .car-card .car-image {
+    width: 110px !important;
+    min-width: 110px !important;
+    height: 130px !important;
+  }
+
+  .property-card .property-title,
+  .car-card .car-title {
+    font-size: 13px !important;
+  }
+
+  .specs-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr !important;
+  }
+}

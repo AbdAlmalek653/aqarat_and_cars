@@ -3,13 +3,12 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover">
   <title>لوحة التحكم | سوق</title>
 
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
 
-  <!-- ✅ Preload للخطوط -->
-  <!-- ✅ نظام الأيقونات المدمج (بديل lucide.min.js) -->
+  <!-- ✅ نظام الأيقونات المدمج -->
   <script src="../js/icons.js" defer></script>
 
   <link rel="stylesheet" href="../css/style.css">
@@ -105,14 +104,19 @@
       }
     }
   </style>
+  <link rel="stylesheet" href="../css/master-fix.css">
+<link rel="stylesheet" href="../css/swipe-cards.css">
 </head>
 
 <body class="has-bottom-nav">
 
+  <!-- ===================== الهيدر ===================== -->
   <header class="header">
     <div class="container header-inner">
-      <a href="../index.html" class="logo"><span class="logo-icon"><i data-lucide="home"></i></span><span
-          class="logo-text">سوق</span></a>
+      <a href="../index.html" class="logo">
+        <span class="logo-icon"><i data-lucide="home"></i></span>
+        <span class="logo-text">سوق</span>
+      </a>
       <nav class="nav">
         <a href="../index.html">الرئيسية</a>
         <a href="properties.html">عقارات</a>
@@ -131,13 +135,14 @@
   </header>
 
   <div class="container">
+    <!-- ===================== مسار التنقل ===================== -->
     <nav class="breadcrumb">
       <a href="../index.html"><i data-lucide="home"></i> الرئيسية</a>
       <i data-lucide="chevron-left"></i>
       <span class="current">لوحة التحكم</span>
     </nav>
 
-    <!-- ===== رسالة: غير مصرح ===== -->
+    <!-- ===================== رسالة: غير مصرح ===================== -->
     <div id="noAccess" style="display:none;text-align:center;padding:80px 20px;">
       <i data-lucide="shield-x" style="width:80px;height:80px;color:var(--danger);opacity:.6;margin-bottom:20px;"></i>
       <h2 style="font-size:24px;margin-bottom:10px;">لا تملك صلاحية الوصول</h2>
@@ -145,7 +150,7 @@
       <a href="../index.html" class="btn btn-primary"><i data-lucide="home"></i><span>العودة للرئيسية</span></a>
     </div>
 
-    <!-- ===== لوحة التحكم ===== -->
+    <!-- ===================== لوحة التحكم ===================== -->
     <div class="admin-dashboard" id="adminDashboard" style="display:none;">
 
       <!-- Sidebar -->
@@ -261,8 +266,7 @@
           </div>
 
           <div class="admin-filters">
-            <input type="text" id="searchListings" placeholder="🔍 ابحث بالعنوان أو المدينة..."
-              class="admin-search-input">
+            <input type="text" id="searchListings" placeholder="🔍 ابحث بالعنوان أو المدينة..." class="admin-search-input">
             <select id="filterType" class="admin-select">
               <option value="">كل الأنواع</option>
               <option value="property">عقارات</option>
@@ -368,13 +372,7 @@
       <p class="admin-search-hint">الصق رقم الإعلان (مثل: L1790521822990109) للوصول إليه مباشرة</p>
 
       <div class="admin-search-input-wrap">
-        <input 
-          type="text" 
-          id="listingIdSearch" 
-          placeholder="L1790521822990109 أو 1790521822990109" 
-          autocomplete="off"
-          dir="ltr"
-        >
+        <input type="text" id="listingIdSearch" placeholder="L1790521822990109 أو 1790521822990109" autocomplete="off" dir="ltr">
         <button type="button" id="listingIdSearchBtn" class="admin-search-btn">
           <i data-lucide="search"></i>
           <span>بحث</span>
@@ -491,6 +489,7 @@
 
   </div>
 
+  <!-- ===================== شريط التنقل السفلي ===================== -->
   <nav class="bottom-nav">
     <a href="../index.html" class="bottom-nav-item"><i data-lucide="home"></i><span>الرئيسية</span></a>
     <a href="search.html" class="bottom-nav-item"><i data-lucide="search"></i><span>البحث</span></a>
@@ -509,6 +508,8 @@
   <script src="../js/app-inline.js" defer></script>
   <script src="../js/speed-boost.js" defer></script>
   <script src="../js/sw-register.js" defer></script>
+<script src="../js/master-fix.js"></script>
+
 </body>
 
 </html>

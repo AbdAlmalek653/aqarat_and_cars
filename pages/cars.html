@@ -8,8 +8,7 @@
 
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚗</text></svg>">
 
-  <!-- ✅ Preload للخطوط -->
-  <!-- ✅ نظام الأيقونات المدمج (بديل lucide.min.js) -->
+  <!-- ✅ نظام الأيقونات المدمج -->
   <script src="../js/icons.js" defer></script>
 
   <link rel="stylesheet" href="../css/style.css">
@@ -22,10 +21,14 @@
         crossorigin="">
 
   <!-- ✅ أنماط الخريطة -->
-  <link rel="stylesheet" href="../css/map-view.css">
+ 
+ <link rel="stylesheet" href="../css/map-view.css">
+<link rel="stylesheet" href="../css/master-fix.css">
+<link rel="stylesheet" href="../css/swipe-cards.css">
 </head>
 <body class="has-bottom-nav">
 
+  <!-- ===================== الهيدر ===================== -->
   <header class="header">
     <div class="container header-inner">
       <a href="../index.html" class="logo">
@@ -48,6 +51,7 @@
   </header>
 
   <div class="container">
+    <!-- ===================== مسار التنقل ===================== -->
     <nav class="breadcrumb">
       <a href="../index.html"><i data-lucide="home"></i> الرئيسية</a>
       <i data-lucide="chevron-left"></i>
@@ -61,11 +65,13 @@
 
   <div class="container">
     <div class="page-layout">
+      <!-- ===================== الفلاتر الجانبية ===================== -->
       <aside class="filters-sidebar" id="filtersSidebar">
         <div class="filters-header">
           <h3><i data-lucide="sliders-horizontal"></i> الفلاتر</h3>
           <button class="filters-clear" id="clearFilters">مسح الكل</button>
         </div>
+
         <div class="filter-group">
           <h4><i data-lucide="tag"></i> الغرض</h4>
           <div class="filter-options">
@@ -74,6 +80,7 @@
             <label class="filter-option"><input type="radio" name="purpose" value="rent"><span>للإيجار</span></label>
           </div>
         </div>
+
         <div class="filter-group">
           <h4><i data-lucide="award"></i> الماركة</h4>
           <div class="filter-options">
@@ -89,6 +96,7 @@
             <label class="filter-option"><input type="checkbox" name="brand" value="other"><span>أخرى</span></label>
           </div>
         </div>
+
         <div class="filter-group">
           <h4><i data-lucide="map-pin"></i> المحافظة</h4>
           <select class="filter-select" id="filterCity">
@@ -109,6 +117,7 @@
             <option value="idlib">إدلب</option>
           </select>
         </div>
+
         <div class="filter-group">
           <h4><i data-lucide="dollar-sign"></i> السعر (USD)</h4>
           <div class="filter-range">
@@ -116,6 +125,7 @@
             <input type="number" id="priceMax" placeholder="إلى">
           </div>
         </div>
+
         <div class="filter-group">
           <h4><i data-lucide="calendar"></i> سنة الصنع</h4>
           <div class="filter-range">
@@ -123,6 +133,7 @@
             <input type="number" id="yearMax" placeholder="إلى">
           </div>
         </div>
+
         <div class="filter-group">
           <h4><i data-lucide="sparkles"></i> الحالة</h4>
           <div class="filter-options">
@@ -131,6 +142,7 @@
             <label class="filter-option"><input type="radio" name="condition" value="used"><span>مستعمل</span></label>
           </div>
         </div>
+
         <div class="filter-group">
           <h4><i data-lucide="settings-2"></i> ناقل الحركة</h4>
           <div class="filter-options">
@@ -139,6 +151,7 @@
             <label class="filter-option"><input type="radio" name="transmission" value="manual"><span>عادي</span></label>
           </div>
         </div>
+
         <div class="filter-group">
           <h4><i data-lucide="fuel"></i> الوقود</h4>
           <div class="filter-options">
@@ -148,17 +161,20 @@
             <label class="filter-option"><input type="checkbox" name="fuel" value="hybrid"><span>هايبرد</span></label>
           </div>
         </div>
+
         <div class="filter-group">
           <h4><i data-lucide="gauge"></i> الكيلومترات (كم)</h4>
           <div class="filter-range">
             <input type="number" id="kmMax" placeholder="أقصى حد">
           </div>
         </div>
+
         <button class="btn-apply-filters" id="applyFilters">تطبيق الفلاتر</button>
       </aside>
 
       <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
+      <!-- ===================== النتائج ===================== -->
       <main class="results-main">
         <div class="results-toolbar">
           <p class="results-count"><strong id="resultsCount">0</strong> سيارة متاحة</p>
@@ -190,9 +206,10 @@
         <!-- ✅ حاوية الخريطة (مخفية افتراضياً) -->
         <div class="map-view-container" id="mapContainer" style="display: none;"></div>
 
-        <!-- الشبكة -->
+        <!-- شبكة البطاقات -->
         <div class="properties-grid" id="carsGrid"></div>
 
+        <!-- رسالة عدم وجود نتائج -->
         <div id="noResultsMessage" style="display: none; text-align: center; padding: 50px 20px; background: #fff; border-radius: 12px; margin-top: 20px;">
           <div style="font-size: 56px; margin-bottom: 15px;">🚗</div>
           <h3>لا توجد نتائج مطابقة</h3>
@@ -207,12 +224,14 @@
     </div>
   </div>
 
+  <!-- ===================== الفوتر ===================== -->
   <footer class="footer">
     <div class="container">
       <div class="footer-bottom"><p>© 2026 سوق. جميع الحقوق محفوظة.</p></div>
     </div>
   </footer>
 
+  <!-- ===================== شريط التنقل السفلي ===================== -->
   <nav class="bottom-nav">
     <a href="../index.html" class="bottom-nav-item"><i data-lucide="home"></i><span>الرئيسية</span></a>
     <a href="search.html" class="bottom-nav-item"><i data-lucide="search"></i><span>البحث</span></a>
@@ -239,5 +258,7 @@
   <script src="../js/app-inline.js" defer></script>
   <script src="../js/speed-boost.js" defer></script>
   <script src="../js/sw-register.js" defer></script>
+<script src="../js/master-fix.js"></script>
+
 </body>
 </html>

@@ -1,7 +1,7 @@
 /* ==========================================
-  طبقة البيانات الموحدة
-  الإصدار: 3.0 (محسّن للأداء الفائق + دعم أحجام متعددة)
-  ========================================== */
+   طبقة البيانات الموحدة
+   الإصدار: 3.1 (محسّن للصور الكبيرة + cache busting)
+   ========================================== */
 
 const API = (function () {
 
@@ -323,9 +323,7 @@ const API = (function () {
       return u && u.role === 'user';
     },
 
-    // ✅ تمت إزالة seedAdmins (لأسباب أمنية - البيانات الآن في السيرفر فقط)
     seedAdmins: function () {
-      // لا تفعل شيئاً - تم نقل هذه الوظيفة للسيرفر بشكل آمن
       return;
     }
   };
@@ -546,9 +544,6 @@ const API = (function () {
     }
   };
 
-  /* ==========================================
-     الواجهة العامة
-     ========================================== */
   return {
     Users: Users,
     Stats: Stats,
@@ -578,19 +573,20 @@ window.API = API;
 
 /* ==========================================
    🖼️ دالة موحّدة عالمية لبناء رابط الصورة
-   ✅ الإصدار 3.0 - تدعم 3 أحجام: thumb / medium / large
-   ✅ تستخدم srcset تلقائياً في كل الصفحات
-   ✅ متوافقة مع الكود القديم 100%
+   ✅ الإصدار 3.1 - الحل النهائي للمشكلة البكسلة
+   ✅ تستخدم size=large افتراضياً + cache busting
    ========================================== */
 window.getListingImageUrl = function (item, index, size) {
   if (!item) return null;
   const idx = (typeof index === 'number') ? index : 0;
-  const sz = size || 'medium'; // ✅ الحجم الافتراضي: medium
 
-  // ✅ مسار مطلق (absolute) - يشتغل من أي صفحة
+  // ✅ الحل: نستخدم large دائماً (مش medium)
+  const sz = size || 'large';
   const apiBase = '/api';
 
-  // استخرج الصورة المطلوبة
+  // ✅ cache busting لمنع الكاش من إرجاع صورة قديمة
+  const cb = item.updatedAt ? new Date(item.updatedAt).getTime() : '';
+
   let first = null;
   if (item.images && Array.isArray(item.images) && item.images.length > 0) {
     first = item.images[idx] || item.images[0];
@@ -598,77 +594,60 @@ window.getListingImageUrl = function (item, index, size) {
     first = item.image;
   }
 
-  // إذا ما في صورة → أرجع رابط API (يعرض placeholder)
   if (!first) {
     if (!item.id) return null;
-    return `${apiBase}/listing_image.php?id=${encodeURIComponent(item.id)}&index=${idx}&size=${sz}`;
+    return `${apiBase}/listing_image.php?id=${encodeURIComponent(item.id)}&index=${idx}&size=${sz}${cb ? '&v=' + cb : ''}`;
   }
 
-  // 1. has_image أو has_image:N
+  // has_image أو has_image:N
   if (typeof first === 'string' && first.startsWith('has_image')) {
     const parts = first.split(':');
     const realIndex = parts[1] !== undefined ? parts[1] : idx;
-    return `${apiBase}/listing_image.php?id=${encodeURIComponent(item.id)}&index=${realIndex}&size=${sz}`;
+    return `${apiBase}/listing_image.php?id=${encodeURIComponent(item.id)}&index=${realIndex}&size=${sz}${cb ? '&v=' + cb : ''}`;
   }
 
-  // 2. Base64 (لا يمكن تصغيره من السيرفر → نعيده كما هو)
+  // Base64
   if (typeof first === 'string' && first.startsWith('data:image/')) {
     return first;
   }
 
-  // 3. URL كامل
+  // URL كامل
   if (typeof first === 'string' && /^https?:\/\//i.test(first)) {
     return first;
   }
 
-  // 4. مسار مطلق (absolute path)
+  // مسار مطلق
   if (typeof first === 'string' && first.startsWith('/')) {
     return first;
   }
 
-  // 5. مسار نسبي
+  // مسار نسبي
   if (typeof first === 'string' && first.startsWith('./')) {
     return first;
   }
 
-  // 6. أي قيمة تانية → استخدم API
   if (!item.id) return null;
-  return `${apiBase}/listing_image.php?id=${encodeURIComponent(item.id)}&index=${idx}&size=${sz}`;
+  return `${apiBase}/listing_image.php?id=${encodeURIComponent(item.id)}&index=${idx}&size=${sz}${cb ? '&v=' + cb : ''}`;
 };
 
 /* ==========================================
-   🎨 دالة مساعدة: توليد srcset كامل لصورة إعلان
-   تُستخدم في البطاقات لعرض الصورة المناسبة حسب حجم الشاشة
+   🎨 دالة srcset (مبسّطة - نستخدم large فقط)
    ========================================== */
 window.getListingImageSrcset = function (item, index) {
   if (!item || !item.id) return { src: null, srcset: '', sizes: '' };
 
   const idx = (typeof index === 'number') ? index : 0;
-  const thumb  = window.getListingImageUrl(item, idx, 'thumb');
-  const medium = window.getListingImageUrl(item, idx, 'medium');
-  const large  = window.getListingImageUrl(item, idx, 'large');
-
-  // إذا كانت الصورة base64 أو رابط خارجي، لا يمكن استخدام srcset
-  if (!thumb || thumb.startsWith('data:') || /^https?:\/\//i.test(thumb)) {
-    return {
-      src: medium,
-      srcset: '',
-      sizes: ''
-    };
-  }
+  const large = window.getListingImageUrl(item, idx, 'large');
 
   return {
-    src: medium, // الافتراضي
-    srcset: `${thumb} 300w, ${medium} 800w, ${large} 1600w`,
-    sizes: '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1440px) 33vw, 25vw'
+    src: large,
+    srcset: '',
+    sizes: '100vw'
   };
 };
 
-/* ==========================================
-   تشغيل تلقائي عند فتح أي صفحة
-   ========================================== */
 document.addEventListener('DOMContentLoaded', function () {
-  // ✅ تمت إزالة استدعاء seedAdmins (البيانات الحساسة نُقلت للسيرفر)
+  // لا شيء
 });
 
 /* ==========================================

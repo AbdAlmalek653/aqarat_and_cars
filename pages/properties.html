@@ -8,21 +8,18 @@
 
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
 
-  <!-- ✅ Preload للخطوط -->
-  <!-- ✅ نظام الأيقونات المدمج (بديل lucide.min.js) -->
   <script src="../js/icons.js" defer></script>
 
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/pages.css">
+  <link rel="stylesheet" href="../css/fix-mobile.css">
   <link rel="stylesheet" href="../css/speed-boost.css">
 
-  <!-- ✅ Leaflet CSS (خريطة تفاعلية) -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-        crossorigin="">
-
-  <!-- ✅ أنماط الخريطة -->
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
   <link rel="stylesheet" href="../css/map-view.css">
+<link rel="stylesheet" href="../css/master-fix.css">
+<link rel="stylesheet" href="../css/swipe-cards.css">
 </head>
 <body class="has-bottom-nav">
 
@@ -42,12 +39,10 @@
       <div class="header-actions">
         <button class="btn-icon" title="البحث"><i data-lucide="search"></i></button>
         <a href="login.html" class="btn-login">
-          <i data-lucide="log-in"></i>
-          <span>تسجيل الدخول</span>
+          <i data-lucide="log-in"></i><span>تسجيل الدخول</span>
         </a>
         <a href="add-listing.html" class="btn btn-primary">
-          <i data-lucide="plus"></i>
-          <span>أضف إعلان</span>
+          <i data-lucide="plus"></i><span>أضف إعلان</span>
         </a>
       </div>
     </div>
@@ -166,24 +161,19 @@
               <option value="area-desc">الأكبر مساحة</option>
             </select>
 
-            <!-- ✅ زر تبديل العرض: قائمة / خريطة -->
             <div class="view-toggle-group">
               <button type="button" class="view-toggle-btn active" data-view="grid" id="viewGridBtn">
-                <i data-lucide="layout-grid"></i>
-                <span>قائمة</span>
+                <i data-lucide="layout-grid"></i><span>قائمة</span>
               </button>
               <button type="button" class="view-toggle-btn" data-view="map" id="viewMapBtn">
-                <i data-lucide="map"></i>
-                <span>خريطة</span>
+                <i data-lucide="map"></i><span>خريطة</span>
               </button>
             </div>
           </div>
         </div>
 
-        <!-- ✅ حاوية الخريطة (مخفية افتراضياً) -->
         <div class="map-view-container" id="mapContainer" style="display: none;"></div>
 
-        <!-- الشبكة -->
         <div class="properties-grid" id="propertiesGrid"></div>
 
         <div id="noResultsMessage" style="display: none; text-align: center; padding: 50px 20px; background: #fff; border-radius: 12px; margin-top: 20px;">
@@ -214,16 +204,10 @@
     <a href="account.html" class="bottom-nav-item"><i data-lucide="user"></i><span>حسابي</span></a>
   </nav>
 
-  <!-- ===================== Scripts ===================== -->
-
-  <!-- ✅ Leaflet JS (خريطة تفاعلية) -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-          crossorigin=""></script>
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script src="../js/city-coords.js" defer></script>
   <script src="../js/map-view.js" defer></script>
-
-  <!-- Scripts الأساسية -->
   <script src="../js/api.js" defer></script>
   <script src="../js/header-state.js" defer></script>
   <script src="../js/main.js" defer></script>
@@ -232,5 +216,7 @@
   <script src="../js/app-inline.js" defer></script>
   <script src="../js/speed-boost.js" defer></script>
   <script src="../js/sw-register.js" defer></script>
+<script src="../js/master-fix.js"></script>
+
 </body>
 </html>
