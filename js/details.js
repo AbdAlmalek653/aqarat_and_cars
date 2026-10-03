@@ -1,6 +1,6 @@
 /* ==========================================
    صفحة تفاصيل الإعلان
-   الإصدار: 3.0 (عرض جميع المتطلبات ديناميكياً + حماية رقم البائع)
+   الإصدار: 3.1 (صور بحجم large + cache busting)
    ========================================== */
 
 const BROKER_PHONE = '963930932794';
@@ -36,7 +36,7 @@ async function fetchListing(id) {
 }
 
 /* ==========================================
-   ✅ الدالة السحرية: تحويل أي حقل في details إلى specs
+   بناء المواصفات من التفاصيل
    ========================================== */
 function buildSpecsFromDetails(listing) {
   if (listing.specs && listing.specs.length > 0) return listing.specs;
@@ -45,10 +45,8 @@ function buildSpecsFromDetails(listing) {
   const isProperty = listing.type === 'property';
   const isAdmin = window.API && API.Users && API.Users.isAdmin && API.Users.isAdmin();
 
-  // 🚨 الحقول الحساسة التي لا تظهر لغير الأدمن
   const sensitiveKeys = ['whatsapp', 'phone', 'mobile', 'email', '_whatsapp', '_phone', '_mobile'];
 
-  // القواميس (لترجمة الحقول القياسية وإعطائها أيقونات)
   const propertyMap = {
     propertyType: { icon: 'building-2', label: 'نوع العقار', translate: { apartment: 'شقة', villa: 'فيلا', 'arabic-house': 'بيت عربي', land: 'أرض', office: 'مكتب', shop: 'محل تجاري', chalet: 'شاليه', building: 'بناء كامل' }},
     area: { icon: 'square', label: 'المساحة', suffix: ' م²' },
@@ -89,20 +87,15 @@ function buildSpecsFromDetails(listing) {
   const usedLabels = new Set();
 
   Object.keys(d).forEach(key => {
-    // 1. إخفاء الحقول الحساسة عن غير الأدمن
     if (sensitiveKeys.includes(key.toLowerCase()) && !isAdmin) return;
-
-    // 2. تجاهل الحقول التي تبدأ بـ _ (باستثناء _whatsapp للأدمن)
     if (key.startsWith('_') && !isAdmin) return;
     if (key.startsWith('_') && key !== '_whatsapp' && key !== '_phone') return;
 
     let value = d[key];
     if (value === '' || value === null || value === undefined) return;
 
-    // 3. البحث عن إعدادات الحقل في القاموس
     let meta = map[key];
-    
-    // ✅ 4. الحل السحري: إذا لم يكن الحقل في القاموس، اعرضه تلقائياً
+
     if (!meta) {
       meta = {
         icon: 'info',
@@ -114,10 +107,8 @@ function buildSpecsFromDetails(listing) {
     if (usedLabels.has(meta.label)) return;
     usedLabels.add(meta.label);
 
-    // ترجمة القيمة
     if (meta.translate && meta.translate[value]) value = meta.translate[value];
 
-    // معالجة القيم
     if (typeof value === 'boolean') value = value ? 'نعم' : 'لا';
     else if (Array.isArray(value)) value = value.join('، ');
     else if (typeof value === 'object') value = JSON.stringify(value);
@@ -162,7 +153,7 @@ function buildLocationText(listing) {
 }
 
 /* ==========================================
-   Preload ديناميكي للصورة الرئيسية (LCP)
+   Preload الصورة الرئيسية (LCP)
    ========================================== */
 function preloadMainImage(item) {
   if (!item || !item.id || !window.getListingImageUrl) return;
@@ -217,7 +208,6 @@ function renderListing(l) {
 
   document.getElementById('adLocation').textContent = buildLocationText(l);
 
-  // ✅ استدعاء الدالة الديناميكية لعرض كافة المتطلبات
   const specs = buildSpecsFromDetails(l);
   const specsContainer = document.getElementById('adSpecs');
 
@@ -238,7 +228,7 @@ function renderListing(l) {
   document.getElementById('adDescription').textContent = l.description || '';
   document.getElementById('adId').textContent = '#' + l.id;
 
-  // ✅ زر واتساب الوسيط
+  // زر واتساب الوسيط
   const listingUrl = window.location.href;
   const locationText = buildLocationText(l);
   const priceText = l.purpose === 'sale' ? `${priceNum.toLocaleString('en-US')} ${l.currency || 'USD'}` : `${priceNum} ${l.currency || 'USD'} / شهرياً`;
@@ -266,16 +256,14 @@ function setupSellerWhatsapp(listing) {
   if (!btn) return;
 
   const isAdmin = window.API && API.Users && API.Users.isAdmin && API.Users.isAdmin();
-  
+
   if (!isAdmin) {
-    // 🔒 إخفاء كامل للزر وللرابط عن غير الأدمن
     btn.style.display = 'none';
     btn.removeAttribute('href');
     btn.innerHTML = '';
     return;
   }
 
-  // ✅ الأدمن يرى الرقم
   let sellerPhone = listing.whatsapp || (listing.details && listing.details._whatsapp) || '';
   sellerPhone = String(sellerPhone).replace(/[^0-9+]/g, '');
   if (sellerPhone.startsWith('+')) sellerPhone = sellerPhone.substring(1);
@@ -303,7 +291,7 @@ function setupSellerWhatsapp(listing) {
 }
 
 /* ==========================================
-   معرض الصور
+   معرض الصور - ✅ معدل للإصدار 3.1 (large دائماً)
    ========================================== */
 function renderGallery(imgs, l) {
   const main = document.getElementById('galleryMain');
@@ -311,34 +299,37 @@ function renderGallery(imgs, l) {
   const fallback = l.type === 'property' ? 'building-2' : 'car';
 
   if (!imgs.length) {
-    main.innerHTML = `<i data-lucide="${fallback}"></i><div class="gallery-nav prev" onclick="prevImage()"><i data-lucide="chevron-right"></i></div><div class="gallery-nav next" onclick="nextImage()"><i data-lucide="chevron-left"></i></div><div class="gallery-counter">1 / 1</div>`;
+    main.innerHTML = `<i data-lucide="${fallback}"></i>
+      <div class="gallery-nav prev" onclick="prevImage()"><i data-lucide="chevron-right"></i></div>
+      <div class="gallery-nav next" onclick="nextImage()"><i data-lucide="chevron-left"></i></div>
+      <div class="gallery-counter">1 / 1</div>`;
     thumbs.innerHTML = `<div class="gallery-thumb active"><i data-lucide="${fallback}" style="color:var(--text-muted);"></i></div>`;
     initIcons();
     return;
   }
 
   const getUrl = window.getListingImageUrl;
-  const urls = {
-    thumb:  imgs.map((_, i) => getUrl ? getUrl(l, i, 'thumb')  : null).filter(Boolean),
-    large:  imgs.map((_, i) => getUrl ? getUrl(l, i, 'large')  : null).filter(Boolean)
-  };
 
-  if (!urls.large.length) {
+  // ✅ الحل: نستخدم large للصور الرئيسية والمصغرات
+  const largeUrls = imgs.map((_, i) => getUrl ? getUrl(l, i, 'large') : null).filter(Boolean);
+
+  // Fallback للصور القديمة (base64 أو روابط مباشرة)
+  if (!largeUrls.length) {
     const raw = imgs.map(img => typeof img === 'string' ? img : null).filter(Boolean);
-    urls.large = raw; urls.thumb = raw;
+    largeUrls.push(...raw);
   }
 
-  currentListing._galleryUrls = urls;
+  currentListing._galleryUrls = { large: largeUrls };
   const safeTitle = (l.title || '').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 
   main.innerHTML = `
-    <img src="${urls.large[0]}" alt="${safeTitle}" loading="eager" decoding="async" fetchpriority="high" width="1200" height="800">
+    <img src="${largeUrls[0]}" alt="${safeTitle}" loading="eager" decoding="async" fetchpriority="high" style="width:100%;height:100%;object-fit:cover;display:block;">
     <div class="gallery-nav prev" onclick="prevImage()"><i data-lucide="chevron-right"></i></div>
     <div class="gallery-nav next" onclick="nextImage()"><i data-lucide="chevron-left"></i></div>
-    <div class="gallery-counter" id="galleryCounter">1 / ${urls.large.length}</div>`;
+    <div class="gallery-counter" id="galleryCounter">1 / ${largeUrls.length}</div>`;
 
-  thumbs.innerHTML = urls.thumb.map((url, i) => 
-    `<div class="gallery-thumb ${i === 0 ? 'active' : ''}" onclick="goToImage(${i})"><img src="${url}" alt="صورة ${i + 1}" loading="lazy" decoding="async" width="100" height="100"></div>`
+  thumbs.innerHTML = largeUrls.map((url, i) => 
+    `<div class="gallery-thumb ${i === 0 ? 'active' : ''}" onclick="goToImage(${i})"><img src="${url}" alt="صورة ${i + 1}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;"></div>`
   ).join('');
 
   currentImageIndex = 0;
@@ -448,7 +439,7 @@ async function saveEdit(e) {
       }
       document.getElementById('adDescription').textContent = updates.description;
       document.getElementById('adLocation').textContent = buildLocationText(currentListing);
-      
+
       const purposeText = currentListing.purpose === 'sale' ? 'للبيع' : 'للإيجار';
       const purposeClass = currentListing.purpose === 'sale' ? 'sale' : 'rent';
       const typeText = currentListing.type === 'property' ? 'عقار' : 'سيارة';

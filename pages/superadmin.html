@@ -7,23 +7,41 @@
 
 <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
 
-<!-- ✅ Preload للخطوط -->
-<!-- ✅ نظام الأيقونات المدمج (بديل lucide.min.js) -->
 <script src="../js/icons.js" defer></script>
 
 <link rel="stylesheet" href="../css/style.css">
 <link rel="stylesheet" href="../css/admin.css">
+<link rel="stylesheet" href="../css/fix-mobile.css">
+<link rel="stylesheet" href="../css/master-fix.css">
+<link rel="stylesheet" href="../css/swipe-cards.css">
 </head>
 <body data-dashboard-role="super_admin">
+
 <header class="admin-header">
   <div class="admin-header-inner">
-    <a class="logo" href="../index.html"><span class="logo-icon"><i data-lucide="home"></i></span><span class="logo-text">سوق</span></a>
-    <div class="admin-title"><span class="eyebrow">لوحة التحكم العليا</span><strong>السوبر أدمن</strong></div>
-    <div class="admin-header-actions"><a class="btn btn-outline" href="account.html"><i data-lucide="user"></i> حسابي</a><button class="btn btn-danger" id="logoutBtn"><i data-lucide="log-out"></i> خروج</button></div>
+    <a class="logo" href="../index.html">
+      <span class="logo-icon"><i data-lucide="home"></i></span>
+      <span class="logo-text">سوق</span>
+    </a>
+    <div class="admin-title">
+      <span class="eyebrow">لوحة التحكم العليا</span>
+      <strong>السوبر أدمن</strong>
+    </div>
+    <div class="admin-header-actions">
+      <a class="btn btn-outline" href="account.html"><i data-lucide="user"></i> حسابي</a>
+      <button class="btn btn-danger" id="logoutBtn"><i data-lucide="log-out"></i> خروج</button>
+    </div>
   </div>
 </header>
+
 <main class="admin-shell">
-  <div id="accessDenied" class="admin-message" hidden><i data-lucide="shield-alert"></i><h2>غير مصرح بالدخول</h2><p>هذه الصفحة مخصصة للسوبر أدمن فقط.</p><a href="login.html" class="btn btn-primary">تسجيل الدخول</a></div>
+  <div id="accessDenied" class="admin-message" hidden>
+    <i data-lucide="shield-alert"></i>
+    <h2>غير مصرح بالدخول</h2>
+    <p>هذه الصفحة مخصصة للسوبر أدمن فقط.</p>
+    <a href="login.html" class="btn btn-primary">تسجيل الدخول</a>
+  </div>
+
   <div id="dashboardContent" hidden>
     <div class="welcome-row">
       <div>
@@ -31,10 +49,11 @@
         <h1 id="welcomeName">لوحة السوبر أدمن</h1>
         <p class="muted">إدارة الإعلانات والمستخدمين وصلاحيات الحسابات.</p>
       </div>
-      <button class="btn btn-primary" id="refreshBtn"><i data-lucide="refresh-cw"></i> تحديث البيانات</button>
+      <button class="btn btn-primary" id="refreshBtn">
+        <i data-lucide="refresh-cw"></i> تحديث البيانات
+      </button>
     </div>
 
-    <!-- ✅ قسم الإحصائيات -->
     <section class="stats-grid" id="statsGrid">
       <div class="admin-stat-card">
         <div class="admin-stat-icon blue"><i data-lucide="building-2"></i></div>
@@ -84,9 +103,14 @@
       <div class="table-wrap">
         <table>
           <thead>
-            <tr><th>الإعلان</th><th>المالك</th><th>النوع</th><th>السعر</th><th>الحالة</th><th>إجراءات</th></tr>
+            <tr>
+              <th>الإعلان</th><th>المالك</th><th>النوع</th>
+              <th>السعر</th><th>الحالة</th><th>إجراءات</th>
+            </tr>
           </thead>
-          <tbody id="listingsTable"><tr><td colspan="6" class="empty-cell">جاري التحميل...</td></tr></tbody>
+          <tbody id="listingsTable">
+            <tr><td colspan="6" class="empty-cell">جاري التحميل...</td></tr>
+          </tbody>
         </table>
       </div>
     </section>
@@ -101,17 +125,26 @@
       <div class="table-wrap">
         <table>
           <thead>
-            <tr><th>المستخدم</th><th>البريد</th><th>الدور</th><th>الإعلانات</th><th>الحالة</th><th>إجراء</th></tr>
+            <tr>
+              <th>المستخدم</th><th>البريد</th><th>الدور</th>
+              <th>الإعلانات</th><th>الحالة</th><th>إجراء</th>
+            </tr>
           </thead>
-          <tbody id="usersTable"><tr><td colspan="6" class="empty-cell">جاري التحميل...</td></tr></tbody>
+          <tbody id="usersTable">
+            <tr><td colspan="6" class="empty-cell">جاري التحميل...</td></tr>
+          </tbody>
         </table>
       </div>
     </section>
   </div>
 </main>
+
 <div id="toast" class="admin-toast" role="status"></div>
+
 <script src="../js/api.js" defer></script>
 <script src="../js/admin.js" defer></script>
 <script src="../js/sw-register.js" defer></script>
+<script src="../js/master-fix.js"></script>
+
 </body>
 </html>

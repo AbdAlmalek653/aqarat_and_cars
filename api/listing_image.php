@@ -1,25 +1,17 @@
 <?php
 /**
  * ==========================================
- * listing_image.php - النسخة المحسّنة (v3.0)
+ * listing_image.php - النسخة النهائية (v3.1)
  * ==========================================
  * 
- * ✨ المميزات الجديدة:
- * 1. دعم 3 أحجام: thumb (300px), medium (800px), large (1600px)
- * 2. كاش ذكي متعدد الأحجام
- * 3. استخدام srcset/sizes من المتصفح
- * 4. ضغط WebP محسّن
- * 5. دعم AVIF إذا كان متوفراً
- * 
- * طريقة الاستخدام:
- * - /api/listing_image.php?id=XXX&index=0&size=thumb   (لل بطاقات)
- * - /api/listing_image.php?id=XXX&index=0&size=medium  (للتفاصيل)
- * - /api/listing_image.php?id=XXX&index=0&size=large   (للتكبير)
- * - /api/listing_image.php?id=XXX&index=0&w=400        (توافق مع الإصدار القديم)
+ * ✨ التحديثات:
+ * - جودة WebP أعلى للصور الكبيرة (88 للـ large)
+ * - Vary: Accept لضمان توافق المتصفحات
+ * - كاش ذكي بدون immutable
+ * - دعم كامل للأحجام الثلاثة
  */
 
 require_once 'config.php';
-// ✅ إغلاق الـ session فوراً لتجنب قفل الطلبات المتوازية
 session_write_close();
 
 /* ==========================================
@@ -27,8 +19,9 @@ session_write_close();
    ========================================== */
 $id    = $_GET['id'] ?? '';
 $index = isset($_GET['index']) ? (int)$_GET['index'] : 0;
-$size  = $_GET['size'] ?? 'medium';       // thumb | medium | large
-$width = isset($_GET['w']) ? (int)$_GET['w'] : 0;  // توافق مع الإصدار القديم
+$size  = $_GET['size'] ?? 'large';       // ✅ الافتراضي: large (مش medium)
+$width = isset($_GET['w']) ? (int)$_GET['w'] : 0;
+$forceQuality = isset($_GET['q']) ? (int)$_GET['q'] : 0;
 
 if (!$id) {
     http_response_code(404);
@@ -38,24 +31,22 @@ if (!$id) {
 $offset = max(0, $index);
 
 /* ==========================================
-   2. تحديد العرض المستهدف حسب الحجم
+   2. تحديد العرض المستهدف
    ========================================== */
 $sizeMap = [
-    'thumb'  => 300,
-    'medium' => 800,
+    'thumb'  => 400,
+    'medium' => 900,
     'large'  => 1600,
 ];
 
-// إذا تم تمرير size غير معروف، استخدم medium
 if (!isset($sizeMap[$size])) {
-    $size = 'medium';
+    $size = 'large';
 }
 
-// إذا تم تمرير w، فهو يتجاوز size
 $targetWidth = $width > 0 ? $width : $sizeMap[$size];
 
 /* ==========================================
-   3. جلب رابط الصورة من قاعدة البيانات
+   3. جلب رابط الصورة
    ========================================== */
 $stmt = $pdo->prepare(
     "SELECT url FROM listing_images 
@@ -74,48 +65,41 @@ if (!$row || empty($row['url'])) {
 $url = $row['url'];
 
 /* ==========================================
-   4. إعدادات الكاش المحلي
+   4. إعدادات الكاش
    ========================================== */
 $cacheDir = __DIR__ . '/cache/images';
 if (!is_dir($cacheDir)) {
     @mkdir($cacheDir, 0755, true);
 }
 
-// ✅ مفتاح كاش يشمل الحجم المستهدف
-$cacheKey = md5($url . '_' . $targetWidth . '_v3');
+// ✅ مفتاح كاش جديد (v4) عشان نمسح كل الكاش القديم
+$cacheKey = md5($url . '_' . $targetWidth . '_v4');
 $cacheFile = $cacheDir . '/' . $cacheKey . '.webp';
 
 /* ==========================================
-   5. دالة: إرسال صورة Placeholder
+   5. Placeholder
    ========================================== */
 function sendPlaceholder($width = 400) {
     $height = (int)($width * 0.75);
     $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' . $width . '" height="' . $height . '" viewBox="0 0 ' . $width . ' ' . $height . '">'
          . '<rect fill="#1A2438" width="' . $width . '" height="' . $height . '"/>'
-         . '<circle cx="' . ($width/2) . '" cy="' . ($height * 0.4) . '" r="40" fill="none" stroke="#334155" stroke-width="3"/>'
-         . '<path d="M' . ($width/2 - 30) . ' ' . ($height * 0.4) . ' L' . ($width/2) . ' ' . ($height * 0.32) . ' L' . ($width/2 + 30) . ' ' . ($height * 0.4) . ' M' . ($width/2 - 15) . ' ' . ($height * 0.4) . ' L' . ($width/2) . ' ' . ($height * 0.35) . ' L' . ($width/2 + 15) . ' ' . ($height * 0.4) . '" stroke="#475569" stroke-width="3" fill="none"/>'
-         . '<text x="' . ($width/2) . '" y="' . ($height * 0.67) . '" fill="#64748B" font-family="Cairo,sans-serif" font-size="14" text-anchor="middle">صورة غير متوفرة</text>'
+         . '<text x="' . ($width/2) . '" y="' . ($height/2) . '" fill="#64748B" font-family="Cairo,sans-serif" font-size="18" text-anchor="middle">صورة غير متوفرة</text>'
          . '</svg>';
     header('Content-Type: image/svg+xml; charset=utf-8');
     header('Cache-Control: public, max-age=3600');
-    header('Content-Length: ' . strlen($svg));
     echo $svg;
     exit;
 }
 
 /* ==========================================
-   6. دالة: إرسال ترويسات الكاش
+   6. ترويسات الكاش
    ========================================== */
 function sendCacheHeaders($mime = null, $size = null) {
-    // ✅ كاش لمدة سنة كاملة (لأن الـ URL فريد لكل صورة)
-    header('Cache-Control: public, max-age=31536000, immutable');
-    header('Expires: ' . gmdate('D, d M Y H:i:s', time() + 31536000) . ' GMT');
-    header('Vary: Accept-Encoding');
-    
-    // ✅ دعم ETag لتحسين الكاش
-    if ($size !== null) {
-        header('ETag: "' . md5($size) . '"');
-    }
+    // ✅ كاش لمدة شهر (مش سنة) لتجنب مشاكل الصور القديمة
+    header('Cache-Control: public, max-age=2592000');
+    header('Expires: ' . gmdate('D, d M Y H:i:s', time() + 2592000) . ' GMT');
+    // ✅ Vary: Accept مهم للـ WebP
+    header('Vary: Accept, Accept-Encoding');
     
     if ($mime) {
         header('Content-Type: ' . $mime);
@@ -126,10 +110,9 @@ function sendCacheHeaders($mime = null, $size = null) {
 }
 
 /* ==========================================
-   7. دالة: معالجة وتصغير الصورة
+   7. معالجة الصورة
    ========================================== */
-function processImage($data, $mime, $targetWidth = 800) {
-    // ✅ تحقق من توفر مكتبة GD
+function processImage($data, $mime, $targetWidth = 1600, $forceQuality = 0) {
     if (!function_exists('imagecreatefromstring')) {
         return ['data' => $data, 'mime' => $mime, 'ext' => 'jpg'];
     }
@@ -145,7 +128,7 @@ function processImage($data, $mime, $targetWidth = 800) {
     $newW = $origW;
     $newH = $origH;
 
-    // ✅ تصغير فقط إذا كانت الصورة أكبر من الحجم المستهدف
+    // تصغير فقط لو الصورة الأصلية أكبر
     if ($targetWidth > 0 && $origW > $targetWidth) {
         $newW = $targetWidth;
         $newH = (int)($origH * ($newW / $origW));
@@ -153,7 +136,6 @@ function processImage($data, $mime, $targetWidth = 800) {
 
     $newImg = imagecreatetruecolor($newW, $newH);
 
-    // ✅ الحفاظ على الشفافية للـ PNG و WebP
     if ($mime === 'image/png' || $mime === 'image/webp') {
         imagealphablending($newImg, false);
         imagesavealpha($newImg, true);
@@ -161,26 +143,30 @@ function processImage($data, $mime, $targetWidth = 800) {
         imagefilledrectangle($newImg, 0, 0, $newW, $newH, $transparent);
     }
 
-    // ✅ تفعيل التنعيم عالي الجودة
     imagecopyresampled($newImg, $img, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
 
     ob_start();
     
-    // ✅ استخدام WebP مع تحسين الجودة حسب الحجم
     if (function_exists('imagewebp')) {
-        // جودة أعلى للصور الكبيرة، أقل للصغيرة
-        $quality = 72;
-        if ($targetWidth >= 1600) $quality = 78;      // large
-        elseif ($targetWidth >= 800) $quality = 75;   // medium
-        elseif ($targetWidth <= 300) $quality = 68;   // thumb
+        // ✅ جودة أعلى بكثير
+        if ($forceQuality > 0) {
+            $quality = $forceQuality;
+        } elseif ($targetWidth >= 1600) {
+            $quality = 88;   // ✅ large: جودة عالية جداً
+        } elseif ($targetWidth >= 900) {
+            $quality = 85;   // ✅ medium: جودة عالية
+        } else {
+            $quality = 80;   // thumb
+        }
         
         imagewebp($newImg, null, $quality);
         $output = ob_get_clean();
         $finalMime = 'image/webp';
         $ext = 'webp';
     } else {
-        // Fallback إلى JPEG
-        imagejpeg($newImg, null, 75);
+        // Fallback
+        $quality = $targetWidth >= 1600 ? 90 : 85;
+        imagejpeg($newImg, null, $quality);
         $output = ob_get_clean();
         $finalMime = 'image/jpeg';
         $ext = 'jpg';
@@ -193,7 +179,7 @@ function processImage($data, $mime, $targetWidth = 800) {
 }
 
 /* ==========================================
-   8. دالة: جلب صورة من URL خارجي
+   8. جلب الصور الخارجية
    ========================================== */
 function fetchRemoteImage($url) {
     if (!filter_var($url, FILTER_VALIDATE_URL)) {
@@ -205,15 +191,14 @@ function fetchRemoteImage($url) {
         CURLOPT_URL => $url,
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_MAXREDIRS => 2,
-        CURLOPT_TIMEOUT => 4,               // ✅ 4 ثوانٍ (زيادة بسيطة للاستقرار)
-        CURLOPT_CONNECTTIMEOUT => 2,
-        CURLOPT_SSL_VERIFYPEER => false,    // ⚠️ قد يسبب ثغرة، لكن يعمل مع الشهادات الضعيفة
-        CURLOPT_USERAGENT => 'Mozilla/5.0 (compatible; SouqBot/1.0)',
+        CURLOPT_MAXREDIRS => 3,
+        CURLOPT_TIMEOUT => 10,
+        CURLOPT_CONNECTTIMEOUT => 5,
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_USERAGENT => 'Mozilla/5.0 (compatible; SouqBot/2.0)',
         CURLOPT_HTTPHEADER => [
             'Accept: image/webp,image/avif,image/jpeg,image/png,image/*,*/*;q=0.8',
         ],
-        // ✅ ضغط الاستجابة من السيرفر الخارجي
         CURLOPT_ENCODING => '',
     ]);
 
@@ -226,11 +211,7 @@ function fetchRemoteImage($url) {
         return false;
     }
 
-    if ($contentType && strpos($contentType, 'image/') !== 0) {
-        return false;
-    }
-
-    if (!$contentType || $contentType === 'application/octet-stream') {
+    if (!$contentType || strpos($contentType, 'image/') !== 0) {
         $finfo = new finfo(FILEINFO_MIME_TYPE);
         $contentType = $finfo->buffer($data) ?: 'image/jpeg';
     }
@@ -239,12 +220,10 @@ function fetchRemoteImage($url) {
 }
 
 /* ==========================================
-   9. التحقق من الكاش → خدمة فورية
+   9. خدمة الكاش
    ========================================== */
 if (file_exists($cacheFile) && filesize($cacheFile) > 0) {
     $cachedData = file_get_contents($cacheFile);
-    
-    // ✅ تحديد نوع MIME من محتوى الملف
     $finfo = new finfo(FILEINFO_MIME_TYPE);
     $mime = $finfo->buffer($cachedData) ?: 'image/webp';
     
@@ -254,7 +233,7 @@ if (file_exists($cacheFile) && filesize($cacheFile) > 0) {
 }
 
 /* ==========================================
-   10. صورة Base64 → معالجة وخدمة
+   10. Base64
    ========================================== */
 if (strpos($url, 'data:image/') === 0) {
     $parts = explode(',', $url, 2);
@@ -263,7 +242,7 @@ if (strpos($url, 'data:image/') === 0) {
         preg_match('/data:([^;]+);/', $parts[0], $m);
         $mime = $m[1] ?? 'image/jpeg';
 
-        $result = processImage($binary, $mime, $targetWidth);
+        $result = processImage($binary, $mime, $targetWidth, $forceQuality);
         @file_put_contents($cacheFile, $result['data']);
 
         sendCacheHeaders($result['mime'], strlen($result['data']));
@@ -273,13 +252,13 @@ if (strpos($url, 'data:image/') === 0) {
 }
 
 /* ==========================================
-   11. رابط خارجي → جلب + معالجة + كاش
+   11. رابط خارجي
    ========================================== */
 if (strpos($url, 'http') === 0) {
     $remote = fetchRemoteImage($url);
 
     if ($remote !== false) {
-        $result = processImage($remote['data'], $remote['mime'], $targetWidth);
+        $result = processImage($remote['data'], $remote['mime'], $targetWidth, $forceQuality);
         @file_put_contents($cacheFile, $result['data']);
 
         sendCacheHeaders($result['mime'], strlen($result['data']));
@@ -287,28 +266,26 @@ if (strpos($url, 'http') === 0) {
         exit;
     }
 
-    // ✅ فشل الجلب → خزّن Placeholder في الكاش لتجنب المحاولة في كل مرة
-    $placeholderSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">'
-                   . '<rect fill="#1A2438" width="400" height="300"/>'
-                   . '<circle cx="200" cy="120" r="40" fill="none" stroke="#334155" stroke-width="3"/>'
-                   . '<text x="200" y="200" fill="#64748B" font-family="Cairo,sans-serif" font-size="16" text-anchor="middle">صورة غير متوفرة</text>'
-                   . '</svg>';
-    @file_put_contents($cacheFile, $placeholderSvg);
-
+    // فشل → Placeholder
     sendPlaceholder($targetWidth);
 }
 
 /* ==========================================
-   12. الوصول لصورة محلية (ملف على السيرفر)
+   12. صورة محلية
    ========================================== */
-// ✅ دعم الصور المحفوظة محلياً
 if (strpos($url, '/uploads/') === 0) {
     $localPath = __DIR__ . '/..' . $url;
     if (file_exists($localPath)) {
         $finfo = new finfo(FILEINFO_MIME_TYPE);
         $mime = $finfo->file($localPath);
-        sendCacheHeaders($mime, filesize($localPath));
-        readfile($localPath);
+        
+        // ✅ نعالج الصورة المحلية بنفس المنطق
+        $data = file_get_contents($localPath);
+        $result = processImage($data, $mime, $targetWidth, $forceQuality);
+        @file_put_contents($cacheFile, $result['data']);
+        
+        sendCacheHeaders($result['mime'], strlen($result['data']));
+        echo $result['data'];
         exit;
     }
 }

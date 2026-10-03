@@ -1,0 +1,81 @@
+@media (max-width: 768px) {
+  .properties-grid, .cars-grid, .favorites-grid, .grid, .grid-4 {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    grid-template-columns: none !important;
+  }
+
+  .property-card, .car-card, .card {
+    display: flex !important;
+    flex-direction: row !important;
+    min-height: 130px !important;
+    height: auto !important;
+    overflow: hidden !important;
+    border-radius: 12px !important;
+    background: var(--bg-card, #fff) !important;
+  }
+
+  .property-card .card-image, .property-card .property-image,
+  .car-card .card-image, .car-card .car-image {
+    width: 130px !important;
+    min-width: 130px !important;
+    height: auto !important;
+    min-height: 130px !important;
+    flex-shrink: 0 !important;
+    border-radius: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .property-card .card-image img, .car-card .card-image img,
+  .property-card img, .car-card img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+  }
+
+  .property-card .card-body, .property-card .property-content,
+  .car-card .card-body, .car-card .car-content {
+    flex: 1 !important;
+    padding: 10px 12px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    min-width: 0 !important;
+  }
+
+  .card-title, .property-title, .car-title {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    margin: 0 0 4px 0 !important;
+    line-height: 1.4 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+
+  .card-price, .property-price, .car-price {
+    font-size: 15px !important;
+    font-weight: 800 !important;
+    color: var(--primary, #2563eb) !important;
+  }
+
+  .card-location, .property-location, .car-location {
+    font-size: 12px !important;
+    opacity: 0.8 !important;
+  }
+
+  .filter-toggle-btn { display: inline-flex !important; }
+  .header .nav { display: none !important; }
+  .footer-grid { grid-template-columns: 1fr 1fr !important; }
+}
+
+@media (max-width: 480px) {
+  .property-card .card-image, .car-card .card-image {
+    width: 110px !important;
+    min-width: 110px !important;
+  }
+  .footer-grid { grid-template-columns: 1fr !important; }
+}

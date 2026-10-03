@@ -8,13 +8,13 @@
 
   <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
 
-  <!-- ✅ Preload للخطوط -->
-  <!-- ✅ نظام الأيقونات المدمج (بديل lucide.min.js) -->
   <script src="../js/icons.js" defer></script>
 
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/auth.css">
   <link rel="stylesheet" href="../css/speed-boost.css">
+<link rel="stylesheet" href="../css/master-fix.css">
+<link rel="stylesheet" href="../css/swipe-cards.css">
 </head>
 <body class="auth-page">
 
@@ -42,22 +42,10 @@
         </p>
 
         <ul class="auth-features">
-          <li>
-            <i data-lucide="check-circle-2"></i>
-            <span>نشر إعلانات غير محدودة</span>
-          </li>
-          <li>
-            <i data-lucide="check-circle-2"></i>
-            <span>تواصل مباشر مع المشترين</span>
-          </li>
-          <li>
-            <i data-lucide="check-circle-2"></i>
-            <span>إحصائيات لمشاهدات إعلاناتك</span>
-          </li>
-          <li>
-            <i data-lucide="check-circle-2"></i>
-            <span>حفظ الإعلانات في المفضلة</span>
-          </li>
+          <li><i data-lucide="check-circle-2"></i><span>نشر إعلانات غير محدودة</span></li>
+          <li><i data-lucide="check-circle-2"></i><span>تواصل مباشر مع المشترين</span></li>
+          <li><i data-lucide="check-circle-2"></i><span>إحصائيات لمشاهدات إعلاناتك</span></li>
+          <li><i data-lucide="check-circle-2"></i><span>حفظ الإعلانات في المفضلة</span></li>
         </ul>
       </div>
     </div>
@@ -74,7 +62,6 @@
           </p>
         </div>
 
-        <!-- تنبيه -->
         <div class="auth-alert error" id="authError" style="display:none;">
           <i data-lucide="alert-circle"></i>
           <span id="authErrorText"></span>
@@ -82,7 +69,6 @@
 
         <form class="auth-form" id="registerForm" novalidate>
 
-          <!-- الاسم -->
           <div class="form-field">
             <label for="name">الاسم الكامل</label>
             <div class="field-input">
@@ -92,7 +78,6 @@
             <span class="field-error" id="nameError"></span>
           </div>
 
-          <!-- البريد -->
           <div class="form-field">
             <label for="email">البريد الإلكتروني</label>
             <div class="field-input">
@@ -102,7 +87,6 @@
             <span class="field-error" id="emailError"></span>
           </div>
 
-          <!-- الهاتف مع رمز الدولة -->
           <div class="form-field">
             <div class="phone-row">
               <div class="phone-col phone-col-code">
@@ -135,25 +119,17 @@
                 <label for="phone" class="phone-mini-label">رقم الهاتف</label>
                 <div class="field-input phone-field">
                   <i data-lucide="phone"></i>
-                  <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
-                    placeholder="930123456"
-                    autocomplete="tel-national"
-                    inputmode="numeric"
-                    required
-                  >
+                  <input type="tel" id="phone" name="phone" placeholder="930123456"
+                         autocomplete="tel-national" inputmode="numeric" required>
                 </div>
               </div>
             </div>
             <span class="field-error" id="phoneError"></span>
             <span class="hint" style="font-size:12px;color:var(--text-muted);margin-top:6px;display:block;">
-              ⓘ  اختر أولا نداء الدولة ثم اكتب الرقم بدون نداء الدولة وبدون الصفر في البداية          (مثال: 930123456) 
+              ⓘ اختر أولاً رمز الدولة ثم اكتب الرقم بدون رمز الدولة وبدون الصفر في البداية (مثال: 930123456)
             </span>
           </div>
 
-          <!-- كلمة المرور -->
           <div class="form-field">
             <label for="password">كلمة المرور</label>
             <div class="field-input">
@@ -166,7 +142,6 @@
             <span class="field-error" id="passwordError"></span>
           </div>
 
-          <!-- تأكيد كلمة المرور -->
           <div class="form-field">
             <label for="confirmPassword">تأكيد كلمة المرور</label>
             <div class="field-input">
@@ -176,7 +151,6 @@
             <span class="field-error" id="confirmPasswordError"></span>
           </div>
 
-          <!-- الشروط -->
           <label class="remember-me" style="margin-top:4px;">
             <input type="checkbox" id="terms">
             <span>
@@ -187,7 +161,6 @@
             </span>
           </label>
 
-          <!-- الزر -->
           <button type="submit" class="btn btn-primary btn-block" id="registerBtn">
             <i data-lucide="user-plus"></i>
             <span>إنشاء الحساب</span>
@@ -204,5 +177,7 @@
   <script src="../js/auth.js" defer></script>
   <script src="../js/speed-boost.js" defer></script>
   <script src="../js/sw-register.js" defer></script>
+<script src="../js/master-fix.js"></script>
+
 </body>
 </html>

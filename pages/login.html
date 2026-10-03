@@ -8,13 +8,13 @@
 
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
 
-  <!-- ✅ Preload للخطوط -->
-  <!-- ✅ نظام الأيقونات المدمج (بديل lucide.min.js) -->
   <script src="../js/icons.js" defer></script>
 
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/auth.css">
   <link rel="stylesheet" href="../css/speed-boost.css">
+<link rel="stylesheet" href="../css/master-fix.css">
+<link rel="stylesheet" href="../css/swipe-cards.css">
 </head>
 <body class="auth-page">
 
@@ -24,6 +24,7 @@
 
   <div class="auth-wrap">
 
+    <!-- ===================== الجانب المرئي ===================== -->
     <div class="auth-brand">
       <div class="auth-brand-content">
         <a href="../index.html" class="logo auth-logo">
@@ -49,6 +50,7 @@
       </div>
     </div>
 
+    <!-- ===================== نموذج الدخول ===================== -->
     <div class="auth-form-side">
       <div class="auth-form-wrap">
 
@@ -115,7 +117,7 @@
 
   </div>
 
-  <!-- ============ السكريبتات ============ -->
+  <!-- ===================== السكربتات ===================== -->
   <script src="../js/api.js" defer></script>
   <script src="../js/auth.js" defer></script>
   <script src="../js/auth-guard.js" defer></script>
@@ -127,37 +129,28 @@
   (function() {
     'use strict';
 
-    console.log('🔐 Login redirect handler loading...');
-
-    // 1. حفظ redirect عند فتح الصفحة
     document.addEventListener('DOMContentLoaded', function() {
       const params = new URLSearchParams(window.location.search);
       const redirect = params.get('redirect');
       if (redirect) {
         const decoded = decodeURIComponent(redirect);
         sessionStorage.setItem('login_redirect', decoded);
-        console.log('💾 حفظ redirect:', decoded);
       }
     });
 
-    // 2. بعد نجاح الدخول → اذهب للـ redirect
-    // نراقب ظهور user في localStorage
     let lastUserStr = localStorage.getItem('user');
     const checkInterval = setInterval(function() {
       const currentUserStr = localStorage.getItem('user');
       
-      // إذا تغير user وصار موجود (تسجيل دخول ناجح)
       if (currentUserStr && currentUserStr !== lastUserStr && currentUserStr !== 'null') {
         const redirect = sessionStorage.getItem('login_redirect');
         if (redirect) {
           sessionStorage.removeItem('login_redirect');
-          console.log('✅ نجح الدخول، الذهاب إلى:', redirect);
           clearInterval(checkInterval);
           setTimeout(function() {
             window.location.href = redirect;
           }, 800);
         } else {
-          // إذا ما في redirect، روح للرئيسية
           clearInterval(checkInterval);
         }
       }
@@ -165,7 +158,6 @@
       lastUserStr = currentUserStr;
     }, 400);
 
-    // 3. إيقاف المراقبة بعد 30 ثانية (احتياطي)
     setTimeout(function() {
       clearInterval(checkInterval);
     }, 30000);
@@ -174,5 +166,7 @@
   </script>
 <script src="../js/speed-boost.js" defer></script>
 <script src="../js/sw-register.js" defer></script>
+<script src="../js/master-fix.js"></script>
+
 </body>
 </html>
