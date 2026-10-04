@@ -1,6 +1,7 @@
 /* ==========================================
-   صفحة تفاصيل الإعلان - النسخة النهائية v7.0
+   صفحة تفاصيل الإعلان - النسخة النهائية v8.0
    معرض: صورة كبيرة + شريط مصغرات
+   إصلاح: has_image → listing_image.php
    ========================================== */
 
 const BROKER_PHONE = '963930932794';
@@ -113,7 +114,7 @@ function buildSpecsFromDetails(listing) {
 
   const negotiableStatus = getNegotiableStatus(listing);
   if (negotiableStatus === 'yes') {
-    specs.push({ icon: 'handshake', label: 'السعر قابل للتفاوض', value: 'نعم ✅', highlight: 'yes' });
+    specs.push({ icon: 'check-circle', label: 'السعر قابل للتفاوض', value: 'نعم ✅', highlight: 'yes' });
     usedLabels.add('السعر قابل للتفاوض');
   } else if (negotiableStatus === 'no') {
     specs.push({ icon: 'x-circle', label: 'السعر قابل للتفاوض', value: 'لا ❌', highlight: 'no' });
@@ -188,9 +189,8 @@ function buildLocationText(listing) {
 }
 
 function preloadMainImage(item) {
-  if (!item || !item.id || !window.getListingImageUrl) return;
-  const mainUrl = window.getListingImageUrl(item, 0, 'large');
-  if (!mainUrl || mainUrl.startsWith('data:')) return;
+  if (!item || !item.id) return;
+  const mainUrl = `/api/listing_image.php?id=${encodeURIComponent(item.id)}&index=0&size=large`;
   if (document.querySelector('link[data-preload-main]')) return;
   const link = document.createElement('link');
   link.rel = 'preload';
@@ -201,21 +201,49 @@ function preloadMainImage(item) {
   document.head.appendChild(link);
 }
 
+/* ==========================================
+   ✅ استخراج روابط الصور - النسخة النهائية
+   تحوّل has_image:N إلى listing_image.php
+   ========================================== */
 function extractAllImageUrls(listing) {
   const urls = [];
   const seen = new Set();
+  const listingId = listing.id;
+  if (!listingId) return urls;
+
   const imgs = listing.images || [];
+  console.log('🔍 عدد الصور:', imgs.length, imgs);
 
   imgs.forEach((img, i) => {
     let url = null;
-    if (typeof img === 'string') url = img;
-    else if (img && typeof img === 'object') url = img.url || img.src || img.path || img.filename || null;
-    if (!url && window.getListingImageUrl) {
-      try { url = window.getListingImageUrl(listing, i, 'large'); } catch (e) {}
+
+    if (typeof img === 'string') {
+      // ✅ Placeholder "has_image:N" → حوّله لـ listing_image.php
+      if (img.startsWith('has_image:') || img.startsWith('has_image_')) {
+        url = `/api/listing_image.php?id=${encodeURIComponent(listingId)}&index=${i}&size=large`;
+      }
+      // رابط مباشر
+      else if (/^(https?:\/\/|\/|data:)/.test(img)) {
+        url = img;
+      }
+    } else if (img && typeof img === 'object') {
+      const c = img.url || img.src || img.path;
+      if (c && typeof c === 'string') {
+        if (c.startsWith('has_image:') || c.startsWith('has_image_')) {
+          url = `/api/listing_image.php?id=${encodeURIComponent(listingId)}&index=${i}&size=large`;
+        } else if (/^(https?:\/\/|\/|data:)/.test(c)) {
+          url = c;
+        }
+      }
     }
-    if (url && !seen.has(url)) { seen.add(url); urls.push(url); }
+
+    if (url && !seen.has(url)) {
+      seen.add(url);
+      urls.push(url);
+    }
   });
 
+  console.log('✅ روابط نهائية:', urls.length, urls);
   return urls;
 }
 
@@ -237,7 +265,7 @@ function renderListing(l) {
   let badges = `<span class="info-badge ${purposeClass}"><i data-lucide="tag"></i>${purposeText}</span><span class="info-badge" style="background:var(--bg-secondary);color:var(--text-secondary);"><i data-lucide="${l.type === 'property' ? 'building-2' : 'car'}"></i>${typeText}</span>`;
 
   const negotiableStatus = getNegotiableStatus(l);
-  if (negotiableStatus === 'yes') badges += `<span class="info-badge negotiable-yes"><i data-lucide="handshake"></i>قابل للتفاوض</span>`;
+  if (negotiableStatus === 'yes') badges += `<span class="info-badge negotiable-yes"><i data-lucide="check-circle"></i>قابل للتفاوض</span>`;
   else if (negotiableStatus === 'no') badges += `<span class="info-badge negotiable-no"><i data-lucide="x-circle"></i>غير قابل للتفاوض</span>`;
 
   if (l.featured) badges += `<span class="info-badge featured"><i data-lucide="star"></i>مميز</span>`;
@@ -331,7 +359,7 @@ function renderGallery(listing) {
 
   const fallback = listing.type === 'property' ? 'building-2' : 'car';
   const urls = extractAllImageUrls(listing);
-  console.log(`🖼️ عدد الصور: ${urls.length}`, urls);
+  console.log(`🖼️ عدد الصور النهائي: ${urls.length}`, urls);
 
   if (urls.length === 0) {
     main.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:var(--text-muted);opacity:0.4;"><i data-lucide="${fallback}" style="width:80px;height:80px;"></i></div>`;
