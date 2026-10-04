@@ -193,10 +193,6 @@
     font-size: 20px !important;
   }
 
-  .specs-grid {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 8px !important;
-  }
 
   .details-sidebar {
     width: 100% !important;

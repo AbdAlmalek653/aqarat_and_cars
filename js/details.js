@@ -728,3 +728,122 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   renderListing(l);
 });
+/* ==========================================================
+   🔥🔥🔥 الحل النووي النهائي: فرض 3 أعمدة على المواصفات
+   يستخدم inline styles مع !important — يتغلب على كل ملفات CSS
+   ========================================================== */
+(function forceSpecsGrid3Columns() {
+  function applyForce() {
+    // البحث عن شبكة المواصفات
+    const specsGrid = document.getElementById('adSpecs') || document.querySelector('.specs-grid');
+    
+    if (!specsGrid) {
+      // إذا الشبكة ما موجودة (صفحة تانية)، نوقف
+      return false;
+    }
+
+    // فقط على الجوال
+    if (window.innerWidth > 768) return true;
+
+    // 🔥 فرض الـ 3 أعمدة بـ inline style + !important
+    specsGrid.style.setProperty('display', 'grid', 'important');
+    specsGrid.style.setProperty('grid-template-columns', 'repeat(3, 1fr)', 'important');
+    specsGrid.style.setProperty('gap', '5px', 'important');
+    specsGrid.style.setProperty('width', '100%', 'important');
+    specsGrid.style.setProperty('max-width', '100%', 'important');
+    specsGrid.style.setProperty('margin', '0', 'important');
+    specsGrid.style.setProperty('padding', '0', 'important');
+
+    // تنسيق كل عنصر داخل الشبكة
+    const items = specsGrid.querySelectorAll('.spec-item');
+    items.forEach(item => {
+      item.style.setProperty('display', 'flex', 'important');
+      item.style.setProperty('flex-direction', 'column', 'important');
+      item.style.setProperty('align-items', 'center', 'important');
+      item.style.setProperty('justify-content', 'center', 'important');
+      item.style.setProperty('text-align', 'center', 'important');
+      item.style.setProperty('padding', '8px 2px', 'important');
+      item.style.setProperty('min-width', '0', 'important');
+      item.style.setProperty('min-height', '60px', 'important');
+      item.style.setProperty('background', '#1A2438', 'important');
+      item.style.setProperty('border-radius', '8px', 'important');
+      item.style.setProperty('border', '1px solid #2A3650', 'important');
+      item.style.setProperty('gap', '0', 'important');
+      item.style.setProperty('overflow', 'hidden', 'important');
+
+      // إخفاء الأيقونة لتوفير مساحة
+      const icon = item.querySelector('.spec-icon');
+      if (icon) icon.style.setProperty('display', 'none', 'important');
+
+      // ضبط النصوص
+      const content = item.querySelector('.spec-content');
+      if (content) {
+        content.style.setProperty('width', '100%', 'important');
+        content.style.setProperty('padding', '0', 'important');
+        content.style.setProperty('overflow', 'hidden', 'important');
+      }
+
+      const label = item.querySelector('.spec-label');
+      if (label) {
+        label.style.setProperty('color', '#94A3B8', 'important');
+        label.style.setProperty('font-size', '9.5px', 'important');
+        label.style.setProperty('margin-bottom', '2px', 'important');
+        label.style.setProperty('white-space', 'normal', 'important');
+        label.style.setProperty('word-break', 'break-word', 'important');
+        label.style.setProperty('line-height', '1.2', 'important');
+      }
+
+      const value = item.querySelector('.spec-value');
+      if (value) {
+        value.style.setProperty('color', '#F8FAFC', 'important');
+        value.style.setProperty('font-weight', '700', 'important');
+        value.style.setProperty('font-size', '11px', 'important');
+        value.style.setProperty('white-space', 'normal', 'important');
+        value.style.setProperty('word-break', 'break-word', 'important');
+        value.style.setProperty('line-height', '1.2', 'important');
+      }
+    });
+
+    return true;
+  }
+
+  // تنفيذ أول ما الصفحة تحمل
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', applyForce);
+  } else {
+    applyForce();
+  }
+
+  // 🔥 مراقبة DOM: إذا أضاف details.js العناصر بعدين، نعيد الفرض تلقائياً
+  const observer = new MutationObserver(() => {
+    applyForce();
+  });
+
+  // راقب التغييرات في الصفحة بعد ما تحمل
+  window.addEventListener('load', () => {
+    applyForce();
+    
+    // ابدأ المراقبة على info-card (أو body إذا ما لقيتها)
+    const target = document.querySelector('.info-card') || document.body;
+    observer.observe(target, { 
+      childList: true, 
+      subtree: true 
+    });
+
+    // أعيد الفرض كل ثانيتين لمدة 10 ثواني (احتياطاً)
+    let count = 0;
+    const interval = setInterval(() => {
+      applyForce();
+      count++;
+      if (count >= 5) clearInterval(interval);
+    }, 2000);
+  });
+
+  // أعد الفرض عند تغيير حجم الشاشة (مثلاً المستخدم يدور الجوال)
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(applyForce, 200);
+  });
+
+})();

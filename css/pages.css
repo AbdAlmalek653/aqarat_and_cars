@@ -1889,10 +1889,6 @@
     font-size: 26px
   }
 
-  .specs-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px
-  }
 
   .spec-item {
     padding: 12px;
