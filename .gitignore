@@ -1,12 +1,37 @@
+# Database
 *.sqlite
-
 *.db
 .env
-vendor/
 database/*.db
 database/*.db-*
 database/*.sqlite
 database/*.sqlite3
 
+# Dependencies
+vendor/
+node_modules/
+
+# Cache
+.cache/
+api/cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Backups
 _backup_*/
 _backup_before_important/
