@@ -1,6 +1,6 @@
 /* ==========================================
    صفحة تفاصيل الإعلان
-   الإصدار: 5.0 (negotiable yes/no + city fix + ترجمة شاملة)
+   الإصدار: 6.0 (معرض أفقي + وصف نظيف + 3 أعمدة)
    ========================================== */
 
 const BROKER_PHONE = '963930932794';
@@ -37,7 +37,6 @@ async function fetchListing(id) {
 
 /* ==========================================
    ✅ دالة موحدة لتحليل "قابل للتفاوض"
-   تُرجع: 'yes' | 'no' | null
    ========================================== */
 function getNegotiableStatus(listing) {
   if (!listing) return null;
@@ -56,6 +55,19 @@ function getNegotiableStatus(listing) {
 }
 
 /* ==========================================
+   ✅ تنظيف الوصف من النجوم
+   ========================================== */
+function cleanDescription(text) {
+  if (!text) return '';
+  let html = String(text);
+  // تحويل *نص* إلى <strong>نص</strong>
+  html = html.replace(/\*([^*\n<>]+)\*/g, '<strong>$1</strong>');
+  // إزالة النجوم المتبقية
+  html = html.replace(/\*/g, '');
+  return html;
+}
+
+/* ==========================================
    بناء المواصفات من التفاصيل
    ========================================== */
 function buildSpecsFromDetails(listing) {
@@ -68,19 +80,9 @@ function buildSpecsFromDetails(listing) {
   const sensitiveKeys = ['whatsapp', 'phone', 'mobile', 'email', '_whatsapp', '_phone', '_mobile'];
 
   const propertyMap = {
-    propertyType: {
-      icon: 'building-2', label: 'نوع العقار',
-      translate: { apartment: 'شقة', villa: 'فيلا', 'arabic-house': 'بيت عربي', land: 'أرض', office: 'مكتب', shop: 'محل تجاري', chalet: 'شاليه', building: 'بناء كامل' }
-    },
-    subType: {
-      icon: 'layers', label: 'نوع العقار',
-      translate: { apartment: 'شقة', villa: 'فيلا', 'arabic-house': 'بيت عربي', land: 'أرض', office: 'مكتب', shop: 'محل تجاري', chalet: 'شاليه', building: 'بناء كامل' }
-    },
-    subtype: {
-      icon: 'layers', label: 'نوع العقار',
-      translate: { apartment: 'شقة', villa: 'فيلا', 'arabic-house': 'بيت عربي', land: 'أرض', office: 'مكتب', shop: 'محل تجاري', chalet: 'شاليه', building: 'بناء كامل' }
-    },
-
+    propertyType: { icon: 'building-2', label: 'نوع العقار', translate: { apartment: 'شقة', villa: 'فيلا', 'arabic-house': 'بيت عربي', land: 'أرض', office: 'مكتب', shop: 'محل تجاري', chalet: 'شاليه', building: 'بناء كامل' } },
+    subType: { icon: 'layers', label: 'نوع العقار', translate: { apartment: 'شقة', villa: 'فيلا', 'arabic-house': 'بيت عربي', land: 'أرض', office: 'مكتب', shop: 'محل تجاري', chalet: 'شاليه', building: 'بناء كامل' } },
+    subtype: { icon: 'layers', label: 'نوع العقار', translate: { apartment: 'شقة', villa: 'فيلا', 'arabic-house': 'بيت عربي', land: 'أرض', office: 'مكتب', shop: 'محل تجاري', chalet: 'شاليه', building: 'بناء كامل' } },
     area: { icon: 'square', label: 'المساحة', suffix: ' م²' },
     propertyArea: { icon: 'square', label: 'المساحة', suffix: ' م²' },
     rooms: { icon: 'bed-double', label: 'عدد الغرف' },
@@ -91,190 +93,75 @@ function buildSpecsFromDetails(listing) {
     totalFloors: { icon: 'building', label: 'إجمالي الطوابق' },
     age: { icon: 'calendar', label: 'عمر البناء', suffix: ' سنة' },
     buildingAge: { icon: 'calendar', label: 'عمر البناء', suffix: ' سنة' },
-
-    direction: {
-      icon: 'compass', label: 'الاتجاه',
-      translate: {
-        'شمالي': 'شمالي', 'جنوبي': 'جنوبي', 'شرقي': 'شرقي', 'غربي': 'غربي',
-        'شمالي شرقي': 'شمالي شرقي', 'شمالي غربي': 'شمالي غربي',
-        'جنوبي شرقي': 'جنوبي شرقي', 'جنوبي غربي': 'جنوبي غربي',
-        north: 'شمالي', south: 'جنوبي', east: 'شرقي', west: 'غربي'
-      }
-    },
-    vacancyType: {
-      icon: 'file-check', label: 'نوع الفراغة',
-      translate: {
-        'عقد تنازل': 'عقد تنازل', 'طابو أخضر': 'طابو أخضر', 'عن طريق محكمة': 'عن طريق محكمة'
-      }
-    },
-    finishingType: {
-      icon: 'sparkles', label: 'نوع الإكساء',
-      translate: {
-        'عادي': 'عادي', 'متوسط': 'متوسط', 'جيد': 'جيد', 'سوبر ديلوكس': 'سوبر ديلوكس'
-      }
-    },
-    furnished: {
-      icon: 'sofa', label: 'الفرش',
-      translate: { furnished: 'مفروش', 'semi-furnished': 'نصف مفروش', unfurnished: 'غير مفروش' }
-    },
-    heating: {
-      icon: 'flame', label: 'التدفئة',
-      translate: { central: 'مركزي', split: 'مكيفات', kerosene: 'كاز', electric: 'كهرباء', none: 'بدون' }
-    },
-    garden: {
-      icon: 'trees', label: 'الحديقة',
-      translate: { yes: 'متوفر', no: 'غير متوفر', true: 'متوفر', false: 'غير متوفر' }
-    },
-    pool: {
-      icon: 'waves', label: 'المسبح',
-      translate: { yes: 'متوفر', no: 'غير متوفر', true: 'متوفر', false: 'غير متوفر' }
-    },
+    direction: { icon: 'compass', label: 'الاتجاه' },
+    vacancyType: { icon: 'file-check', label: 'نوع الفراغة' },
+    finishingType: { icon: 'sparkles', label: 'نوع الإكساء' },
+    furnished: { icon: 'sofa', label: 'الفرش', translate: { furnished: 'مفروش', 'semi-furnished': 'نصف مفروش', unfurnished: 'غير مفروش' } },
+    heating: { icon: 'flame', label: 'التدفئة', translate: { central: 'مركزي', split: 'مكيفات', kerosene: 'كاز', electric: 'كهرباء', none: 'بدون' } },
+    garden: { icon: 'trees', label: 'الحديقة', translate: { yes: 'متوفر', no: 'غير متوفر', true: 'متوفر', false: 'غير متوفر' } },
+    pool: { icon: 'waves', label: 'المسبح', translate: { yes: 'متوفر', no: 'غير متوفر', true: 'متوفر', false: 'غير متوفر' } },
     landArea: { icon: 'square', label: 'مساحة الأرض', suffix: ' م²' },
-    landFrontage: { icon: 'route', label: 'عرض الواجهة', suffix: ' م' },
-    landDepth: { icon: 'move-horizontal', label: 'العمق', suffix: ' م' },
-    landZoning: {
-      icon: 'map', label: 'التنظيم',
-      translate: { residential: 'سكني', commercial: 'تجاري', industrial: 'صناعي', agricultural: 'زراعي', mixed: 'مختلط' }
-    },
-    landTabu: {
-      icon: 'file-check', label: 'الطابو',
-      translate: { green: 'أخضر', blue: 'أزرق', organized: 'منظم', unorganized: 'غير منظم' }
-    },
-    rentPeriod: {
-      icon: 'calendar-clock', label: 'مدة الإيجار',
-      translate: { daily: 'يومي', monthly: 'شهري', yearly: 'سنوي' }
-    },
+    rentPeriod: { icon: 'calendar-clock', label: 'مدة الإيجار', translate: { daily: 'يومي', monthly: 'شهري', yearly: 'سنوي' } },
     deposit: { icon: 'wallet', label: 'مبلغ التأمين' }
   };
 
   const carMap = {
-    brand: {
-      icon: 'car', label: 'الماركة',
-      translate: {
-        toyota: 'تويوتا', hyundai: 'هيونداي', kia: 'كيا', mercedes: 'مرسيدس',
-        bmw: 'BMW', nissan: 'نيسان', honda: 'هوندا', chevrolet: 'شيفروليه',
-        ford: 'فورد', mazda: 'مازدا', mitsubishi: 'ميتسوبيشي',
-        volkswagen: 'فولكس فاجن', audi: 'أودي', lexus: 'لكزس',
-        renault: 'رينو', peugeot: 'بيجو', fiat: 'فيات', seat: 'سيات',
-        skoda: 'سكودا', opel: 'أوبل', jeep: 'جيب', landrover: 'لاند روفر',
-        tesla: 'تسلا', volvo: 'فولفو', subaru: 'سوبارو', other: 'أخرى'
-      }
-    },
+    brand: { icon: 'car', label: 'الماركة', translate: { toyota: 'تويوتا', hyundai: 'هيونداي', kia: 'كيا', mercedes: 'مرسيدس', bmw: 'BMW', nissan: 'نيسان', honda: 'هوندا', chevrolet: 'شيفروليه', ford: 'فورد', mazda: 'مازدا', mitsubishi: 'ميتسوبيشي', volkswagen: 'فولكس فاجن', audi: 'أودي', lexus: 'لكزس', renault: 'رينو', peugeot: 'بيجو', fiat: 'فيات', seat: 'سيات', skoda: 'سكودا', opel: 'أوبل', jeep: 'جيب', landrover: 'لاند روفر', tesla: 'تسلا', volvo: 'فولفو', subaru: 'سوبارو', other: 'أخرى' } },
     brandName: { skip: true },
     model: { icon: 'tag', label: 'الموديل' },
     year: { icon: 'calendar', label: 'سنة الصنع' },
     km: { icon: 'gauge', label: 'الكيلومترات', suffix: ' كم' },
     mileage: { icon: 'gauge', label: 'الكيلومترات', suffix: ' كم' },
-    condition: {
-      icon: 'sparkles', label: 'الحالة',
-      translate: { new: 'جديد', used: 'مستعمل', 'like-new': 'كالجديد', excellent: 'ممتازة', good: 'جيدة', fair: 'مقبولة' }
-    },
-    transmission: {
-      icon: 'settings-2', label: 'ناقل الحركة',
-      translate: { automatic: 'أوتوماتيك', manual: 'عادي', auto: 'أوتوماتيك', cvt: 'CVT' }
-    },
-    gear: {
-      icon: 'settings-2', label: 'ناقل الحركة',
-      translate: { automatic: 'أوتوماتيك', manual: 'عادي' }
-    },
-    fuel: {
-      icon: 'fuel', label: 'الوقود',
-      translate: { petrol: 'بنزين', diesel: 'ديزل', electric: 'كهرباء', hybrid: 'هايبرد' }
-    },
-    color: {
-      icon: 'palette', label: 'اللون',
-      translate: {
-        white: 'أبيض', black: 'أسود', silver: 'فضي', gray: 'رمادي',
-        red: 'أحمر', blue: 'أزرق', green: 'أخضر', yellow: 'أصفر',
-        brown: 'بني', beige: 'بيج', gold: 'ذهبي', orange: 'برتقالي'
-      }
-    },
-    bodyType: {
-      icon: 'car', label: 'نوع الجسم',
-      translate: { sedan: 'سيدان', suv: 'SUV', hatchback: 'هاتشباك', pickup: 'بيك أب', coupe: 'كوبيه', van: 'فان' }
-    },
-    carInsurance: {
-      icon: 'shield-check', label: 'التأمين',
-      translate: { yes: 'مؤمنة', no: 'غير مؤمنة', true: 'مؤمنة', false: 'غير مؤمنة' }
-    },
-    insurance: {
-      icon: 'shield-check', label: 'التأمين',
-      translate: { yes: 'مؤمنة', no: 'غير مؤمنة', true: 'مؤمنة', false: 'غير مؤمنة' }
-    },
-    minDays: { icon: 'calendar-clock', label: 'أقل مدة إيجار', suffix: ' يوم' }
+    condition: { icon: 'sparkles', label: 'الحالة', translate: { new: 'جديد', used: 'مستعمل', 'like-new': 'كالجديد', excellent: 'ممتازة', good: 'جيدة', fair: 'مقبولة' } },
+    transmission: { icon: 'settings-2', label: 'ناقل الحركة', translate: { automatic: 'أوتوماتيك', manual: 'عادي', auto: 'أوتوماتيك', cvt: 'CVT' } },
+    gear: { icon: 'settings-2', label: 'ناقل الحركة', translate: { automatic: 'أوتوماتيك', manual: 'عادي' } },
+    fuel: { icon: 'fuel', label: 'الوقود', translate: { petrol: 'بنزين', diesel: 'ديزل', electric: 'كهرباء', hybrid: 'هايبرد' } },
+    color: { icon: 'palette', label: 'اللون', translate: { white: 'أبيض', black: 'أسود', silver: 'فضي', gray: 'رمادي', red: 'أحمر', blue: 'أزرق', green: 'أخضر', yellow: 'أصفر', brown: 'بني', beige: 'بيج', gold: 'ذهبي', orange: 'برتقالي' } },
+    bodyType: { icon: 'car', label: 'نوع الجسم', translate: { sedan: 'سيدان', suv: 'SUV', hatchback: 'هاتشباك', pickup: 'بيك أب', coupe: 'كوبيه', van: 'فان' } },
+    carInsurance: { icon: 'shield-check', label: 'التأمين', translate: { yes: 'مؤمنة', no: 'غير مؤمنة', true: 'مؤمنة', false: 'غير مؤمنة' } },
+    insurance: { icon: 'shield-check', label: 'التأمين', translate: { yes: 'مؤمنة', no: 'غير مؤمنة', true: 'مؤمنة', false: 'غير مؤمنة' } }
   };
 
   const globalFieldTranslations = {
-    subtype: 'النوع الفرعي', sub_type: 'النوع الفرعي', 'sub-type': 'النوع الفرعي',
-    propertytype: 'نوع العقار', property_type: 'نوع العقار',
-    direction: 'الاتجاه', facing: 'الاتجاه',
-    vacancytype: 'نوع الفراغة', vacancy_type: 'نوع الفراغة',
-    finishingtype: 'نوع الإكساء', finishing_type: 'نوع الإكساء',
-    totalfloors: 'إجمالي الطوابق', total_floors: 'إجمالي الطوابق',
-    floors: 'عدد الطوابق', floor: 'الطابق',
-    rooms: 'عدد الغرف', bedrooms: 'غرف النوم',
-    bathrooms: 'عدد الحمامات', baths: 'عدد الحمامات',
-    area: 'المساحة', propertyarea: 'المساحة', property_area: 'المساحة',
-    landarea: 'مساحة الأرض', land_area: 'مساحة الأرض',
-    age: 'عمر البناء', buildingage: 'عمر البناء', building_age: 'عمر البناء',
-    furnished: 'الفرش', heating: 'التدفئة', cooling: 'التبريد',
-    garden: 'الحديقة', pool: 'المسبح', parking: 'موقف سيارة',
-    elevator: 'مصعد', balcony: 'شرفة', terrace: 'تراس',
-    address: 'العنوان', location: 'الموقع', city: 'المحافظة',
-    brand: 'الماركة', brandname: 'الماركة', brand_name: 'الماركة',
-    model: 'الموديل', year: 'السنة', km: 'الكيلومترات', mileage: 'المسافة المقطوعة',
-    color: 'اللون', bodytype: 'نوع الجسم', body_type: 'نوع الجسم',
-    fuel: 'الوقود', transmission: 'ناقل الحركة', gear: 'ناقل الحركة',
-    condition: 'الحالة', carinsurance: 'التأمين', insurance: 'التأمين',
-    mindays: 'أقل مدة إيجار', min_days: 'أقل مدة إيجار',
-    rentperiod: 'مدة الإيجار', rent_period: 'مدة الإيجار',
-    deposit: 'مبلغ التأمين'
+    subtype: 'النوع الفرعي', sub_type: 'النوع الفرعي', propertytype: 'نوع العقار', property_type: 'نوع العقار',
+    direction: 'الاتجاه', facing: 'الاتجاه', vacancytype: 'نوع الفراغة', vacancy_type: 'نوع الفراغة',
+    finishingtype: 'نوع الإكساء', finishing_type: 'نوع الإكساء', totalfloors: 'إجمالي الطوابق',
+    total_floors: 'إجمالي الطوابق', rooms: 'عدد الغرف', bedrooms: 'غرف النوم',
+    bathrooms: 'عدد الحمامات', baths: 'عدد الحمامات', area: 'المساحة',
+    age: 'عمر البناء', furnished: 'الفرش', heating: 'التدفئة', garden: 'الحديقة', pool: 'المسبح',
+    brand: 'الماركة', model: 'الموديل', year: 'السنة', km: 'الكيلومترات',
+    color: 'اللون', bodytype: 'نوع الجسم', body_type: 'نوع الجسم', fuel: 'الوقود',
+    transmission: 'ناقل الحركة', condition: 'الحالة', carinsurance: 'التأمين', insurance: 'التأمين'
   };
 
   const map = isProperty ? propertyMap : carMap;
   const specs = [];
   const usedLabels = new Set();
 
-  // ✅ 1. أضف "قابل للتفاوض" في كل الحالات
   const negotiableStatus = getNegotiableStatus(listing);
   if (negotiableStatus === 'yes') {
-    specs.push({
-      icon: 'handshake',
-      label: 'السعر قابل للتفاوض',
-      value: 'نعم ✅',
-      highlight: 'yes'
-    });
+    specs.push({ icon: 'handshake', label: 'السعر قابل للتفاوض', value: 'نعم ✅', highlight: 'yes' });
     usedLabels.add('السعر قابل للتفاوض');
   } else if (negotiableStatus === 'no') {
-    specs.push({
-      icon: 'x-circle',
-      label: 'السعر قابل للتفاوض',
-      value: 'لا ❌',
-      highlight: 'no'
-    });
+    specs.push({ icon: 'x-circle', label: 'السعر قابل للتفاوض', value: 'لا ❌', highlight: 'no' });
     usedLabels.add('السعر قابل للتفاوض');
   }
 
-  // ✅ 2. باقي الحقول
   Object.keys(d).forEach(key => {
     if (sensitiveKeys.includes(key.toLowerCase()) && !isAdmin) return;
     if (key.startsWith('_') && !isAdmin) return;
     if (key.startsWith('_') && key !== '_whatsapp' && key !== '_phone') return;
-    if (key === 'negotiable') return; // ← تجاهل لأنه أُضيف فوق
+    if (key === 'negotiable') return;
 
     let value = d[key];
     if (value === '' || value === null || value === undefined) return;
 
     let meta = map[key];
-
     if (!meta) {
       const lowerKey = key.toLowerCase();
       const label = globalFieldTranslations[lowerKey] || globalFieldTranslations[key];
-      if (label) {
-        meta = { icon: 'info', label: label };
-      } else {
-        return;
-      }
+      if (label) meta = { icon: 'info', label: label };
+      else return;
     }
 
     if (meta.skip) return;
@@ -282,11 +169,9 @@ function buildSpecsFromDetails(listing) {
     usedLabels.add(meta.label);
 
     if (meta.translate && meta.translate[value]) value = meta.translate[value];
-
     if (typeof value === 'boolean') value = value ? 'نعم' : 'لا';
     else if (Array.isArray(value)) value = value.join('، ');
     else if (typeof value === 'object') value = JSON.stringify(value);
-
     if (meta.suffix) value = value + meta.suffix;
 
     specs.push({ icon: meta.icon, label: meta.label, value: String(value) });
@@ -305,12 +190,7 @@ function buildTypeText(listing) {
     return types[listing.subType || d.propertyType] || 'عقار';
   }
   if (listing.type === 'car') {
-    const brands = {
-      toyota: 'تويوتا', hyundai: 'هيونداي', kia: 'كيا', mercedes: 'مرسيدس',
-      bmw: 'BMW', nissan: 'نيسان', honda: 'هوندا', chevrolet: 'شيفروليه',
-      ford: 'فورد', mazda: 'مازدا', mitsubishi: 'ميتسوبيشي',
-      volkswagen: 'فولكس فاجن', audi: 'أودي', lexus: 'لكزس', other: 'أخرى'
-    };
+    const brands = { toyota: 'تويوتا', hyundai: 'هيونداي', kia: 'كيا', mercedes: 'مرسيدس', bmw: 'BMW', nissan: 'نيسان', honda: 'هوندا', chevrolet: 'شيفروليه', ford: 'فورد', mazda: 'مازدا', mitsubishi: 'ميتسوبيشي', volkswagen: 'فولكس فاجن', audi: 'أودي', lexus: 'لكزس', other: 'أخرى' };
     const brand = d.brandName || brands[d.brand] || d.brand || '';
     const model = d.model || '';
     return [brand, model].filter(Boolean).join(' ') || 'سيارة';
@@ -319,30 +199,19 @@ function buildTypeText(listing) {
 }
 
 /* ==========================================
-   ✅ استخراج الموقع الصحيح
+   استخراج الموقع الصحيح
    ========================================== */
 function buildLocationText(listing) {
-  const cityNames = {
-    damascus: 'دمشق', 'rif-dimashq': 'ريف دمشق', aleppo: 'حلب',
-    homs: 'حمص', hama: 'حماة', latakia: 'اللاذقية', tartus: 'طرطوس',
-    daraa: 'درعا', sweida: 'السويداء', quneitra: 'القنيطرة',
-    'deir-ezzor': 'دير الزور', raqqa: 'الرقة', hasakah: 'الحسكة', idlib: 'إدلب'
-  };
-
+  const cityNames = { damascus: 'دمشق', 'rif-dimashq': 'ريف دمشق', aleppo: 'حلب', homs: 'حمص', hama: 'حماة', latakia: 'اللاذقية', tartus: 'طرطوس', daraa: 'درعا', sweida: 'السويداء', quneitra: 'القنيطرة', 'deir-ezzor': 'دير الزور', raqqa: 'الرقة', hasakah: 'الحسكة', idlib: 'إدلب' };
   const citySlug = listing.city_slug || listing.city || '';
   const cityNameFromAPI = listing.city_name || listing.cityName || '';
   const cityAr = listing.city ? (cityNames[listing.city] || listing.city) : '';
 
   let cityText = '';
-  if (cityNameFromAPI && cityNameFromAPI.trim()) {
-    cityText = cityNameFromAPI.trim();
-  } else if (cityAr && /[\u0600-\u06FF]/.test(cityAr)) {
-    cityText = cityAr;
-  } else if (citySlug && cityNames[citySlug]) {
-    cityText = cityNames[citySlug];
-  } else if (citySlug && /[\u0600-\u06FF]/.test(citySlug)) {
-    cityText = citySlug;
-  }
+  if (cityNameFromAPI && cityNameFromAPI.trim()) cityText = cityNameFromAPI.trim();
+  else if (cityAr && /[\u0600-\u06FF]/.test(cityAr)) cityText = cityAr;
+  else if (citySlug && cityNames[citySlug]) cityText = cityNames[citySlug];
+  else if (citySlug && /[\u0600-\u06FF]/.test(citySlug)) cityText = citySlug;
 
   const area = listing.area || '';
   if (cityText && area) return `${cityText} - ${area}`;
@@ -352,7 +221,7 @@ function buildLocationText(listing) {
 }
 
 /* ==========================================
-   Preload الصورة الرئيسية (LCP)
+   Preload الصورة الرئيسية
    ========================================== */
 function preloadMainImage(item) {
   if (!item || !item.id || !window.getListingImageUrl) return;
@@ -370,20 +239,45 @@ function preloadMainImage(item) {
 }
 
 /* ==========================================
-   عرض الإعلان (مع شارات التفاوض في كل الحالات)
+   ✅ استخراج كل روابط الصور
+   ========================================== */
+function extractAllImageUrls(listing) {
+  const urls = [];
+  const seen = new Set();
+  const imgs = listing.images || [];
+
+  imgs.forEach((img, i) => {
+    let url = null;
+    if (typeof img === 'string') {
+      url = img;
+    } else if (img && typeof img === 'object') {
+      url = img.url || img.src || img.path || img.filename || null;
+    }
+    
+    // جرب getListingImageUrl إذا الرابط مش مباشر
+    if (!url && window.getListingImageUrl) {
+      try { url = window.getListingImageUrl(listing, i, 'large'); } catch (e) {}
+    }
+
+    if (url && !seen.has(url)) {
+      seen.add(url);
+      urls.push(url);
+    }
+  });
+
+  return urls;
+}
+
+/* ==========================================
+   عرض الإعلان
    ========================================== */
 function renderListing(l) {
   currentListing = l;
   preloadMainImage(l);
 
   const parent = document.getElementById('breadcrumbParent');
-  if (l.type === 'property') {
-    parent.textContent = 'العقارات';
-    parent.href = 'properties.html';
-  } else {
-    parent.textContent = 'السيارات';
-    parent.href = 'cars.html';
-  }
+  if (l.type === 'property') { parent.textContent = 'العقارات'; parent.href = 'properties.html'; }
+  else { parent.textContent = 'السيارات'; parent.href = 'cars.html'; }
   document.getElementById('breadcrumbTitle').textContent = l.title;
   document.title = l.title + ' | سوق';
   document.getElementById('adTitle').textContent = l.title;
@@ -392,13 +286,8 @@ function renderListing(l) {
   const purposeClass = l.purpose === 'sale' ? 'sale' : 'rent';
   const typeText = l.type === 'property' ? 'عقار' : 'سيارة';
 
-  let badges = `
-    <span class="info-badge ${purposeClass}"><i data-lucide="tag"></i>${purposeText}</span>
-    <span class="info-badge" style="background:var(--bg-secondary);color:var(--text-secondary);">
-      <i data-lucide="${l.type === 'property' ? 'building-2' : 'car'}"></i>${typeText}
-    </span>`;
+  let badges = `<span class="info-badge ${purposeClass}"><i data-lucide="tag"></i>${purposeText}</span><span class="info-badge" style="background:var(--bg-secondary);color:var(--text-secondary);"><i data-lucide="${l.type === 'property' ? 'building-2' : 'car'}"></i>${typeText}</span>`;
 
-  // ✅ شارة "قابل للتفاوض" في الأعلى - في كل الحالات
   const negotiableStatus = getNegotiableStatus(l);
   if (negotiableStatus === 'yes') {
     badges += `<span class="info-badge negotiable-yes"><i data-lucide="handshake"></i>قابل للتفاوض</span>`;
@@ -424,19 +313,19 @@ function renderListing(l) {
   } else {
     specsContainer.innerHTML = specs.map(s => {
       const highlightClass = s.highlight ? `highlight-${s.highlight}` : '';
-      return `
-        <div class="spec-item ${highlightClass}">
-          <div class="spec-icon"><i data-lucide="${s.icon}"></i></div>
-          <div class="spec-content">
-            <div class="spec-label">${s.label}</div>
-            <div class="spec-value">${s.value}</div>
-          </div>
-        </div>
-      `;
+      return `<div class="spec-item ${highlightClass}"><div class="spec-icon"><i data-lucide="${s.icon}"></i></div><div class="spec-content"><div class="spec-label">${s.label}</div><div class="spec-value">${s.value}</div></div></div>`;
     }).join('');
   }
 
-  document.getElementById('adDescription').textContent = l.description || '';
+  // ✅ الوصف: نظّفه من النجوم
+  const descEl = document.getElementById('adDescription');
+  const cleanedDesc = cleanDescription(l.description || '');
+  if (/<[a-z][\s\S]*>/i.test(cleanedDesc)) {
+    descEl.innerHTML = cleanedDesc;
+  } else {
+    descEl.textContent = cleanedDesc;
+  }
+
   document.getElementById('adId').textContent = '#' + l.id;
 
   const listingUrl = window.location.href;
@@ -445,20 +334,15 @@ function renderListing(l) {
   const specificType = buildTypeText(l);
   const typeLabel = l.type === 'property' ? 'نوع العقار' : 'نوع السيارة';
 
-  // ✅ نص التفاوض في رسالة الواتساب
   let negotiableText = '';
-  if (negotiableStatus === 'yes') {
-    negotiableText = '\n🤝 السعر قابل للتفاوض';
-  } else if (negotiableStatus === 'no') {
-    negotiableText = '\n🔒 السعر غير قابل للتفاوض';
-  }
+  if (negotiableStatus === 'yes') negotiableText = '\n🤝 السعر قابل للتفاوض';
+  else if (negotiableStatus === 'no') negotiableText = '\n🔒 السعر غير قابل للتفاوض';
 
   const msg = `مرحباً، انا مهتم بـ ${typeText} ورقم الإعلان هو: ${l.id}\n🔍 ${typeLabel}: ${specificType}\n📍 الموقع: ${locationText}\n💰 السعر: ${priceText}${negotiableText}\n\n🔗 رابط الإعلان:\n${listingUrl}`;
-
   document.getElementById('whatsappBtn').href = `https://wa.me/${BROKER_PHONE}?text=${encodeURIComponent(msg)}`;
 
   setupSellerWhatsapp(l);
-  renderGallery(l.images || [], l);
+  renderGallery(l);
   setupFavorite(l.id);
 
   document.getElementById('loadingState').style.display = 'none';
@@ -472,9 +356,7 @@ function renderListing(l) {
 function setupSellerWhatsapp(listing) {
   const btn = document.getElementById('sellerWhatsappBtn');
   if (!btn) return;
-
   const isAdmin = window.API && API.Users && API.Users.isAdmin && API.Users.isAdmin();
-
   if (!isAdmin) {
     btn.style.display = 'none';
     btn.removeAttribute('href');
@@ -499,7 +381,6 @@ function setupSellerWhatsapp(listing) {
 
   const typeText = listing.type === 'property' ? 'العقار' : 'السيارة';
   const message = `مرحباً، معك فريق سوق للوساطة الإلكترونية بخصوص ${typeText} رقم #${listing.id}\n${listing.title}`;
-
   btn.href = `https://wa.me/${sellerPhone}?text=${encodeURIComponent(message)}`;
   btn.style.display = 'flex';
   btn.style.background = '';
@@ -509,57 +390,42 @@ function setupSellerWhatsapp(listing) {
 }
 
 /* ==========================================
-   معرض الصور
+   🔥 معرض الصور: شريط أفقي من البداية
    ========================================== */
-function renderGallery(imgs, l) {
+function renderGallery(listing) {
   const main = document.getElementById('galleryMain');
   const thumbs = document.getElementById('galleryThumbs');
-  const fallback = l.type === 'property' ? 'building-2' : 'car';
+  if (!main) return;
+  if (thumbs) { thumbs.style.display = 'none'; thumbs.innerHTML = ''; }
 
-  if (!imgs.length) {
-    main.innerHTML = `<i data-lucide="${fallback}"></i>
-      <div class="gallery-nav prev" onclick="prevImage()"><i data-lucide="chevron-right"></i></div>
-      <div class="gallery-nav next" onclick="nextImage()"><i data-lucide="chevron-left"></i></div>`;
-    thumbs.innerHTML = `<div class="gallery-thumb active"><i data-lucide="${fallback}" style="color:var(--text-muted);"></i></div>`;
+  const fallback = listing.type === 'property' ? 'building-2' : 'car';
+  const urls = extractAllImageUrls(listing);
+
+  console.log(`🖼️ عدد الصور: ${urls.length}`, urls);
+
+  if (urls.length === 0) {
+    main.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;width:100%;min-height:240px;color:var(--text-muted);opacity:0.4;"><i data-lucide="${fallback}" style="width:80px;height:80px;"></i></div>`;
     initIcons();
     return;
   }
 
-  const getUrl = window.getListingImageUrl;
-  const largeUrls = imgs.map((_, i) => getUrl ? getUrl(l, i, 'large') : null).filter(Boolean);
+  // ✅ بناء شريط أفقي مباشرة
+  const safeTitle = (listing.title || '').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+  const isMobile = window.innerWidth <= 768;
+  const size = isMobile ? 240 : 300;
 
-  if (!largeUrls.length) {
-    const raw = imgs.map(img => typeof img === 'string' ? img : null).filter(Boolean);
-    largeUrls.push(...raw);
-  }
-
-  currentListing._galleryUrls = { large: largeUrls };
-  const safeTitle = (l.title || '').replace(/"/g, '&quot;').replace(/</g, '&lt;');
-
-  main.innerHTML = `
-    <img src="${largeUrls[0]}" alt="${safeTitle}" loading="eager" decoding="async" fetchpriority="high" style="width:100%;height:100%;object-fit:cover;display:block;">
-    <div class="gallery-nav prev" onclick="prevImage()"><i data-lucide="chevron-right"></i></div>
-    <div class="gallery-nav next" onclick="nextImage()"><i data-lucide="chevron-left"></i></div>`;
-
-  thumbs.innerHTML = largeUrls.map((url, i) => 
-    `<div class="gallery-thumb ${i === 0 ? 'active' : ''}" onclick="goToImage(${i})"><img src="${url}" alt="صورة ${i + 1}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;"></div>`
+  main.innerHTML = urls.map((url, i) => 
+    `<img src="${url}" alt="${safeTitle} - صورة ${i + 1}" loading="${i === 0 ? 'eager' : 'lazy'}" decoding="async" ${i === 0 ? 'fetchpriority="high"' : ''} data-index="${i}" style="flex:0 0 ${size}px;width:${size}px;height:${size}px;min-width:${size}px;max-width:${size}px;border-radius:12px;object-fit:cover;cursor:pointer;scroll-snap-align:center;background:#0f1729;display:block;">`
   ).join('');
 
-  currentImageIndex = 0;
+  // إضافة معاينة عند الضغط
+  main.querySelectorAll('img').forEach(img => {
+    img.addEventListener('click', () => {
+      window.open(img.src, '_blank');
+    });
+  });
+
   initIcons();
-}
-
-window.prevImage = function() { if (!currentListing?._galleryUrls?.large?.length) return; const t = currentListing._galleryUrls.large.length; currentImageIndex = (currentImageIndex - 1 + t) % t; updateGallery(); };
-window.nextImage = function() { if (!currentListing?._galleryUrls?.large?.length) return; const t = currentListing._galleryUrls.large.length; currentImageIndex = (currentImageIndex + 1) % t; updateGallery(); };
-window.goToImage = function(i) { if (!currentListing?._galleryUrls?.large?.length) return; currentImageIndex = i; updateGallery(); };
-
-function updateGallery() {
-  const urls = currentListing._galleryUrls;
-  if (!urls || !urls.large.length) return;
-  const main = document.getElementById('galleryMain');
-  const imgEl = main.querySelector('img');
-  if (imgEl) imgEl.src = urls.large[currentImageIndex];
-  document.querySelectorAll('.gallery-thumb').forEach((t, i) => t.classList.toggle('active', i === currentImageIndex));
 }
 
 /* ==========================================
@@ -648,21 +514,21 @@ async function saveEdit(e) {
         const priceText = Number(updates.price).toLocaleString('en-US');
         priceEl.innerHTML = currentListing.purpose === 'sale' ? `${priceText} ${updates.currency}` : `${priceText} ${updates.currency} <small>/ شهرياً</small>`;
       }
-      document.getElementById('adDescription').textContent = updates.description;
+      const descEl = document.getElementById('adDescription');
+      const cleaned = cleanDescription(updates.description);
+      if (/<[a-z][\s\S]*>/i.test(cleaned)) descEl.innerHTML = cleaned;
+      else descEl.textContent = cleaned;
+
       document.getElementById('adLocation').textContent = buildLocationText(currentListing);
 
       const purposeText = currentListing.purpose === 'sale' ? 'للبيع' : 'للإيجار';
       const purposeClass = currentListing.purpose === 'sale' ? 'sale' : 'rent';
       const typeText = currentListing.type === 'property' ? 'عقار' : 'سيارة';
       let badges = `<span class="info-badge ${purposeClass}"><i data-lucide="tag"></i>${purposeText}</span><span class="info-badge" style="background:var(--bg-secondary);color:var(--text-secondary);"><i data-lucide="${currentListing.type === 'property' ? 'building-2' : 'car'}"></i>${typeText}</span>`;
-      
+
       const negotiableStatus = getNegotiableStatus(currentListing);
-      if (negotiableStatus === 'yes') {
-        badges += `<span class="info-badge negotiable-yes"><i data-lucide="handshake"></i>قابل للتفاوض</span>`;
-      } else if (negotiableStatus === 'no') {
-        badges += `<span class="info-badge negotiable-no"><i data-lucide="x-circle"></i>غير قابل للتفاوض</span>`;
-      }
-      
+      if (negotiableStatus === 'yes') badges += `<span class="info-badge negotiable-yes"><i data-lucide="handshake"></i>قابل للتفاوض</span>`;
+      else if (negotiableStatus === 'no') badges += `<span class="info-badge negotiable-no"><i data-lucide="x-circle"></i>غير قابل للتفاوض</span>`;
       if (updates.featured) badges += `<span class="info-badge featured"><i data-lucide="star"></i>مميز</span>`;
       document.getElementById('infoBadges').innerHTML = badges;
 
@@ -697,6 +563,62 @@ if (!document.getElementById('toast-animation')) {
 }
 
 /* ==========================================
+   ✅ فرض 3 أعمدة على المواصفات (inline styles)
+   ========================================== */
+function enforceMobileSpecs() {
+  if (window.innerWidth > 768) return;
+  const grid = document.getElementById('adSpecs');
+  if (!grid) return;
+
+  grid.style.setProperty('display', 'grid', 'important');
+  grid.style.setProperty('grid-template-columns', 'repeat(3, 1fr)', 'important');
+  grid.style.setProperty('gap', '5px', 'important');
+  grid.style.setProperty('width', '100%', 'important');
+  grid.style.setProperty('max-width', '100%', 'important');
+  grid.style.setProperty('margin', '0', 'important');
+  grid.style.setProperty('padding', '0', 'important');
+
+  grid.querySelectorAll('.spec-item').forEach(item => {
+    item.style.setProperty('display', 'flex', 'important');
+    item.style.setProperty('flex-direction', 'column', 'important');
+    item.style.setProperty('align-items', 'center', 'important');
+    item.style.setProperty('justify-content', 'center', 'important');
+    item.style.setProperty('text-align', 'center', 'important');
+    item.style.setProperty('padding', '8px 3px', 'important');
+    item.style.setProperty('min-width', '0', 'important');
+    item.style.setProperty('min-height', '60px', 'important');
+    item.style.setProperty('gap', '0', 'important');
+    item.style.setProperty('overflow', 'hidden', 'important');
+
+    const icon = item.querySelector('.spec-icon');
+    if (icon) icon.style.setProperty('display', 'none', 'important');
+
+    const content = item.querySelector('.spec-content');
+    if (content) {
+      content.style.setProperty('width', '100%', 'important');
+      content.style.setProperty('padding', '0', 'important');
+      content.style.setProperty('overflow', 'hidden', 'important');
+    }
+
+    const label = item.querySelector('.spec-label');
+    if (label) {
+      label.style.setProperty('font-size', '9.5px', 'important');
+      label.style.setProperty('white-space', 'normal', 'important');
+      label.style.setProperty('word-break', 'break-word', 'important');
+      label.style.setProperty('line-height', '1.2', 'important');
+    }
+
+    const value = item.querySelector('.spec-value');
+    if (value) {
+      value.style.setProperty('font-size', '11px', 'important');
+      value.style.setProperty('white-space', 'normal', 'important');
+      value.style.setProperty('word-break', 'break-word', 'important');
+      value.style.setProperty('line-height', '1.2', 'important');
+    }
+  });
+}
+
+/* ==========================================
    تشغيل
    ========================================== */
 document.addEventListener('DOMContentLoaded', async () => {
@@ -727,234 +649,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   renderListing(l);
+
+  // فرض 3 أعمدة بعد الرندر
+  setTimeout(enforceMobileSpecs, 100);
+  setTimeout(enforceMobileSpecs, 500);
+  setTimeout(enforceMobileSpecs, 1500);
 });
-/* ==========================================================
-   🔥🔥🔥 الحل النووي النهائي: فرض 3 أعمدة على المواصفات
-   يستخدم inline styles مع !important — يتغلب على كل ملفات CSS
-   ========================================================== */
-(function forceSpecsGrid3Columns() {
-  function applyForce() {
-    // البحث عن شبكة المواصفات
-    const specsGrid = document.getElementById('adSpecs') || document.querySelector('.specs-grid');
-    
-    if (!specsGrid) {
-      // إذا الشبكة ما موجودة (صفحة تانية)، نوقف
-      return false;
-    }
 
-    // فقط على الجوال
-    if (window.innerWidth > 768) return true;
-
-    // 🔥 فرض الـ 3 أعمدة بـ inline style + !important
-    specsGrid.style.setProperty('display', 'grid', 'important');
-    specsGrid.style.setProperty('grid-template-columns', 'repeat(3, 1fr)', 'important');
-    specsGrid.style.setProperty('gap', '5px', 'important');
-    specsGrid.style.setProperty('width', '100%', 'important');
-    specsGrid.style.setProperty('max-width', '100%', 'important');
-    specsGrid.style.setProperty('margin', '0', 'important');
-    specsGrid.style.setProperty('padding', '0', 'important');
-
-    // تنسيق كل عنصر داخل الشبكة
-    const items = specsGrid.querySelectorAll('.spec-item');
-    items.forEach(item => {
-      item.style.setProperty('display', 'flex', 'important');
-      item.style.setProperty('flex-direction', 'column', 'important');
-      item.style.setProperty('align-items', 'center', 'important');
-      item.style.setProperty('justify-content', 'center', 'important');
-      item.style.setProperty('text-align', 'center', 'important');
-      item.style.setProperty('padding', '8px 2px', 'important');
-      item.style.setProperty('min-width', '0', 'important');
-      item.style.setProperty('min-height', '60px', 'important');
-      item.style.setProperty('background', '#1A2438', 'important');
-      item.style.setProperty('border-radius', '8px', 'important');
-      item.style.setProperty('border', '1px solid #2A3650', 'important');
-      item.style.setProperty('gap', '0', 'important');
-      item.style.setProperty('overflow', 'hidden', 'important');
-
-      // إخفاء الأيقونة لتوفير مساحة
-      const icon = item.querySelector('.spec-icon');
-      if (icon) icon.style.setProperty('display', 'none', 'important');
-
-      // ضبط النصوص
-      const content = item.querySelector('.spec-content');
-      if (content) {
-        content.style.setProperty('width', '100%', 'important');
-        content.style.setProperty('padding', '0', 'important');
-        content.style.setProperty('overflow', 'hidden', 'important');
-      }
-
-      const label = item.querySelector('.spec-label');
-      if (label) {
-        label.style.setProperty('color', '#94A3B8', 'important');
-        label.style.setProperty('font-size', '9.5px', 'important');
-        label.style.setProperty('margin-bottom', '2px', 'important');
-        label.style.setProperty('white-space', 'normal', 'important');
-        label.style.setProperty('word-break', 'break-word', 'important');
-        label.style.setProperty('line-height', '1.2', 'important');
-      }
-
-      const value = item.querySelector('.spec-value');
-      if (value) {
-        value.style.setProperty('color', '#F8FAFC', 'important');
-        value.style.setProperty('font-weight', '700', 'important');
-        value.style.setProperty('font-size', '11px', 'important');
-        value.style.setProperty('white-space', 'normal', 'important');
-        value.style.setProperty('word-break', 'break-word', 'important');
-        value.style.setProperty('line-height', '1.2', 'important');
-      }
-    });
-
-    return true;
-  }
-
-  // تنفيذ أول ما الصفحة تحمل
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', applyForce);
-  } else {
-    applyForce();
-  }
-
-  // 🔥 مراقبة DOM: إذا أضاف details.js العناصر بعدين، نعيد الفرض تلقائياً
-  const observer = new MutationObserver(() => {
-    applyForce();
-  });
-
-  // راقب التغييرات في الصفحة بعد ما تحمل
-  window.addEventListener('load', () => {
-    applyForce();
-    
-    // ابدأ المراقبة على info-card (أو body إذا ما لقيتها)
-    const target = document.querySelector('.info-card') || document.body;
-    observer.observe(target, { 
-      childList: true, 
-      subtree: true 
-    });
-
-    // أعيد الفرض كل ثانيتين لمدة 10 ثواني (احتياطاً)
-    let count = 0;
-    const interval = setInterval(() => {
-      applyForce();
-      count++;
-      if (count >= 5) clearInterval(interval);
-    }, 2000);
-  });
-
-  // أعد الفرض عند تغيير حجم الشاشة (مثلاً المستخدم يدور الجوال)
-  let resizeTimer;
-  window.addEventListener('resize', () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(applyForce, 200);
-  });
-
-})();
-/* ==========================================================
-   🎯 تحويل المعرض إلى شريط أفقي (كل الصور بنفس الصف)
-   ========================================================== */
-(function convertGalleryToHorizontal() {
-  
-  function convertGallery() {
-    const mainImage = document.getElementById('mainImage');
-    const galleryMain = document.getElementById('galleryMain');
-    const thumbsContainer = document.getElementById('galleryThumbs');
-    
-    if (!mainImage || !galleryMain) return;
-    
-    // اجمع كل الصور
-    const allImages = [];
-    
-    // الصورة الرئيسية أولاً
-    if (mainImage.src && mainImage.src.trim() !== '' && !mainImage.src.endsWith('/')) {
-      allImages.push(mainImage.src);
-    }
-    
-    // ثم الصور المصغرة
-    if (thumbsContainer) {
-      thumbsContainer.querySelectorAll('img').forEach(img => {
-        if (img.src && !allImages.includes(img.src)) {
-          allImages.push(img.src);
-        }
-      });
-    }
-    
-    if (allImages.length === 0) return;
-    
-    // إذا الشريط محوّل من قبل، لا نعيد
-    if (galleryMain.dataset.horizontalized === 'true') {
-      // فقط نعيد ترتيب الصور إن تغيرت
-      const currentImages = Array.from(galleryMain.querySelectorAll('img')).map(i => i.src).join(',');
-      if (currentImages === allImages.join(',')) return;
-    }
-    
-    // 🔥 احذف كل شي داخل galleryMain وابنِ من جديد
-    galleryMain.innerHTML = '';
-    
-    // أضف كل صورة في شريط أفقي
-    allImages.forEach((src, index) => {
-      const img = document.createElement('img');
-      img.src = src;
-      img.alt = `صورة ${index + 1}`;
-      img.loading = 'lazy';
-      img.decoding = 'async';
-      img.dataset.index = index;
-      img.style.cssText = `
-        flex: 0 0 auto;
-        width: 280px;
-        height: 280px;
-        min-width: 280px;
-        max-width: 280px;
-        border-radius: 12px;
-        object-fit: cover;
-        cursor: pointer;
-        scroll-snap-align: center;
-        display: block;
-        transition: transform 0.3s ease;
-      `;
-      
-      // عند الضغط - تكبير الصورة (اختياري)
-      img.addEventListener('click', function() {
-        // فتح الصورة في نافذة أو تبويب جديد
-        window.open(src, '_blank');
-      });
-      
-      galleryMain.appendChild(img);
-    });
-    
-    // إخفاء شريط المصغرات
-    if (thumbsContainer) {
-      thumbsContainer.style.display = 'none';
-      thumbsContainer.style.visibility = 'hidden';
-    }
-    
-    // إخفاء أيقونات التمرير القديمة
-    galleryMain.querySelectorAll('.gallery-nav').forEach(el => el.remove());
-    
-    // علم إنه تم التحويل
-    galleryMain.dataset.horizontalized = 'true';
-    
-    console.log(`✅ تم تحويل المعرض إلى شريط أفقي (${allImages.length} صور)`);
-  }
-  
-  // تنفيذ
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', convertGallery);
-  } else {
-    convertGallery();
-  }
-  
-  window.addEventListener('load', convertGallery);
-  setTimeout(convertGallery, 500);
-  setTimeout(convertGallery, 1500);
-  setTimeout(convertGallery, 3000);
-  
-  // مراقبة تغيير الصور
-  const observer = new MutationObserver(() => {
-    setTimeout(convertGallery, 100);
-  });
-  
-  window.addEventListener('load', () => {
-    const target = document.getElementById('detailsContent');
-    if (target) {
-      observer.observe(target, { childList: true, subtree: true });
-    }
-  });
-})();
+window.addEventListener('resize', () => {
+  clearTimeout(window._resizeT);
+  window._resizeT = setTimeout(enforceMobileSpecs, 200);
+});

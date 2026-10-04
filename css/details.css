@@ -1,6 +1,6 @@
 /* ==========================================================
-   details.css - النسخة النهائية v7.0
-   معرض صور أفقي قابل للسحب + مواصفات 3 أعمدة
+   details.css - النسخة النهائية v8.0
+   معرض أفقي + 3 أعمدة + صناديق عرض كامل
    ========================================================== */
 
 /* ==================== الحاويات ==================== */
@@ -12,17 +12,17 @@
   align-items: start;
 }
 
-/* ==================== معرض الصور - أفقي ==================== */
+/* ==================== معرض الصور - شريط أفقي ==================== */
 .details-gallery {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 16px;
   overflow: hidden;
   margin-bottom: 20px;
-  position: relative;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-/* 🔥 الصورة الرئيسية + المصغرة كلها بشريط واحد أفقي */
 .gallery-main {
   display: flex !important;
   flex-direction: row !important;
@@ -37,49 +37,31 @@
   scroll-behavior: smooth !important;
   scrollbar-width: thin !important;
   scrollbar-color: #3B82F6 rgba(42,54,80,0.3) !important;
-  position: relative !important;
   width: 100% !important;
-  height: auto !important;
-  min-height: 300px !important;
-  max-height: 400px !important;
+  min-height: 320px !important;
   box-sizing: border-box !important;
   cursor: grab !important;
   user-select: none !important;
 }
 
-.gallery-main:active {
-  cursor: grabbing !important;
-}
+.gallery-main:active { cursor: grabbing !important; }
 
-.gallery-main::-webkit-scrollbar {
-  height: 6px;
-}
-.gallery-main::-webkit-scrollbar-track {
-  background: rgba(42,54,80,0.3);
-  border-radius: 10px;
-}
-.gallery-main::-webkit-scrollbar-thumb {
-  background: linear-gradient(90deg, #3B82F6, #8B5CF6);
-  border-radius: 10px;
-}
+.gallery-main::-webkit-scrollbar { height: 6px; }
+.gallery-main::-webkit-scrollbar-track { background: rgba(42,54,80,0.3); border-radius: 10px; }
+.gallery-main::-webkit-scrollbar-thumb { background: linear-gradient(90deg, #3B82F6, #8B5CF6); border-radius: 10px; }
 
-/* 🔥 كل صورة - حجم موحد 280x280 على الكمبيوتر */
-.gallery-main > img,
-.gallery-main .gallery-slide {
-  flex: 0 0 280px !important;
-  width: 280px !important;
-  height: 280px !important;
-  min-width: 280px !important;
-  max-width: 280px !important;
+.gallery-main > img {
+  flex: 0 0 300px !important;
+  width: 300px !important;
+  height: 300px !important;
+  min-width: 300px !important;
+  max-width: 300px !important;
   border-radius: 12px !important;
-  overflow: hidden !important;
-  background: #0f1729 !important;
-  scroll-snap-align: center !important;
   object-fit: cover !important;
-  cursor: pointer !important;
-  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+  scroll-snap-align: center !important;
+  background: #0f1729 !important;
   display: block !important;
-  position: relative !important;
+  transition: transform 0.25s ease, box-shadow 0.25s ease !important;
 }
 
 .gallery-main > img:hover {
@@ -87,15 +69,8 @@
   box-shadow: 0 8px 30px rgba(59, 130, 246, 0.4);
 }
 
-/* إخفاء أسهم التنقل القديمة */
-.gallery-nav {
-  display: none !important;
-}
-
-/* 🔥 شريط الصور المصغرة تحت - مخفي (لأن الصور كلها فوق) */
-.gallery-thumbs {
-  display: none !important;
-}
+.gallery-nav { display: none !important; }
+.gallery-thumbs { display: none !important; }
 
 /* ==================== بطاقة المعلومات ==================== */
 .info-card {
@@ -104,6 +79,8 @@
   border-radius: 16px;
   padding: 24px;
   margin-bottom: 20px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .info-badges { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
@@ -122,6 +99,8 @@
 .info-badge.sale { background: linear-gradient(135deg, #10B981, #059669); color: #fff; }
 .info-badge.rent { background: linear-gradient(135deg, #3B82F6, #1D4ED8); color: #fff; }
 .info-badge.featured { background: linear-gradient(135deg, #F59E0B, #B45309); color: #fff; }
+.info-badge.negotiable-yes { background: linear-gradient(135deg, #10B981, #059669); color: #fff; }
+.info-badge.negotiable-no { background: linear-gradient(135deg, #64748B, #475569); color: #fff; }
 
 .info-title { font-size: 26px; font-weight: 800; line-height: 1.4; color: var(--text-primary); margin: 0 0 16px 0; }
 .info-price { font-size: 32px; font-weight: 800; color: #FBBF24; margin: 12px 0; display: flex; align-items: baseline; gap: 6px; }
@@ -135,6 +114,8 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
   margin-bottom: 20px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .spec-item {
@@ -147,6 +128,7 @@
   border-radius: 12px;
   min-width: 0;
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 .spec-icon { width: 40px; height: 40px; border-radius: 10px; background: rgba(59, 130, 246, 0.12); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
@@ -167,6 +149,9 @@
 .description-text strong {
   color: #F8FAFC;
   font-weight: 800;
+  background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(245,158,11,0.08));
+  padding: 2px 8px;
+  border-radius: 6px;
 }
 
 /* ==================== الشريط الجانبي ==================== */
@@ -212,7 +197,7 @@
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
 /* ==========================================================
-   🔥📱 الجوال
+   📱 الجوال
    ========================================================== */
 @media (max-width: 768px) {
 
@@ -222,9 +207,7 @@
     max-width: 100vw !important;
   }
 
-  body.has-bottom-nav {
-    padding-bottom: 140px !important;
-  }
+  body.has-bottom-nav { padding-bottom: 140px !important; }
 
   .container {
     padding-left: 10px !important;
@@ -240,47 +223,44 @@
     width: 100% !important;
   }
 
+  /* كل البطاقات تاخذ عرض كامل */
   .info-card, .details-sidebar, .details-gallery, .seller-card, .admin-panel {
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
   }
 
-  /* 🔥 معرض الصور: أفقي قابل للسحب على الجوال */
+  /* خفف padding البطاقة عشان المحتوى ياخد عرض أكبر */
+  .info-card {
+    padding: 14px 12px !important;
+    margin-bottom: 12px !important;
+  }
+
+  /* معرض الصور: شريط أفقي */
   .gallery-main {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    gap: 8px !important;
-    padding: 10px !important;
-    height: auto !important;
     min-height: 240px !important;
-    max-height: 280px !important;
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-    scroll-snap-type: x mandatory !important;
-    -webkit-overflow-scrolling: touch !important;
+    padding: 10px !important;
+    gap: 8px !important;
   }
 
-  .gallery-main > img,
-  .gallery-main .gallery-slide {
-    flex: 0 0 220px !important;
-    width: 220px !important;
-    height: 220px !important;
-    min-width: 220px !important;
-    max-width: 220px !important;
-    scroll-snap-align: center !important;
+  .gallery-main > img {
+    flex: 0 0 240px !important;
+    width: 240px !important;
+    height: 240px !important;
+    min-width: 240px !important;
+    max-width: 240px !important;
   }
 
-  /* بطاقة المعلومات */
-  .info-card { padding: 16px !important; margin-bottom: 12px !important; }
+  /* نصوص */
   .info-title { font-size: 18px !important; text-align: center !important; }
   .info-price { font-size: 26px !important; text-align: center !important; justify-content: center !important; }
   .info-location { justify-content: center !important; font-size: 13px !important; }
   .info-badges { justify-content: center !important; }
   .section-heading { font-size: 16px !important; margin: 14px 0 10px 0 !important; }
 
-  /* 🔥 المواصفات: 3 أعمدة */
+  /* 🔥 المواصفات: 3 أعمدة + عرض كامل */
   .specs-grid,
   #adSpecs {
     display: grid !important;
@@ -289,6 +269,7 @@
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
+    padding: 0 !important;
   }
 
   .spec-item,
@@ -306,6 +287,7 @@
     border: 1px solid #2A3650 !important;
     gap: 0 !important;
     overflow: hidden !important;
+    box-sizing: border-box !important;
   }
 
   .spec-icon,
@@ -349,17 +331,13 @@
 
 /* جوال صغير جداً */
 @media (max-width: 375px) {
-  .gallery-main {
-    min-height: 200px !important;
-    max-height: 220px !important;
-  }
-  .gallery-main > img,
-  .gallery-main .gallery-slide {
-    flex: 0 0 180px !important;
-    width: 180px !important;
-    height: 180px !important;
-    min-width: 180px !important;
-    max-width: 180px !important;
+  .gallery-main { min-height: 200px !important; }
+  .gallery-main > img {
+    flex: 0 0 200px !important;
+    width: 200px !important;
+    height: 200px !important;
+    min-width: 200px !important;
+    max-width: 200px !important;
   }
 
   .info-title { font-size: 16px !important; }
