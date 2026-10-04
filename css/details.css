@@ -1,5 +1,5 @@
 /* ==========================================================
-   details.css - النسخة النهائية v14.0
+   details.css - النسخة النهائية v15.0
    تصميم متكامل يعمل على جميع أحجام الأجهزة (320px → 4K)
    ========================================================== */
 
@@ -170,8 +170,7 @@
 .info-badge.rent { background: linear-gradient(135deg, #3B82F6, #1D4ED8); color: #fff; }
 .info-badge.featured { background: linear-gradient(135deg, #F59E0B, #B45309); color: #fff; }
 .info-badge.negotiable-yes { background: linear-gradient(135deg, #10B981, #059669); color: #fff; }
-.info-badge.negotiable-no { background: linear-gradient(135deg, #64748B, #475569); color: #fff; ;
-
+.info-badge.negotiable-no { background: linear-gradient(135deg, #64748B, #475569); color: #fff; }
 
 /* ==================== 1. صندوق العنوان ==================== */
 .info-title {
@@ -304,7 +303,6 @@
   max-width: 100%;
   color: #F8FAFC;
 }
-
 
 /* ==================== heading الأقسام ==================== */
 .section-heading {
@@ -464,15 +462,146 @@
 /* ==================== نافذة التعديل ==================== */
 .edit-modal { position: fixed; inset: 0; z-index: 9999; display: none; align-items: center; justify-content: center; padding: 20px; }
 .edit-modal.show { display: flex; }
-.edit-modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.8); }
-.edit-modal-content { position: relative; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 28px; }
-.edit-modal-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+.edit-modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); }
+
+.edit-modal-content {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: var(--bg-card, #1A2438);
+  border: 1px solid var(--border, #2A3650);
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+}
+
+.edit-modal-close {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-secondary, #131C31);
+  border: 1px solid var(--border, #2A3650);
+  border-radius: 50%;
+  color: var(--text-secondary, #94A3B8);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.edit-modal-close:hover {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: #EF4444;
+  color: #EF4444;
+  transform: rotate(90deg);
+}
+.edit-modal-close svg { width: 18px; height: 18px; }
+
+.edit-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border, #2A3650);
+}
+.edit-modal-header svg {
+  width: 22px;
+  height: 22px;
+  color: #3B82F6;
+  padding: 5px;
+  background: rgba(59, 130, 246, 0.15);
+  border-radius: 8px;
+}
+.edit-modal-header h2 {
+  font-size: 20px;
+  font-weight: 800;
+  color: #F8FAFC;
+  margin: 0;
+}
+
 .edit-form { display: flex; flex-direction: column; gap: 16px; }
 .edit-field { display: flex; flex-direction: column; gap: 6px; }
-.edit-field input, .edit-field select, .edit-field textarea { padding: 12px 14px; background: var(--bg-secondary); border: 1.5px solid var(--border); border-radius: 10px; color: var(--text-primary); font-family: inherit; font-size: 14px; }
+.edit-field label { font-size: 13.5px; font-weight: 700; color: #94A3B8; }
+
+.edit-field input,
+.edit-field select,
+.edit-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  background: var(--bg-secondary, #131C31) !important;
+  border: 1.5px solid var(--border, #2A3650) !important;
+  border-radius: 10px;
+  color: #F8FAFC !important;
+  font-family: 'Cairo', inherit;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.edit-field input:focus,
+.edit-field select:focus,
+.edit-field textarea:focus {
+  border-color: #3B82F6 !important;
+  background: rgba(59, 130, 246, 0.05) !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.edit-field input::placeholder,
+.edit-field textarea::placeholder { color: #64748B; }
+
+.edit-field textarea { resize: vertical; min-height: 90px; }
+
 .edit-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.edit-checkbox { padding: 10px 0; }
+
+.edit-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  color: #F8FAFC;
+}
+.edit-toggle input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: #3B82F6;
+  cursor: pointer;
+}
+
 .edit-actions { display: flex; gap: 12px; padding-top: 8px; }
-.edit-actions button { flex: 1; padding: 13px; border-radius: 10px; font-size: 14.5px; font-weight: 800; border: none; cursor: pointer; }
+.edit-actions button {
+  flex: 1;
+  padding: 13px;
+  border-radius: 10px;
+  font-size: 14.5px;
+  font-weight: 800;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+.edit-actions .btn-outline {
+  background: var(--bg-secondary, #131C31);
+  color: #94A3B8;
+  border: 1.5px solid var(--border, #2A3650);
+}
+.edit-actions .btn-outline:hover { border-color: #EF4444; color: #EF4444; }
+.edit-actions .btn-primary {
+  background: linear-gradient(135deg, #3B82F6, #2563EB);
+  color: #fff;
+}
+.edit-actions .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+}
 
 .spin { animation: spin 1s linear infinite; }
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -520,29 +649,45 @@
   /* صندوق العنوان */
   .info-title {
     font-size: 17px;
-    padding: 20px 14px 15px;
+    padding: 14px 14px;
     margin-bottom: 10px;
+    border-radius: 10px;
+    gap: 8px;
   }
-  .info-title::before { font-size: 10px; padding: 2px 10px; right: 14px; }
+  .info-title::before {
+    font-size: 10px;
+    padding: 4px 10px;
+    border-radius: 6px;
+  }
 
   /* صندوق السعر */
   .info-price {
     font-size: 21px;
-    padding: 20px 14px 15px;
+    padding: 14px 14px;
     margin-bottom: 10px;
-    gap: 6px;
+    gap: 8px;
+    border-radius: 10px;
   }
-  .info-price::before { font-size: 10px; padding: 2px 10px; right: 14px; }
+  .info-price::before {
+    font-size: 10px;
+    padding: 4px 10px;
+    border-radius: 6px;
+  }
   .info-price small { font-size: 11.5px; }
 
   /* صندوق الموقع */
   .info-location {
     font-size: 13px;
-    padding: 20px 14px 15px;
+    padding: 14px 14px;
     margin-bottom: 8px;
     gap: 8px;
+    border-radius: 10px;
   }
-  .info-location::before { font-size: 10px; padding: 2px 10px; right: 14px; }
+  .info-location::before {
+    font-size: 10px;
+    padding: 4px 10px;
+    border-radius: 6px;
+  }
   .info-location svg { width: 16px; height: 16px; }
 
   /* heading الأقسام */
@@ -626,28 +771,22 @@
   .info-badge { font-size: 11px; padding: 5px 10px; }
   .info-badge svg { width: 11px; height: 11px; }
 
-  .info-title { font-size: 16px; padding: 18px 12px 14px; }
-  .info-title::before { font-size: 9.5px; padding: 2px 9px; right: 12px; }
+  .info-title { font-size: 16px; padding: 13px 12px; gap: 7px; }
+  .info-title::before { font-size: 9.5px; padding: 3px 9px; }
 
-  .info-price { font-size: 19px; padding: 18px 12px 14px; }
-  .info-price::before { font-size: 9.5px; padding: 2px 9px; right: 12px; }
+  .info-price { font-size: 19px; padding: 13px 12px; gap: 7px; }
+  .info-price::before { font-size: 9.5px; padding: 3px 9px; }
   .info-price small { font-size: 11px; }
 
-  .info-location { font-size: 12.5px; padding: 18px 12px 14px; gap: 7px; }
-  .info-location::before { font-size: 9.5px; padding: 2px 9px; right: 12px; }
+  .info-location { font-size: 12.5px; padding: 13px 12px; gap: 6px; }
+  .info-location::before { font-size: 9.5px; padding: 3px 9px; }
   .info-location svg { width: 15px; height: 15px; }
 
   .section-heading { font-size: 14px; margin: 16px 0 11px; }
   .section-heading svg { width: 17px; height: 17px; padding: 3px; }
 
-  .specs-grid, #adSpecs {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 5px;
-  }
-  .spec-item, #adSpecs .spec-item {
-    padding: 7px 2px;
-    min-height: 58px;
-  }
+  .specs-grid, #adSpecs { grid-template-columns: repeat(3, 1fr); gap: 5px; }
+  .spec-item, #adSpecs .spec-item { padding: 7px 2px; min-height: 58px; }
   .spec-label, #adSpecs .spec-label { font-size: 9px; margin-bottom: 2px; }
   .spec-value, #adSpecs .spec-value { font-size: 11px; }
 
@@ -664,29 +803,22 @@
   .info-badge { font-size: 10px; padding: 4px 9px; gap: 4px; }
   .info-badge svg { width: 10px; height: 10px; }
 
-  .info-title { font-size: 14px; padding: 16px 10px 12px; margin-bottom: 8px; border-radius: 10px; }
-  .info-title::before { font-size: 8.5px; padding: 2px 8px; right: 10px; top: -9px; }
+  .info-title { font-size: 14px; padding: 12px 10px; margin-bottom: 8px; border-radius: 10px; gap: 6px; }
+  .info-title::before { font-size: 8.5px; padding: 3px 8px; border-radius: 5px; }
 
-  .info-price { font-size: 16px; padding: 16px 10px 12px; margin-bottom: 8px; border-radius: 10px; gap: 4px; }
-  .info-price::before { font-size: 8.5px; padding: 2px 8px; right: 10px; top: -9px; }
+  .info-price { font-size: 16px; padding: 12px 10px; margin-bottom: 8px; border-radius: 10px; gap: 6px; }
+  .info-price::before { font-size: 8.5px; padding: 3px 8px; border-radius: 5px; }
   .info-price small { font-size: 9.5px; }
 
-  .info-location { font-size: 11px; padding: 16px 10px 12px; margin-bottom: 6px; border-radius: 10px; gap: 6px; }
-  .info-location::before { font-size: 8.5px; padding: 2px 8px; right: 10px; top: -9px; }
+  .info-location { font-size: 11px; padding: 12px 10px; margin-bottom: 6px; border-radius: 10px; gap: 5px; }
+  .info-location::before { font-size: 8.5px; padding: 3px 8px; border-radius: 5px; }
   .info-location svg { width: 13px; height: 13px; }
 
   .section-heading { font-size: 13px; margin: 14px 0 10px; gap: 6px; padding-bottom: 8px; }
   .section-heading svg { width: 15px; height: 15px; padding: 3px; }
 
-  .specs-grid, #adSpecs {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 3px;
-  }
-  .spec-item, #adSpecs .spec-item {
-    padding: 6px 2px;
-    min-height: 52px;
-    border-radius: 7px;
-  }
+  .specs-grid, #adSpecs { grid-template-columns: repeat(3, 1fr); gap: 3px; }
+  .spec-item, #adSpecs .spec-item { padding: 6px 2px; min-height: 52px; border-radius: 7px; }
   .spec-label, #adSpecs .spec-label { font-size: 8px; margin-bottom: 2px; }
   .spec-value, #adSpecs .spec-value { font-size: 10px; }
 
@@ -698,24 +830,18 @@
   .container { padding-left: 6px; padding-right: 6px; }
   .info-card { padding: 10px 7px; }
 
-  .info-title { font-size: 13px; padding: 14px 8px 10px; }
-  .info-title::before { font-size: 8px; padding: 2px 7px; right: 8px; top: -8px; }
+  .info-title { font-size: 13px; padding: 11px 8px; gap: 5px; }
+  .info-title::before { font-size: 8px; padding: 2px 7px; }
 
-  .info-price { font-size: 14px; padding: 14px 8px 10px; }
-  .info-price::before { font-size: 8px; padding: 2px 7px; right: 8px; top: -8px; }
+  .info-price { font-size: 14px; padding: 11px 8px; gap: 5px; }
+  .info-price::before { font-size: 8px; padding: 2px 7px; }
   .info-price small { font-size: 9px; }
 
-  .info-location { font-size: 10px; padding: 14px 8px 10px; }
-  .info-location::before { font-size: 8px; padding: 2px 7px; right: 8px; top: -8px; }
+  .info-location { font-size: 10px; padding: 11px 8px; gap: 4px; }
+  .info-location::before { font-size: 8px; padding: 2px 7px; }
 
-  .specs-grid, #adSpecs {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 3px;
-  }
-  .spec-item, #adSpecs .spec-item {
-    padding: 6px 2px;
-    min-height: 48px;
-  }
+  .specs-grid, #adSpecs { grid-template-columns: repeat(2, 1fr); gap: 3px; }
+  .spec-item, #adSpecs .spec-item { padding: 6px 2px; min-height: 48px; }
   .spec-label, #adSpecs .spec-label { font-size: 7.5px; }
   .spec-value, #adSpecs .spec-value { font-size: 9.5px; }
 }
