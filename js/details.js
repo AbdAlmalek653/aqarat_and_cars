@@ -1,23 +1,17 @@
 /* ==========================================
-   صفحة تفاصيل الإعلان
-   الإصدار: 6.0 (معرض أفقي + وصف نظيف + 3 أعمدة)
+   صفحة تفاصيل الإعلان - النسخة النهائية v7.0
+   معرض: صورة كبيرة + شريط مصغرات
    ========================================== */
 
 const BROKER_PHONE = '963930932794';
 let currentListing = null;
 let currentImageIndex = 0;
 
-/* ==========================================
-   بيانات تجريبية (Fallback)
-   ========================================== */
 const MOCK_LISTINGS = {
-  '1001': {id:'1001',type:'property',purpose:'sale',title:'شقة فاخرة بتشطيب سوبر ديلوكس في المزة',location:'دمشق - المزة',price:185000,currency:'USD',featured:true,negotiable:'قابل',whatsapp:'0930000001',description:'شقة فاخرة بمساحة 180 متر مربع.',images:[],details:{propertyType:'apartment',area:180,rooms:3,bathrooms:2,floor:3,age:3,furnished:'furnished',heating:'central',negotiable:'قابل',_whatsapp:'0930000001'}},
-  '2001': {id:'2001',type:'car',purpose:'sale',title:'تويوتا كامري 2022 - فل كامل',location:'دمشق - المزة',price:28500,currency:'USD',featured:true,negotiable:'غير قابل',whatsapp:'0930000005',description:'تويوتا كامري 2022 فل كامل.',images:[],details:{brand:'toyota',model:'كامري',year:2022,km:35000,transmission:'automatic',fuel:'petrol',color:'أبيض',condition:'used',negotiable:'غير قابل',_whatsapp:'0930000005'}}
+  '1001': {id:'1001',type:'property',purpose:'sale',title:'شقة فاخرة',location:'دمشق',price:185000,currency:'USD',featured:true,negotiable:'قابل',whatsapp:'0930000001',description:'شقة فاخرة.',images:[],details:{propertyType:'apartment',area:180,rooms:3,bathrooms:2}},
+  '2001': {id:'2001',type:'car',purpose:'sale',title:'تويوتا كامري',location:'دمشق',price:28500,currency:'USD',featured:true,negotiable:'غير قابل',whatsapp:'0930000005',description:'تويوتا كامري.',images:[],details:{brand:'toyota',model:'كامري',year:2022,km:35000}}
 };
 
-/* ==========================================
-   أدوات مساعدة
-   ========================================== */
 function initIcons() { if (window.lucide) window.lucide.createIcons(); }
 
 function getParams() {
@@ -35,54 +29,35 @@ async function fetchListing(id) {
   return MOCK_LISTINGS[id] || null;
 }
 
-/* ==========================================
-   ✅ دالة موحدة لتحليل "قابل للتفاوض"
-   ========================================== */
 function getNegotiableStatus(listing) {
   if (!listing) return null;
   const d = listing.details || {};
   const value = String(listing.negotiable || d.negotiable || '').trim().toLowerCase();
-
-  if (value === 'قابل' || value === 'قابل للتفاوض' || value === 'negotiable' || 
-      value === 'yes' || value === 'true' || value === '1') {
-    return 'yes';
-  }
-  if (value === 'غير قابل' || value === 'غير قابل للتفاوض' || value === 'no' || 
-      value === 'false' || value === '0') {
-    return 'no';
-  }
+  if (value === 'قابل' || value === 'قابل للتفاوض' || value === 'negotiable' || value === 'yes' || value === 'true' || value === '1') return 'yes';
+  if (value === 'غير قابل' || value === 'غير قابل للتفاوض' || value === 'no' || value === 'false' || value === '0') return 'no';
   return null;
 }
 
-/* ==========================================
-   ✅ تنظيف الوصف من النجوم
-   ========================================== */
 function cleanDescription(text) {
   if (!text) return '';
   let html = String(text);
-  // تحويل *نص* إلى <strong>نص</strong>
   html = html.replace(/\*([^*\n<>]+)\*/g, '<strong>$1</strong>');
-  // إزالة النجوم المتبقية
   html = html.replace(/\*/g, '');
   return html;
 }
 
-/* ==========================================
-   بناء المواصفات من التفاصيل
-   ========================================== */
 function buildSpecsFromDetails(listing) {
   if (listing.specs && listing.specs.length > 0) return listing.specs;
 
   const d = listing.details || {};
   const isProperty = listing.type === 'property';
   const isAdmin = window.API && API.Users && API.Users.isAdmin && API.Users.isAdmin();
-
   const sensitiveKeys = ['whatsapp', 'phone', 'mobile', 'email', '_whatsapp', '_phone', '_mobile'];
 
   const propertyMap = {
     propertyType: { icon: 'building-2', label: 'نوع العقار', translate: { apartment: 'شقة', villa: 'فيلا', 'arabic-house': 'بيت عربي', land: 'أرض', office: 'مكتب', shop: 'محل تجاري', chalet: 'شاليه', building: 'بناء كامل' } },
-    subType: { icon: 'layers', label: 'نوع العقار', translate: { apartment: 'شقة', villa: 'فيلا', 'arabic-house': 'بيت عربي', land: 'أرض', office: 'مكتب', shop: 'محل تجاري', chalet: 'شاليه', building: 'بناء كامل' } },
-    subtype: { icon: 'layers', label: 'نوع العقار', translate: { apartment: 'شقة', villa: 'فيلا', 'arabic-house': 'بيت عربي', land: 'أرض', office: 'مكتب', shop: 'محل تجاري', chalet: 'شاليه', building: 'بناء كامل' } },
+    subType: { icon: 'layers', label: 'نوع العقار', translate: { apartment: 'شقة', villa: 'فيلا', land: 'أرض' } },
+    subtype: { icon: 'layers', label: 'نوع العقار' },
     area: { icon: 'square', label: 'المساحة', suffix: ' م²' },
     propertyArea: { icon: 'square', label: 'المساحة', suffix: ' م²' },
     rooms: { icon: 'bed-double', label: 'عدد الغرف' },
@@ -118,20 +93,18 @@ function buildSpecsFromDetails(listing) {
     fuel: { icon: 'fuel', label: 'الوقود', translate: { petrol: 'بنزين', diesel: 'ديزل', electric: 'كهرباء', hybrid: 'هايبرد' } },
     color: { icon: 'palette', label: 'اللون', translate: { white: 'أبيض', black: 'أسود', silver: 'فضي', gray: 'رمادي', red: 'أحمر', blue: 'أزرق', green: 'أخضر', yellow: 'أصفر', brown: 'بني', beige: 'بيج', gold: 'ذهبي', orange: 'برتقالي' } },
     bodyType: { icon: 'car', label: 'نوع الجسم', translate: { sedan: 'سيدان', suv: 'SUV', hatchback: 'هاتشباك', pickup: 'بيك أب', coupe: 'كوبيه', van: 'فان' } },
-    carInsurance: { icon: 'shield-check', label: 'التأمين', translate: { yes: 'مؤمنة', no: 'غير مؤمنة', true: 'مؤمنة', false: 'غير مؤمنة' } },
-    insurance: { icon: 'shield-check', label: 'التأمين', translate: { yes: 'مؤمنة', no: 'غير مؤمنة', true: 'مؤمنة', false: 'غير مؤمنة' } }
+    carInsurance: { icon: 'shield-check', label: 'التأمين', translate: { yes: 'مؤمنة', no: 'غير مؤمنة' } },
+    insurance: { icon: 'shield-check', label: 'التأمين' }
   };
 
   const globalFieldTranslations = {
-    subtype: 'النوع الفرعي', sub_type: 'النوع الفرعي', propertytype: 'نوع العقار', property_type: 'نوع العقار',
-    direction: 'الاتجاه', facing: 'الاتجاه', vacancytype: 'نوع الفراغة', vacancy_type: 'نوع الفراغة',
-    finishingtype: 'نوع الإكساء', finishing_type: 'نوع الإكساء', totalfloors: 'إجمالي الطوابق',
-    total_floors: 'إجمالي الطوابق', rooms: 'عدد الغرف', bedrooms: 'غرف النوم',
-    bathrooms: 'عدد الحمامات', baths: 'عدد الحمامات', area: 'المساحة',
-    age: 'عمر البناء', furnished: 'الفرش', heating: 'التدفئة', garden: 'الحديقة', pool: 'المسبح',
-    brand: 'الماركة', model: 'الموديل', year: 'السنة', km: 'الكيلومترات',
-    color: 'اللون', bodytype: 'نوع الجسم', body_type: 'نوع الجسم', fuel: 'الوقود',
-    transmission: 'ناقل الحركة', condition: 'الحالة', carinsurance: 'التأمين', insurance: 'التأمين'
+    subtype: 'النوع الفرعي', propertytype: 'نوع العقار', direction: 'الاتجاه',
+    vacancytype: 'نوع الفراغة', finishingtype: 'نوع الإكساء', totalfloors: 'إجمالي الطوابق',
+    rooms: 'عدد الغرف', bedrooms: 'غرف النوم', bathrooms: 'عدد الحمامات', baths: 'عدد الحمامات',
+    area: 'المساحة', age: 'عمر البناء', furnished: 'الفرش', heating: 'التدفئة',
+    garden: 'الحديقة', pool: 'المسبح', brand: 'الماركة', model: 'الموديل', year: 'السنة',
+    km: 'الكيلومترات', color: 'اللون', bodytype: 'نوع الجسم', fuel: 'الوقود',
+    transmission: 'ناقل الحركة', condition: 'الحالة', insurance: 'التأمين'
   };
 
   const map = isProperty ? propertyMap : carMap;
@@ -180,9 +153,6 @@ function buildSpecsFromDetails(listing) {
   return specs;
 }
 
-/* ==========================================
-   استخراج نوع العقار/السيارة
-   ========================================== */
 function buildTypeText(listing) {
   const d = listing.details || {};
   if (listing.type === 'property') {
@@ -198,9 +168,6 @@ function buildTypeText(listing) {
   return '';
 }
 
-/* ==========================================
-   استخراج الموقع الصحيح
-   ========================================== */
 function buildLocationText(listing) {
   const cityNames = { damascus: 'دمشق', 'rif-dimashq': 'ريف دمشق', aleppo: 'حلب', homs: 'حمص', hama: 'حماة', latakia: 'اللاذقية', tartus: 'طرطوس', daraa: 'درعا', sweida: 'السويداء', quneitra: 'القنيطرة', 'deir-ezzor': 'دير الزور', raqqa: 'الرقة', hasakah: 'الحسكة', idlib: 'إدلب' };
   const citySlug = listing.city_slug || listing.city || '';
@@ -220,15 +187,11 @@ function buildLocationText(listing) {
   return listing.location || '—';
 }
 
-/* ==========================================
-   Preload الصورة الرئيسية
-   ========================================== */
 function preloadMainImage(item) {
   if (!item || !item.id || !window.getListingImageUrl) return;
   const mainUrl = window.getListingImageUrl(item, 0, 'large');
   if (!mainUrl || mainUrl.startsWith('data:')) return;
   if (document.querySelector('link[data-preload-main]')) return;
-
   const link = document.createElement('link');
   link.rel = 'preload';
   link.as = 'image';
@@ -238,9 +201,6 @@ function preloadMainImage(item) {
   document.head.appendChild(link);
 }
 
-/* ==========================================
-   ✅ استخراج كل روابط الصور
-   ========================================== */
 function extractAllImageUrls(listing) {
   const urls = [];
   const seen = new Set();
@@ -248,29 +208,17 @@ function extractAllImageUrls(listing) {
 
   imgs.forEach((img, i) => {
     let url = null;
-    if (typeof img === 'string') {
-      url = img;
-    } else if (img && typeof img === 'object') {
-      url = img.url || img.src || img.path || img.filename || null;
-    }
-    
-    // جرب getListingImageUrl إذا الرابط مش مباشر
+    if (typeof img === 'string') url = img;
+    else if (img && typeof img === 'object') url = img.url || img.src || img.path || img.filename || null;
     if (!url && window.getListingImageUrl) {
       try { url = window.getListingImageUrl(listing, i, 'large'); } catch (e) {}
     }
-
-    if (url && !seen.has(url)) {
-      seen.add(url);
-      urls.push(url);
-    }
+    if (url && !seen.has(url)) { seen.add(url); urls.push(url); }
   });
 
   return urls;
 }
 
-/* ==========================================
-   عرض الإعلان
-   ========================================== */
 function renderListing(l) {
   currentListing = l;
   preloadMainImage(l);
@@ -289,11 +237,8 @@ function renderListing(l) {
   let badges = `<span class="info-badge ${purposeClass}"><i data-lucide="tag"></i>${purposeText}</span><span class="info-badge" style="background:var(--bg-secondary);color:var(--text-secondary);"><i data-lucide="${l.type === 'property' ? 'building-2' : 'car'}"></i>${typeText}</span>`;
 
   const negotiableStatus = getNegotiableStatus(l);
-  if (negotiableStatus === 'yes') {
-    badges += `<span class="info-badge negotiable-yes"><i data-lucide="handshake"></i>قابل للتفاوض</span>`;
-  } else if (negotiableStatus === 'no') {
-    badges += `<span class="info-badge negotiable-no"><i data-lucide="x-circle"></i>غير قابل للتفاوض</span>`;
-  }
+  if (negotiableStatus === 'yes') badges += `<span class="info-badge negotiable-yes"><i data-lucide="handshake"></i>قابل للتفاوض</span>`;
+  else if (negotiableStatus === 'no') badges += `<span class="info-badge negotiable-no"><i data-lucide="x-circle"></i>غير قابل للتفاوض</span>`;
 
   if (l.featured) badges += `<span class="info-badge featured"><i data-lucide="star"></i>مميز</span>`;
   document.getElementById('infoBadges').innerHTML = badges;
@@ -307,7 +252,6 @@ function renderListing(l) {
 
   const specs = buildSpecsFromDetails(l);
   const specsContainer = document.getElementById('adSpecs');
-
   if (specs.length === 0) {
     specsContainer.innerHTML = '<p style="color:var(--text-muted);text-align:center;grid-column:1/-1;padding:20px;">لا توجد مواصفات متاحة</p>';
   } else {
@@ -317,14 +261,10 @@ function renderListing(l) {
     }).join('');
   }
 
-  // ✅ الوصف: نظّفه من النجوم
   const descEl = document.getElementById('adDescription');
   const cleanedDesc = cleanDescription(l.description || '');
-  if (/<[a-z][\s\S]*>/i.test(cleanedDesc)) {
-    descEl.innerHTML = cleanedDesc;
-  } else {
-    descEl.textContent = cleanedDesc;
-  }
+  if (/<[a-z][\s\S]*>/i.test(cleanedDesc)) descEl.innerHTML = cleanedDesc;
+  else descEl.textContent = cleanedDesc;
 
   document.getElementById('adId').textContent = '#' + l.id;
 
@@ -346,23 +286,15 @@ function renderListing(l) {
   setupFavorite(l.id);
 
   document.getElementById('loadingState').style.display = 'none';
-  document.getElementById('detailsContent').style.display = 'grid';
+  document.getElementById('detailsContent').style.display = 'flex';
   initIcons();
 }
 
-/* ==========================================
-   زر واتساب البائع (للأدمن فقط)
-   ========================================== */
 function setupSellerWhatsapp(listing) {
   const btn = document.getElementById('sellerWhatsappBtn');
   if (!btn) return;
   const isAdmin = window.API && API.Users && API.Users.isAdmin && API.Users.isAdmin();
-  if (!isAdmin) {
-    btn.style.display = 'none';
-    btn.removeAttribute('href');
-    btn.innerHTML = '';
-    return;
-  }
+  if (!isAdmin) { btn.style.display = 'none'; btn.removeAttribute('href'); btn.innerHTML = ''; return; }
 
   let sellerPhone = listing.whatsapp || (listing.details && listing.details._whatsapp) || '';
   sellerPhone = String(sellerPhone).replace(/[^0-9+]/g, '');
@@ -390,47 +322,86 @@ function setupSellerWhatsapp(listing) {
 }
 
 /* ==========================================
-   🔥 معرض الصور: شريط أفقي من البداية
+   ✅ معرض الصور: صورة كبيرة + شريط مصغرات
    ========================================== */
 function renderGallery(listing) {
   const main = document.getElementById('galleryMain');
   const thumbs = document.getElementById('galleryThumbs');
   if (!main) return;
-  if (thumbs) { thumbs.style.display = 'none'; thumbs.innerHTML = ''; }
 
   const fallback = listing.type === 'property' ? 'building-2' : 'car';
   const urls = extractAllImageUrls(listing);
-
   console.log(`🖼️ عدد الصور: ${urls.length}`, urls);
 
   if (urls.length === 0) {
-    main.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;width:100%;min-height:240px;color:var(--text-muted);opacity:0.4;"><i data-lucide="${fallback}" style="width:80px;height:80px;"></i></div>`;
+    main.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:var(--text-muted);opacity:0.4;"><i data-lucide="${fallback}" style="width:80px;height:80px;"></i></div>`;
+    if (thumbs) thumbs.innerHTML = '';
     initIcons();
     return;
   }
 
-  // ✅ بناء شريط أفقي مباشرة
+  window._galleryUrls = urls;
+  window._currentImageIndex = 0;
+
   const safeTitle = (listing.title || '').replace(/"/g, '&quot;').replace(/</g, '&lt;');
-  const isMobile = window.innerWidth <= 768;
-  const size = isMobile ? 240 : 300;
 
-  main.innerHTML = urls.map((url, i) => 
-    `<img src="${url}" alt="${safeTitle} - صورة ${i + 1}" loading="${i === 0 ? 'eager' : 'lazy'}" decoding="async" ${i === 0 ? 'fetchpriority="high"' : ''} data-index="${i}" style="flex:0 0 ${size}px;width:${size}px;height:${size}px;min-width:${size}px;max-width:${size}px;border-radius:12px;object-fit:cover;cursor:pointer;scroll-snap-align:center;background:#0f1729;display:block;">`
-  ).join('');
+  // الصورة الكبيرة
+  main.innerHTML = `
+    <img id="mainImage" src="${urls[0]}" alt="${safeTitle}" loading="eager" decoding="async" fetchpriority="high">
+    <div class="gallery-nav prev" onclick="prevImage()"><i data-lucide="chevron-right"></i></div>
+    <div class="gallery-nav next" onclick="nextImage()"><i data-lucide="chevron-left"></i></div>
+    <div class="gallery-counter"><span id="galleryCounter">1 / ${urls.length}</span></div>
+  `;
 
-  // إضافة معاينة عند الضغط
-  main.querySelectorAll('img').forEach(img => {
-    img.addEventListener('click', () => {
-      window.open(img.src, '_blank');
-    });
-  });
+  // شريط الصور المصغرة
+  if (thumbs) {
+    thumbs.style.display = 'flex';
+    thumbs.innerHTML = urls.map((url, i) => 
+      `<div class="gallery-thumb ${i === 0 ? 'active' : ''}" data-index="${i}" onclick="goToImage(${i})"><img src="${url}" alt="صورة ${i + 1}" loading="lazy" decoding="async"></div>`
+    ).join('');
+  }
 
   initIcons();
 }
 
-/* ==========================================
-   المفضلة
-   ========================================== */
+window.prevImage = function() {
+  const urls = window._galleryUrls || [];
+  if (!urls.length) return;
+  window._currentImageIndex = (window._currentImageIndex - 1 + urls.length) % urls.length;
+  updateGalleryDisplay();
+};
+
+window.nextImage = function() {
+  const urls = window._galleryUrls || [];
+  if (!urls.length) return;
+  window._currentImageIndex = (window._currentImageIndex + 1) % urls.length;
+  updateGalleryDisplay();
+};
+
+window.goToImage = function(i) {
+  window._currentImageIndex = i;
+  updateGalleryDisplay();
+};
+
+function updateGalleryDisplay() {
+  const urls = window._galleryUrls || [];
+  const idx = window._currentImageIndex || 0;
+  if (!urls.length) return;
+
+  const mainImg = document.getElementById('mainImage');
+  if (mainImg) mainImg.src = urls[idx];
+
+  const counter = document.getElementById('galleryCounter');
+  if (counter) counter.textContent = `${idx + 1} / ${urls.length}`;
+
+  document.querySelectorAll('.gallery-thumb').forEach((t, i) => {
+    t.classList.toggle('active', i === idx);
+  });
+
+  const activeThumb = document.querySelector('.gallery-thumb.active');
+  if (activeThumb) activeThumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+}
+
 async function setupFavorite(id) {
   const btn = document.getElementById('favBtn');
   if (!btn) return;
@@ -445,9 +416,6 @@ async function setupFavorite(id) {
   });
 }
 
-/* ==========================================
-   المشاركة
-   ========================================== */
 function setupShare() {
   document.getElementById('shareBtn')?.addEventListener('click', async () => {
     const data = { title: currentListing.title, text: `${currentListing.title} - ${currentListing.price} ${currentListing.currency}`, url: window.location.href };
@@ -456,14 +424,10 @@ function setupShare() {
   });
 }
 
-/* ==========================================
-   تعديل الإعلان (للأدمن)
-   ========================================== */
 function openEditModal() {
   if (!currentListing) { alert('لم يتم تحميل الإعلان بعد'); return; }
   const isAdmin = window.API && API.Users && API.Users.isAdmin && API.Users.isAdmin();
   if (!isAdmin) { alert('هذه الميزة للأدمن فقط'); return; }
-
   document.getElementById('editTitle').value = currentListing.title || '';
   document.getElementById('editPrice').value = currentListing.price || '';
   document.getElementById('editCurrency').value = currentListing.currency || 'USD';
@@ -473,7 +437,6 @@ function openEditModal() {
   document.getElementById('editWhatsapp').value = currentListing.whatsapp || '';
   document.getElementById('editStatus').value = currentListing.status || 'active';
   document.getElementById('editFeatured').checked = !!currentListing.featured;
-
   document.getElementById('editModal').classList.add('show');
   document.body.style.overflow = 'hidden';
   if (window.lucide) window.lucide.createIcons();
@@ -518,25 +481,11 @@ async function saveEdit(e) {
       const cleaned = cleanDescription(updates.description);
       if (/<[a-z][\s\S]*>/i.test(cleaned)) descEl.innerHTML = cleaned;
       else descEl.textContent = cleaned;
-
       document.getElementById('adLocation').textContent = buildLocationText(currentListing);
-
-      const purposeText = currentListing.purpose === 'sale' ? 'للبيع' : 'للإيجار';
-      const purposeClass = currentListing.purpose === 'sale' ? 'sale' : 'rent';
-      const typeText = currentListing.type === 'property' ? 'عقار' : 'سيارة';
-      let badges = `<span class="info-badge ${purposeClass}"><i data-lucide="tag"></i>${purposeText}</span><span class="info-badge" style="background:var(--bg-secondary);color:var(--text-secondary);"><i data-lucide="${currentListing.type === 'property' ? 'building-2' : 'car'}"></i>${typeText}</span>`;
-
-      const negotiableStatus = getNegotiableStatus(currentListing);
-      if (negotiableStatus === 'yes') badges += `<span class="info-badge negotiable-yes"><i data-lucide="handshake"></i>قابل للتفاوض</span>`;
-      else if (negotiableStatus === 'no') badges += `<span class="info-badge negotiable-no"><i data-lucide="x-circle"></i>غير قابل للتفاوض</span>`;
-      if (updates.featured) badges += `<span class="info-badge featured"><i data-lucide="star"></i>مميز</span>`;
-      document.getElementById('infoBadges').innerHTML = badges;
-
-      setupSellerWhatsapp(currentListing);
       closeEditModal();
       showToast('✅ تم حفظ التعديلات بنجاح', 'success');
     } else { showToast('❌ فشل الحفظ: ' + (result.error || 'خطأ غير معروف'), 'error'); }
-  } catch (err) { console.error('خطأ في التعديل:', err); showToast('❌ حدث خطأ أثناء الحفظ', 'error'); }
+  } catch (err) { console.error('خطأ:', err); showToast('❌ حدث خطأ أثناء الحفظ', 'error'); }
   finally {
     saveBtn.disabled = false;
     saveBtn.innerHTML = '<i data-lucide="save"></i><span>حفظ التعديلات</span>';
@@ -544,9 +493,6 @@ async function saveEdit(e) {
   }
 }
 
-/* ==========================================
-   Toast
-   ========================================== */
 function showToast(message, type = 'success') {
   const toast = document.createElement('div');
   toast.style.cssText = `position: fixed; top: 90px; left: 50%; transform: translateX(-50%); padding: 14px 24px; background: ${type === 'success' ? 'linear-gradient(135deg, #10B981, #059669)' : 'linear-gradient(135deg, #EF4444, #DC2626)'}; color: white; border-radius: 12px; font-family: 'Cairo', sans-serif; font-weight: 700; font-size: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); z-index: 99999; animation: slideDown 0.3s ease; max-width: 90%; text-align: center;`;
@@ -562,65 +508,6 @@ if (!document.getElementById('toast-animation')) {
   document.head.appendChild(style);
 }
 
-/* ==========================================
-   ✅ فرض 3 أعمدة على المواصفات (inline styles)
-   ========================================== */
-function enforceMobileSpecs() {
-  if (window.innerWidth > 768) return;
-  const grid = document.getElementById('adSpecs');
-  if (!grid) return;
-
-  grid.style.setProperty('display', 'grid', 'important');
-  grid.style.setProperty('grid-template-columns', 'repeat(3, 1fr)', 'important');
-  grid.style.setProperty('gap', '5px', 'important');
-  grid.style.setProperty('width', '100%', 'important');
-  grid.style.setProperty('max-width', '100%', 'important');
-  grid.style.setProperty('margin', '0', 'important');
-  grid.style.setProperty('padding', '0', 'important');
-
-  grid.querySelectorAll('.spec-item').forEach(item => {
-    item.style.setProperty('display', 'flex', 'important');
-    item.style.setProperty('flex-direction', 'column', 'important');
-    item.style.setProperty('align-items', 'center', 'important');
-    item.style.setProperty('justify-content', 'center', 'important');
-    item.style.setProperty('text-align', 'center', 'important');
-    item.style.setProperty('padding', '8px 3px', 'important');
-    item.style.setProperty('min-width', '0', 'important');
-    item.style.setProperty('min-height', '60px', 'important');
-    item.style.setProperty('gap', '0', 'important');
-    item.style.setProperty('overflow', 'hidden', 'important');
-
-    const icon = item.querySelector('.spec-icon');
-    if (icon) icon.style.setProperty('display', 'none', 'important');
-
-    const content = item.querySelector('.spec-content');
-    if (content) {
-      content.style.setProperty('width', '100%', 'important');
-      content.style.setProperty('padding', '0', 'important');
-      content.style.setProperty('overflow', 'hidden', 'important');
-    }
-
-    const label = item.querySelector('.spec-label');
-    if (label) {
-      label.style.setProperty('font-size', '9.5px', 'important');
-      label.style.setProperty('white-space', 'normal', 'important');
-      label.style.setProperty('word-break', 'break-word', 'important');
-      label.style.setProperty('line-height', '1.2', 'important');
-    }
-
-    const value = item.querySelector('.spec-value');
-    if (value) {
-      value.style.setProperty('font-size', '11px', 'important');
-      value.style.setProperty('white-space', 'normal', 'important');
-      value.style.setProperty('word-break', 'break-word', 'important');
-      value.style.setProperty('line-height', '1.2', 'important');
-    }
-  });
-}
-
-/* ==========================================
-   تشغيل
-   ========================================== */
 document.addEventListener('DOMContentLoaded', async () => {
   initIcons();
   setupShare();
@@ -649,14 +536,4 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   renderListing(l);
-
-  // فرض 3 أعمدة بعد الرندر
-  setTimeout(enforceMobileSpecs, 100);
-  setTimeout(enforceMobileSpecs, 500);
-  setTimeout(enforceMobileSpecs, 1500);
-});
-
-window.addEventListener('resize', () => {
-  clearTimeout(window._resizeT);
-  window._resizeT = setTimeout(enforceMobileSpecs, 200);
 });
