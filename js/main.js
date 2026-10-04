@@ -1,6 +1,6 @@
 /* ==========================================
    الصفحة الرئيسية - سوق
-   الإصدار: 6.0 (negotiable badges + city fix)
+   الإصدار: 7.0 (car brand badge + negotiable + city fix)
    ========================================== */
 
 function initIcons() {
@@ -17,6 +17,17 @@ const CITY_NAMES = {
 
 const TYPE_NAMES = { property: 'عقارات', car: 'سيارات' };
 const PURPOSE_NAMES = { sale: 'للبيع', rent: 'للإيجار' };
+
+/* ✅ قاموس الماركات */
+const CAR_BRANDS = {
+  toyota: 'تويوتا', hyundai: 'هيونداي', kia: 'كيا', mercedes: 'مرسيدس',
+  bmw: 'BMW', nissan: 'نيسان', honda: 'هوندا', chevrolet: 'شيفروليه',
+  ford: 'فورد', mazda: 'مازدا', mitsubishi: 'ميتسوبيشي',
+  volkswagen: 'فولكس فاجن', audi: 'أودي', lexus: 'لكزس',
+  renault: 'رينو', peugeot: 'بيجو', fiat: 'فيات', seat: 'سيات',
+  skoda: 'سكودا', opel: 'أوبل', jeep: 'جيب', landrover: 'لاند روفر',
+  tesla: 'تسلا', volvo: 'فولفو', subaru: 'سوبارو', other: 'أخرى'
+};
 
 /* ==========================================
    ✅ دوال مساعدة
@@ -38,21 +49,28 @@ function cityMatches(listing, targetSlug) {
   return listingKeys.some(key => key === target || (targetName && key === targetName));
 }
 
-/* ✅ دالة موحدة لتحليل "قابل للتفاوض" */
 function getNegotiableStatus(listing) {
   if (!listing) return null;
   const d = listing.details || {};
   const value = String(listing.negotiable || d.negotiable || '').trim().toLowerCase();
-  
-  if (value === 'قابل' || value === 'قابل للتفاوض' || value === 'negotiable' || 
-      value === 'yes' || value === 'true' || value === '1') {
-    return 'yes';
-  }
-  if (value === 'غير قابل' || value === 'غير قابل للتفاوض' || value === 'no' || 
-      value === 'false' || value === '0') {
-    return 'no';
-  }
+  if (value === 'قابل' || value === 'قابل للتفاوض' || value === 'negotiable' ||
+      value === 'yes' || value === 'true' || value === '1') return 'yes';
+  if (value === 'غير قابل' || value === 'غير قابل للتفاوض' || value === 'no' ||
+      value === 'false' || value === '0') return 'no';
   return null;
+}
+
+/* ✅ استخراج ماركة وموديل السيارة */
+function getCarBrandText(listing) {
+  const d = listing.details || {};
+  if (d.brandName) return String(d.brandName).trim();
+  const key = String(d.brand || '').toLowerCase();
+  return CAR_BRANDS[key] || d.brand || '';
+}
+
+function getCarModelText(listing) {
+  const d = listing.details || {};
+  return String(d.model || '').trim();
 }
 
 /* ==========================================
@@ -104,7 +122,7 @@ function getImageUrl(item) {
 }
 
 /* ==========================================
-   ✅ createCard (مع شارات التفاوض)
+   ✅ createCard (مع شارة الماركة والموديل)
    ========================================== */
 function createCard(item, type) {
   const purposeText = item.purpose === 'sale' ? 'للبيع' : 'للإيجار';
@@ -142,7 +160,7 @@ function createCard(item, type) {
 
   const featuredBadge = item.featured ? `<span class="card-badge featured">⭐ مميز</span>` : '';
 
-  // ✅ المحافظة
+  /* ✅ المحافظة */
   let locationText = '—';
   const citySlug = item.city_slug || item.city || '';
   const cityNameFromAPI = item.city_name || item.cityName || '';
@@ -164,15 +182,32 @@ function createCard(item, type) {
   const d = item.details || {};
   let chips = [];
 
+  /* ✅ للسيارات: ماركة + موديل كشارة منفصلة، والباقي كـ chips */
+  let carBrandBadgeHTML = '';
   if (type === 'car') {
-    const brandNames = { toyota: 'تويوتا', hyundai: 'هيونداي', kia: 'كيا', mercedes: 'مرسيدس', bmw: 'BMW', nissan: 'نيسان', honda: 'هوندا', chevrolet: 'شيفروليه', ford: 'فورد', mazda: 'مازدا', mitsubishi: 'ميتسوبيشي', volkswagen: 'فولكس فاجن', audi: 'أودي', lexus: 'لكزس', other: 'أخرى' };
-    if (d.brandName) chips.push({ icon: 'car', text: d.brandName });
-    else if (d.brand) chips.push({ icon: 'car', text: brandNames[d.brand] || d.brand });
-    if (d.model) chips.push({ icon: 'tag', text: d.model });
+    const brandText = getCarBrandText(item);
+    const modelText = getCarModelText(item);
+    const fullBrandModel = [brandText, modelText].filter(Boolean).join(' ');
+    
+    if (fullBrandModel) {
+      carBrandBadgeHTML = `
+        <div class="car-brand-badge">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/>
+            <circle cx="7" cy="17" r="2"/>
+            <path d="M9 17h6"/>
+            <circle cx="17" cy="17" r="2"/>
+          </svg>
+          <span>${fullBrandModel}</span>
+        </div>`;
+    }
+    
+    /* باقي المعلومات كـ chips: سنة، كيلومترات، ناقل الحركة */
     if (d.year) chips.push({ icon: 'calendar', text: d.year });
     if (d.km && item.purpose === 'sale') chips.push({ icon: 'gauge', text: `${Number(d.km).toLocaleString('en-US')} كم` });
     if (d.transmission) chips.push({ icon: 'settings-2', text: d.transmission === 'automatic' ? 'أوتوماتيك' : 'عادي' });
   } else {
+    /* ✅ للعقارات: نفس النظام القديم */
     const typeNames = { apartment: 'شقة', villa: 'فيلا', 'arabic-house': 'بيت عربي', land: 'أرض', office: 'مكتب', shop: 'محل تجاري', chalet: 'شاليه', building: 'بناء كامل' };
     if (item.subType) chips.push({ icon: 'building-2', text: typeNames[item.subType] || item.subType });
     else if (d.propertyType) chips.push({ icon: 'building-2', text: typeNames[d.propertyType] || d.propertyType });
@@ -191,10 +226,9 @@ function createCard(item, type) {
     ? `<div class="card-meta">${chips.map(c => `<span class="card-meta-chip"><i data-lucide="${c.icon}"></i><span>${c.text}</span></span>`).join('')}</div>`
     : '';
 
-  // ✅ شارة "قابل للتفاوض" - تظهر في كل الحالات
+  /* ✅ شارة قابل للتفاوض */
   const negotiableStatus = getNegotiableStatus(item);
   let negotiableBadge = '';
-  
   if (negotiableStatus === 'yes') {
     negotiableBadge = `<span class="card-negotiable yes"><i data-lucide="handshake"></i>قابل للتفاوض</span>`;
   } else if (negotiableStatus === 'no') {
@@ -205,6 +239,7 @@ function createCard(item, type) {
       <div class="card-image">${imageContent}${featuredBadge}<span class="card-badge ${purposeClass}">${purposeText}</span></div>
       <div class="card-body">
         <h3 class="card-title">${item.title}</h3>
+        ${carBrandBadgeHTML}
         <p class="card-location"><i data-lucide="map-pin"></i>${locationText}</p>
         ${chipsHTML}
         <div class="card-price-row">

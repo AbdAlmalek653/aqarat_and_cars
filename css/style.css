@@ -2962,3 +2962,107 @@ html {
   .specs-grid .spec-value,
   #adSpecs .spec-value { font-size: 10px; }
 }
+/* ==========================================================
+   🚗 شارة ماركة وموديل السيارة في البطاقات
+   ========================================================== */
+
+.card .car-brand-badge,
+.car-brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  margin: 6px 0 10px 0;
+  background: linear-gradient(135deg,
+    rgba(59, 130, 246, 0.14) 0%,
+    rgba(139, 92, 246, 0.10) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.30);
+  border-radius: 20px;
+  color: #93C5FD;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+  transition: all 0.25s ease;
+  cursor: default;
+}
+
+.card .car-brand-badge:hover,
+.car-brand-badge:hover {
+  background: linear-gradient(135deg,
+    rgba(59, 130, 246, 0.22) 0%,
+    rgba(139, 92, 246, 0.15) 100%);
+  border-color: rgba(59, 130, 246, 0.50);
+  transform: translateY(-1px);
+  color: #BFDBFE;
+}
+
+.card .car-brand-badge svg,
+.car-brand-badge svg {
+  width: 13px;
+  height: 13px;
+  color: #3B82F6;
+  flex-shrink: 0;
+}
+
+.card .car-brand-badge span,
+.car-brand-badge span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* الجوال */
+@media (max-width: 768px) {
+  .card .car-brand-badge,
+  .car-brand-badge {
+    font-size: 10.5px;
+    padding: 3px 9px;
+    gap: 4px;
+    margin: 4px 0 7px 0;
+  }
+  .card .car-brand-badge svg,
+  .car-brand-badge svg {
+    width: 11px;
+    height: 11px;
+  }
+}
+
+/* جوال صغير جداً */
+@media (max-width: 375px) {
+  .card .car-brand-badge,
+  .car-brand-badge {
+    font-size: 9.5px;
+    padding: 3px 7px;
+    gap: 3px;
+  }
+  .card .car-brand-badge svg,
+  .car-brand-badge svg {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+/* البطاقات الصغيرة */
+@media (max-width: 768px) {
+  #featuredCars .card .car-brand-badge,
+  #featuredProperties .card .car-brand-badge,
+  .properties-grid .card .car-brand-badge,
+  #carsGrid .card .car-brand-badge {
+    font-size: 9.5px;
+    padding: 2px 7px;
+    margin: 3px 0 5px 0;
+    gap: 3px;
+  }
+  #featuredCars .card .car-brand-badge svg,
+  #featuredProperties .card .car-brand-badge svg,
+  .properties-grid .card .car-brand-badge svg,
+  #carsGrid .card .car-brand-badge svg {
+    width: 10px;
+    height: 10px;
+  }
+}
