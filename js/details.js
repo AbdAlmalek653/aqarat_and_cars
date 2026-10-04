@@ -847,3 +847,114 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
 })();
+/* ==========================================================
+   🎯 تحويل المعرض إلى شريط أفقي (كل الصور بنفس الصف)
+   ========================================================== */
+(function convertGalleryToHorizontal() {
+  
+  function convertGallery() {
+    const mainImage = document.getElementById('mainImage');
+    const galleryMain = document.getElementById('galleryMain');
+    const thumbsContainer = document.getElementById('galleryThumbs');
+    
+    if (!mainImage || !galleryMain) return;
+    
+    // اجمع كل الصور
+    const allImages = [];
+    
+    // الصورة الرئيسية أولاً
+    if (mainImage.src && mainImage.src.trim() !== '' && !mainImage.src.endsWith('/')) {
+      allImages.push(mainImage.src);
+    }
+    
+    // ثم الصور المصغرة
+    if (thumbsContainer) {
+      thumbsContainer.querySelectorAll('img').forEach(img => {
+        if (img.src && !allImages.includes(img.src)) {
+          allImages.push(img.src);
+        }
+      });
+    }
+    
+    if (allImages.length === 0) return;
+    
+    // إذا الشريط محوّل من قبل، لا نعيد
+    if (galleryMain.dataset.horizontalized === 'true') {
+      // فقط نعيد ترتيب الصور إن تغيرت
+      const currentImages = Array.from(galleryMain.querySelectorAll('img')).map(i => i.src).join(',');
+      if (currentImages === allImages.join(',')) return;
+    }
+    
+    // 🔥 احذف كل شي داخل galleryMain وابنِ من جديد
+    galleryMain.innerHTML = '';
+    
+    // أضف كل صورة في شريط أفقي
+    allImages.forEach((src, index) => {
+      const img = document.createElement('img');
+      img.src = src;
+      img.alt = `صورة ${index + 1}`;
+      img.loading = 'lazy';
+      img.decoding = 'async';
+      img.dataset.index = index;
+      img.style.cssText = `
+        flex: 0 0 auto;
+        width: 280px;
+        height: 280px;
+        min-width: 280px;
+        max-width: 280px;
+        border-radius: 12px;
+        object-fit: cover;
+        cursor: pointer;
+        scroll-snap-align: center;
+        display: block;
+        transition: transform 0.3s ease;
+      `;
+      
+      // عند الضغط - تكبير الصورة (اختياري)
+      img.addEventListener('click', function() {
+        // فتح الصورة في نافذة أو تبويب جديد
+        window.open(src, '_blank');
+      });
+      
+      galleryMain.appendChild(img);
+    });
+    
+    // إخفاء شريط المصغرات
+    if (thumbsContainer) {
+      thumbsContainer.style.display = 'none';
+      thumbsContainer.style.visibility = 'hidden';
+    }
+    
+    // إخفاء أيقونات التمرير القديمة
+    galleryMain.querySelectorAll('.gallery-nav').forEach(el => el.remove());
+    
+    // علم إنه تم التحويل
+    galleryMain.dataset.horizontalized = 'true';
+    
+    console.log(`✅ تم تحويل المعرض إلى شريط أفقي (${allImages.length} صور)`);
+  }
+  
+  // تنفيذ
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', convertGallery);
+  } else {
+    convertGallery();
+  }
+  
+  window.addEventListener('load', convertGallery);
+  setTimeout(convertGallery, 500);
+  setTimeout(convertGallery, 1500);
+  setTimeout(convertGallery, 3000);
+  
+  // مراقبة تغيير الصور
+  const observer = new MutationObserver(() => {
+    setTimeout(convertGallery, 100);
+  });
+  
+  window.addEventListener('load', () => {
+    const target = document.getElementById('detailsContent');
+    if (target) {
+      observer.observe(target, { childList: true, subtree: true });
+    }
+  });
+})();
