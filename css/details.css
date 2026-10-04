@@ -170,19 +170,22 @@
 .info-badge.rent { background: linear-gradient(135deg, #3B82F6, #1D4ED8); color: #fff; }
 .info-badge.featured { background: linear-gradient(135deg, #F59E0B, #B45309); color: #fff; }
 .info-badge.negotiable-yes { background: linear-gradient(135deg, #10B981, #059669); color: #fff; }
-.info-badge.negotiable-no { background: linear-gradient(135deg, #64748B, #475569); color: #fff; }
+.info-badge.negotiable-no { background: linear-gradient(135deg, #64748B, #475569); color: #fff; ;
+
 
 /* ==================== 1. صندوق العنوان ==================== */
 .info-title {
-  display: block;
-  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
   margin: 0 0 12px 0;
-  padding: clamp(18px, 2vw, 24px) clamp(12px, 1.5vw, 20px) clamp(14px, 1.5vw, 18px);
+  padding: 14px clamp(12px, 1.5vw, 20px);
   background: rgba(59, 130, 246, 0.06);
   border: 1.5px solid rgba(59, 130, 246, 0.25);
+  border-right: 4px solid #3B82F6;
   border-radius: 12px;
   font-size: clamp(15px, 2vw, 22px);
   font-weight: 800;
@@ -197,35 +200,31 @@
 
 .info-title::before {
   content: 'العنوان';
-  position: absolute;
-  top: -10px;
-  right: clamp(12px, 1.5vw, 18px);
-  font-size: clamp(9px, 0.9vw, 11px);
+  flex-shrink: 0;
+  font-size: clamp(10px, 1vw, 12px);
   font-weight: 700;
-  background: var(--bg-card);
-  padding: 2px clamp(8px, 1vw, 12px);
-  color: #93C5FD;
-  border-radius: 6px;
-  border: 1px solid rgba(59, 130, 246, 0.35);
+  background: linear-gradient(135deg, #3B82F6, #2563EB);
+  padding: 5px 12px;
+  color: #fff;
+  border-radius: 8px;
   letter-spacing: 0.3px;
   line-height: 1.4;
+  align-self: flex-start;
 }
 
 /* ==================== 2. صندوق السعر ==================== */
 .info-price {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  flex-wrap: wrap;
-  gap: clamp(4px, 0.6vw, 10px);
-  position: relative;
+  gap: 10px;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
   margin: 0 0 12px 0;
-  padding: clamp(18px, 2vw, 24px) clamp(12px, 1.5vw, 20px) clamp(14px, 1.5vw, 18px);
+  padding: 14px clamp(12px, 1.5vw, 20px);
   background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(251, 191, 36, 0.04));
   border: 1.5px solid rgba(245, 158, 11, 0.35);
+  border-right: 4px solid #F59E0B;
   border-radius: 12px;
   font-size: clamp(18px, 2.5vw, 28px);
   font-weight: 900;
@@ -237,18 +236,16 @@
 
 .info-price::before {
   content: 'السعر';
-  position: absolute;
-  top: -10px;
-  right: clamp(12px, 1.5vw, 18px);
-  font-size: clamp(9px, 0.9vw, 11px);
+  flex-shrink: 0;
+  font-size: clamp(10px, 1vw, 12px);
   font-weight: 700;
-  background: var(--bg-card);
-  padding: 2px clamp(8px, 1vw, 12px);
-  color: #F59E0B;
-  border-radius: 6px;
-  border: 1px solid rgba(245, 158, 11, 0.35);
+  background: linear-gradient(135deg, #F59E0B, #B45309);
+  padding: 5px 12px;
+  color: #fff;
+  border-radius: 8px;
   letter-spacing: 0.3px;
   line-height: 1.4;
+  align-self: flex-start;
 }
 
 .info-price small {
@@ -262,16 +259,15 @@
 .info-location {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  gap: clamp(6px, 0.8vw, 10px);
-  position: relative;
+  gap: 10px;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
   margin: 0 0 8px 0;
-  padding: clamp(18px, 2vw, 24px) clamp(12px, 1.5vw, 20px) clamp(14px, 1.5vw, 18px);
+  padding: 14px clamp(12px, 1.5vw, 20px);
   background: rgba(16, 185, 129, 0.06);
   border: 1.5px solid rgba(16, 185, 129, 0.3);
+  border-right: 4px solid #10B981;
   border-radius: 12px;
   font-size: clamp(12px, 1.3vw, 17px);
   font-weight: 700;
@@ -282,18 +278,16 @@
 
 .info-location::before {
   content: 'الموقع';
-  position: absolute;
-  top: -10px;
-  right: clamp(12px, 1.5vw, 18px);
-  font-size: clamp(9px, 0.9vw, 11px);
+  flex-shrink: 0;
+  font-size: clamp(10px, 1vw, 12px);
   font-weight: 700;
-  background: var(--bg-card);
-  padding: 2px clamp(8px, 1vw, 12px);
-  color: #10B981;
-  border-radius: 6px;
-  border: 1px solid rgba(16, 185, 129, 0.35);
+  background: linear-gradient(135deg, #10B981, #059669);
+  padding: 5px 12px;
+  color: #fff;
+  border-radius: 8px;
   letter-spacing: 0.3px;
   line-height: 1.4;
+  align-self: flex-start;
 }
 
 .info-location svg {
@@ -310,6 +304,7 @@
   max-width: 100%;
   color: #F8FAFC;
 }
+
 
 /* ==================== heading الأقسام ==================== */
 .section-heading {
