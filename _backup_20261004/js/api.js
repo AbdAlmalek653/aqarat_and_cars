@@ -1,0 +1,749 @@
+/* ==========================================
+   طبقة البيانات الموحدة
+   الإصدار: 4.0 (جلسة دائمة + إصلاح validateSession)
+   ========================================== */
+
+const API = (function () {
+
+  let MODE = 'server';
+  const API_BASE = (function () {
+    return window.location.pathname.includes('/pages/') ? '../api' : 'api';
+  })();
+
+  const KEYS = {
+    USERS: 'souq_users',
+    LISTINGS: 'souq_listings',
+    CURRENT_USER: 'souq_current_user',
+    FAVORITES: 'souq_favorites',
+    REMEMBER_ME: 'souq_remember_me',
+    LOGIN_TIME: 'souq_login_time'
+  };
+
+  function read(key, defaultValue) {
+    defaultValue = defaultValue || [];
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : defaultValue;
+    } catch (e) {
+      console.error('خطأ في القراءة:', e);
+      return defaultValue;
+    }
+  }
+
+  function write(key, value) {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+      return true;
+    } catch (e) {
+      console.error('خطأ في الكتابة:', e);
+      return false;
+    }
+  }
+
+  function generateId(prefix) {
+    prefix = prefix || '';
+    return prefix + Date.now() + Math.floor(Math.random() * 1000);
+  }
+
+  /* ==========================================
+     ✅ دوال HTTP مع منع تكرار الطلبات
+     ========================================== */
+
+  const _pendingGets = {};
+  const _memoryCache = {};
+
+  const MEMORY_CACHE_TTL = 15000;
+  const SESSION_CACHE_TTL = 30000;
+  const SESSION_CACHE_PREFIX = 'api_cache_';
+
+  // ✅ مسارات حساسة لا يتم عمل cache لها أبداً
+  const NO_CACHE_ENDPOINTS = ['/me.php', '/login.php', '/register.php', '/logout.php'];
+
+  function isNoCacheEndpoint(url) {
+    for (let i = 0; i < NO_CACHE_ENDPOINTS.length; i++) {
+      if (url.indexOf(NO_CACHE_ENDPOINTS[i]) !== -1) return true;
+    }
+    return false;
+  }
+
+  function getSessionCache(key) {
+    try {
+      const raw = sessionStorage.getItem(SESSION_CACHE_PREFIX + key);
+      if (!raw) return null;
+      const entry = JSON.parse(raw);
+      if (Date.now() - entry.time < SESSION_CACHE_TTL) {
+        return entry.data;
+      }
+      sessionStorage.removeItem(SESSION_CACHE_PREFIX + key);
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function setSessionCache(key, data) {
+    try {
+      sessionStorage.setItem(SESSION_CACHE_PREFIX + key, JSON.stringify({
+        data: data,
+        time: Date.now()
+      }));
+    } catch (e) {}
+  }
+
+  function httpGet(url, options) {
+    options = options || {};
+    const forceRefresh = options.forceRefresh === true || isNoCacheEndpoint(url);
+    const fullUrl = API_BASE + url;
+    const cacheKey = fullUrl;
+
+    if (forceRefresh) {
+      delete _memoryCache[cacheKey];
+      try { sessionStorage.removeItem(SESSION_CACHE_PREFIX + cacheKey); } catch(e) {}
+    }
+
+    if (_pendingGets[cacheKey]) {
+      return _pendingGets[cacheKey];
+    }
+
+    if (!forceRefresh && _memoryCache[cacheKey] && (Date.now() - _memoryCache[cacheKey].time) < MEMORY_CACHE_TTL) {
+      return Promise.resolve(_memoryCache[cacheKey].data);
+    }
+
+    if (!forceRefresh) {
+      const sessionData = getSessionCache(cacheKey);
+      if (sessionData) {
+        _memoryCache[cacheKey] = { data: sessionData, time: Date.now() };
+        return Promise.resolve(sessionData);
+      }
+    }
+
+    const promise = fetch(fullUrl, {
+      credentials: 'include',
+      cache: 'no-store'
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      // ✅ لا نخزن /me.php في الكاش
+      if (!isNoCacheEndpoint(url)) {
+        _memoryCache[cacheKey] = { data: data, time: Date.now() };
+        setSessionCache(cacheKey, data);
+      }
+      return data;
+    })
+    .finally(function () {
+      delete _pendingGets[cacheKey];
+    });
+
+    _pendingGets[cacheKey] = promise;
+    return promise;
+  }
+
+  function clearApiCache(urlPattern) {
+    if (!urlPattern) {
+      Object.keys(_memoryCache).forEach(function(k) { delete _memoryCache[k]; });
+      try {
+        Object.keys(sessionStorage).forEach(function(k) {
+          if (k.indexOf(SESSION_CACHE_PREFIX) === 0) sessionStorage.removeItem(k);
+        });
+      } catch(e) {}
+      return;
+    }
+    Object.keys(_memoryCache).forEach(function(k) {
+      if (k.indexOf(urlPattern) !== -1) delete _memoryCache[k];
+    });
+    try {
+      Object.keys(sessionStorage).forEach(function(k) {
+        if (k.indexOf(SESSION_CACHE_PREFIX) === 0 && k.indexOf(urlPattern) !== -1) {
+          sessionStorage.removeItem(k);
+        }
+      });
+    } catch(e) {}
+  }
+
+  function httpPost(url, data) {
+    return fetch(API_BASE + url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      cache: 'no-store',
+      body: JSON.stringify(data)
+    }).then(function (r) {
+      // ✅ امسح كاش كل شي بعد أي POST
+      clearApiCache('/listings.php');
+      clearApiCache('/listing.php');
+      clearApiCache('/stats.php');
+      clearApiCache('/my_listings.php');
+      clearApiCache('/me.php');
+      clearApiCache('/favorites.php');
+      return r.json();
+    });
+  }
+
+  function normalizeListing(listing) {
+    if (!listing) return listing;
+    const details = listing.details || {};
+    return Object.assign({}, listing, {
+      userId: listing.userId || listing.user_id,
+      city: listing.city || listing.city_slug,
+      cityName: listing.cityName || listing.city_name,
+      subType: listing.subType || details.subType,
+      createdAt: listing.createdAt || listing.created_at,
+      updatedAt: listing.updatedAt || listing.updated_at,
+      featured: listing.featured !== undefined
+        ? listing.featured
+        : Boolean(listing.is_featured)
+    });
+  }
+
+  /* ==========================================
+     المستخدمين
+     ========================================== */
+  const Users = {
+    getAll: function () {
+      if (MODE === 'server') {
+        return httpGet('/admin_users.php').then(function (result) {
+          return result.users || [];
+        });
+      }
+      return Promise.resolve(read(KEYS.USERS, []));
+    },
+
+    getById: function (id) {
+      if (MODE === 'server') return httpGet('/user.php?id=' + id);
+      return Promise.resolve(read(KEYS.USERS, []).find(function (u) { return u.id === id; }));
+    },
+
+    getByEmail: function (email) {
+      if (MODE === 'server') return httpGet('/user.php?email=' + email);
+      return Promise.resolve(read(KEYS.USERS, []).find(function (u) { return u.email === email; }));
+    },
+
+    create: function (userData) {
+      if (MODE === 'server') return httpPost('/register.php', userData);
+
+      const users = read(KEYS.USERS, []);
+      if (users.find(function (u) { return u.email === userData.email; })) {
+        return Promise.resolve({ success: false, error: 'البريد الإلكتروني مستخدم مسبقاً' });
+      }
+
+      const newUser = {
+        id: generateId('U'),
+        name: userData.name,
+        email: userData.email,
+        phone: userData.phone,
+        password: userData.password,
+        role: 'user',
+        createdAt: new Date().toISOString()
+      };
+
+      users.push(newUser);
+      write(KEYS.USERS, users);
+      return Promise.resolve({ success: true, user: newUser });
+    },
+
+    // ✅ تسجيل الدخول مع remember_me
+    login: function(email, password, rememberMe) {
+      if (MODE === 'server') {
+        // ✅ افتراضياً remember_me = true (جلسة دائمة)
+        const shouldRemember = rememberMe !== false;
+
+        return httpPost('/login.php', {
+          email: email,
+          password: password,
+          remember_me: shouldRemember
+        }).then(function(result) {
+          if (result.success && result.user) {
+            write(KEYS.CURRENT_USER, result.user);
+            try {
+              localStorage.setItem(KEYS.REMEMBER_ME, shouldRemember ? 'true' : 'false');
+              localStorage.setItem(KEYS.LOGIN_TIME, String(Date.now()));
+            } catch (e) {}
+            // ✅ امسح كاش me.php
+            clearApiCache('/me.php');
+          }
+          return result;
+        });
+      }
+
+      const user = read(KEYS.USERS, []).find(function(u) {
+        return u.email === email;
+      });
+
+      if (!user) {
+        return Promise.resolve({
+          success: false,
+          error: 'لا يوجد حساب بهذا البريد'
+        });
+      }
+
+      if (user.password !== password) {
+        return Promise.resolve({
+          success: false,
+          error: 'كلمة المرور غير صحيحة'
+        });
+      }
+
+      const sessionUser = {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role || 'user'
+      };
+
+      write(KEYS.CURRENT_USER, sessionUser);
+      try {
+        localStorage.setItem(KEYS.REMEMBER_ME, 'true');
+        localStorage.setItem(KEYS.LOGIN_TIME, String(Date.now()));
+      } catch (e) {}
+
+      return Promise.resolve({
+        success: true,
+        user: sessionUser
+      });
+    },
+
+    logout: function () {
+      // ✅ امسح كل البيانات المحلية أولاً
+      try {
+        localStorage.removeItem(KEYS.CURRENT_USER);
+        localStorage.removeItem(KEYS.REMEMBER_ME);
+        localStorage.removeItem(KEYS.LOGIN_TIME);
+      } catch (e) {}
+
+      if (MODE === 'server') {
+        return httpPost('/logout.php', {}).then(function (result) {
+          clearApiCache();
+          return result;
+        }).catch(function() {
+          clearApiCache();
+          return { success: true };
+        });
+      }
+
+      return Promise.resolve({ success: true });
+    },
+
+    getCurrent: function () {
+      try {
+        const raw = localStorage.getItem(KEYS.CURRENT_USER);
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) {
+        return null;
+      }
+    },
+
+    // ✅ إصلاح validateSession - مع forceRefresh
+    validateSession: function (forceRefresh) {
+      if (MODE !== 'server') return Promise.resolve(this.getCurrent());
+
+      // ✅ مسح كاش me.php قبل الطلب
+      clearApiCache('/me.php');
+
+      return httpGet('/me.php', { forceRefresh: forceRefresh === true || true }).then(function (result) {
+        if (result.success && result.user) {
+          write(KEYS.CURRENT_USER, result.user);
+          return result.user;
+        }
+
+        // ❌ ما في جلسة على السيرفر
+        // ✅ إذا "تذكرني" مفعّل، احتفظ بالبيانات المحلية
+        const rememberMe = localStorage.getItem(KEYS.REMEMBER_ME) === 'true';
+        const localUser = Users.getCurrent();
+
+        if (rememberMe && localUser) {
+          return localUser;
+        }
+
+        // ما في "تذكرني" - امسح
+        try {
+          localStorage.removeItem(KEYS.CURRENT_USER);
+        } catch (e) {}
+        return null;
+      }).catch(function (err) {
+        console.warn('⚠️ خطأ في validateSession:', err);
+
+        // ✅ في حالة خطأ الشبكة، احتفظ بالبيانات المحلية
+        const rememberMe = localStorage.getItem(KEYS.REMEMBER_ME) === 'true';
+        if (rememberMe) {
+          return Users.getCurrent();
+        }
+        return null;
+      });
+    },
+
+    isLoggedIn: function () {
+      return this.getCurrent() !== null;
+    },
+
+    isSuperAdmin: function () {
+      const u = this.getCurrent();
+      return u && u.role === 'super_admin';
+    },
+
+    isAdmin: function () {
+      const u = this.getCurrent();
+      return u && (u.role === 'admin' || u.role === 'super_admin');
+    },
+
+    isRegularUser: function () {
+      const u = this.getCurrent();
+      return u && u.role === 'user';
+    },
+
+    seedAdmins: function () {
+      return;
+    }
+  };
+
+  const Stats = {
+    get: function (options) {
+      if (MODE === 'server') {
+        return httpGet('/stats.php', options).then(function (result) {
+          return result.stats || {};
+        });
+      }
+      return Promise.resolve({
+        users: read(KEYS.USERS, []).length,
+        listings: read(KEYS.LISTINGS, []).length,
+        properties: read(KEYS.LISTINGS, []).filter(function (listing) { return listing.type === 'property'; }).length,
+        cars: read(KEYS.LISTINGS, []).filter(function (listing) { return listing.type === 'car'; }).length
+      });
+    }
+  };
+
+  /* ==========================================
+     الإعلانات
+     ========================================== */
+  const Listings = {
+    getAll: function (filters, options) {
+      if (MODE === 'server') {
+        const q = filters ? new URLSearchParams(filters).toString() : '';
+        return httpGet('/listings.php' + (q ? '?' + q : ''), options).then(function (result) {
+          return (result.listings || []).map(normalizeListing);
+        });
+      }
+      return Promise.resolve(read(KEYS.LISTINGS, []));
+    },
+
+    getById: function (id, options) {
+      if (MODE === 'server') {
+        return httpGet('/listing.php?id=' + encodeURIComponent(id), options).then(function (result) {
+          return normalizeListing(result.listing);
+        });
+      }
+      return Promise.resolve(read(KEYS.LISTINGS, []).find(function (l) { return l.id === id; }));
+    },
+
+    getByType: function (type, options) {
+      if (MODE === 'server') {
+        return httpGet('/listings.php?type=' + encodeURIComponent(type), options).then(function (result) {
+          return (result.listings || []).map(normalizeListing);
+        });
+      }
+      return Promise.resolve(read(KEYS.LISTINGS, []).filter(function (l) { return l.type === type; }));
+    },
+
+    getByUser: function (userId, options) {
+      if (MODE === 'server') {
+        return httpGet('/my_listings.php', options).then(function (result) {
+          return (result.listings || []).map(normalizeListing);
+        });
+      }
+      return Promise.resolve(read(KEYS.LISTINGS, []).filter(function (l) { return l.userId === userId; }));
+    },
+
+    getFeatured: function (type, limit, options) {
+      limit = limit || 4;
+      if (MODE === 'server') {
+        return httpGet('/listings.php?type=' + encodeURIComponent(type) + '&featured=1&limit=' + limit, options)
+          .then(function (result) { return (result.listings || []).map(normalizeListing); });
+      }
+      return Promise.resolve(read(KEYS.LISTINGS, [])
+        .filter(function (l) { return l.type === type && l.featured; })
+        .slice(0, limit));
+    },
+
+    getLatest: function (type, limit, options) {
+      limit = limit || 4;
+      if (MODE === 'server') {
+        return httpGet('/listings.php?type=' + encodeURIComponent(type) + '&limit=' + limit, options)
+          .then(function (result) { return (result.listings || []).map(normalizeListing); });
+      }
+      return Promise.resolve(read(KEYS.LISTINGS, [])
+        .filter(function (l) { return l.type === type; })
+        .sort(function (a, b) { return new Date(b.createdAt) - new Date(a.createdAt); })
+        .slice(0, limit));
+    },
+
+    create: function (listingData) {
+      if (MODE === 'server') return httpPost('/add_listing.php', listingData);
+
+      const user = Users.getCurrent();
+      if (!user) return Promise.resolve({ success: false, error: 'يجب تسجيل الدخول أولاً' });
+
+      const listings = read(KEYS.LISTINGS, []);
+      const newListing = {
+        id: generateId('L'),
+        userId: user.id,
+        type: listingData.type,
+        purpose: listingData.purpose,
+        subType: listingData.subType || null,
+        title: listingData.title,
+        description: listingData.description || '',
+        price: Number(listingData.price) || 0,
+        currency: listingData.currency || 'USD',
+        negotiable: listingData.negotiable || '',
+        city: listingData.city || '',
+        area: listingData.area || '',
+        address: listingData.address || '',
+        whatsapp: listingData.whatsapp || '',
+        images: listingData.images || [],
+        details: listingData.details || {},
+        status: 'active',
+        featured: false,
+        views: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      listings.push(newListing);
+      write(KEYS.LISTINGS, listings);
+      return Promise.resolve({ success: true, listing: newListing });
+    },
+
+    update: function (id, updates) {
+      if (MODE === 'server') return httpPost('/update_listing.php', Object.assign({ id: id }, updates));
+
+      const listings = read(KEYS.LISTINGS, []);
+      const index = listings.findIndex(function (l) { return l.id === id; });
+      if (index === -1) return Promise.resolve({ success: false, error: 'الإعلان غير موجود' });
+
+      listings[index] = Object.assign({}, listings[index], updates, { updatedAt: new Date().toISOString() });
+      write(KEYS.LISTINGS, listings);
+      return Promise.resolve({ success: true, listing: listings[index] });
+    },
+
+    updateStatus: function (id, status) {
+      if (MODE === 'server') return httpPost('/update_listing.php', { id: id, status: status });
+
+      const listings = read(KEYS.LISTINGS, []);
+      const index = listings.findIndex(function (l) { return l.id === id; });
+      if (index === -1) return Promise.resolve({ success: false, error: 'الإعلان غير موجود' });
+
+      listings[index].status = status;
+      listings[index].updatedAt = new Date().toISOString();
+      write(KEYS.LISTINGS, listings);
+      return Promise.resolve({ success: true, listing: listings[index] });
+    },
+
+    delete: function (id) {
+      if (MODE === 'server') return httpPost('/delete_listing.php', { id: id });
+
+      const listings = read(KEYS.LISTINGS, []);
+      const filtered = listings.filter(function (l) { return l.id !== id; });
+      if (filtered.length === listings.length) return Promise.resolve({ success: false, error: 'الإعلان غير موجود' });
+
+      write(KEYS.LISTINGS, filtered);
+      return Promise.resolve({ success: true });
+    }
+  };
+
+  /* ==========================================
+     المفضلة
+     ========================================== */
+  const Favorites = {
+    getAll: function () {
+      if (MODE === 'server') {
+        return httpGet('/favorites.php').then(function (result) {
+          return Array.isArray(result.favorites) ? result.favorites : [];
+        });
+      }
+      const user = Users.getCurrent();
+      if (!user) return Promise.resolve([]);
+      const all = read(KEYS.FAVORITES, {});
+      return Promise.resolve(all[user.id] || []);
+    },
+
+    isFavorite: function (listingId) {
+      return this.getAll().then(function (favs) {
+        return favs.indexOf(listingId) !== -1;
+      });
+    },
+
+    toggle: function (listingId) {
+      if (MODE === 'server') return httpPost('/toggle_favorite.php', { listing_id: listingId });
+
+      const user = Users.getCurrent();
+      if (!user) return Promise.resolve({ success: false, error: 'يجب تسجيل الدخول' });
+
+      const all = read(KEYS.FAVORITES, {});
+      const userFavs = all[user.id] || [];
+
+      if (userFavs.indexOf(listingId) !== -1) {
+        all[user.id] = userFavs.filter(function (id) { return id !== listingId; });
+      } else {
+        userFavs.push(listingId);
+        all[user.id] = userFavs;
+      }
+
+      write(KEYS.FAVORITES, all);
+      return Promise.resolve({
+        success: true,
+        isFavorite: all[user.id].indexOf(listingId) !== -1
+      });
+    }
+  };
+
+  /* ==========================================
+     حماية الصفحات
+     ========================================== */
+  const Auth = {
+    isLoggedIn: function () {
+      return Users.getCurrent() !== null;
+    },
+
+    isAdmin: function () {
+      return Users.isAdmin();
+    },
+
+    isSuperAdmin: function () {
+      return Users.isSuperAdmin();
+    }
+  };
+
+  return {
+    Users: Users,
+    Stats: Stats,
+    Listings: Listings,
+    Favorites: Favorites,
+    Auth: Auth,
+    generateId: generateId,
+    setMode: function (mode) {
+      if (mode === 'local' || mode === 'server') {
+        MODE = mode;
+      }
+    },
+    getMode: function () { return MODE; },
+    clearApiCache: clearApiCache,
+    clearAll: function () {
+      Object.keys(KEYS).forEach(function (key) {
+        localStorage.removeItem(KEYS[key]);
+      });
+      localStorage.removeItem('souq_admins_seeded');
+      clearApiCache();
+    }
+  };
+
+})();
+
+window.API = API;
+
+/* ==========================================
+   🖼️ دالة موحّدة عالمية لبناء رابط الصورة
+   ========================================== */
+window.getListingImageUrl = function (item, index, size) {
+  if (!item) return null;
+  const idx = (typeof index === 'number') ? index : 0;
+  const sz = size || 'large';
+  const apiBase = '/api';
+  const cb = item.updatedAt ? new Date(item.updatedAt).getTime() : '';
+
+  let first = null;
+  if (item.images && Array.isArray(item.images) && item.images.length > 0) {
+    first = item.images[idx] || item.images[0];
+  } else if (item.image) {
+    first = item.image;
+  }
+
+  if (!first) {
+    if (!item.id) return null;
+    return `${apiBase}/listing_image.php?id=${encodeURIComponent(item.id)}&index=${idx}&size=${sz}${cb ? '&v=' + cb : ''}`;
+  }
+
+  if (typeof first === 'string' && first.startsWith('has_image')) {
+    const parts = first.split(':');
+    const realIndex = parts[1] !== undefined ? parts[1] : idx;
+    return `${apiBase}/listing_image.php?id=${encodeURIComponent(item.id)}&index=${realIndex}&size=${sz}${cb ? '&v=' + cb : ''}`;
+  }
+
+  if (typeof first === 'string' && first.startsWith('data:image/')) {
+    return first;
+  }
+
+  if (typeof first === 'string' && /^https?:\/\//i.test(first)) {
+    return first;
+  }
+
+  if (typeof first === 'string' && first.startsWith('/')) {
+    return first;
+  }
+
+  if (typeof first === 'string' && first.startsWith('./')) {
+    return first;
+  }
+
+  if (!item.id) return null;
+  return `${apiBase}/listing_image.php?id=${encodeURIComponent(item.id)}&index=${idx}&size=${sz}${cb ? '&v=' + cb : ''}`;
+};
+
+window.getListingImageSrcset = function (item, index) {
+  if (!item || !item.id) return { src: null, srcset: '', sizes: '' };
+  const idx = (typeof index === 'number') ? index : 0;
+  const large = window.getListingImageUrl(item, idx, 'large');
+  return { src: large, srcset: '', sizes: '100vw' };
+};
+
+document.addEventListener('DOMContentLoaded', function () {
+  // لا شيء
+});
+
+/* ==========================================
+   🎯 زر تفاصيل الإعلان - إضافة تلقائية
+   ========================================== */
+(function () {
+  'use strict';
+
+  function addDetailsButton(card) {
+    if (!card || card.querySelector('.card-details-btn')) return;
+    const cardBody = card.querySelector('.card-body');
+    if (!cardBody) return;
+
+    const btn = document.createElement('span');
+    btn.className = 'card-details-btn';
+    btn.setAttribute('aria-label', 'تفاصيل الإعلان');
+    btn.innerHTML = '<span>تفاصيل الإعلان</span><i data-lucide="arrow-left"></i>';
+    cardBody.appendChild(btn);
+
+    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+      window.lucide.createIcons();
+    }
+  }
+
+  function scanCards() {
+    document.querySelectorAll('.card').forEach(addDetailsButton);
+  }
+
+  function init() {
+    scanCards();
+    const observer = new MutationObserver(function (mutations) {
+      mutations.forEach(function (mutation) {
+        mutation.addedNodes.forEach(function (node) {
+          if (node.nodeType !== 1) return;
+          if (node.classList && node.classList.contains('card')) {
+            addDetailsButton(node);
+          } else if (node.querySelectorAll) {
+            node.querySelectorAll('.card').forEach(addDetailsButton);
+          }
+        });
+      });
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();

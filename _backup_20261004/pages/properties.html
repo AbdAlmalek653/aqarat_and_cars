@@ -3,29 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
-  <title>سيارات للبيع والإيجار | سوق</title>
-  <meta name="description" content="تصفح آلاف السيارات للبيع والإيجار - جديدة ومستعملة بأفضل الأسعار">
+  <title>عقارات للبيع والإيجار | سوق</title>
+  <meta name="description" content="تصفح آلاف العقارات للبيع والإيجار - شقق، فلل، أراضي، مكاتب">
 
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚗</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
 
-  <!-- ✅ نظام الأيقونات المدمج -->
   <script src="../js/icons.js" defer></script>
 
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/pages.css">
+  <link rel="stylesheet" href="../css/fix-mobile.css">
+  <link rel="stylesheet" href="../css/speed-boost.css">
 
-  <!-- ✅ Leaflet CSS (خريطة تفاعلية) -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-        crossorigin="">
-
-  <!-- ✅ أنماط الخريطة -->
- 
- <link rel="stylesheet" href="../css/map-view.css">
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <link rel="stylesheet" href="../css/map-view.css">
+<link rel="stylesheet" href="../css/master-fix.css">
+<link rel="stylesheet" href="../css/swipe-cards.css">
 </head>
 <body class="has-bottom-nav">
 
-  <!-- ===================== الهيدر ===================== -->
   <header class="header">
     <div class="container header-inner">
       <a href="../index.html" class="logo">
@@ -34,41 +31,43 @@
       </a>
       <nav class="nav">
         <a href="../index.html">الرئيسية</a>
-        <a href="properties.html">عقارات</a>
-        <a href="cars.html" class="active">سيارات</a>
+        <a href="properties.html" class="active">عقارات</a>
+        <a href="cars.html">سيارات</a>
         <a href="about.html">من نحن</a>
         <a href="contact.html">اتصل بنا</a>
       </nav>
       <div class="header-actions">
         <button class="btn-icon" title="البحث"><i data-lucide="search"></i></button>
-        <a href="login.html" class="btn btn-outline">دخول</a>
-        <a href="add-listing.html" class="btn btn-primary"><i data-lucide="plus"></i><span>أضف إعلان</span></a>
+        <a href="login.html" class="btn-login">
+          <i data-lucide="log-in"></i><span>تسجيل الدخول</span>
+        </a>
+        <a href="add-listing.html" class="btn btn-primary">
+          <i data-lucide="plus"></i><span>أضف إعلان</span>
+        </a>
       </div>
     </div>
   </header>
 
   <div class="container">
-    <!-- ===================== مسار التنقل ===================== -->
     <nav class="breadcrumb">
       <a href="../index.html"><i data-lucide="home"></i> الرئيسية</a>
       <i data-lucide="chevron-left"></i>
-      <span class="current">سيارات</span>
+      <span class="current">عقارات</span>
     </nav>
+
     <div class="page-header">
-      <h1 class="page-title">السيارات المتاحة</h1>
-      <p class="page-subtitle">اكتشف آلاف السيارات الجديدة والمستعملة للبيع والإيجار</p>
+      <h1 class="page-title">العقارات المتاحة</h1>
+      <p class="page-subtitle">اكتشف آلاف العقارات للبيع والإيجار في جميع المحافظات</p>
     </div>
   </div>
 
   <div class="container">
     <div class="page-layout">
-      <!-- ===================== الفلاتر الجانبية ===================== -->
       <aside class="filters-sidebar" id="filtersSidebar">
         <div class="filters-header">
           <h3><i data-lucide="sliders-horizontal"></i> الفلاتر</h3>
           <button class="filters-clear" id="clearFilters">مسح الكل</button>
         </div>
-
         <div class="filter-group">
           <h4><i data-lucide="tag"></i> الغرض</h4>
           <div class="filter-options">
@@ -77,23 +76,18 @@
             <label class="filter-option"><input type="radio" name="purpose" value="rent"><span>للإيجار</span></label>
           </div>
         </div>
-
         <div class="filter-group">
-          <h4><i data-lucide="award"></i> الماركة</h4>
+          <h4><i data-lucide="building-2"></i> نوع العقار</h4>
           <div class="filter-options">
-            <label class="filter-option"><input type="checkbox" name="brand" value="toyota"><span>تويوتا</span></label>
-            <label class="filter-option"><input type="checkbox" name="brand" value="hyundai"><span>هيونداي</span></label>
-            <label class="filter-option"><input type="checkbox" name="brand" value="kia"><span>كيا</span></label>
-            <label class="filter-option"><input type="checkbox" name="brand" value="mercedes"><span>مرسيدس</span></label>
-            <label class="filter-option"><input type="checkbox" name="brand" value="bmw"><span>BMW</span></label>
-            <label class="filter-option"><input type="checkbox" name="brand" value="nissan"><span>نيسان</span></label>
-            <label class="filter-option"><input type="checkbox" name="brand" value="honda"><span>هوندا</span></label>
-            <label class="filter-option"><input type="checkbox" name="brand" value="chevrolet"><span>شيفروليه</span></label>
-            <label class="filter-option"><input type="checkbox" name="brand" value="ford"><span>فورد</span></label>
-            <label class="filter-option"><input type="checkbox" name="brand" value="other"><span>أخرى</span></label>
+            <label class="filter-option"><input type="checkbox" name="type" value="apartment"><span>شقة</span></label>
+            <label class="filter-option"><input type="checkbox" name="type" value="villa"><span>فيلا</span></label>
+            <label class="filter-option"><input type="checkbox" name="type" value="arabic-house"><span>بيت عربي</span></label>
+            <label class="filter-option"><input type="checkbox" name="type" value="land"><span>أرض</span></label>
+            <label class="filter-option"><input type="checkbox" name="type" value="office"><span>مكتب</span></label>
+            <label class="filter-option"><input type="checkbox" name="type" value="shop"><span>محل تجاري</span></label>
+            <label class="filter-option"><input type="checkbox" name="type" value="chalet"><span>شاليه</span></label>
           </div>
         </div>
-
         <div class="filter-group">
           <h4><i data-lucide="map-pin"></i> المحافظة</h4>
           <select class="filter-select" id="filterCity">
@@ -114,7 +108,6 @@
             <option value="idlib">إدلب</option>
           </select>
         </div>
-
         <div class="filter-group">
           <h4><i data-lucide="dollar-sign"></i> السعر (USD)</h4>
           <div class="filter-range">
@@ -122,59 +115,41 @@
             <input type="number" id="priceMax" placeholder="إلى">
           </div>
         </div>
-
         <div class="filter-group">
-          <h4><i data-lucide="calendar"></i> سنة الصنع</h4>
+          <h4><i data-lucide="bed-double"></i> عدد الغرف</h4>
+          <div class="filter-options">
+            <label class="filter-option"><input type="radio" name="rooms" value="" checked><span>الكل</span></label>
+            <label class="filter-option"><input type="radio" name="rooms" value="1"><span>غرفة واحدة</span></label>
+            <label class="filter-option"><input type="radio" name="rooms" value="2"><span>2 غرف</span></label>
+            <label class="filter-option"><input type="radio" name="rooms" value="3"><span>3 غرف</span></label>
+            <label class="filter-option"><input type="radio" name="rooms" value="4"><span>4 غرف</span></label>
+            <label class="filter-option"><input type="radio" name="rooms" value="5"><span>5+ غرف</span></label>
+          </div>
+        </div>
+        <div class="filter-group">
+          <h4><i data-lucide="square"></i> المساحة (m²)</h4>
           <div class="filter-range">
-            <input type="number" id="yearMin" placeholder="من">
-            <input type="number" id="yearMax" placeholder="إلى">
+            <input type="number" id="areaMin" placeholder="من">
+            <input type="number" id="areaMax" placeholder="إلى">
           </div>
         </div>
-
         <div class="filter-group">
-          <h4><i data-lucide="sparkles"></i> الحالة</h4>
+          <h4><i data-lucide="sofa"></i> الفرش</h4>
           <div class="filter-options">
-            <label class="filter-option"><input type="radio" name="condition" value="" checked><span>الكل</span></label>
-            <label class="filter-option"><input type="radio" name="condition" value="new"><span>جديد</span></label>
-            <label class="filter-option"><input type="radio" name="condition" value="used"><span>مستعمل</span></label>
+            <label class="filter-option"><input type="checkbox" name="furnished" value="furnished"><span>مفروش</span></label>
+            <label class="filter-option"><input type="checkbox" name="furnished" value="unfurnished"><span>غير مفروش</span></label>
           </div>
         </div>
-
-        <div class="filter-group">
-          <h4><i data-lucide="settings-2"></i> ناقل الحركة</h4>
-          <div class="filter-options">
-            <label class="filter-option"><input type="radio" name="transmission" value="" checked><span>الكل</span></label>
-            <label class="filter-option"><input type="radio" name="transmission" value="automatic"><span>أوتوماتيك</span></label>
-            <label class="filter-option"><input type="radio" name="transmission" value="manual"><span>عادي</span></label>
-          </div>
-        </div>
-
-        <div class="filter-group">
-          <h4><i data-lucide="fuel"></i> الوقود</h4>
-          <div class="filter-options">
-            <label class="filter-option"><input type="checkbox" name="fuel" value="petrol"><span>بنزين</span></label>
-            <label class="filter-option"><input type="checkbox" name="fuel" value="diesel"><span>ديزل</span></label>
-            <label class="filter-option"><input type="checkbox" name="fuel" value="electric"><span>كهرباء</span></label>
-            <label class="filter-option"><input type="checkbox" name="fuel" value="hybrid"><span>هايبرد</span></label>
-          </div>
-        </div>
-
-        <div class="filter-group">
-          <h4><i data-lucide="gauge"></i> الكيلومترات (كم)</h4>
-          <div class="filter-range">
-            <input type="number" id="kmMax" placeholder="أقصى حد">
-          </div>
-        </div>
-
         <button class="btn-apply-filters" id="applyFilters">تطبيق الفلاتر</button>
       </aside>
 
       <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-      <!-- ===================== النتائج ===================== -->
       <main class="results-main">
         <div class="results-toolbar">
-          <p class="results-count"><strong id="resultsCount">0</strong> سيارة متاحة</p>
+          <p class="results-count">
+            <strong id="resultsCount">0</strong> عقار متاح
+          </p>
           <div class="toolbar-actions">
             <button class="filter-toggle-btn" id="filterToggle">
               <i data-lucide="sliders-horizontal"></i> الفلاتر
@@ -183,34 +158,28 @@
               <option value="newest">الأحدث</option>
               <option value="price-asc">الأرخص أولاً</option>
               <option value="price-desc">الأغلى أولاً</option>
-              <option value="year-desc">الأحدث سنة</option>
+              <option value="area-desc">الأكبر مساحة</option>
             </select>
 
-            <!-- ✅ زر تبديل العرض: قائمة / خريطة -->
             <div class="view-toggle-group">
               <button type="button" class="view-toggle-btn active" data-view="grid" id="viewGridBtn">
-                <i data-lucide="layout-grid"></i>
-                <span>قائمة</span>
+                <i data-lucide="layout-grid"></i><span>قائمة</span>
               </button>
               <button type="button" class="view-toggle-btn" data-view="map" id="viewMapBtn">
-                <i data-lucide="map"></i>
-                <span>خريطة</span>
+                <i data-lucide="map"></i><span>خريطة</span>
               </button>
             </div>
           </div>
         </div>
 
-        <!-- ✅ حاوية الخريطة (مخفية افتراضياً) -->
         <div class="map-view-container" id="mapContainer" style="display: none;"></div>
 
-        <!-- شبكة البطاقات -->
-        <div class="properties-grid" id="carsGrid"></div>
+        <div class="properties-grid" id="propertiesGrid"></div>
 
-        <!-- رسالة عدم وجود نتائج -->
         <div id="noResultsMessage" style="display: none; text-align: center; padding: 50px 20px; background: #fff; border-radius: 12px; margin-top: 20px;">
-          <div style="font-size: 56px; margin-bottom: 15px;">🚗</div>
+          <div style="font-size: 56px; margin-bottom: 15px;">🏠</div>
           <h3>لا توجد نتائج مطابقة</h3>
-          <p>لم نتمكن من العثور على سيارات تطابق معايير البحث.</p>
+          <p>لم نتمكن من العثور على عقارات تطابق معايير البحث.</p>
           <a href="https://wa.me/963930932794?text=مرحبا%20أبو%20أيمن" target="_blank" rel="noopener" style="background-color: #25D366; color: white; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold;">
             <i data-lucide="message-circle"></i> تواصل مع أبو أيمن
           </a>
@@ -221,14 +190,12 @@
     </div>
   </div>
 
-  <!-- ===================== الفوتر ===================== -->
   <footer class="footer">
     <div class="container">
       <div class="footer-bottom"><p>© 2026 سوق. جميع الحقوق محفوظة.</p></div>
     </div>
   </footer>
 
-  <!-- ===================== شريط التنقل السفلي ===================== -->
   <nav class="bottom-nav">
     <a href="../index.html" class="bottom-nav-item"><i data-lucide="home"></i><span>الرئيسية</span></a>
     <a href="search.html" class="bottom-nav-item"><i data-lucide="search"></i><span>البحث</span></a>
@@ -237,23 +204,19 @@
     <a href="account.html" class="bottom-nav-item"><i data-lucide="user"></i><span>حسابي</span></a>
   </nav>
 
-  <!-- ===================== Scripts ===================== -->
-
-  <!-- ✅ Leaflet JS (خريطة تفاعلية) -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-          crossorigin=""></script>
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script src="../js/city-coords.js" defer></script>
   <script src="../js/map-view.js" defer></script>
-
-  <!-- Scripts الأساسية -->
   <script src="../js/api.js" defer></script>
   <script src="../js/header-state.js" defer></script>
   <script src="../js/main.js" defer></script>
-  <script src="../js/cars.js" defer></script>
+  <script src="../js/properties.js" defer></script>
   <script src="../js/auth-guard.js" defer></script>
   <script src="../js/app-inline.js" defer></script>
+  <script src="../js/speed-boost.js" defer></script>
   <script src="../js/sw-register.js" defer></script>
+<script src="../js/master-fix.js"></script>
 
 </body>
 </html>

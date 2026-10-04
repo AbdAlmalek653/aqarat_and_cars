@@ -12,15 +12,11 @@ const PRECACHE_URLS = [
   '/',
   '/index.html',
   '/css/style.css',
-  '/css/speed-boost.css',
-  '/css/master-fix.css',
   '/js/api.js',
   '/js/header-state.js',
   '/js/main.js',
   '/js/auth-guard.js',
   '/js/app-inline.js',
-  '/js/master-fix.js',
-  '/js/speed-boost.js',
   '/js/icons.js'
 ];
 
