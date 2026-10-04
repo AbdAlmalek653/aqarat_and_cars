@@ -8,3 +8,7 @@ database/*.db-*
 database/*.sqlite
 database/*.sqlite3
 
+
+# Backups
+_backup_*/
+_backup_before_important/
