@@ -1,6 +1,6 @@
 /* ==========================================
    الصفحة الرئيسية - سوق
-   الإصدار: 7.0 (car brand badge + negotiable + city fix)
+   الإصدار: 7.1 (إضافة شارة نوع العقار)
    ========================================== */
 
 function initIcons() {
@@ -16,6 +16,24 @@ const CITY_NAMES = {
 };
 
 const TYPE_NAMES = { property: 'عقارات', car: 'سيارات' };
+
+/* ✅ دالة ترجمة نوع العقار */
+function getPropertyTypeName(type) {
+  const types = {
+    'apartment': 'شقة',
+    'house': 'منزل',
+    'villa': 'فيلا',
+    'land': 'أرض',
+    'shop': 'محل تجاري',
+    'office': 'مكتب',
+    'building': 'عمارة كاملة',
+    'chalet': 'شاليه',
+    'arabic-house': 'بيت عربي'
+  };
+  if (!type) return '';
+  return types[String(type).toLowerCase()] || type;
+}
+
 const PURPOSE_NAMES = { sale: 'للبيع', rent: 'للإيجار' };
 
 /* ✅ قاموس الماركات */
@@ -122,7 +140,7 @@ function getImageUrl(item) {
 }
 
 /* ==========================================
-   ✅ createCard (مع شارة الماركة والموديل)
+   ✅ createCard (مع شارة الماركة وشارة نوع العقار)
    ========================================== */
 function createCard(item, type) {
   const purposeText = item.purpose === 'sale' ? 'للبيع' : 'للإيجار';
@@ -181,10 +199,10 @@ function createCard(item, type) {
 
   const d = item.details || {};
   let chips = [];
+  let carBrandBadgeHTML = ''; // متغير مشترك للسيارات والعقارات
 
-  /* ✅ للسيارات: ماركة + موديل كشارة منفصلة، والباقي كـ chips */
-  let carBrandBadgeHTML = '';
   if (type === 'car') {
+    /* ✅ للسيارات: ماركة + موديل كشارة منفصلة */
     const brandText = getCarBrandText(item);
     const modelText = getCarModelText(item);
     const fullBrandModel = [brandText, modelText].filter(Boolean).join(' ');
@@ -202,15 +220,25 @@ function createCard(item, type) {
         </div>`;
     }
     
-    /* باقي المعلومات كـ chips: سنة، كيلومترات، ناقل الحركة */
     if (d.year) chips.push({ icon: 'calendar', text: d.year });
     if (d.km && item.purpose === 'sale') chips.push({ icon: 'gauge', text: `${Number(d.km).toLocaleString('en-US')} كم` });
     if (d.transmission) chips.push({ icon: 'settings-2', text: d.transmission === 'automatic' ? 'أوتوماتيك' : 'عادي' });
+
   } else {
-    /* ✅ للعقارات: نفس النظام القديم */
-    const typeNames = { apartment: 'شقة', villa: 'فيلا', 'arabic-house': 'بيت عربي', land: 'أرض', office: 'مكتب', shop: 'محل تجاري', chalet: 'شاليه', building: 'بناء كامل' };
-    if (item.subType) chips.push({ icon: 'building-2', text: typeNames[item.subType] || item.subType });
-    else if (d.propertyType) chips.push({ icon: 'building-2', text: typeNames[d.propertyType] || d.propertyType });
+    /* ✅ للعقارات: استخراج النوع كشارة منفصلة */
+    const rawType = item.subType || item.subtype || d.propertyType || d.property_type || item.property_type;
+    const typeText = getPropertyTypeName(rawType);
+    
+    if (typeText) {
+      carBrandBadgeHTML = `
+        <div class="car-brand-badge" style="background: rgba(59, 130, 246, 0.15); color: #60A5FA; border-color: rgba(59, 130, 246, 0.3);">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/>
+          </svg>
+          <span>${typeText}</span>
+        </div>`;
+    }
+    
     const area = d.area || d.landArea || d.commercialArea;
     if (area) chips.push({ icon: 'square', text: `${area} م²` });
     if (d.rooms) chips.push({ icon: 'bed-double', text: `${d.rooms} غرف` });

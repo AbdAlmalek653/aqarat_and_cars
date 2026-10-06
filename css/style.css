@@ -3066,3 +3066,14 @@ html {
     height: 10px;
   }
 }
+/* ✅ تنسيق شارة نوع العقار وماركة السيارة */
+.car-brand-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    width: fit-content;
+}

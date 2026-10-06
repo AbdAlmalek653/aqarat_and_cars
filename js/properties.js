@@ -1,6 +1,6 @@
 /* ==========================================
    صفحة العقارات - البيانات من API فقط
-   الإصدار: 3.0 (محسّن + خريطة تفاعلية + أداء صاروخي)
+   الإصدار: 3.1 (إضافة شارة نوع العقار)
    ========================================== */
 
 const ITEMS_PER_PAGE = 9;
@@ -12,9 +12,25 @@ let mapInitialized = false;
 
 function initIcons() { if (window.lucide) window.lucide.createIcons(); }
 
+/* ✅ دالة ترجمة نوع العقار */
+function getPropertyTypeName(type) {
+  const types = {
+    'apartment': 'شقة',
+    'house': 'منزل',
+    'villa': 'فيلا',
+    'land': 'أرض',
+    'shop': 'محل تجاري',
+    'office': 'مكتب',
+    'building': 'عمارة كاملة',
+    'chalet': 'شاليه',
+    'arabic-house': 'بيت عربي'
+  };
+  if (!type) return '';
+  return types[String(type).toLowerCase()] || type;
+}
+
 async function loadProperties() {
   try {
-    // ✅ تم تغيير car إلى property
     const listings = await API.Listings.getAll({ type: 'property' });
     allProperties = listings || [];
     applyFilters();
@@ -99,7 +115,6 @@ function applyFilters() {
   filteredProperties = allProperties.filter(p => {
     if (f.purpose && p.purpose !== f.purpose) return false;
 
-    // فلترة نوع العقار (شقة، فيلا، الخ)
     if (!propertyMatchesType(p, f.types)) return false;
 
     if (!propertyMatchesCity(p, f.city)) return false;
@@ -121,7 +136,6 @@ function applyFilters() {
     return true;
   });
 
-  // عند عدم وجود تطابق كامل، اعرض الأقرب بدل ترك النتائج فارغة.
   if (!filteredProperties.length && allProperties.length) {
     const compatibleProperties = allProperties.filter(property =>
       (!f.purpose || property.purpose === f.purpose) &&
@@ -177,7 +191,6 @@ function createPropertyCard(item) {
   const statusBadge = getStatusBadge(item.status);
   const isUnavailable = item.status === 'sold' || item.status === 'rented';
 
-  // ✅ تم تغيير الأيقونة إلى مبنى
   const icon = 'building-2';
 
   const imgData = window.getListingImageSrcset
@@ -202,17 +215,32 @@ function createPropertyCard(item) {
   const location = item.area || item.city || '—';
 
   const d = item.details || {};
-  let meta = '';
+
+  // ✅ استخراج نوع العقار كشارة
+  let propertyTypeBadgeHTML = '';
+  const rawType = item.subType || item.subtype || item.property_type || d.propertyType || d.type;
+  const typeText = getPropertyTypeName(rawType);
+  
+  if (typeText) {
+    propertyTypeBadgeHTML = `
+      <div class="car-brand-badge" style="background: rgba(59, 130, 246, 0.15); color: #60A5FA; border-color: rgba(59, 130, 246, 0.3); margin-top: 5px; margin-bottom: 5px;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/>
+        </svg>
+        <span>${typeText}</span>
+      </div>`;
+  }
+
+  // باقي الشرائح (مساحة، غرف)
   const chips = [];
   if (d.rooms || item.rooms) chips.push({ icon: 'bed-double', text: `${d.rooms || item.rooms} غرف` });
   if (d.area || item.area) chips.push({ icon: 'square', text: `${d.area || item.area} م²` });
-  if (d.type || item.property_type) chips.push({ icon: 'building-2', text: d.type || item.property_type });
-
+  
+  let meta = '';
   if (chips.length) {
     meta = `<div class="card-meta">${chips.map(c => `<span class="card-meta-chip"><i data-lucide="${c.icon}"></i><span>${c.text}</span></span>`).join('')}</div>`;
   }
 
-  // ✅ تم تغيير type=car إلى type=property
   return `
     <a href="details.html?id=${item.id}&type=property" class="card ${isUnavailable ? 'card-unavailable' : ''}">
       <div class="card-image">
@@ -223,6 +251,7 @@ function createPropertyCard(item) {
       </div>
       <div class="card-body">
         <h3 class="card-title">${item.title}</h3>
+        ${propertyTypeBadgeHTML} <!-- ✅ شارة نوع العقار هنا -->
         <p class="card-location"><i data-lucide="map-pin"></i>${location}</p>
         ${meta}
         <p class="card-price">${priceText}</p>
@@ -232,7 +261,6 @@ function createPropertyCard(item) {
 }
 
 function renderProperties() {
-  // ✅ تم تغيير carsGrid إلى propertiesGrid
   const grid = document.getElementById('propertiesGrid');
   const countEl = document.getElementById('resultsCount');
   const noResultsMsg = document.getElementById('noResultsMessage');
@@ -343,7 +371,6 @@ function setupMapToggle() {
   const viewGridBtn = document.getElementById('viewGridBtn');
   const viewMapBtn = document.getElementById('viewMapBtn');
   const mapContainer = document.getElementById('mapContainer');
-  // ✅ تم تغيير carsGrid إلى propertiesGrid
   const grid = document.getElementById('propertiesGrid');
 
   if (!viewGridBtn || !viewMapBtn || !mapContainer || !grid) return;

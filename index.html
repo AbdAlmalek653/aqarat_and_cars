@@ -21,6 +21,50 @@
   <script src="js/icons.js" defer></script>
 
   <link rel="stylesheet" href="css/style.css">
+
+  <!-- تنسيقات الزر النابض -->
+  <style>
+    @keyframes pulseBtn {
+        0% { transform: scale(0.96); box-shadow: 0 0 0 0 rgba(255, 75, 43, 0.7); }
+        70% { transform: scale(1); box-shadow: 0 0 0 15px rgba(255, 75, 43, 0); }
+        100% { transform: scale(0.96); box-shadow: 0 0 0 0 rgba(255, 75, 43, 0); }
+    }
+    .btn-pulse-whatsapp {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        background: linear-gradient(135deg, #F7971E 0%, #FFD200 100%);
+        color: #1A2438;
+        padding: 12px 30px;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 800;
+        font-size: 0.95em;
+        box-shadow: 0 4px 15px rgba(247, 151, 30, 0.4);
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        animation: pulseBtn 2s infinite;
+        width: 100%;
+        max-width: 220px;
+    }
+    .btn-pulse-whatsapp:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 8px 25px rgba(247, 151, 30, 0.6);
+        animation: none;
+        background: linear-gradient(135deg, #FFD200 0%, #F7971E 100%);
+    }
+    .btn-pulse-whatsapp i {
+        color: #1A2438;
+    }
+    /* تنسيق خاص للزر داخل الواجهة الرئيسية ليكون أصغر قليلاً */
+    .homepage-note .btn-pulse-whatsapp {
+        padding: 8px 20px;
+        font-size: 0.85em;
+        max-width: 180px;
+    }
+  </style>
 </head>
 <body class="has-bottom-nav">
 
@@ -113,6 +157,20 @@
           </div>
           <div class="cascade-title-line"></div>
         </div>
+
+        <!-- 🟢 بداية الملاحظة وزر الواتساب في الواجهة الرئيسية 🟢 -->
+        <div class="homepage-note" style="margin: 0 auto 20px auto; max-width: 500px; padding: 12px 16px; background: rgba(30, 41, 59, 0.4); border: 1px dashed rgba(247, 151, 30, 0.4); border-radius: 12px; text-align: center;">
+            <p style="font-size: 0.85em; color: #cbd5e1; margin: 0 0 10px 0; line-height: 1.5; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                <i data-lucide="info" style="width: 16px; height: 16px; color: #F7971E;"></i>
+                <span>للإطلاع على نظام العمولة، يرجى التواصل مع  أبو أيمن</span>
+            </p>
+            <a href="https://wa.me/963930932794?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%20%D8%A7%D8%A8%D9%88%20%D8%A7%D9%8A%D9%85%D9%86%20%0A%20%D8%A7%D8%B1%D8%AC%D9%88%20%D8%A7%D9%84%D8%A7%D8%B7%D9%84%D8%A7%D8%B9%20%D8%B9%D9%84%D9%89%20%D9%86%D8%B8%D8%A7%D9%85%20%D8%A7%D9%84%D8%B9%D9%85%D9%88%D9%84%D8%A9%20%D9%84%D8%AF%D9%8A%D9%83%D9%85%20%0A%20%F0%9F%8C%B7%20%D8%B4%D8%A7%D9%83%D8%B1%D8%A7%20%D8%AA%D9%81%D9%87%D9%85%D9%83%D9%85" target="_blank" rel="noopener" class="btn-pulse-whatsapp">
+                <i data-lucide="message-circle" style="width: 16px; height: 16px;"></i>
+                <span>انقر هنا</span>
+            </a>
+        </div>
+        <!-- 🔴 نهاية الملاحظة وزر الواتساب في الواجهة الرئيسية 🔴 -->
+
         <div class="cascade-step" data-step="1">
           <div class="cascade-step-title"><span class="cascade-step-num">1</span><span>اختر النوع</span></div>
           <div class="cascade-options">
@@ -274,6 +332,7 @@
     <a href="pages/account.html" class="bottom-nav-item"><i data-lucide="user"></i><span>تسجيل الدخول</span></a>
   </nav>
 
+  <!-- بداية النافذة المنبثقة -->
   <div class="welcome-modal" id="welcomeModal">
     <div class="welcome-modal-overlay" onclick="closeWelcome()"></div>
     <div class="welcome-modal-content">
@@ -285,16 +344,33 @@
           <span class="logo-duo-item logo-duo-car"><i data-lucide="car"></i></span>
         </div>
       </div>
-      <h2 class="welcome-modal-title">أهلاً وسهلاً بك في <span class="gradient-text">سوق</span></h2>
-      <p class="welcome-modal-text">أهلا بكم في منصة العقارات &amp; السيارات للوساطة الإلكترونية، نقدم لكم تجربة مثالية لبيع وشراء أي عقار أو سيارة إلكترونياً</p>
+      <h2 class="welcome-modal-title">أهلاً وسهلاً بك في  منصة<span class="gradient-text">بُنيان</span></h2>
+      
+      <p class="welcome-modal-text">أهلا بكم في منصة <strong>سوق</strong> للوساطة الإلكترونية. نضمن لكم تجربة آمنة وموثوقة بعمولة عادلة ومرضية للطرفين، ولا نستحق أي عمولة إلا بعد إتمام عملية البيع بنجاح.</p>
+      
       <div class="welcome-modal-features">
         <div class="welcome-feature"><i data-lucide="building-2"></i><span>عقارات للبيع والإيجار</span></div>
         <div class="welcome-feature"><i data-lucide="car"></i><span>سيارات بأسعار تنافسية</span></div>
-        <div class="welcome-feature"><i data-lucide="shield-check"></i><span>وساطة إلكترونية آمنة</span></div>
+        <div class="welcome-feature" style="color: #10B981; font-weight: 600;"><i data-lucide="handshake"></i><span>عمولة عادلة تُدفع بعد إتمام البيع</span></div>
       </div>
+
+      <div style="margin-top: 20px; margin-bottom: 20px; padding: 16px; background: linear-gradient(145deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.6)); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.15); backdrop-filter: blur(10px);">
+        <div style="display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; background: rgba(247, 151, 30, 0.15); border-radius: 50%; margin-bottom: 12px; border: 1px solid rgba(247, 151, 30, 0.2);">
+            <i data-lucide="percent" style="width: 18px; height: 18px; color: #F7971E;"></i>
+        </div>
+        <h4 style="font-size: 0.95em; color: #f8fafc; margin: 0 0 6px 0; font-weight: 700; letter-spacing: 0.5px;">للاطلاع على تفاصيل العمولة</h4>
+        <p style="font-size: 0.82em; color: #94a3b8; margin: 0 0 16px 0; line-height: 1.5;">يرجى التواصل مباشرة مع أبو أيمن عبر الواتساب</p>
+        
+        <a href="https://wa.me/963930932794?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%20%D8%A7%D8%A8%D9%88%20%D8%A7%D9%8A%D9%85%D9%86%20%0A%20%D8%A7%D8%B1%D8%AC%D9%88%20%D8%A7%D9%84%D8%A7%D8%B7%D9%84%D8%A7%D8%B9%20%D8%B9%D9%84%D9%89%20%D9%86%D8%B8%D8%A7%D9%85%20%D8%A7%D9%84%D8%B9%D9%85%D9%88%D9%84%D8%A9%20%D9%84%D8%AF%D9%8A%D9%83%D9%85%20%0A%20%F0%9F%8C%B7%20%D8%B4%D8%A7%D9%83%D8%B1%D8%A7%20%D8%AA%D9%81%D9%87%D9%85%D9%83%D9%85" target="_blank" rel="noopener" class="btn-pulse-whatsapp">
+            <i data-lucide="message-circle" style="width: 18px; height: 18px;"></i>
+            <span>انقر هنا</span>
+        </a>
+      </div>
+      
       <button class="btn btn-primary btn-block-full" onclick="closeWelcome()"><i data-lucide="arrow-left"></i><span>ابدأ التصفح الآن</span></button>
     </div>
   </div>
+  <!-- نهاية النافذة المنبثقة -->
 
   <div class="browse-modal" id="browseModal">
     <div class="browse-modal-overlay" data-close-browse></div>
