@@ -3077,3 +3077,132 @@ html {
     font-weight: 600;
     width: fit-content;
 }
+/* ==========================================
+   ✨ التصميم الاحترافي للفوتر على الهاتف
+   ========================================== */
+@media (max-width: 768px) {
+  /* تحويل الفوتر إلى شبكة من عمودين */
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px; /* مسافة بين الصندوقين */
+    align-items: start;
+    padding: 0 10px;
+  }
+
+  /* الصندوق الأول (الشعار) وقسم الدعم يمتدان بعرض الشاشة */
+  .footer-grid .footer-col:first-child,
+  .footer-grid .footer-col.footer-support {
+    grid-column: 1 / -1;
+    text-align: center;
+    margin-bottom: 10px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+  }
+
+  /* ---------------------------------------------------
+     تصميم الصناديق (روابط سريعة + الحساب)
+     --------------------------------------------------- */
+  .footer-grid .footer-col:nth-child(2),
+  .footer-grid .footer-col:nth-child(3) {
+    position: relative;
+    background: linear-gradient(145deg, rgba(26, 36, 56, 0.8), rgba(17, 24, 39, 0.95)); /* خلفية زجاجية */
+    border: 1px solid rgba(59, 130, 246, 0.15); /* إطار خفيف */
+    border-radius: 16px; /* حواف دائرية أكبر */
+    padding: 18px 12px 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05); /* ظل احترافي */
+    overflow: hidden;
+  }
+
+  /* خط متوهج أعلى كل صندوق */
+  .footer-grid .footer-col:nth-child(2)::before,
+  .footer-grid .footer-col:nth-child(3)::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 10%;
+    right: 10%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--primary), var(--accent), transparent);
+    border-radius: 2px;
+    opacity: 0.8;
+  }
+
+  /* ---------------------------------------------------
+     عناوين الصناديق (روابط سريعة / الحساب)
+     --------------------------------------------------- */
+  .footer-grid .footer-col:nth-child(2) h4,
+  .footer-grid .footer-col:nth-child(3) h4 {
+    font-size: 14px;
+    font-weight: 800;
+    color: #F8FAFC; /* أبيض ناصع */
+    margin: 0 0 14px 0;
+    padding-bottom: 10px;
+    text-align: center;
+    position: relative;
+    letter-spacing: 0.5px;
+  }
+
+  /* خط فاصل تحت العنوان */
+  .footer-grid .footer-col:nth-child(2) h4::after,
+  .footer-grid .footer-col:nth-child(3) h4::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 20%;
+    right: 20%;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  /* ---------------------------------------------------
+     الروابط داخل الصناديق (التحويل إلى أزرار تفاعلية)
+     --------------------------------------------------- */
+  .footer-grid .footer-col:nth-child(2) a,
+  .footer-grid .footer-col:nth-child(3) a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* النص يمين والسهم يسار */
+    padding: 8px 12px;
+    margin-bottom: 6px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #94A3B8; /* رمادي فاتح */
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid transparent;
+    transition: all 0.3s ease;
+    text-decoration: none;
+  }
+
+  /* إضافة سهم صغير لكل رابط باستخدام CSS */
+  .footer-grid .footer-col:nth-child(2) a::after,
+  .footer-grid .footer-col:nth-child(3) a::after {
+    content: '‹'; /* سهم صغير */
+    font-size: 18px;
+    line-height: 1;
+    color: rgba(59, 130, 246, 0.5);
+    transition: transform 0.3s ease, color 0.3s ease;
+  }
+
+  /* تأثير عند اللمس أو تمرير الماوس (Hover/Active) */
+  .footer-grid .footer-col:nth-child(2) a:active,
+  .footer-grid .footer-col:nth-child(3) a:active,
+  .footer-grid .footer-col:nth-child(2) a:hover,
+  .footer-grid .footer-col:nth-child(3) a:hover {
+    background: rgba(59, 130, 246, 0.1); /* خلفية زرقاء شفافة */
+    border-color: rgba(59, 130, 246, 0.2); /* إطار أزرق */
+    color: #F8FAFC; /* النص يصبح أبيض */
+    transform: translateX(-4px); /* تحرك خفيف لليسار */
+  }
+
+  /* تحريك السهم عند اللمس */
+  .footer-grid .footer-col:nth-child(2) a:active::after,
+  .footer-grid .footer-col:nth-child(3) a:active::after,
+  .footer-grid .footer-col:nth-child(2) a:hover::after,
+  .footer-grid .footer-col:nth-child(3) a:hover::after {
+    color: var(--primary); /* السهم يصبح أزرق */
+    transform: translateX(-3px); /* السهم يتحرك لليسار */
+  }
+}

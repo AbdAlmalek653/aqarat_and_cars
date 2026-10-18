@@ -1,10 +1,10 @@
 /* ==========================================
-   Service Worker - سوق v3.0.0
+   Service Worker - بنيان v1.0.0
    - الصور: Network First (لا كاش!)
    - الكاش القديم يُحذف تلقائياً
    ========================================== */
 
-const CACHE_VERSION = 'souq-v3.0.0';
+const CACHE_VERSION = 'bunyan-v1.0.0';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const FONT_CACHE = `${CACHE_VERSION}-fonts`;
 
@@ -35,7 +35,8 @@ self.addEventListener('activate', (event) => {
     caches.keys()
       .then((names) => Promise.all(
         names
-          .filter((name) => name.startsWith('souq-') && !name.startsWith(CACHE_VERSION))
+          // ✅ هنا نمسح أي كاش قديم يبدأ بـ souq أو bunyan (ما عدا النسخة الحالية)
+          .filter((name) => (name.startsWith('souq-') || name.startsWith('bunyan-')) && !name.startsWith(CACHE_VERSION))
           .map((name) => caches.delete(name))
       ))
       .then(() => self.clients.claim())

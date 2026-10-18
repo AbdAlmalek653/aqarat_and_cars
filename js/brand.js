@@ -1,15 +1,15 @@
 /* ==========================================
    brand.js - تغيير عنوان المنصة
    من: سوق
-   إلى: منصة بُنيان للوساطة الإلكترونية
+   إلى: منصة بنيان للوساطة الإلكترونية
    ========================================== */
 
 (function() {
   'use strict';
 
-  // ✅ الاسم الجديد
-  const NEW_NAME = 'منصة بُنيان للوساطة الإلكترونية';
-  const NEW_NAME_SHORT = 'بُنيان'; // ← للاستخدام في الأماكن الضيقة
+  // ✅ الاسم الجديد (بدون ضمة للبحث الأفضل)
+  const NEW_NAME = 'منصة بنيان للوساطة الإلكترونية';
+  const NEW_NAME_SHORT = 'بنيان'; // ← للاستخدام في الأماكن الضيقة
 
   // ✅ النصوص المستثناة (ما نغيرهن)
   const EXCLUDE_SELECTORS = [
@@ -69,7 +69,7 @@
     }
 
     nodes.forEach(node => {
-      // استبدال كل "سوق" بـ "منصة بُنيان للوساطة الإلكترونية"
+      // استبدال كل "سوق" بـ "بنيان"
       node.nodeValue = node.nodeValue.split(oldText).join(newText);
     });
   }
@@ -80,7 +80,7 @@
   function updatePageTitle() {
     const currentTitle = document.title;
     if (currentTitle && currentTitle.includes('سوق')) {
-      document.title = currentTitle.split('سوق').join('بُنيان');
+      document.title = currentTitle.split('سوق').join('بنيان');
     }
   }
 
@@ -92,7 +92,7 @@
     metas.forEach(meta => {
       const content = meta.getAttribute('content');
       if (content && content.includes('سوق')) {
-        meta.setAttribute('content', content.split('سوق').join('بُنيان'));
+        meta.setAttribute('content', content.split('سوق').join('بنيان'));
       }
     });
   }
@@ -109,12 +109,12 @@
 
     // 3. تغيير النص في body
     if (document.body) {
-      replaceTextNodes(document.body, 'سوق', 'بُنيان');
+      replaceTextNodes(document.body, 'سوق', 'بنيان');
     }
 
     // ✅ أيضاً في head (للـ title وجزئيات أخرى)
     if (document.head) {
-      replaceTextNodes(document.head, 'سوق', 'بُنيان');
+      replaceTextNodes(document.head, 'سوق', 'بنيان');
     }
   }
 
@@ -130,10 +130,10 @@
     mutations.forEach(function(mutation) {
       mutation.addedNodes.forEach(function(node) {
         if (node.nodeType === Node.ELEMENT_NODE) {
-          replaceTextNodes(node, 'سوق', 'بُنيان');
+          replaceTextNodes(node, 'سوق', 'بنيان');
         } else if (node.nodeType === Node.TEXT_NODE) {
           if (node.nodeValue && node.nodeValue.includes('سوق')) {
-            node.nodeValue = node.nodeValue.split('سوق').join('بُنيان');
+            node.nodeValue = node.nodeValue.split('سوق').join('بنيان');
           }
         }
       });
